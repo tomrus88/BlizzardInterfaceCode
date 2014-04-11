@@ -1,0 +1,298 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<!-- This Fonts.xml is loaded before FontStyles.xml Set up Font objects to be localized in Fonts.xml not FontStyles.xml -->
+	<!-- This Fonts.xml will be overridden by localized files, so any changes here may need to be added or adapted to the localized versions of Fonts.xml -->
+	<Include file="..\SharedXML\SharedFonts.xml"/>
+
+	<Script>
+		STANDARD_TEXT_FONT = "Fonts\\FRIZQT__.TTF";
+		UNIT_NAME_FONT = "Fonts\\FRIZQT__.TTF";
+		DAMAGE_TEXT_FONT = "Fonts\\FRIZQT__.TTF";
+		NAMEPLATE_FONT = "GameFontWhite";
+		NAMEPLATE_SPELLCAST_FONT = "GameFontWhiteTiny";
+	</Script>
+
+	<Font name="SystemFont_Small" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>
+	<Font name="SystemFont_Outline_Small" font="Fonts\FRIZQT__.TTF" outline="NORMAL" virtual="true">
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>
+	<Font name="SystemFont_Outline" font="Fonts\FRIZQT__.TTF" outline="NORMAL" virtual="true">
+		<FontHeight>
+			<AbsValue val="13"/>
+		</FontHeight>
+	</Font>	
+	<Font name="SystemFont_InverseShadow_Small" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r=".4" g=".4" b=".4" a=".75"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>	
+	<Font name="SystemFont_Med2" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="13"/>
+		</FontHeight>
+	</Font>
+	<Font name="SystemFont_Med3" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="14"/>
+		</FontHeight>
+	</Font>
+	<Font name="SystemFont_Shadow_Med3" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="14"/>
+		</FontHeight>
+	</Font>
+	<Font name="SystemFont_Shadow_Large_Outline" font="Fonts\FRIZQT__.TTF" outline="NORMAL" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="16"/>
+		</FontHeight>
+	</Font>
+	<Font name="SystemFont_Huge1" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="20"/>
+		</FontHeight>
+	</Font>
+	<Font name="SystemFont_OutlineThick_Huge2" font="Fonts\FRIZQT__.TTF" outline="THICK" virtual="true">
+		<FontHeight>
+			<AbsValue val="22"/>
+		</FontHeight>
+	</Font>
+	<Font name="SystemFont_OutlineThick_Huge4" font="Fonts\FRIZQT__.TTF" outline="THICK" virtual="true">
+		<FontHeight>
+			<AbsValue val="26"/>
+		</FontHeight>
+	</Font>
+	<Font name="SystemFont_OutlineThick_WTF" font="Fonts\FRIZQT__.TTF" outline="THICK" virtual="true">
+		<FontHeight>
+			<AbsValue val="32"/>
+		</FontHeight>
+	</Font>
+
+	<Font name="NumberFont_Shadow_Small" font="Fonts\ARIALN.TTF" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="12"/>
+		</FontHeight>
+	</Font>
+	<Font name="NumberFont_OutlineThick_Mono_Small" font="Fonts\ARIALN.TTF" outline="THICK" monochrome="true" virtual="true">
+		<FontHeight>
+			<AbsValue val="12"/>
+		</FontHeight>
+	</Font>
+	<Font name="NumberFont_Shadow_Med" font="Fonts\ARIALN.TTF" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="14"/>
+		</FontHeight>
+	</Font>
+	<Font name="NumberFont_Normal_Med" font="Fonts\ARIALN.TTF" virtual="true" >
+		<FontHeight>
+			<AbsValue val="14"/>
+		</FontHeight>
+	</Font>
+	<Font name="NumberFont_Outline_Med" font="Fonts\ARIALN.TTF" outline="NORMAL" virtual="true" >
+		<FontHeight>
+			<AbsValue val="14"/>
+		</FontHeight>
+	</Font>
+	<Font name="NumberFont_Outline_Large" font="Fonts\ARIALN.TTF" outline="NORMAL" virtual="true">
+		<FontHeight>
+			<AbsValue val="16"/>
+		</FontHeight>
+	</Font>	
+	<Font name="NumberFont_Outline_Huge" font="Fonts\skurri.ttf" outline="NORMAL" virtual="true">
+		<FontHeight>
+			<AbsValue val="30"/>
+		</FontHeight>
+	</Font>
+
+	<Font name="QuestFont_Shadow_Huge" font="Fonts\MORPHEUS.ttf" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0.49" g="0.35" b="0.05"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="18"/>
+		</FontHeight>
+	</Font>
+	<Font name="QuestFont_Super_Huge" font="Fonts\MORPHEUS.ttf" virtual="true">
+		<FontHeight>
+			<AbsValue val="24"/>
+		</FontHeight>
+		<Color r="1" g=".82" b="0"/>
+	</Font>
+	<Font name="DestinyFontLarge" font="Fonts\MORPHEUS.ttf" virtual="true">
+		<FontHeight>
+			<AbsValue val="18"/>
+		</FontHeight>
+		<Color r="0.1" g="0.1" b="0.1"/>
+	</Font>
+	<Font name="CoreAbilityFont" font="Fonts\MORPHEUS.ttf" virtual="true">
+		<FontHeight>
+			<AbsValue val="32"/>
+		</FontHeight>
+		<Color r="0.1" g="0.1" b="0.1"/>
+	</Font>
+	<Font name="DestinyFontHuge" font="Fonts\MORPHEUS.ttf" virtual="true">
+		<FontHeight>
+			<AbsValue val="32"/>
+		</FontHeight>
+		<Color r="0.1" g="0.1" b="0.1"/>
+	</Font>
+	<Font name="QuestFont_Shadow_Small" font="Fonts\MORPHEUS.ttf" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0.49" g="0.35" b="0.05"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="14"/>
+		</FontHeight>
+	</Font>
+
+	<Font name="MailFont_Large" font="Fonts\MORPHEUS.ttf" virtual="true">
+		<FontHeight>
+			<AbsValue val="15"/>
+		</FontHeight>
+	</Font>
+	<Font name="SpellFont_Small" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>
+
+	<Font name="InvoiceFont_Med" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="12"/>
+		</FontHeight>
+	</Font>
+	<Font name="InvoiceFont_Small" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>
+	<Font name="Tooltip_Med" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="12"/>
+		</FontHeight>
+	</Font>
+	<Font name="Tooltip_Small" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>
+	<Font name="AchievementFont_Small" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>	
+	<Font name="ReputationDetailFont" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0.0" g="0.0" b="0.0"/>
+		</Shadow>
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>
+	<Font name="FriendsFont_Normal" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="12"/>
+		</FontHeight>
+	</Font>
+	<Font name="FriendsFont_Small" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>
+	<Font name="FriendsFont_Large" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="14"/>
+		</FontHeight>
+	</Font>
+	<Font name="FriendsFont_UserText" font="Fonts\ARIALN.TTF" virtual="true">
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0" g="0" b="0"/>
+		</Shadow>
+		<FontHeight>
+			<AbsValue val="11"/>
+		</FontHeight>
+	</Font>	
+	<Font name="GameFont_Gigantic" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="32"/>
+		</FontHeight>
+		<Shadow>
+			<Offset>
+				<AbsDimension x="1" y="-1"/>
+			</Offset>
+			<Color r="0.0" g="0.0" b="0.0"/>
+		</Shadow>
+		<Color r="1.0" g="0.82" b="0"/>
+	</Font>
+	<Font name="ChatBubbleFont" font="Fonts\FRIZQT__.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="13"/>
+		</FontHeight>
+	</Font>
+</Ui>

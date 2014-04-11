@@ -1,0 +1,88 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Script file="HealthBar.lua"/>
+	<Script file="GameTooltip.lua"/>
+	<Include file="GameTooltipTemplate.xml"/>
+	<GameTooltip name="ShoppingTooltip1" clampedToScreen="true" frameStrata="TOOLTIP" hidden="true" parent="UIParent" inherits="ShoppingTooltipTemplate"/>
+	<GameTooltip name="ShoppingTooltip2" clampedToScreen="true" frameStrata="TOOLTIP" hidden="true" parent="UIParent" inherits="ShoppingTooltipTemplate"/>
+	<GameTooltip name="ShoppingTooltip3" clampedToScreen="true" frameStrata="TOOLTIP" hidden="true" parent="UIParent" inherits="ShoppingTooltipTemplate"/>
+	<GameTooltip name="GameTooltip" frameStrata="TOOLTIP" hidden="true" parent="UIParent" inherits="GameTooltipTemplate">
+		<Scripts>
+			<OnLoad>
+				GameTooltip_OnLoad(self);
+				self.shoppingTooltips = { ShoppingTooltip1, ShoppingTooltip2, ShoppingTooltip3 };
+				if (BattlePetTooltip) then
+					BattlePetTooltip:Hide();
+				end
+			</OnLoad>
+			<OnTooltipSetUnit>
+				if ( self:IsUnit("mouseover") ) then
+					_G[self:GetName().."TextLeft1"]:SetTextColor(GameTooltip_UnitColor("mouseover"));
+				end
+				if (BattlePetTooltip) then
+					BattlePetTooltip:Hide();
+				end
+			</OnTooltipSetUnit>
+			<OnTooltipSetItem>
+				if ( IsModifiedClick("COMPAREITEMS") or
+				     (GetCVarBool("alwaysCompareItems") and not self:IsEquippedItem()) ) then
+					GameTooltip_ShowCompareItem(self, 1);
+				end
+				if (BattlePetTooltip) then
+					BattlePetTooltip:Hide();
+				end
+			</OnTooltipSetItem>
+			<OnHide>
+				GameTooltip_OnHide(self);
+				ShoppingTooltip1:Hide();
+				ShoppingTooltip2:Hide();
+				ShoppingTooltip3:Hide();
+				if (BattlePetTooltip) then
+					BattlePetTooltip:Hide();
+				end
+			</OnHide>
+			<OnUpdate function="GameTooltip_OnUpdate"/>
+		</Scripts>
+	</GameTooltip>
+	<Frame name="SmallTextTooltip" frameStrata="TOOLTIP" hidden="true" parent="UIParent">
+		<Size>
+			<AbsDimension x="10" y="32"/>
+		</Size>
+		<Anchors>
+			<Anchor point="BOTTOM"/>
+		</Anchors>
+		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+			<EdgeSize>
+				<AbsValue val="16"/>
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="16"/>
+			</TileSize>
+			<BackgroundInsets>
+				<AbsInset left="5" right="5" top="5" bottom="5"/>
+			</BackgroundInsets>
+		</Backdrop>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="SmallTextTooltipText" inherits="GameFontHighlightSmall">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="-10"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+			</OnLoad>
+			<OnShow>
+				self:SetWidth(SmallTextTooltipText:GetWidth() + 20);
+			</OnShow>
+		</Scripts>
+	</Frame>
+</Ui>

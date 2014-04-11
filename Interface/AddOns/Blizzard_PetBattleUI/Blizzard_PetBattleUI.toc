@@ -1,0 +1,7 @@
+## Interface: 50400
+## Title: Blizzard Pet Battle UI
+## Secure: 1
+## LoadOnDemand: 0
+Blizzard_PetBattleUIPatchwerks.xml
+Blizzard_PetBattleUI.xml
+Localization.lua

@@ -1,0 +1,92 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Script file="MovieFrame.lua"/>
+	<MovieFrame name="MovieFrame" setAllPoints="true" hidden="true" enableKeyboard="true">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="MovieFrameSubtitleString" inherits="MovieSubtitleFont" hidden="true">
+					<Size>
+						<AbsDimension x="800" y="138"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset>
+								<AbsDimension x="0" y="-630"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame parentKey="CloseDialog">
+				<Size x="320" y="84"/>
+				<Anchors>
+					<Anchor point="CENTER"/>
+				</Anchors>
+				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+					<BackgroundInsets>
+						<AbsInset left="11" right="12" top="12" bottom="11"/>
+					</BackgroundInsets>
+					<TileSize>
+						<AbsValue val="32"/>
+					</TileSize>
+					<EdgeSize>
+						<AbsValue val="32"/>
+					</EdgeSize>
+				</Backdrop>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString inherits="GameFontHighlight" text="CONFIRM_CLOSE_CINEMATIC">
+							<Size x="290" y="0"/>
+							<Anchors>
+								<Anchor point="TOP" x="0" y="-16"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Button parentKey="ConfirmButton" inherits="CinematicDialogButtonTemplate" text="YES">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" x="-6" y="16"/>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								MovieFrame:StopMovie();
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button parentKey="ResumeButton" inherits="CinematicDialogButtonTemplate" text="NO">
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.ConfirmButton" relativePoint="RIGHT" x="13" y="0"/>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								self:GetParent():Hide();
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
+				<Scripts>
+					<OnShow>
+						MouseOverrideCinematicDisable(true);
+					</OnShow>
+					<OnHide>
+						MouseOverrideCinematicDisable(false);
+					</OnHide>
+				</Scripts>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad function="MovieFrame_OnLoad"/>
+			<OnShow function="MovieFrame_OnShow"/>
+			<OnHide function="MovieFrame_OnHide"/>
+			<OnEvent function="MovieFrame_OnEvent"/>
+			<OnUpdate function="MovieFrame_OnUpdate"/>
+			<OnKeyUp function="MovieFrame_OnKeyUp"/>
+			<OnMovieFinished function="MovieFrame_OnMovieFinished"/>
+			<OnMovieShowSubtitle function="MovieFrame_OnMovieShowSubtitle"/>
+			<OnMovieHideSubtitle function="MovieFrame_OnMovieHideSubtitle"/>
+		</Scripts>
+	</MovieFrame>
+</Ui>

@@ -1,0 +1,161 @@
+ <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Script file="ItemButtonTemplate.lua"/>
+ 	<Button name="ItemButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="37" y="37"/>
+		</Size>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture name="$parentIconTexture" parentKey="icon"/>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="2">
+				<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT" hidden="true" parentKey="count">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-5" y="2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentStock" inherits="NumberFontNormalYellow" justifyH="LEFT" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture name="$parentSearchOverlay" parentKey="searchOverlay" setAllPoints="true" hidden="true">
+					<Color r="0" g="0" b="0" a="0.8"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<NormalTexture name="$parentNormalTexture" file="Interface\Buttons\UI-Quickslot2">
+			<Size>
+				<AbsDimension x="64" y="64"/>
+			</Size>
+			<Anchors>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="-1"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</NormalTexture>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
+		<HighlightTexture file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+	</Button>
+	<CheckButton name="SimplePopupButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="36" y="36"/>
+		</Size>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentName" inherits="GameFontHighlightSmallOutline">
+					<Size>
+						<AbsDimension x="36" y="10"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOM">
+							<Offset>
+								<AbsDimension x="0" y="2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\Buttons\UI-EmptySlot-Disabled">
+					<Size>
+						<AbsDimension x="45" y="45"/>
+					</Size>
+					<Anchors>
+						<Anchor point="CENTER">
+							<Offset>
+								<AbsDimension x="0" y="-1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0.140625" right="0.84375" top="0.140625" bottom="0.84375"/>
+				</Texture>
+			</Layer>
+		</Layers>
+	</CheckButton>
+	<CheckButton name="PopupButtonTemplate" virtual="true" inherits="SimplePopupButtonTemplate">
+		<NormalTexture name="$parentIcon">
+			<Size>
+				<AbsDimension x="36" y="36"/>
+			</Size>
+			<Anchors>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="-1"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</NormalTexture>
+		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+		<CheckedTexture alphaMode="ADD" file="Interface\Buttons\CheckButtonHilight"/>
+	</CheckButton>
+	<Button name="LargeItemButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="147" y="41"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentIconTexture" parentKey="icon">
+					<Size>
+						<AbsDimension x="39" y="39"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture name="$parentNameFrame" file="Interface\QuestFrame\UI-QuestItemNameFrame">
+					<Size>
+						<AbsDimension x="128" y="64"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentIconTexture" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-10" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<FontString name="$parentName" inherits="GameFontHighlight" justifyH="LEFT" parentKey="name">
+					<Size>
+						<AbsDimension x="90" y="36"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentNameFrame">
+							<Offset>
+								<AbsDimension x="15" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT" parentKey="count">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentIconTexture">
+							<Offset>
+								<AbsDimension x="-1" y="1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
+ </Ui>

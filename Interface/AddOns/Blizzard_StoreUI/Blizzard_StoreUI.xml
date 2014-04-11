@@ -1,0 +1,1892 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+	<Include file="Blizzard_StoreUIPatchwerk.xml" />
+	<Script file="Blizzard_StoreUIInbound.lua" />
+	<Script file="Blizzard_StoreUIOutbound.lua" />
+	<Script file="Blizzard_StoreUISecure.lua" />
+	<ScopedModifier forbidden="true" scriptsUseGivenEnv="true">
+		<Button name="StoreDialogTemplate" virtual="true">
+			<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+				<BackgroundInsets>
+					<AbsInset left="11" right="12" top="12" bottom="11" />
+				</BackgroundInsets>
+				<TileSize>
+					<AbsValue val="32" />
+				</TileSize>
+				<EdgeSize>
+					<AbsValue val="32" />
+				</EdgeSize>
+			</Backdrop>
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture parentKey="Background">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="11" y="-12" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="-12" y="11" />
+						</Anchors>
+						<Color r="0" g="0" b="0" a="0.8" />
+					</Texture>
+				</Layer>
+			</Layers>
+		</Button>
+		<Button name="StoreButtonTemplate" virtual="true">
+			<Size x="40" y="22" />
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture parentKey="Left" file="Interface\Buttons\UI-Panel-Button-Up">
+						<Size x="12" y="22" />
+						<Anchors>
+							<Anchor point="TOPLEFT" />
+							<Anchor point="BOTTOMLEFT" />
+						</Anchors>
+						<TexCoords left="0" right="0.09375" top="0" bottom="0.6875" />
+					</Texture>
+					<Texture parentKey="Right" file="Interface\Buttons\UI-Panel-Button-Up">
+						<Size x="12" y="22" />
+						<Anchors>
+							<Anchor point="TOPRIGHT" />
+							<Anchor point="BOTTOMRIGHT" />
+						</Anchors>
+						<TexCoords left="0.53125" right="0.625" top="0" bottom="0.6875" />
+					</Texture>
+					<Texture parentKey="Middle" file="Interface\Buttons\UI-Panel-Button-Up">
+						<Size x="12" y="22" />
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="TOPRIGHT" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMLEFT" />
+						</Anchors>
+						<TexCoords left="0.09375" right="0.53125" top="0" bottom="0.6875" />
+					</Texture>
+				</Layer>
+			</Layers>
+			<Scripts>
+				<OnLoad>
+					if ( not self:IsEnabled() ) then
+						self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+						self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+						self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+					end
+				</OnLoad>
+				<OnMouseDown>
+					if ( self:IsEnabled() ) then
+						self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down");
+						self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down");
+						self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down");
+					end
+				</OnMouseDown>
+				<OnMouseUp>
+					if ( self:IsEnabled() ) then
+						self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+						self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+						self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+					end
+				</OnMouseUp>
+				<OnShow function="StoreButton_OnShow" />
+				<OnDisable>
+					self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+					self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+					self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+				</OnDisable>
+				<OnEnable>
+					self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+					self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+					self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+				</OnEnable>
+			</Scripts>
+			<ButtonText parentKey="Text" />
+			<NormalFont style="GameFontNormalLarge" />
+			<HighlightFont style="GameFontHighlightLarge" />
+			<DisabledFont style="GameFontDisableLarge" />
+			<HighlightTexture inherits="UIPanelButtonHighlightTexture" />
+		</Button>
+		<Button name="StoreButtonSmallTemplate" virtual="true">
+			<Size x="40" y="22" />
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture parentKey="Left" file="Interface\Buttons\UI-Panel-Button-Up">
+						<Size x="12" y="22" />
+						<Anchors>
+							<Anchor point="TOPLEFT" />
+							<Anchor point="BOTTOMLEFT" />
+						</Anchors>
+						<TexCoords left="0" right="0.09375" top="0" bottom="0.6875" />
+					</Texture>
+					<Texture parentKey="Right" file="Interface\Buttons\UI-Panel-Button-Up">
+						<Size x="12" y="22" />
+						<Anchors>
+							<Anchor point="TOPRIGHT" />
+							<Anchor point="BOTTOMRIGHT" />
+						</Anchors>
+						<TexCoords left="0.53125" right="0.625" top="0" bottom="0.6875" />
+					</Texture>
+					<Texture parentKey="Middle" file="Interface\Buttons\UI-Panel-Button-Up">
+						<Size x="12" y="22" />
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="TOPRIGHT" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMLEFT" />
+						</Anchors>
+						<TexCoords left="0.09375" right="0.53125" top="0" bottom="0.6875" />
+					</Texture>
+				</Layer>
+			</Layers>
+			<Scripts>
+				<OnLoad>
+					if ( not self:IsEnabled() ) then
+						self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+						self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+						self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+					end
+				</OnLoad>
+				<OnMouseDown>
+					if ( self:IsEnabled() ) then
+						self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down");
+						self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down");
+						self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down");
+					end
+				</OnMouseDown>
+				<OnMouseUp>
+					if ( self:IsEnabled() ) then
+						self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+						self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+						self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+					end
+				</OnMouseUp>
+				<OnShow function="StoreButton_OnShow" />
+				<OnDisable>
+					self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+					self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+					self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Disabled");
+				</OnDisable>
+				<OnEnable>
+					self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+					self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+					self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up");
+				</OnEnable>
+			</Scripts>
+			<ButtonText parentKey="Text" />
+			<NormalFont style="GameFontNormal" />
+			<HighlightFont style="GameFontHighlight" />
+			<DisabledFont style="GameFontDisable" />
+			<HighlightTexture inherits="UIPanelButtonHighlightTexture" />
+		</Button>
+		<Button name="StoreGoldButtonTemplate" virtual="true">
+			<Size x="40" y="22" />
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture parentKey="Left" inherits="store-button-up-left">
+						<Anchors>
+							<Anchor point="TOPLEFT" />
+							<Anchor point="BOTTOMLEFT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="Right" inherits="store-button-up-right">
+						<Anchors>
+							<Anchor point="TOPRIGHT" />
+							<Anchor point="BOTTOMRIGHT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="Middle" inherits="store-button-up-middle">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="TOPRIGHT" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMLEFT" />
+						</Anchors>
+					</Texture>
+				</Layer>
+			</Layers>
+			<Scripts>
+				<OnLoad>
+					if ( not self:IsEnabled() ) then
+						self.Left:SetTexCoord(0.26464844, 0.31542969, 0.89160156, 0.92285156);
+						self.Middle:SetTexCoord(0.18457031, 0.25683594, 0.96484375, 0.99609375);
+						self.Right:SetTexCoord(0.98046875, 0.99707031, 0.29980469, 0.33105469);
+					end
+				</OnLoad>
+				<OnMouseDown>
+					if ( self:IsEnabled() ) then
+						self.Left:SetTexCoord(0.31738281, 0.36816406, 0.89160156, 0.92285156);
+						self.Middle:SetTexCoord(0.18457031, 0.25683594, 0.93164063, 0.96289063);
+						self.Right:SetTexCoord(0.98046875, 0.99707031, 0.33300781, 0.36425781);
+					end
+				</OnMouseDown>
+				<OnMouseUp>
+					if ( self:IsEnabled() ) then
+						self.Left:SetTexCoord(0.30859375, 0.35937500, 0.85156250, 0.88281250);
+						self.Middle:SetTexCoord(0.73925781, 0.81152344, 0.41992188, 0.45117188);
+						self.Right:SetTexCoord(0.98242188, 0.99902344, 0.15917969, 0.19042969);
+					end
+				</OnMouseUp>
+				<OnShow function="StoreGoldButton_OnShow" />
+				<OnDisable>
+					self.Left:SetTexCoord(0.26464844, 0.31542969, 0.89160156, 0.92285156);
+					self.Middle:SetTexCoord(0.18457031, 0.25683594, 0.96484375, 0.99609375);
+					self.Right:SetTexCoord(0.98046875, 0.99707031, 0.29980469, 0.33105469);
+				</OnDisable>
+				<OnEnable>
+					self.Left:SetTexCoord(0.30859375, 0.35937500, 0.85156250, 0.88281250);
+					self.Middle:SetTexCoord(0.73925781, 0.81152344, 0.41992188, 0.45117188);
+					self.Right:SetTexCoord(0.98242188, 0.99902344, 0.15917969, 0.19042969);
+				</OnEnable>
+			</Scripts>
+			<ButtonText parentKey="Text" />
+			<NormalFont style="GameFontNormalLarge" />
+			<HighlightFont style="GameFontHighlightLarge" />
+			<DisabledFont style="GameFontDisableLarge" />
+			<HighlightTexture inherits="UIPanelButtonHighlightTexture" />
+		</Button>
+		<CheckButton name="StoreCheckButtonTemplate" virtual="true">
+			<Size>
+				<AbsDimension x="32" y="32" />
+			</Size>
+			<NormalTexture file="Interface\Buttons\UI-CheckBox-Up" />
+			<PushedTexture file="Interface\Buttons\UI-CheckBox-Down" />
+			<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD" />
+			<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check" />
+			<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled" />
+		</CheckButton>
+		<CheckButton name="StoreQuantitySelectionTemplate" virtual="true">
+			<Size x="14" y="14" />
+			<HitRectInsets>
+				<AbsInset left="0" right="-145" top="0" bottom="0" />
+			</HitRectInsets>
+			<Layers>
+				<Layer level="ARTWORK">
+					<FontString parentKey="Title" inherits="GameFontHighlight" justifyH="LEFT">
+						<Size x="70" y="14" />
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent" relativePoint="RIGHT" x="5" y="0" />
+						</Anchors>
+					</FontString>
+					<FontString parentKey="Price" inherits="GameFontHighlight" justifyH="LEFT">
+						<Size x="70" y="14" />
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.Title" relativePoint="RIGHT" x="5" y="0" />
+						</Anchors>
+						<Color r="0.5098" g="0.8549" b="1.0" />
+					</FontString>
+				</Layer>
+			</Layers>
+			<Scripts>
+				<OnClick function="StoreFrameBrowseQuantitySelectButton_OnClick" />
+			</Scripts>
+			<NormalTexture file="Interface\Buttons\UI-RadioButton">
+				<TexCoords left="0" right="0.25" top="0" bottom="1" />
+			</NormalTexture>
+			<HighlightTexture file="Interface\Buttons\UI-RadioButton" alphaMode="ADD">
+				<TexCoords left="0.5" right="0.75" top="0" bottom="1" />
+			</HighlightTexture>
+			<CheckedTexture file="Interface\Buttons\UI-RadioButton">
+				<TexCoords left="0.25" right="0.5" top="0" bottom="1" />
+			</CheckedTexture>
+		</CheckButton>
+		<Frame name="StoreInsetFrameTemplate" virtual="true">
+			<Size x="64" y="64" />
+			<Layers>
+				<Layer level="BACKGROUND" textureSubLevel="-5">
+					<Texture parentKey="Bg" file="Interface\BlackMarket\BlackMarketBackground-Tile" horizTile="true" vertTile="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" />
+							<Anchor point="BOTTOMRIGHT" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="BACKGROUND" textureSubLevel="-2">
+					<Texture>
+						<Anchors>
+							<Anchor point="TOPLEFT" />
+							<Anchor point="BOTTOMRIGHT" />
+						</Anchors>
+						<Color r="1" g="1" b="1" />
+						<Gradient orientation="VERTICAL">
+							<MaxColor r="0" g="0" b="0" a="0.34" />
+							<MinColor r="0" g="0" b="0" a="0.5" />
+						</Gradient>
+					</Texture>
+				</Layer>
+				<Layer level="BORDER" textureSubLevel="-5">
+					<Texture parentKey="InsetBorderTopLeft" inherits="UI-Frame-InnerTopLeft">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.Bg" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="InsetBorderTopRight" inherits="UI-Frame-InnerTopRight">
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeKey="$parent.Bg" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="InsetBorderBottomLeft" inherits="UI-Frame-InnerBotLeftCorner">
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.Bg" y="-1" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="InsetBorderBottomRight" inherits="UI-Frame-InnerBotRight">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Bg" y="-1" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="InsetBorderTop" inherits="_UI-Frame-InnerTopTile">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.InsetBorderTopLeft" relativePoint="TOPRIGHT" />
+							<Anchor point="TOPRIGHT" relativeKey="$parent.InsetBorderTopRight" relativePoint="TOPLEFT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="InsetBorderBottom" inherits="_UI-Frame-InnerBotTile">
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.InsetBorderBottomLeft" relativePoint="BOTTOMRIGHT" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.InsetBorderBottomRight" relativePoint="BOTTOMLEFT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="InsetBorderLeft" inherits="!UI-Frame-InnerLeftTile">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.InsetBorderTopLeft" relativePoint="BOTTOMLEFT" x="0" y="0" />
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.InsetBorderBottomLeft" relativePoint="TOPLEFT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="InsetBorderRight" inherits="!UI-Frame-InnerRightTile">
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeKey="$parent.InsetBorderTopRight" relativePoint="BOTTOMRIGHT" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.InsetBorderBottomRight" relativePoint="TOPRIGHT" />
+						</Anchors>
+					</Texture>
+				</Layer>
+			</Layers>
+		</Frame>
+		<Button name="StoreProductCardTemplate" virtual="true" hidden="true">
+			<Size x="146" y="209" />
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture parentKey="Card" inherits="store-card" setAllPoints="true"/>
+				</Layer>
+				<Layer level="BACKGROUND" textureSubLevel="2">
+					<Texture parentKey="Shadows" inherits="store-card-petshadow" hidden="true">
+						<Anchors>
+							<Anchor point="CENTER" x="0" y="0" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="BORDER">
+					<Texture parentKey="Icon" hidden="true">
+						<Size x="63" y="63" />
+						<Anchors>
+							<Anchor point="TOP" x="0" y="-36" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="-1">
+					<Texture parentKey="IconBorder" inherits="store-itemicon-border" hidden="true">
+						<Anchors>
+							<Anchor point="TOP" x="0" y="-33" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK">
+					<FontString parentKey="CurrentPrice" inherits="GameFontNormalMed3">
+						<Anchors>
+							<Anchor point="BOTTOM" x="0" y="32" />
+						</Anchors>
+					</FontString>
+					<FontString parentKey="NormalPrice" inherits="GameFontNormalSmall2" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOM" x="0" y="32" />
+						</Anchors>
+					</FontString>
+					<FontString parentKey="SalePrice" inherits="GameFontNormalMed3" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOM" x="0" y="18" />
+						</Anchors>
+						<Color r="0.1" g="1.0" b="0.1" />
+					</FontString>
+					<FontString parentKey="ProductName" inherits="GameFontNormalMed3" justifyV="TOP" wordwrap="true">
+						<Size x="120" y="40" />
+						<Anchors>
+							<Anchor point="BOTTOM" x="0" y="42" />
+						</Anchors>
+						<Color r="1.0" g="1.0" b="1.0" />
+					</FontString>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="1">
+					<Texture parentKey="SelectedTexture" inherits="store-card-selected" hidden="true" alphaMode="ADD">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="UpgradeArrow" inherits="store-icon-upgradearrow" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.IconBorder" relativePoint="BOTTOMRIGHT" x="-3" y="4"/>
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="2">
+					<Texture parentKey="HighlightTexture" inherits="store-card-hover" hidden="true" alphaMode="ADD">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="3">
+					<Texture parentKey="NewTexture" inherits="store-corner-new" hidden="true">
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="1" y="3" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="HotTexture" inherits="store-corner-hot" hidden="true">
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="1" y="2" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="DiscountRight" inherits="store-corner-discount-right" hidden="true">
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="1" y="-2" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="DiscountLeft" inherits="store-corner-discount-left" hidden="true">
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.DiscountRight" relativePoint="LEFT" x="-40" y="0" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="DiscountMiddle" inherits="store-corner-discount-middle" hidden="true">
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.DiscountLeft" relativePoint="RIGHT" />
+							<Anchor point="RIGHT" relativeKey="$parent.DiscountRight" relativePoint="LEFT" />
+						</Anchors>
+					</Texture>
+					<FontString parentKey="DiscountText" inherits="GameFontNormalMed2" justifyH="CENTER" text="-25%" hidden="true">
+						<Size x="50" y="30" />
+						<Anchors>
+							<Anchor point="CENTER" relativeKey="$parent.DiscountMiddle" relativePoint="CENTER" x="1" y="2" />
+						</Anchors>
+						<Color r="1" g="1" b="1"/>
+					</FontString>
+				</Layer>
+				<Layer level="OVERLAY">
+					<Texture parentKey="Strikethrough" inherits="store-strikethrough" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.NormalPrice" x="-2" y="0"/>
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.NormalPrice" x="2" y="0"/>
+						</Anchors>
+					</Texture>
+				</Layer>
+			</Layers>
+			<Frames>
+				<PlayerModel parentKey="Model" creature="12257" hidden="true">
+					<Size x="126" y="124" />
+					<Anchors>
+						<Anchor point="BOTTOM" x="0" y="80" />
+					</Anchors>
+					<Scripts>
+						<OnUpdate function="StoreProductCardModel_OnUpdate" />
+					</Scripts>
+				</PlayerModel>
+				<Button parentKey="Magnifier" enableMouse="true" hidden="true">
+					<Size x="31" y="35" />
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="8" y="-8" />
+					</Anchors>
+					<NormalTexture inherits="store-icon-magnifyingglass" />
+					<HighlightTexture inherits="store-icon-magnifyingglass" alphaMode="ADD" />
+					<Scripts>
+						<OnClick function="StoreProductCardMagnifyingGlass_OnClick" />
+						<OnEnter function="StoreProductCardMagnifyingGlass_OnEnter" />
+						<OnLeave function="StoreProductCardMagnifyingGlass_OnLeave" />
+						<OnShow>
+							self:SetFrameLevel(self:GetParent().Model:GetFrameLevel()+1);
+						</OnShow>
+					</Scripts>
+				</Button>
+				<Frame parentKey="Checkmark" hidden="true">
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="-8" y="-8" />
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture inherits="store-icon-checkmark" setAllPoints="true"/>
+						</Layer>
+					</Layers>
+					<Scripts>
+						<OnShow>
+							self:SetFrameLevel(self:GetParent().Model:GetFrameLevel()+1);
+						</OnShow>
+						<OnEnter function="StoreProductCardCheckmark_OnEnter"/>
+						<OnLeave function="StoreProductCardCheckmark_OnLeave"/>
+					</Scripts>
+				</Frame>
+			</Frames>
+			<Scripts>
+				<OnEnter function="StoreProductCard_OnEnter" />
+				<OnLeave function="StoreProductCard_OnLeave" />
+				<OnClick function="StoreProductCard_OnClick" />
+				<OnDragStart function="StoreProductCard_OnDragStart" />
+				<OnDragStop function="StoreProductCard_OnDragStop" />
+			</Scripts>
+		</Button>
+		<Button name="StoreSplashSingleCardTemplate" virtual="true" hidden="true">
+			<Size x="576" y="471" />
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture parentKey="Card" inherits="store-card-splash1" setAllPoints="true" />
+				</Layer>
+				<Layer level="BACKGROUND" textureSubLevel="2">
+					<Texture parentKey="Shadows" inherits="store-card-petshadow" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="35" y="-210" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="BORDER">
+					<Texture parentKey="Icon" hidden="true">
+						<Size x="70" y="70" />
+						<Anchors>
+							<Anchor point="TOPLEFT" x="88" y="-96" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="-1">
+					<Texture parentKey="IconBorder" inherits="store-itemicon-border-splash1" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="4" y="-4" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK">
+					<Texture parentKey="UpgradeArrow" inherits="store-icon-upgradearrow" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.IconBorder" relativePoint="BOTTOMRIGHT" x="-3" y="4"/>
+						</Anchors>
+					</Texture>
+					<FontString parentKey="ProductName" inherits="GameFontNormalWTF2" justifyH="LEFT" justifyV="TOP">
+						<Size x="300" y="0" />
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.IconBorder" relativePoint="TOPRIGHT" x="-45" y="-70" />
+						</Anchors>
+						<Color r="1" g="1" b="1" />
+					</FontString>
+					<FontString parentKey="Description" inherits="GameFontNormalLarge" justifyH="LEFT" justifyV="TOP">
+						<Size x="340" y="0" />
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.ProductName" relativePoint="BOTTOMLEFT" x="0" y="-16" />
+						</Anchors>
+						<Color r="1" g="0.84" b="0.55" />
+					</FontString>
+					<FontString parentKey="CurrentPrice" inherits="GameFontNormalHugeOutline" >
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.Description" relativePoint="BOTTOMLEFT" x="0" y="-28" />
+						</Anchors>
+						<Color r="1.0" g="0.82" b="0" />
+					</FontString>
+					<FontString parentKey="NormalPrice" inherits="GameFontNormalMed3">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.Description" relativePoint="BOTTOMLEFT" x="0" y="-28" />
+						</Anchors>
+						<Color r="0.8" g="0.66" b="0" />
+					</FontString>
+					<FontString parentKey="SalePrice" inherits="GameFontNormalHugeOutline" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.NormalPrice" relativePoint="BOTTOMRIGHT" x="4" y="0" />
+						</Anchors>
+						<Color r="0.1" g="1.0" b="0.1" />
+					</FontString>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="4">
+					<Texture parentKey="SplashBanner" inherits="store-card-splash-banner" >
+						<Size x="374" y="77" />
+						<Anchors>
+							<Anchor point="TOP" x="3" y="2" />
+						</Anchors>
+					</Texture>
+					<FontString parentKey="SplashBannerText" inherits="GameFontNormalHuge3">
+						<Anchors>
+							<Anchor point="CENTER" relativeKey="$parent.SplashBanner" x="0" y="16" />
+						</Anchors>
+						<Color r="0.36" g="0.18" b="0.05" />
+					</FontString>
+				</Layer>
+				<Layer level="OVERLAY">
+					<Texture parentKey="Strikethrough" inherits="store-strikethrough" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.NormalPrice" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.NormalPrice" />
+						</Anchors>
+					</Texture>
+				</Layer>
+			</Layers>
+			<Frames>
+				<Frame parentKey="GlowSpin" hidden="true">
+					<Size x="253" y="256"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.IconBorder"/>
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture inherits="store-itemicon-border-glowspin" setAllPoints="true" alpha="0.09" alphaMode="ADD" />
+						</Layer>
+					</Layers>
+					<Animations>
+						<AnimationGroup parentKey="SpinAnim" looping="REPEAT">
+							<Rotation order="1" duration="15" degrees="-360"/>
+						</AnimationGroup>
+					</Animations>
+				</Frame>
+				<Frame parentKey="GlowPulse" hidden="true">
+					<Size x="145" y="138"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.IconBorder"/>
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture inherits="store-itemicon-border-glowpulse" setAllPoints="true" alpha="1" alphaMode="ADD" />
+						</Layer>
+						<Layer level="OVERLAY" textureSubLevel="1">
+							<Texture inherits="store-itemicon-border-glowpulse" setAllPoints="true" alpha=".5" alphaMode="ADD" />
+						</Layer>
+					</Layers>
+					<Animations>
+						<AnimationGroup parentKey="PulseAnim" looping="BOUNCE">
+							<Alpha change="-1" duration="1.5" order="1"/>
+						</AnimationGroup>
+					</Animations>
+				</Frame>
+				<Frame parentKey="BannerFadeIn" alpha="0.75" hidden="true">
+					<Size x="374" y="77"/>
+					<Anchors>
+						<Anchor point="TOP" x="3" y="2" />
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture parentKey="Banner" inherits="store-card-splash-banner" setAllPoint="true" alphaMode="ADD" />
+						</Layer>
+					</Layers>
+					<Animations>
+						<AnimationGroup parentKey="FadeAnim">
+							<Alpha change="-0.75" duration=".3"/>
+							<Scripts>
+								<OnFinished>
+									self:GetParent():Hide();
+								</OnFinished>
+							</Scripts>
+						</AnimationGroup>
+					</Animations>
+				</Frame>
+				<PlayerModel parentKey="Model" creature="12257" hidden="true">
+					<Size x="260" y="244" />
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-25" y="-30" />
+					</Anchors>
+					<Scripts>
+						<OnUpdate function="StoreProductCardModel_OnUpdate" />
+					</Scripts>
+				</PlayerModel>
+				<Button parentKey="BuyButton" inherits="StoreButtonTemplate">
+					<Size x="140" y="30" />
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.CurrentPrice" relativePoint="BOTTOMLEFT" x="0" y="-20" />
+					</Anchors>
+					<Scripts>
+						<OnClick function="StoreFrameBuyButton_OnClick" />
+					</Scripts>
+				</Button>
+				<Button parentKey="Magnifier" hidden="true">
+					<Size x="31" y="35" />
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.Shadows" relativePoint="BOTTOMRIGHT" x="-40" y="20" />
+					</Anchors>
+					<NormalTexture inherits="store-icon-magnifyingglass" />
+					<HighlightTexture inherits="store-icon-magnifyingglass" alphaMode="ADD" />
+					<Scripts>
+						<OnClick function="StoreProductCardMagnifyingGlass_OnClick" />
+						<OnShow>
+							self:SetFrameLevel(self:GetParent().Model:GetFrameLevel()+1);
+						</OnShow>
+					</Scripts>
+				</Button>
+				<Frame parentKey="Checkmark" hidden="true">
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="BOTTOM" relativeKey="$parent.Magnifier" relativePoint="TOP" x="5" y="2"/>
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture inherits="store-icon-checkmark" setAllPoints="true"/>
+						</Layer>
+					</Layers>
+					<Scripts>
+						<OnShow>
+							self:SetFrameLevel(self:GetParent().Model:GetFrameLevel()+1);
+						</OnShow>
+						<OnEnter function="StoreProductCardCheckmark_OnEnter"/>
+						<OnLeave function="StoreProductCardCheckmark_OnLeave"/>
+					</Scripts>
+				</Frame>
+			</Frames>
+			<Scripts>
+				<OnLoad function="StoreProductCard_OnLoad" />
+				<OnDragStart function="StoreProductCard_OnDragStart" />
+				<OnDragStop function="StoreProductCard_OnDragStop" />
+				<OnClick>
+					local showPreview;
+					if ( IsOnGlueScreen() ) then
+						showPreview = _G.IsControlKeyDown();
+					else
+						showPreview = IsModifiedClick("DRESSUP");
+					end
+					if ( showPreview ) then
+						local name, _, modelID = select(10,C_PurchaseAPI.GetEntryInfo(self:GetID()));
+						if ( modelID ) then
+							Outbound.ShowPreview(name, modelID);
+						end
+					end
+				</OnClick>
+			</Scripts>
+		</Button>
+		<Button name="StoreSplashPrimaryCardTemplate" virtual="true" hidden="true">
+			<Size x="576" y="266" />
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture parentKey="Card" inherits="store-card-splash3-large" setAllPoints="true"/>
+				</Layer>
+				<Layer level="BACKGROUND" textureSubLevel="2">
+					<Texture parentKey="Shadows" inherits="store-card-petshadow" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="40" y="-152" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="BORDER">
+					<Texture parentKey="Icon" hidden="true">
+						<Size x="70" y="70" />
+						<Anchors>
+							<Anchor point="TOPLEFT" x="88" y="-76" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="-1">
+					<Texture parentKey="IconBorder" inherits="store-itemicon-border-splash3" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="4" y="-4"/>
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK">
+					<FontString parentKey="ProductName" inherits="GameFontNormalHuge3" justifyH="LEFT" justifyV="TOP">
+						<Size x="350" y="0" />
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.IconBorder" relativePoint="RIGHT" x="-44" y="34" />
+						</Anchors>
+						<Color r="1" g="1" b="1" />
+					</FontString>
+					<FontString parentKey="Description" inherits="GameFontNormal" justifyH="LEFT" justifyV="TOP">
+						<Size x="340" y="0" />
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.ProductName" relativePoint="BOTTOMLEFT" x="0" y="-17" />
+						</Anchors>
+						<Color r="1" g="0.84" b="0.55" />
+					</FontString>
+					<FontString parentKey="CurrentPrice" inherits="GameFontNormalLarge2">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.Description" relativePoint="BOTTOMLEFT" x="0" y="-22" />
+						</Anchors>
+						<Color r="1.0" g="0.82" b="0" />
+					</FontString>
+					<FontString parentKey="NormalPrice" inherits="GameFontNormalMed2">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.Description" relativePoint="BOTTOMLEFT" x="0" y="-22" />
+						</Anchors>
+						<Color r="0.8" g="0.66" b="0" />
+					</FontString>
+					<FontString parentKey="SalePrice" inherits="GameFontNormalLarge2" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.NormalPrice" relativePoint="BOTTOMRIGHT" x="6" y="0" />
+						</Anchors>
+						<Color r="0.1" g="1.0" b="0.1" />
+					</FontString>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="1">
+					<Texture parentKey="SelectedTexture" inherits="store-card-splash3-large-selected" hidden="true" alphaMode="ADD">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="UpgradeArrow" inherits="store-icon-upgradearrow" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.IconBorder" relativePoint="BOTTOMRIGHT" x="-3" y="4"/>
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="2">
+					<Texture parentKey="HighlightTexture" inherits="store-card-splash3-large-hover" hidden="true" alphaMode="ADD">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="4">
+					<Texture parentKey="SplashBanner" inherits="store-card-splash-banner">
+						<Size x="374" y="77" />
+						<Anchors>
+							<Anchor point="TOP" x="3" y="2" />
+						</Anchors>
+					</Texture>
+					<FontString parentKey="SplashBannerText" inherits="GameFontNormalHuge3">
+						<Anchors>
+							<Anchor point="CENTER" relativeKey="$parent.SplashBanner" x="0" y="16" />
+						</Anchors>
+						<Color r="0.36" g="0.18" b="0.05" />
+					</FontString>
+				</Layer>
+				<Layer level="OVERLAY">
+					<Texture parentKey="Strikethrough" inherits="store-strikethrough" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.NormalPrice" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.NormalPrice" />
+						</Anchors>
+					</Texture>
+				</Layer>
+			</Layers>
+			<Frames>
+				<Frame parentKey="GlowSpin" hidden="true">
+					<Size x="253" y="256"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.IconBorder" x="0" y="10"/>
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture inherits="store-itemicon-border-glowspin" setAllPoints="true" alpha="0.08" alphaMode="ADD" />
+						</Layer>
+					</Layers>
+					<Animations>
+						<AnimationGroup parentKey="SpinAnim" looping="REPEAT">
+							<Rotation order="1" duration="15" degrees="-360"/>
+						</AnimationGroup>
+					</Animations>
+				</Frame>
+				<Frame parentKey="GlowPulse" hidden="true">
+					<Size x="145" y="138"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.IconBorder" x="0" y="10"/>
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture inherits="store-itemicon-border-glowpulse" setAllPoints="true" alpha="1" alphaMode="ADD" />
+						</Layer>
+						<Layer level="OVERLAY" textureSubLevel="1">
+							<Texture inherits="store-itemicon-border-glowpulse" setAllPoints="true" alpha=".5" alphaMode="ADD" />
+						</Layer>
+					</Layers>
+					<Animations>
+						<AnimationGroup parentKey="PulseAnim" looping="BOUNCE">
+							<Alpha change="-1" duration="1.5" order="1"/>
+						</AnimationGroup>
+					</Animations>
+				</Frame>
+				<Frame parentKey="BannerFadeIn" alpha="0.75" hidden="true">
+					<Size x="374" y="77"/>
+					<Anchors>
+						<Anchor point="TOP" x="3" y="2" />
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture parentKey="Banner" inherits="store-card-splash-banner" setAllPoint="true" alphaMode="ADD" />
+						</Layer>
+					</Layers>
+					<Animations>
+						<AnimationGroup parentKey="FadeAnim">
+							<Alpha change="-0.75" duration=".3"/>
+							<Scripts>
+								<OnFinished>
+									self:GetParent():Hide();
+								</OnFinished>
+							</Scripts>
+						</AnimationGroup>
+					</Animations>
+				</Frame>
+				<PlayerModel parentKey="Model" creature="12257" hidden="true">
+					<Size x="200" y="184" />
+					<Anchors>
+						<Anchor point="TOPLEFT" x="10" y="-30" />
+					</Anchors>
+					<Scripts>
+						<OnUpdate function="StoreProductCardModel_OnUpdate" />
+					</Scripts>
+				</PlayerModel>
+				<Button parentKey="Magnifier" hidden="true">
+					<Size x="31" y="35" />
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.Shadows" relativePoint="BOTTOMRIGHT" x="-35" y="30" />
+					</Anchors>
+					<NormalTexture inherits="store-icon-magnifyingglass" />
+					<HighlightTexture inherits="store-icon-magnifyingglass" alphaMode="ADD" />
+					<Scripts>
+						<OnClick function="StoreProductCardMagnifyingGlass_OnClick" />
+						<OnEnter function="StoreProductCardMagnifyingGlass_OnEnter" />
+						<OnLeave function="StoreProductCardMagnifyingGlass_OnLeave" />
+						<OnShow>
+							self:SetFrameLevel(self:GetParent().Model:GetFrameLevel()+1);
+						</OnShow>
+					</Scripts>
+				</Button>
+				<Frame parentKey="Checkmark" hidden="true">
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="BOTTOM" relativeKey="$parent.Magnifier" relativePoint="TOP" x="5" y="2"/>
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture inherits="store-icon-checkmark" setAllPoints="true"/>
+						</Layer>
+					</Layers>
+					<Scripts>
+						<OnShow>
+							self:SetFrameLevel(self:GetParent().Model:GetFrameLevel()+1);
+						</OnShow>
+						<OnEnter function="StoreProductCardCheckmark_OnEnter"/>
+						<OnLeave function="StoreProductCardCheckmark_OnLeave"/>
+					</Scripts>
+				</Frame>
+			</Frames>
+			<Scripts>
+				<OnLoad function="StoreProductCard_OnLoad" />
+				<OnDragStart function="StoreProductCard_OnDragStart" />
+				<OnDragStop function="StoreProductCard_OnDragStop" />
+				<OnEnter function="StoreProductCard_OnEnter" />
+				<OnLeave function="StoreProductCard_OnLeave" />
+				<OnClick function="StoreProductCard_OnClick" />
+			</Scripts>
+		</Button>
+		<Button name="StoreSplashSecondaryCardTemplate" virtual="true" hidden="true">
+			<Size x="286" y="146" />
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture parentKey="Card" inherits="store-card-splash3-small" setAllPoints="true"/>
+				</Layer>
+				<Layer level="BACKGROUND" textureSubLevel="2">
+					<Texture parentKey="Shadows" inherits="store-card-petshadow" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="-5" y="-78" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="BORDER">
+					<Texture parentKey="Icon" hidden="true">
+						<Size x="63" y="63" />
+						<Anchors>
+							<Anchor point="CENTER" x="-70" y="6" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="-1">
+					<Texture parentKey="IconBorder" inherits="store-itemicon-border" hidden="true">
+						<Anchors>
+							<Anchor point="CENTER" x="-72" y="1" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK">
+					<FontString parentKey="ProductName" inherits="GameFontNormalLarge" justifyH="LEFT" justifyV="TOP">
+						<Size x="140" y="40" />
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.IconBorder" relativePoint="RIGHT" x="5" y="10" />
+						</Anchors>
+						<Color r="1" g="1" b="1" />
+					</FontString>
+					<FontString parentKey="CurrentPrice" inherits="GameFontNormalMed3">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.ProductName" relativePoint="BOTTOMLEFT" x="0" y="0" />
+						</Anchors>
+						<Color r="1.0" g="0.82" b="0" />
+					</FontString>
+					<FontString parentKey="NormalPrice" inherits="GameFontNormalMed2">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.ProductName" relativePoint="BOTTOMLEFT" x="0" y="0" />
+						</Anchors>
+						<Color r="0.8" g="0.66" b="0" />
+					</FontString>
+					<FontString parentKey="SalePrice" inherits="GameFontNormalMed3" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.NormalPrice" relativePoint="BOTTOMRIGHT" x="4" y="0" />
+						</Anchors>
+						<Color r="0.1" g="1.0" b="0.1" />
+					</FontString>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="1">
+					<Texture parentKey="SelectedTexture" inherits="store-card-splash3-small-selected" hidden="true" alphaMode="ADD">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="UpgradeArrow" inherits="store-icon-upgradearrow" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.IconBorder" relativePoint="BOTTOMRIGHT" x="-3" y="4"/>
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="2">
+					<Texture parentKey="HighlightTexture" inherits="store-card-splash3-small-hover" hidden="true" alphaMode="ADD">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="3">
+					<Texture parentKey="NewTexture" inherits="store-corner-new" hidden="true">
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="1" y="3" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="HotTexture" inherits="store-corner-hot" hidden="true">
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="1" y="2" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="DiscountRight" inherits="store-corner-discount-right" hidden="true">
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="1" y="-2" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="DiscountLeft" inherits="store-corner-discount-left" hidden="true">
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.DiscountRight" relativePoint="LEFT" x="-40" y="0" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="DiscountMiddle" inherits="store-corner-discount-middle" hidden="true">
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.DiscountLeft" relativePoint="RIGHT" />
+							<Anchor point="RIGHT" relativeKey="$parent.DiscountRight" relativePoint="LEFT" />
+						</Anchors>
+					</Texture>
+					<FontString parentKey="DiscountText" inherits="GameFontNormalMed2" justifyH="CENTER" text="-25%" hidden="true">
+						<Size x="50" y="30" />
+						<Anchors>
+							<Anchor point="CENTER" relativeKey="$parent.DiscountMiddle" relativePoint="CENTER" x="1" y="2" />
+						</Anchors>
+						<Color r="1" g="1" b="1"/>
+					</FontString>
+				</Layer>
+				<Layer level="OVERLAY">
+					<Texture parentKey="Strikethrough" inherits="store-strikethrough" hidden="true">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.NormalPrice" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.NormalPrice" />
+						</Anchors>
+					</Texture>
+				</Layer>
+			</Layers>
+			<Frames>
+				<PlayerModel parentKey="Model" creature="12257" hidden="true">
+					<Size x="125" y="136" />
+					<Anchors>
+						<Anchor point="TOPLEFT" x="5" y="-5" />
+					</Anchors>
+					<Scripts>
+						<OnUpdate function="StoreProductCardModel_OnUpdate" />
+					</Scripts>
+				</PlayerModel>
+				<Button parentKey="Magnifier" hidden="true">
+					<Size x="31" y="35" />
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.Shadows" relativePoint="BOTTOMRIGHT" x="-45" y="30" />
+					</Anchors>
+					<NormalTexture inherits="store-icon-magnifyingglass" />
+					<HighlightTexture inherits="store-icon-magnifyingglass" alphaMode="ADD" />
+					<Scripts>
+						<OnClick function="StoreProductCardMagnifyingGlass_OnClick" />
+						<OnEnter function="StoreProductCardMagnifyingGlass_OnEnter" />
+						<OnLeave function="StoreProductCardMagnifyingGlass_OnLeave" />
+						<OnShow>
+							self:SetFrameLevel(self:GetParent().Model:GetFrameLevel()+1);
+						</OnShow>
+					</Scripts>
+				</Button>
+				<Frame parentKey="Checkmark" hidden="true">
+					<Size x="27" y="27"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="-8" y="-8" />
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY">
+							<Texture inherits="store-icon-checkmark" setAllPoints="true"/>
+						</Layer>
+					</Layers>
+					<Scripts>
+						<OnShow>
+							self:SetFrameLevel(self:GetParent().Model:GetFrameLevel()+1);
+						</OnShow>
+						<OnEnter function="StoreProductCardCheckmark_OnEnter"/>
+						<OnLeave function="StoreProductCardCheckmark_OnLeave"/>
+					</Scripts>
+				</Frame>
+			</Frames>
+			<Scripts>
+				<OnLoad function="StoreProductCard_OnLoad" />
+				<OnDragStart function="StoreProductCard_OnDragStart" />
+				<OnDragStop function="StoreProductCard_OnDragStop" />
+				<OnEnter function="StoreProductCard_OnEnter" />
+				<OnLeave function="StoreProductCard_OnLeave" />
+				<OnClick function="StoreProductCard_OnClick" />
+			</Scripts>
+		</Button>
+		<Button name="StoreCategoryTemplate" virtual="true">
+			<Size x="176" y="38" />
+			<Layers>
+				<Layer layer="BACKGROUND">
+					<Texture parentKey="Category" inherits="store-category" setAllPoints="true"/>
+				</Layer>
+				<Layer level="ARTWORK">
+					<FontString parentKey="Text" inherits="GameFontNormal" wordwrap="true" justifyH="LEFT">
+						<Size x="120" y="38" />
+						<Anchors>
+							<Anchor point="LEFT" x="36" y="4" />
+						</Anchors>
+					</FontString>
+				</Layer>
+				<Layer level="ARTWORK">
+					<Texture parentKey="NewItems" inherits="store-icon-new" hidden="true">
+						<Anchors>
+							<Anchor point="RIGHT" x="-8" y="2" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="1">
+					<Texture parentKey="SelectedTexture" inherits="store-category-selected" hidden="true" alphaMode="ADD">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER" x="0" y="2" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="HighlightTexture" inherits="store-category-hover" hidden="true" alphaMode="ADD">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER" x="0" y="2" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="OVERLAY">
+					<Texture parentKey="Icon">
+						<Size x="64" y="64"/>
+						<Anchors>
+							<Anchor point="CENTER" relativeKey="$parent" relativePoint="LEFT" x="15" y="2"/>
+						</Anchors>
+					</Texture>
+				</Layer>
+			</Layers>
+			<Scripts>
+				<OnEnter function="StoreCategory_OnEnter" />
+				<OnLeave function="StoreCategory_OnLeave" />
+				<OnClick function="StoreCategory_OnClick" />
+			</Scripts>
+		</Button>
+		<Frame name="GoldBorderFrameTemplate" virtual="true">
+			<Size x="398" y="556" />
+			<Layers>
+				<Layer level="ARTWORK">
+					<Texture parentKey="TopLeft" inherits="store-goldborder-top-left">
+						<Anchors>
+							<Anchor point="TOPLEFT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="TopRight" inherits="store-goldborder-top-right">
+						<Anchors>
+							<Anchor point="TOPRIGHT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="BottomLeft" inherits="store-goldborder-bottom-left">
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="BottomRight" inherits="store-goldborder-bottom-right">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="Top" inherits="store-goldborder-top">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.TopLeft" relativePoint="TOPRIGHT" />
+							<Anchor point="TOPRIGHT" relativeKey="$parent.TopRight" relativePoint="TOPLEFT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="Left" inherits="store-goldborder-left">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.TopLeft" relativePoint="BOTTOMLEFT" />
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.BottomLeft" relativePoint="TOPLEFT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="Right" inherits="store-goldborder-right">
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeKey="$parent.TopRight" relativePoint="BOTTOMRIGHT" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BottomRight" relativePoint="TOPRIGHT" />
+						</Anchors>
+					</Texture>
+					<Texture parentKey="Bottom" inherits="store-goldborder-bottom">
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.BottomLeft" relativePoint="BOTTOMRIGHT" />
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BottomRight" relativePoint="BOTTOMLEFT" />
+						</Anchors>
+					</Texture>
+				</Layer>
+			</Layers>
+			<Frames>
+				<Button parentKey="CloseButton" inherits="UIPanelCloseButtonNoScripts">
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" x="-6" y="-6" />
+					</Anchors>
+					<Scripts>
+						<OnClick>
+							self:GetParent():Hide();
+						</OnClick>
+					</Scripts>
+				</Button>
+			</Frames>
+		</Frame>
+		<Frame name="StoreStateDriverFrame">
+			<Animations>
+				<AnimationGroup parentKey="NoticeTextTimer">
+					<Animation duration="7.0" order="1">
+						<Scripts>
+							<OnFinished>
+								StoreFrame_UpdateActivePanel(StoreFrame);
+							</OnFinished>
+						</Scripts>
+					</Animation>
+				</AnimationGroup>
+			</Animations>
+		</Frame>
+		<Frame name="ServicesLogoutPopup" frameStrata="FULLSCREEN_DIALOG" parent="UIParent" enableMouse="true" hidden="true">
+			<Size x="412" y="146"/>
+			<Anchors>
+				<Anchor point="CENTER" relativeTo="UIParent" relativePoint="CENTER" x="0" y="40"/>
+			</Anchors>
+			<Frames>
+				<Frame parentKey="Background">
+					<Size x="412" y="146"/>
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="0"/>
+					</Anchors>
+					<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+						<BackgroundInsets>
+							<AbsInset left="11" right="12" top="12" bottom="11"/>
+						</BackgroundInsets>
+						<TileSize>
+							<AbsValue val="32"/>
+						</TileSize>
+						<EdgeSize>
+							<AbsValue val="32"/>
+						</EdgeSize>
+					</Backdrop>
+					<Layers>
+						<Layer level="ARTWORK">
+							<FontString parentKey="Title" inherits="GameFontNormalMed2">
+								<Size x="360" y="0"/>
+								<Anchors>
+									<Anchor point="TOP" x="0" y="-26"/>
+								</Anchors>
+							</FontString>
+							<FontString parentKey="Description" inherits="GameFontNormalMed2">
+								<Size x="360" y="0"/>
+								<Anchors>
+									<Anchor point="TOP" x="0" y="-58"/>
+								</Anchors>
+								<Color r="1" g="1" b="1"/>
+							</FontString>
+						</Layer>
+					</Layers>
+					<Frames>
+						<Button parentKey="ConfirmButton" inherits="StoreButtonSmallTemplate">
+							<Size x="160" y="26"/>
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" x="24" y="20"/>
+							</Anchors>
+							<Scripts>
+								<OnClick function="ServicesLogoutPopupConfirmButton_OnClick"/>
+								<OnUpdate>
+									self:SetEnabled(not (UnitAffectingCombat("player") or UnitAffectingCombat("pet")));
+								</OnUpdate>
+							</Scripts>
+						</Button>
+						<Button parentKey="CancelButton" inherits="StoreButtonSmallTemplate">
+							<Size x="100" y="26"/>
+							<Anchors>
+								<Anchor point="LEFT" relativeKey="$parent.ConfirmButton" relativePoint="RIGHT" x="12" y="0"/>
+							</Anchors>
+							<Scripts>
+								<OnClick function="ServicesLogoutPopupCancelButton_OnClick"/>
+							</Scripts>
+						</Button>
+					</Frames>
+					<Scripts>
+						<OnLoad function="ServicesLogoutPopup_OnLoad"/>
+					</Scripts>
+				</Frame>
+			</Frames>
+		</Frame>
+		<Frame name="StoreFrame" frameStrata="FULLSCREEN_DIALOG" parent="UIParent" inherits="PortraitFrameTemplateNoCloseButton" enableMouse="true" hidden="true">
+			<Size x="800" y="537" />
+			<!--Anchored to the screen as a whole in Lua-->
+			<Layers>
+				<Layer layer="ARTWORK">
+					<FontString parentKey="PageText" inherits="GameFontHighlight" justifyH="RIGHT">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" x="-98" y="46" />
+						</Anchors>
+					</FontString>
+				</Layer>
+				<Layer layer="OVERLAY">
+					<FontString parentKey="BrowseNotice" inherits="GameFontHighlightSmall2" justifyH="CENTERED" justifyV="TOP">
+						<Size x="180" y="40" />
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" x="40" y="22" />
+						</Anchors>
+					</FontString>
+				</Layer>
+			</Layers>
+			<Frames>
+				<Frame parentKey="LeftInset" useParentLevel="true" inherits="StoreInsetFrameTemplate">
+					<Size x="192" y="496" />
+					<Anchors>
+						<Anchor point="TOPLEFT" x="4" y="-40" />
+						<Anchor point="BOTTOMLEFT" x="4" y="6" />
+					</Anchors>
+				</Frame>
+				<Frame parentKey="RightInset" useParentLevel="true" inherits="StoreInsetFrameTemplate">
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="-6" y="-40" />
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.LeftInset" relativePoint="BOTTOMRIGHT" x="2" y="0" />
+					</Anchors>
+				</Frame>
+				<Frame parentKey="LeftDisplay" useParentLevel="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.LeftInset" relativePoint="TOPLEFT" x="3" y="-3" />
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.LeftInset" relativePoint="BOTTOMRIGHT" x="-3" y="3" />
+					</Anchors>
+					<Layers>
+						<Layer layer="BACKGROUND">
+							<Texture inherits="store-category-bg" setAllPoints="true" />
+						</Layer>
+					</Layers>
+				</Frame>
+				<Frame parentKey="RightDisplay" useParentLevel="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.RightInset" relativePoint="TOPLEFT" x="3" y="-3" />
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.RightInset" relativePoint="BOTTOMRIGHT" x="-3" y="3" />
+					</Anchors>
+					<Frames>
+						<Frame parentKey="ShadowOverlay" inherits="ShadowOverlayTemplate" useParentLevel="true" setAllPoints="true" />
+					</Frames>
+				</Frame>
+				<Frame parentKey="Cover" setAllPoints="true" enableMouse="true" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="0" y="-20" />
+						<Anchor point="BOTTOMRIGHT" x="0" y="0" />
+					</Anchors>
+					<Layers>
+						<Layer level="ARTWORK">
+							<Texture parentKey="Texture" setAllPoints="true">
+								<Color r="0" g="0" b="0" a="0" />
+							</Texture>
+						</Layer>
+					</Layers>
+					<Scripts>
+						<OnShow>
+							self:SetFrameLevel(self:GetParent():GetFrameLevel()+3);
+						</OnShow>
+					</Scripts>
+				</Frame>
+				<Frame parentKey="Notice" enableMouse="false" hidden="true">
+					<Size x="320" y="210" />
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="20" />
+					</Anchors>
+					<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+						<TileSize>
+							<AbsValue val="32" />
+						</TileSize>
+						<EdgeSize>
+							<AbsValue val="32" />
+						</EdgeSize>
+					</Backdrop>
+					<Layers>
+						<Layer level="BACKGROUND">
+							<Texture>
+								<Anchors>
+									<Anchor point="TOPLEFT" x="5" y="-5" />
+									<Anchor point="BOTTOMRIGHT" x="-5" y="5" />
+								</Anchors>
+								<Color r="0" g="0" b="0" a="1" />
+							</Texture>
+						</Layer>
+						<Layer level="BORDER">
+							<Texture parentKey="Icon" inherits="store-error-icon">
+								<Anchors>
+									<Anchor point="CENTER" x="0" y="30" />
+								</Anchors>
+							</Texture>
+						</Layer>
+						<Layer level="ARTWORK">
+							<Texture parentKey="Line" inherits="store-error-line">
+								<Anchors>
+									<Anchor point="CENTER" x="0" y="-40" />
+								</Anchors>
+							</Texture>
+							<FontString parentKey="Title" inherits="GameFontNormalLarge">
+								<Anchors>
+									<Anchor point="BOTTOM" relativeKey="$parent.Line" relativePoint="TOP" x="0" y="6" />
+								</Anchors>
+							</FontString>
+							<FontString parentKey="Description" inherits="GameFontHighlight" justifyV="TOP">
+								<Size x="250" y="40" />
+								<Anchors>
+									<Anchor point="TOP" relativeKey="$parent.Line" relativePoint="BOTTOM" x="0" y="-10" />
+								</Anchors>
+							</FontString>
+						</Layer>
+					</Layers>
+					<Scripts>
+						<OnShow>
+							StoreFrame_UpdateCoverState();
+							self:SetFrameLevel(self:GetParent():GetFrameLevel()+4);
+						</OnShow>
+						<OnHide function="StoreFrame_UpdateCoverState" />
+					</Scripts>
+				</Frame>
+				<Frame parentKey="PurchaseSentFrame" enableMouse="false" hidden="true">
+					<Size x="320" y="210" />
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="20" />
+					</Anchors>
+					<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+						<TileSize>
+							<AbsValue val="32" />
+						</TileSize>
+						<EdgeSize>
+							<AbsValue val="32" />
+						</EdgeSize>
+					</Backdrop>
+					<Layers>
+						<Layer level="BACKGROUND">
+							<Texture>
+								<Anchors>
+									<Anchor point="TOPLEFT" x="5" y="-5" />
+									<Anchor point="BOTTOMRIGHT" x="-5" y="5" />
+								</Anchors>
+								<Color r="0" g="0" b="0" a="1" />
+							</Texture>
+						</Layer>
+						<Layer level="BORDER">
+							<Texture parentKey="Icon" inherits="store-icon-purchasesent">
+								<Anchors>
+									<Anchor point="CENTER" x="0" y="30" />
+								</Anchors>
+							</Texture>
+						</Layer>
+						<Layer level="ARTWORK">
+							<FontString parentKey="Title" inherits="GameFontNormalLarge2">
+								<Anchors>
+									<Anchor point="BOTTOM" x="0" y="70" />
+								</Anchors>
+							</FontString>
+						</Layer>
+					</Layers>
+					<Frames>
+						<Button parentKey="OkayButton" inherits="StoreButtonTemplate">
+							<Size x="120" y="22" />
+							<Anchors>
+								<Anchor point="BOTTOM" x="0" y="20" />
+							</Anchors>
+							<Scripts>
+								<OnClick function="StoreFramePurchaseSentOkayButton_OnClick" />
+							</Scripts>
+						</Button>
+					</Frames>
+					<Scripts>
+						<OnShow>
+							StoreFrame_UpdateCoverState();
+							self:SetFrameLevel(self:GetParent():GetFrameLevel()+6);
+						</OnShow>
+						<OnHide function="StoreFrame_UpdateCoverState" />
+					</Scripts>
+				</Frame>
+				<Frame parentKey="ErrorFrame" enableMouse="false" hidden="true">
+					<Size x="320" y="250" />
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="40" />
+					</Anchors>
+					<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+						<TileSize>
+							<AbsValue val="32" />
+						</TileSize>
+						<EdgeSize>
+							<AbsValue val="32" />
+						</EdgeSize>
+					</Backdrop>
+					<Layers>
+						<Layer level="BACKGROUND">
+							<Texture>
+								<Anchors>
+									<Anchor point="TOPLEFT" x="5" y="-5" />
+									<Anchor point="BOTTOMRIGHT" x="-5" y="5" />
+								</Anchors>
+								<Color r="0" g="0" b="0" a="1" />
+							</Texture>
+						</Layer>
+						<Layer level="BORDER">
+							<Texture parentKey="Icon" inherits="store-error-icon">
+								<Anchors>
+									<Anchor point="CENTER" x="0" y="50" />
+								</Anchors>
+							</Texture>
+						</Layer>
+						<Layer level="ARTWORK">
+							<Texture parentKey="Line" inherits="store-error-line">
+								<Anchors>
+									<Anchor point="CENTER" x="0" y="-20" />
+								</Anchors>
+							</Texture>
+							<FontString parentKey="Title" inherits="GameFontNormalLarge">
+								<Anchors>
+									<Anchor point="BOTTOM" relativeKey="$parent.Line" relativePoint="TOP" x="0" y="6" />
+								</Anchors>
+							</FontString>
+							<FontString parentKey="Description" inherits="GameFontHighlight" justifyV="TOP">
+								<Size x="250" y="0" />
+								<Anchors>
+									<Anchor point="TOP" relativeKey="$parent.Line" relativePoint="BOTTOM" x="0" y="-6" />
+								</Anchors>
+							</FontString>
+							<FontString parentKey="WebsiteWarning" inherits="GameFontNormalSmall" justifyH="CENTER">
+								<Size x="270" y="0" />
+								<Anchors>
+									<Anchor point="TOP" relativeKey="$parent.Description" relativePoint="BOTTOM" x="0" y="-6" />
+								</Anchors>
+							</FontString>
+						</Layer>
+					</Layers>
+					<Frames>
+						<Button parentKey="AcceptButton" inherits="StoreButtonTemplate">
+							<Size x="120" y="22" />
+							<Anchors>
+								<Anchor point="BOTTOM" relativeKey="$parent.RightInset" relativePoint="BOTTOM" x="0" y="20" />
+							</Anchors>
+							<Scripts>
+								<OnClick function="StoreFrameErrorAcceptButton_OnClick" />
+							</Scripts>
+						</Button>
+						<Button parentKey="WebsiteButton" inherits="StoreButtonTemplate">
+							<Size x="120" y="22" />
+							<Scripts>
+								<OnClick function="StoreFrameErrorWebsiteButton_OnClick" />
+							</Scripts>
+						</Button>
+					</Frames>
+					<Scripts>
+						<OnShow function="StoreFrameErrorFrame_OnShow" />
+						<OnHide function="StoreFrameErrorFrame_OnHide" />
+					</Scripts>
+				</Frame>
+				<Button parentKey="BuyButton" inherits="StoreButtonTemplate" enableMouse="true">
+					<Size x="140" y="30" />
+					<Animations>
+						<AnimationGroup parentKey="PulseAnim">
+							<Alpha targetKey="$parent.$parent.Flash" change="1.0" duration="0.5" order="1"/>
+							<Alpha targetKey="$parent.$parent.Flash" change="-1.0" duration="0.5" order="2"/>
+						</AnimationGroup>
+					</Animations>
+					<Anchors>
+						<Anchor point="BOTTOM" relativeKey="$parent.RightInset" relativePoint="BOTTOM" x="0" y="26" />
+					</Anchors>
+					<Layers>
+						<Layer level="OVERLAY" textureSubLevel="1">
+							<Texture parentKey="Flash" file="Interface\Buttons\UI-Panel-Button-Glow" alphaMode="ADD" alpha="0">
+								<Size x="165" y="41"/>
+								<Anchors>
+									<Anchor point="CENTER"/>
+								</Anchors>
+								<TexCoords left="0.0" right="0.75" top="0.0" bottom="0.609375"/>
+							</Texture>
+						</Layer>
+					</Layers>
+					<Scripts>
+						<OnClick function="StoreFrameBuyButton_OnClick" />
+						<OnSizeChanged>
+							self.Flash:SetSize(self:GetWidth()*1.17857, self:GetHeight()*1.3);
+						</OnSizeChanged>
+					</Scripts>
+				</Button>
+				<Button parentKey="PrevPageButton">
+					<Size x="32" y="32" />
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="-57" y="36" />
+					</Anchors>
+					<Scripts>
+						<OnClick function="StoreFramePrevPageButton_OnClick" />
+					</Scripts>
+					<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Up" />
+					<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Down" />
+					<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Disabled" />
+					<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD" />
+				</Button>
+				<Button parentKey="NextPageButton">
+					<Size x="32" y="32" />
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="-22" y="36" />
+					</Anchors>
+					<Scripts>
+						<OnClick function="StoreFrameNextPageButton_OnClick" />
+					</Scripts>
+					<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up" />
+					<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Down" />
+					<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Disabled" />
+					<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD" />
+				</Button>
+				<Button parentKey="CloseButton" inherits="UIPanelCloseButtonNoScripts">
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
+							<Offset x="4" y="5" />
+						</Anchor>
+					</Anchors>
+					<Scripts>
+						<OnClick function="StoreFrameCloseButton_OnClick" />
+					</Scripts>
+				</Button>
+				<Button parentKey="SplashSingle" inherits="StoreSplashSingleCardTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.RightInset" relativePoint="TOPLEFT" x="10" y="-10" />
+					</Anchors>
+				</Button>
+				<Button parentKey="SplashPrimary" inherits="StoreSplashPrimaryCardTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.RightInset" relativePoint="TOPLEFT" x="10" y="-10" />
+					</Anchors>
+				</Button>
+				<Button parentKey="SplashSecondary1" inherits="StoreSplashSecondaryCardTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.SplashPrimary" relativePoint="BOTTOMLEFT" x="0" y="-4" />
+					</Anchors>
+				</Button>
+				<Button parentKey="SplashSecondary2" inherits="StoreSplashSecondaryCardTemplate">
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.SplashPrimary" relativePoint="BOTTOMRIGHT" x="0" y="-4" />
+					</Anchors>
+				</Button>
+				<Button parentArray="CategoryFrames" inherits="StoreCategoryTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.LeftInset" relativePoint="TOPLEFT" x="9" y="-20" />
+					</Anchors>
+				</Button>
+				<Button parentArray="ProductCards" inherits="StoreProductCardTemplate">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.RightInset" relativePoint="TOPLEFT" x="6" y="-6" />
+					</Anchors>
+					<Scripts>
+						<OnLoad function="StoreProductCard_OnLoad" />
+					</Scripts>
+				</Button>
+			</Frames>
+			<Scripts>
+				<OnLoad function="StoreFrame_OnLoad" />
+				<OnEvent function="StoreFrame_OnEvent" />
+				<OnShow function="StoreFrame_OnShow" />
+				<OnHide>
+					self:SetAttribute("isshown", false);
+					-- TODO: Fix so will only hide if Store showed the preview frame
+					Outbound.HidePreviewFrame();
+					if ( not IsOnGlueScreen() ) then
+						Outbound.UpdateMicroButtons();
+					end
+
+					PlaySound("UI_igStore_WindowClose_Button");
+				</OnHide>
+				<OnAttributeChanged function="StoreFrame_OnAttributeChanged" />
+			</Scripts>
+		</Frame>
+		<Frame name="StoreConfirmationFrame" frameStrata="FULLSCREEN_DIALOG" topLevel="true" parent="StoreFrame" inherits="GoldBorderFrameTemplate" hidden="true">
+			<Size x="403" y="556" />
+			<Layers>
+				<Layer level="BACKGROUND">
+					<Texture parentKey="ParchmentMiddle" file="Interface\Store\receipt-parchment-middle" horizTile="true">
+						<Size x="376" y="0" />
+						<Anchors>
+							<Anchor point="TOP" x="0" y="-14"/>
+							<Anchor point="BOTTOM" x="0" y="154"/>
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="BACKGROUND" textureSubLevel="1">
+					<Texture parentKey="AlphaLayer" alphaMode="ADD">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.ParchmentMiddle" x="0" y="-116"/>
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.ParchmentMiddle" x="0" y="62"/>
+						</Anchors>
+						<Color r="1" g="1" b="1" a="0.10" />
+					</Texture>
+				</Layer>
+				<Layer level="BORDER">
+					<Texture parentKey="BlueGlow" inherits="store-receipt-blueglow">
+						<Size x="376" y="134" />
+						<Anchors>
+							<Anchor point="BOTTOM" x="0" y="14" />
+						</Anchors>
+					</Texture>	
+					<Texture parentKey="ParchmentBottom" inherits="store-receipt-parchment-bottom">
+						<Anchors>
+							<Anchor point="BOTTOM" x="0" y="144" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="BORDER" textureSubLevel="1">
+					<Texture parentKey="ParchmentTop" inherits="store-receipt-parchment-top">
+						<Anchors>
+							<Anchor point="TOP" x="0" y="-14" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK">
+					<Texture inherits="store-receipt-line">
+						<Anchors>
+							<Anchor point="TOP" relativeKey="$parent.ParchmentMiddle" relativePoint="TOP" x="0" y="-116"/>
+						</Anchors>
+					</Texture>
+					<Texture inherits="store-receipt-line">
+						<Size x="350" y="3" />
+						<Anchors>
+							<Anchor point="BOTTOM" relativeKey="$parent.ParchmentMiddle" relativePoint="BOTTOM" x="0" y="60"/>
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="1">
+					<Texture parentKey="Icon">
+						<Size x="63" y="63" />
+						<Anchors>
+							<Anchor point="TOP" x="-120" y="-66" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="2">
+					<Texture parentKey="IconBorder" inherits="store-itemicon-border-receipt">
+						<Anchors>
+							<Anchor point="TOP" x="-120" y="-64" />
+						</Anchors>
+					</Texture>
+				</Layer>
+				<Layer level="ARTWORK" textureSubLevel="3">
+					<Texture parentKey="UpgradeArrow" inherits="store-icon-upgradearrow" hidden="true">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" relativeKey="$parent.IconBorder" relativePoint="BOTTOMRIGHT" x="-3" y="4"/>
+						</Anchors>
+					</Texture>
+					<FontString parentKey="ProductName" inherits="GameFontNormalLarge2" wordwrap="true" justifyH="LEFT">
+						<Size x="200" y="60" />
+						<Anchors>
+							<Anchor point="TOP" x="22" y="-67" />
+						</Anchors>
+					</FontString>
+					<FontString parentKey="Title" inherits="GameFontHighlight">
+						<Size x="150" y="20" />
+						<Anchors>
+							<Anchor point="TOP" x="0" y="-16" />
+						</Anchors>
+					</FontString>
+					<FontString parentKey="TotalLabel" inherits="GameFontBlackMedium">
+						<Anchors>
+							<Anchor point="BOTTOM" x="-115" y="174" />
+						</Anchors>
+					</FontString>
+					<FontString parentKey="Price" inherits="GameFontNormalShadowHuge2">
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" x="-50" y="174"/>
+						</Anchors>
+					</FontString>
+					<FontString parentKey="BrowseNotice" inherits="GameFontHighlightSmall2" justifyV="TOP">
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeKey="$parent.Price" relativePoint="BOTTOMRIGHT" x="0" y="-8" />
+						</Anchors>
+						<Color r="0" g="0" b="0"/>
+					</FontString>
+				</Layer>
+			</Layers>
+			<Frames>
+				<Frame parentKey="NoticeFrame">
+					<Size x="300" y="300" />
+					<Anchors>
+						<Anchor point="TOP" relativeKey="$parent.ParchmentMiddle" relativePoint="TOP" x="0" y="-246" />
+					</Anchors>
+					<Frames>
+						<SimpleHTML parentKey="Notice">
+							<Size x="260" y="240"/>
+							<Anchors>
+								<Anchor point="TOP"/>
+							</Anchors>
+							<Scripts>
+								<OnHyperlinkClick>
+									local linkType, index = (":"):split(link);
+									if ( linkType == "urlIndex" ) then
+										LoadURLIndex(tonumber(index));
+									end
+								</OnHyperlinkClick>
+							</Scripts>
+							<FontString inherits="GameFontBlackMedium" justifyH="LEFT" />
+						</SimpleHTML>
+					</Frames>
+				</Frame>
+				<Button parentKey="BuyButton" inherits="StoreGoldButtonTemplate" enableMouse="true">
+					<Size x="140" y="32" />
+					<Anchors>
+						<Anchor point="BOTTOM" relativePoint="BOTTOM" x="0" y="38" />
+					</Anchors>
+					<Scripts>
+						<OnClick function="StoreConfirmationFinalBuy_OnClick" />
+					</Scripts>
+				</Button>
+				<SimpleHTML parentKey="LicenseAcceptText">
+					<Size x="300" y="70" />
+					<Anchors>
+						<Anchor point="BOTTOM" x="0" y="50" />
+					</Anchors>
+					<Scripts>
+						<OnHyperlinkClick>
+							local linkType, index = (":"):split(link);
+							if ( linkType == "urlIndex" ) then
+								LoadURLIndex(tonumber(index));
+							end
+						</OnHyperlinkClick>
+					</Scripts>
+					<FontString inherits="GameFontNormalSmall" />
+				</SimpleHTML>
+				<CheckButton parentKey="LicenseAcceptButton" inherits="StoreCheckButtonTemplate">
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.LicenseAcceptText" relativePoint="TOPLEFT" x="-3" y="7" />
+					</Anchors>
+					<Scripts>
+						<OnClick>
+							PlaySound("UI_igStore_PageNav_Button");
+							self:GetParent().BuyButton:SetEnabled(self:GetChecked());
+						</OnClick>
+					</Scripts>
+				</CheckButton>
+			</Frames>
+			<Scripts>
+				<OnLoad function="StoreConfirmationFrame_OnLoad" />
+				<OnShow function="StoreConfirmationFrame_OnShow" />
+				<OnHide function="StoreConfirmationFrame_OnHide" />
+				<OnEvent function="StoreConfirmationFrame_OnEvent" />
+			</Scripts>
+		</Frame>
+		<Frame name="StoreTooltip" inherits="TooltipBorderedFrameTemplate" frameStrata="FULLSCREEN_DIALOG" topLevel="true" parent="StoreFrame" clampedToScreen="true" hidden="true">
+			<Size x="0" y="200" />
+			<Layers>
+				<Layer level="ARTWORK">
+					<FontString parentKey="ProductName" inherits="GameTooltipHeaderText" justifyH="LEFT">
+						<Size x="230" y="0"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" x="10" y="-10" />
+						</Anchors>
+					</FontString>
+					<FontString parentKey="Description" inherits="GameFontNormal" justifyH="LEFT">
+						<Size x="230" y="0"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.ProductName" relativePoint="BOTTOMLEFT" x="0" y="-10" />
+						</Anchors>
+					</FontString>
+				</Layer>
+			</Layers>
+			<Scripts>
+				<OnLoad function="StoreTooltip_OnLoad" />
+			</Scripts>
+		</Frame>
+	</ScopedModifier>
+</Ui>
