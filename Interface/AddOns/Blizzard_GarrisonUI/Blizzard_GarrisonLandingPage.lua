@@ -9,36 +9,46 @@ function GarrisonLandingPage_ToggleFrame()
 	end
 end
 
-function GarrisonMissionFrame_OnLoad(self)
+function GarrisonLandingPage_OnLoad(self)
 	
-	self.MissionList.listScroll.update = GarrisonLandingPageMissionList_Update;
-	HybridScrollFrame_CreateButtons(self.MissionList.listScroll, "GarrisonLandingPageMissionTemplate", 10, -10, nil, nil, nil, -6);
-	GarrisonLandingPageMissionList_Update();
+	self.List.listScroll.update = GarrisonLandingPageList_Update;
+	HybridScrollFrame_CreateButtons(self.List.listScroll, "GarrisonLandingPageMissionTemplate", 0, 0);
+	GarrisonLandingPageList_Update();
+	
+	self:RegisterEvent("GARRISON_SHOW_LANDING_PAGE");
+	self:RegisterEvent("GARRISON_HIDE_LANDING_PAGE");
+end
 
+function GarrisonLandingPage_OnEvent(self, event, ...)
+	if (event == "GARRISON_HIDE_LANDING_PAGE") then
+		GarrisonLandingPageMinimapButton:Hide();
+	elseif (event == "GARRISON_SHOW_LANDING_PAGE") then
+		GarrisonLandingPageMinimapButton:Show();
+	end
 end
 
 ---------------------------------------------------------------------------------
 --- Mission List                                                              ---
 ---------------------------------------------------------------------------------
 
-function GarrisonLandingPageMissionList_OnShow(self)
-	GarrisonLandingPageMissionList_UpdateMissions()
+function GarrisonLandingPageList_OnShow(self)
+	GarrisonLandingPageList_UpdateItems()
 end
 
-function GarrisonLandingPageMissionList_OnHide(self)
+function GarrisonLandingPageList_OnHide(self)
 	self.missions = nil;
 end
 
-function GarrisonLandingPageMissionList_UpdateMissions()
-	local self = GarrisonLandingPage.MissionList;
-	self.missions = C_Garrison.GetLandingPageMissions();
-	GarrisonLandingPageMissionList_Update();
+function GarrisonLandingPageList_UpdateItems()
+	local self = GarrisonLandingPage.List;
+	self.items = C_Garrison.GetLandingPageItems();
+	GarrisonLandingPageList_Update();
 end
 
-function GarrisonLandingPageMissionList_Update()
-	local missions = GarrisonLandingPage.MissionList.missions or {};
-	local numMissions = #missions;
-	local scrollFrame = GarrisonLandingPage.MissionList.listScroll;
+function GarrisonLandingPageList_Update()
+	local items = GarrisonLandingPage.List.items or {};
+	local numItems = #items;
+	local scrollFrame = GarrisonLandingPage.List.listScroll;
 	local offset = HybridScrollFrame_GetOffset(scrollFrame);
 	local buttons = scrollFrame.buttons;
 	local numButtons = #buttons;
@@ -46,18 +56,35 @@ function GarrisonLandingPageMissionList_Update()
 	for i = 1, numButtons do
 		local button = buttons[i];
 		local index = offset + i; -- adjust index
-		if ( index <= numMissions ) then
-			local mission = missions[index];
+		if ( index <= numItems ) then
+			local item = items[index];
 			button.id = index;
-			button.Title:SetText(mission.name);
-			button.TimeLeft:SetText(mission.timeLeft);
+			local bgName;
+			if (item.isBuilding) then
+				bgName = "GarrLanding-Building-";
+				button.Status:SetText(GARRISON_LANDING_STATUS_BUILDING);
+				button.MissionTypeIcon:Hide();
+			else
+				bgName = "GarrLanding-Mission-";
+				button.MissionTypeIcon:Show();
+			end
+			if (item.isComplete) then
+				bgName = bgName.."Complete";
+				button.Status:Hide();
+				button.TimeLeft:Hide();
+			else
+				bgName = bgName.."InProgress";
+			end
+			button.BG:SetAtlas(bgName, true);
+			button.Title:SetText(item.name);
+			button.TimeLeft:SetText(item.timeLeft);
 			button:Show();
 		else
 			button:Hide();
 		end
 	end
 	
-	local totalHeight = numMissions * scrollFrame.buttonHeight;
+	local totalHeight = numItems * scrollFrame.buttonHeight;
 	local displayedHeight = numButtons * scrollFrame.buttonHeight;
 	HybridScrollFrame_Update(scrollFrame, totalHeight, displayedHeight);
 end
