@@ -257,3 +257,85 @@ function GarrisonLandingPageList_Update()
 	HybridScrollFrame_Update(scrollFrame, totalHeight, displayedHeight);
 end
 
+function GarrisonLandingPageMission_OnClick(self, button)
+	if ( IsModifiedClick("CHATLINK") ) then
+		local items = GarrisonLandingPage.List.items or {};
+		if GarrisonLandingPage.selectedTab == GarrisonLandingPage.Available then
+			items = GarrisonLandingPage.List.AvailableItems or {};
+		end
+	
+		local item = items[self.id];
+
+		-- non mission entries have no link capability
+		if not item.missionID then
+			return;
+		end
+
+		local missionLink = C_Garrison.GetMissionLink(item.missionID);
+		if (missionLink) then
+			ChatEdit_InsertLink(missionLink);
+			return;
+		end
+	end
+end
+
+function GarrisonLandingPageMission_OnEnter(self, button)
+	GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT");
+	local items = GarrisonLandingPage.List.items or {};
+	if GarrisonLandingPage.selectedTab == GarrisonLandingPage.Available then
+	    items = GarrisonLandingPage.List.AvailableItems or {};
+	end
+	
+	local item = items[self.id];
+
+	-- building entries have no tooltip
+	if item.isBuilding then
+		return;
+	end
+	
+	--mission tooltips
+	GameTooltip:SetText(item.name);
+
+	if(GarrisonLandingPage.selectedTab == GarrisonLandingPage.InProgress) then
+		if(item.isComplete) then
+			GameTooltip:AddLine(COMPLETE, 1, 1, 1);
+		else
+			GameTooltip:AddLine(tostring(item.timeLeft), 1, 1, 1);
+		end
+
+		GameTooltip:AddLine(" ");
+
+		if item.followers ~= nil then
+			GameTooltip:AddLine(GARRISON_FOLLOWERS);
+			for i=1, #(item.followers) do
+				GameTooltip:AddLine(C_Garrison.GetFollowerName(item.followers[i]), 1, 1, 1);
+			end
+			GameTooltip:AddLine(" ");
+		end
+
+		GameTooltip:AddLine(REWARDS);
+		for id, reward in pairs(item.rewards) do
+			if (reward.quality) then
+				GameTooltip:AddLine(ITEM_QUALITY_COLORS[reward.quality + 1].hex..reward.title..FONT_COLOR_CODE_CLOSE);
+			elseif (reward.itemID) then 
+				local itemName, _, itemRarity, _, _, _, _, _, _, itemTexture = GetItemInfo(reward.itemID);
+				if itemName then
+					GameTooltip:AddLine(ITEM_QUALITY_COLORS[itemRarity].hex..itemName..FONT_COLOR_CODE_CLOSE);
+				end
+			elseif (reward.followerXP) then
+				GameTooltip:AddLine(reward.title, 1, 1, 1);
+			else
+				GameTooltip:AddLine(reward.title, 1, 1, 1);
+			end
+		end
+	else
+		GameTooltip:AddLine(string.format(GARRISON_MISSION_TOOLTIP_NUM_REQUIRED_FOLLOWERS, item.numFollowers), 1, 1, 1);
+		
+		if not C_Garrison.IsOnGarrisonMap() then
+			GameTooltip:AddLine(" ");
+			GameTooltip:AddLine(GARRISON_MISSION_TOOLTIP_RETURN_TO_START);
+		end
+	end
+
+	GameTooltip:Show();
+end
