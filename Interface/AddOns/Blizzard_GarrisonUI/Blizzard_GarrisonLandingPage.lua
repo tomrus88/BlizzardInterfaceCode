@@ -17,6 +17,10 @@ function GarrisonLandingPage_OnShow(self)
 	C_Garrison.RequestLandingPageShipmentInfo();
 end
 
+function GarrisonLandingPage_OnHide(self)
+	GarrisonLandingPage:SetScript("OnUpdate", nil);
+end
+
 function GarrisonLandingPage_OnEvent(self, event)
 	if ( event == "GARRISON_LANDINGPAGE_SHIPMENTS" ) then
 		for i = 1, #self.Shipments do
@@ -42,6 +46,18 @@ function GarrisonLandingPage_OnEvent(self, event)
 				shipment:Hide();
 			end
 		end
+	end
+end
+
+function GarrisonLandingPage_OnUpdate()
+	if( GarrisonLandingPage.List.items and #GarrisonLandingPage.List.items > 0 )then
+		GarrisonLandingPage.List.items = C_Garrison.GetLandingPageItems(true); -- don't sort entries again
+	else
+		GarrisonLandingPage.List.items = C_Garrison.GetLandingPageItems();
+	end
+	
+	if( GarrisonLandingPageList_Update() ) then
+		GarrisonLandingPage:SetScript("OnUpdate", nil);
 	end
 end
 
@@ -112,8 +128,10 @@ function GarrisonLandingPageList_UpdateItems()
 	GarrisonLandingPage.Available.Text:SetFormattedText(GARRISON_LANDING_AVAILABLE, #GarrisonLandingPage.List.AvailableItems);
 	if ( GarrisonLandingPage.selectedTab == GarrisonLandingPage.InProgress ) then
 		GarrisonLandingPageList_Update();
+		GarrisonLandingPage:SetScript("OnUpdate", GarrisonLandingPage_OnUpdate);
 	else
 		GarrisonLandingPageList_UpdateAvailable();
+		GarrisonLandingPage:SetScript("OnUpdate", nil);
 	end
 end
 
@@ -204,6 +222,8 @@ function GarrisonLandingPageList_Update()
 	local buttons = scrollFrame.buttons;
 	local numButtons = #buttons;
 
+	local stopUpdate = true;
+	
 	for i = 1, numButtons do
 		local button = buttons[i];
 		local index = offset + i; -- adjust index
@@ -229,6 +249,8 @@ function GarrisonLandingPageList_Update()
 				else
 					button.MissionType:SetText(item.type);
 				end
+				button.TimeLeft:SetText(item.timeLeft);
+				stopUpdate = false;
 			end
 
 			button.MissionTypeIcon:SetShown(not item.isBuilding);
@@ -237,7 +259,6 @@ function GarrisonLandingPageList_Update()
 
 			button.BG:SetAtlas(bgName, true);
 			button.Title:SetText(item.name);
-			button.TimeLeft:SetText(item.timeLeft);
 			button.Cost:Hide();
 			button.CostLabel:Hide();
 			button.MaterialIcon:Hide();
@@ -255,6 +276,8 @@ function GarrisonLandingPageList_Update()
 	local totalHeight = numItems * scrollFrame.buttonHeight;
 	local displayedHeight = numButtons * scrollFrame.buttonHeight;
 	HybridScrollFrame_Update(scrollFrame, totalHeight, displayedHeight);
+	
+	return stopUpdate;
 end
 
 function GarrisonLandingPageMission_OnClick(self, button)
