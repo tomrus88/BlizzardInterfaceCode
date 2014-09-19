@@ -1676,6 +1676,8 @@ function Class_QuestCompleteOpenMap:OnBegin(questData)
 		self:Interrupt(Tutorials.UseHearthstone);
 	end
 
+	self.QuestData = questData;
+
 	-- Kill the loot corpse tutorial if it's up.
 	Tutorials.LootCorpse:Interrupt(self);
 
@@ -1689,7 +1691,12 @@ function Class_QuestCompleteOpenMap:OnBegin(questData)
 	end
 
 	self:ShowScreenTutorial(prompt);
-	Dispatcher:RegisterScript(WorldMapFrame, "OnShow", function() self:Complete(questData) end, true);
+	Dispatcher:RegisterScript(WorldMapFrame, "OnShow", self);
+end
+
+-- This is not inlined because it needs to be unregistered if the tutorial gets interrupted.
+function Class_QuestCompleteOpenMap:OnShow()
+	self:Complete(self.QuestData);
 end
 
 function Class_QuestCompleteOpenMap:OnComplete(questData)

@@ -311,6 +311,7 @@ function GarrisonLandingPageReportList_UpdateAvailable()
 					local _, _, _, _, _, _, _, _, _, itemTexture = GetItemInfo(reward.itemID);
 					Reward.Icon:SetTexture(itemTexture);
 				else
+					Reward.itemID = nil;
 					Reward.Icon:SetTexture(reward.icon);
 					Reward.title = reward.title
 					if (reward.currencyID and reward.quantity) then

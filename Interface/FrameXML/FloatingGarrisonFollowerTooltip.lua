@@ -56,7 +56,7 @@ function GarrisonFollowerTooltipTemplate_SetGarrisonFollower(tooltipFrame, data)
 	tooltipFrame.Portrait.LevelBorder:SetVertexColor(color.r, color.g, color.b);
 	tooltipFrame.Portrait.PortraitRingQuality:SetVertexColor(color.r, color.g, color.b);
 	if ( data.spec ) then
-		local classSpecName = C_Garrison.GetFollowerClassSpecName(data.spec);
+		local classSpecName = C_Garrison.GetFollowerClassSpecName(data.garrisonFollowerID);
 		tooltipFrame.ClassSpecName:SetText(classSpecName);
 		local classSpecAtlas = C_Garrison.GetFollowerClassSpecAtlas(data.spec);
 		if ( classSpecAtlas ) then

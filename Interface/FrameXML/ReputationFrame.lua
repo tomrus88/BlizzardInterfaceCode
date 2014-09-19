@@ -53,17 +53,20 @@ function ReputationFrame_SetRowType(factionRow, isChild, isHeader, hasRep)	--row
 	factionRightTexture:SetWidth(42);
 	factionBar:SetPoint("RIGHT", factionRow, "RIGHT", 0, 0);
 	if ( isHeader ) then
-		if ( isChild ) then
+		if (isChild) then
 			factionRow:SetPoint("LEFT", ReputationFrame, "LEFT", 29, 0);
-			factionTitle:SetWidth(150);
 		else
 			factionRow:SetPoint("LEFT", ReputationFrame, "LEFT", 10, 0);
-			factionTitle:SetWidth(160);
 		end
-
 		factionButton:SetPoint("LEFT", factionRow, "LEFT", 3, 0);
 		factionButton:Show();
-		factionTitle:SetPoint("LEFT",factionButton,"RIGHT",10,0);
+		factionTitle:SetPoint("LEFT",factionButton,"RIGHT", 10, 0);
+		if (hasRep) then 
+			factionTitle:SetPoint("RIGHT", factionBar, "LEFT", -3, 0);
+		else
+			factionTitle:SetPoint("RIGHT", factionBar, "RIGHT", -3, 0);
+		end
+
 		factionTitle:SetFontObject(GameFontNormalLeft);
 		factionBackground:Hide()	
 		factionLeftTexture:SetHeight(15);

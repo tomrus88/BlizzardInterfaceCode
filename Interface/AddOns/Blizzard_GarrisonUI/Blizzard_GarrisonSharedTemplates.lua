@@ -814,7 +814,13 @@ function Garrison_SortMissions(missionsList)
 		if ( mission1.level ~= mission2.level ) then
 			return mission1.level > mission2.level;
 		end
-		
+
+		if ( mission1.level == GARRISON_FOLLOWER_MAX_LEVEL ) then	-- mission 2 level is same as 1's at this point
+			if ( mission1.iLevel ~= mission2.iLevel ) then
+				return mission1.iLevel > mission2.iLevel;
+			end		
+		end
+
 		if ( mission1.durationSeconds ~= mission2.durationSeconds ) then
 			return mission1.durationSeconds < mission2.durationSeconds;
 		end

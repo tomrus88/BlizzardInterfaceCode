@@ -882,11 +882,13 @@ function GarrisonMissionPage_ShowMission(missionInfo)
 end
 
 function GarrisonMissionPage_UpdateMissionForParty()
-	local totalTimeString, isMissionTimeImproved, successChance, partyBuffs, isEnvMechanicCountered, xpBonus = C_Garrison.GetPartyMissionInfo(MISSION_PAGE_FRAME.missionInfo.missionID);
+	local totalTimeString, totalTimeSeconds, isMissionTimeImproved, successChance, partyBuffs, isEnvMechanicCountered, xpBonus = C_Garrison.GetPartyMissionInfo(MISSION_PAGE_FRAME.missionInfo.missionID);
 
 	-- TIME
 	if ( isMissionTimeImproved ) then
 		totalTimeString = GREEN_FONT_COLOR_CODE..totalTimeString..FONT_COLOR_CODE_CLOSE;
+	elseif ( totalTimeSeconds >= GARRISON_LONG_MISSION_TIME ) then
+		totalTimeString = format(GARRISON_LONG_MISSION_TIME_FORMAT, totalTimeString);
 	end
 	MISSION_PAGE_FRAME.Stage.MissionTime:SetFormattedText(GARRISON_MISSION_TIME_TOTAL, totalTimeString);
 

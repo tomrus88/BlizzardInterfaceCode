@@ -308,7 +308,7 @@ function WorldMapFrame_OnShow(self)
 	end
 
 	-- check to show the help plate
-	if ( UnitLevel("player") >= 7 and not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_WORLD_MAP_FRAME) ) then
+	if ( (not NewPlayerExperience or not NewPlayerExperience.IsActive) and not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_WORLD_MAP_FRAME) ) then
 		local helpPlate = WorldMapFrame_HelpPlate;
 		if ( helpPlate and not HelpPlate_IsShowing(helpPlate) ) then
 			WorldMapFrame_ToggleTutorial();

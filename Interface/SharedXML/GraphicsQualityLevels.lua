@@ -566,13 +566,13 @@ VideoData["Display_AntiAliasingDropDown"]={
 		[2] = {
 			text = ANTIALIASING_FXAA_LOW,
 			cvars =	{
-				ffxAntiAliasingMode = 2,
+				ffxAntiAliasingMode = 1,
 			},
 		},
 		[3] = {
 			text = ANTIALIASING_FXAA_HIGH,
 			cvars =	{
-				ffxAntiAliasingMode = 1,
+				ffxAntiAliasingMode = 2,
 			},
 		},
 		[4] = {
@@ -592,13 +592,13 @@ VideoData["Display_AntiAliasingDropDown"]={
 		[2] = {
 			text = ANTIALIASING_FXAA_LOW,
 			cvars =	{
-				ffxAntiAliasingMode = 2,
+				ffxAntiAliasingMode = 1,
 			},
 		},
 		[3] = {
 			text = ANTIALIASING_FXAA_HIGH,
 			cvars =	{
-				ffxAntiAliasingMode = 1,
+				ffxAntiAliasingMode = 2,
 			},
 		},
 	},

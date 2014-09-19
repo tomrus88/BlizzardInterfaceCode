@@ -204,6 +204,7 @@ function GarrisonBuildingFrame_OnEvent(self, event, ...)
 			GarrisonPlot_UpdateBuilding(plotID);
 		end
 	elseif (event == "GARRISON_BUILDING_PLACED") then
+		GarrisonBuildingFrame_UpdateGarrisonInfo(self);
 		local plotID, newPlacement = ...;
 		local id, name, texPrefix, icon, rank, isBuilding, timeStart, buildTime, canActivate, canUpgrade, isPrebuilt = C_Garrison.GetOwnedBuildingInfoAbbrev(plotID);
 		if (id) then
@@ -585,6 +586,8 @@ function GarrisonBuildingInfoBox_ShowBuilding(ID, owned, showLock)
 	else
 		id, name, texPrefix, icon, description, rank, currencyID, currencyQty, goldQty, buildTime, needsPlan, isPrebuilt, possSpecs, upgrades, canUpgrade, isMaxLevel, hasFollowerSlot = C_Garrison.GetBuildingInfo(ID);
 	end
+	-- currencyID, currencyQty, and goldQty from above are the cost of the building's current level, which we do not display. What we do display is the cost of the next level.
+	_, _, _, _, _, currencyID, currencyQty, goldQty = C_Garrison.GetBuildingUpgradeInfo(id);
 	infoBox.canActivate = canActivate;
 	if (name == nil) then
 		return;
@@ -701,11 +704,6 @@ function GarrisonBuildingInfoBox_ShowBuilding(ID, owned, showLock)
 		infoBox.Building:SetDesaturated(false);
 	end
 	
-	-- Show the cost to upgrade the building if it can be upgraded.
-	local _;
-	if (owned and canUpgrade) then
-		_, _, _, _, _, currencyID, currencyQty, goldQty = C_Garrison.GetBuildingUpgradeInfo(id);
-	end
 	if (not isBuilding and not canActivate and currencyID and not showLock) then
 		infoBox.UpgradeCostBar.CostAmountMaterial:SetText(Garrison_GetMaterialCostString(currencyQty));
 		infoBox.UpgradeCostBar.CostAmountGold:SetText(Garrison_GetGoldCostString(goldQty));

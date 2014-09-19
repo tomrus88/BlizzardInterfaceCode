@@ -388,6 +388,8 @@ function GarrisonRecruitSelectFrame_OnHide(self)
 	self:UnregisterEvent("GARRISON_RECRUITMENT_NPC_CLOSED");
 	C_Garrison.CloseRecruitmentNPC();
 	StaticPopup_Hide("CONFIRM_RECRUIT_FOLLOWER");
+	StaticPopup_Hide("DEACTIVATE_FOLLOWER");
+	StaticPopup_Hide("ACTIVATE_FOLLOWER");
 end
 
 function GarrisonRecruiterFrame_HireRecruit(self)

@@ -168,7 +168,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Cooldown parentKey="Swipe" reverse="true">
+			<Cooldown parentKey="Swipe" reverse="true" hideCountdownNumbers="true">
 				<Size x="64" y="64"/>
 				<Anchors>
 					<Anchor point="CENTER"/>
