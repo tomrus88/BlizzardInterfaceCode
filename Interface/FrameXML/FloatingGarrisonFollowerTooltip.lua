@@ -122,6 +122,16 @@ function GarrisonFollowerTooltipTemplate_SetGarrisonFollower(tooltipFrame, data)
 	local tooltipFrameHeight = tooltipFrameHeightBase;
 	tooltipFrame:SetSize(260, tooltipFrameHeight);
 
+	if ( ENABLE_COLORBLIND_MODE == "1" ) then
+		tooltipFrame.Quality:SetText(_G["ITEM_QUALITY"..data.quality.."_DESC"]);
+		tooltipFrame.Quality:Show();
+		tooltipFrame.AbilitiesLabel:SetPoint("TOPLEFT", 15, -90);
+		tooltipFrameHeight = tooltipFrameHeight + 5;
+	else
+		tooltipFrame.Quality:Hide();
+		tooltipFrame.AbilitiesLabel:SetPoint("TOPLEFT", 15, -85);
+	end	
+	
 	if abilityCount > 0 then 
 		tooltipFrameHeight = tooltipFrameHeight + tooltipFrame.AbilitiesLabel:GetHeight() + abilityOffset;
 		tooltipFrame.AbilitiesLabel:Show();

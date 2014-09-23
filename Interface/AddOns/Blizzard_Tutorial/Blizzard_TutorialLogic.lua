@@ -2024,8 +2024,9 @@ end
 function Class_AbilityUse_Watcher:OnUpdate(elapsed)
 	self.CombatTimeWithNoAbility = self.CombatTimeWithNoAbility + elapsed;
 
-	if ((self.CombatTimeWithNoAbility >= 20) and (not Tutorials.AbilityUse_AbilityReminder.IsActive)) then
+	if (self.CombatTimeWithNoAbility >= 20) then
 		Tutorials.AbilityUse_AbilityReminder:Begin();
+		Dispatcher:UnregisterEvent("OnUpdate", self);
 	end
 end
 

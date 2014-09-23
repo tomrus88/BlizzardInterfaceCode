@@ -1839,6 +1839,7 @@ VideoData["Advanced_StereoEnabled"]={
 
 VideoData["Advanced_ShowHDModels"]={
 	name = SHOW_HD_MODELS_TEXT;
+	tooltip = OPTION_TOOLTIP_SHOW_HD_MODELS,
 }
 
 -------------------------------------------------------------------------------------------------------
