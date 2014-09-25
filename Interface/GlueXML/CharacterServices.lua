@@ -59,31 +59,6 @@ local UPGRADE_MAX_LEVEL = 90;
 local UPGRADE_BONUS_LEVEL = 60;
 
 CURRENCY_KRW = 3;
-CURRENCY_CPT = 14;
-CURRENCY_TPT = 15;
-
-local freeTokenTooltips = {
-	[-1] = {
-		["title"] = CHARACTER_UPGRADE_WOD_TOKEN_TITLE,
-		["description"] = CHARACTER_UPGRADE_WOD_TOKEN_DESCRIPTION,
-		["showPopup"] = true,
-	},
-	[CURRENCY_KRW] = {
-		["title"] = CHARACTER_UPGRADE_WOD_TOKEN_TITLE_KRW,
-		["description"] = CHARACTER_UPGRADE_WOD_TOKEN_DESCRIPTION_KRW,
-		["showPopup"] = false,
-	},
-	[CURRENCY_CPT] = {
-		["title"] = CHARACTER_UPGRADE_WOD_TOKEN_TITLE_CPT,
-		["description"] = CHARACTER_UPGRADE_WOD_TOKEN_DESCRIPTION_CPT,
-		["showPopup"] = false,
-	},
-	[CURRENCY_TPT] = {
-		["title"] = CHARACTER_UPGRADE_WOD_TOKEN_TITLE_TPT,
-		["description"] = CHARACTER_UPGRADE_WOD_TOKEN_DESCRIPTION_TPT,
-		["showPopup"] = false,
-	},
-};
 
 local RAID_CLASS_COLORS = {
 	["HUNTER"] = { r = 0.67, g = 0.83, b = 0.45, colorStr = "ffabd473" },
@@ -211,10 +186,7 @@ function CharacterServicesMaster_UpdateServiceButton()
 	if (C_SharedCharacterServices.HasFreeDistribution()) then
 		hasFree = true;
 		local currencyID = C_PurchaseAPI.GetCurrencyID();
-		local shouldShow = true;
-		if (freeTokenTooltips[currencyID]) then
-			shouldShow = freeTokenTooltips[currencyID].showPopup;
-		end
+		local shouldShow = not select(2, C_SharedCharacterServices.HasFreeDistribution());
 		if (not C_SharedCharacterServices.HasSeenPopup() and shouldShow) then
 			showPopup = true;
 		end
@@ -460,14 +432,13 @@ function CharacterServicesMasterFinishButton_OnClick(self)
 end
 
 function CharacterServicesTokenWoDFree_OnEnter(self)
-	local currencyID = C_PurchaseAPI.GetCurrencyID();
 	local title, desc;
-	if (freeTokenTooltips[currencyID]) then
-		title = freeTokenTooltips[currencyID].title;
-		desc = freeTokenTooltips[currencyID].description;
+	if (select(2, C_SharedCharacterServices.HasFreeDistribution())) then
+		title = CHARACTER_UPGRADE_WOD_TOKEN_TITLE_ASIA;
+		desc = CHARACTER_UPGRADE_WOD_TOKEN_DESCRIPTION_ASIA;
 	else
-		title = freeTokenTooltips[-1].title;
-		desc = freeTokenTooltips[-1].description;
+		title = CHARACTER_UPGRADE_WOD_TOKEN_TITLE;
+		desc = CHARACTER_UPGRADE_WOD_TOKEN_DESCRIPTION;
 	end
 	self.Highlight:Show();
 	GlueTooltip:SetOwner(self, "ANCHOR_LEFT");

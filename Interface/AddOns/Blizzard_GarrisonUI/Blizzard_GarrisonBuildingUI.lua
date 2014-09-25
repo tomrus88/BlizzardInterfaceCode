@@ -1381,13 +1381,8 @@ function GarrisonPlot_OnReceiveDrag(self)
 	end
 	-- If this was dragged from another plot, swap the buildings
 	if (GarrisonBuildingPlacer.fromExistingBuilding) then
-		if (self.buildingID) then
-			C_Garrison.SwapBuildings(GarrisonBuildingPlacer.info.plotID, self.plotID);
-			GarrisonBuildingPlacer_Clear();
-		else
-			UIErrorsFrame:AddMessage(ERR_GARRISON_CANNOT_MOVE_BUILDING, 1.0, 0.1, 0.1, 1.0);
-			PlaySound("UI_Garrison_ArchitectTable_BuildingPlacementError");
-		end
+		C_Garrison.SwapBuildings(GarrisonBuildingPlacer.info.plotID, self.plotID);
+		GarrisonBuildingPlacer_Clear();
 		return;
 	end
 	

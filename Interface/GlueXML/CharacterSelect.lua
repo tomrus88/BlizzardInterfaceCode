@@ -384,6 +384,7 @@ function CharacterSelect_OnEvent(self, event, ...)
 		end
 
 		UpdateCharacterList();
+		UpdateAddonButton(true);
 		CharSelectCharacterName:SetText(GetCharacterInfo(GetCharIDFromIndex(self.selectedIndex)));
 		if (IsBlizzCon()) then
 			if (BLIZZCON_IS_A_GO) then

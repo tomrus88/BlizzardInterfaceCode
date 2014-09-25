@@ -193,6 +193,11 @@ function GarrisonMissionFrame_OnEvent(self, event, ...)
 	if (event == "GARRISON_MISSION_LIST_UPDATE") then
 		GarrisonMissionList_UpdateMissions();
 	elseif (event == "GARRISON_FOLLOWER_LIST_UPDATE" or event == "GARRISON_FOLLOWER_XP_CHANGED" or event == "GARRISON_FOLLOWER_REMOVED") then
+		-- follower could have leveled at mission page, need to recheck counters
+		if ( event == "GARRISON_FOLLOWER_XP_CHANGED" and MISSION_PAGE_FRAME:IsShown() and MISSION_PAGE_FRAME.missionInfo ) then
+			GarrisonMissionFrame.followerCounters = C_Garrison.GetBuffedFollowersForMission(MISSION_PAGE_FRAME.missionInfo.missionID);
+			GarrisonMissionFrame.followerTraits = C_Garrison.GetFollowersTraitsForMission(MISSION_PAGE_FRAME.missionInfo.missionID);	
+		end
 		GarrisonFollowerList_OnEvent(self, event, ...);
 	elseif (event == "CURRENCY_DISPLAY_UPDATE") then
 		GarrisonMissionFrame_UpdateCurrency();
@@ -742,8 +747,12 @@ function GarrisonMissionButton_AddThreatsToTooltip(missionID)
 	end
 	GarrisonMissionListTooltipThreatsFrame:SetWidth(24 + numThreats * 30);
 	GarrisonMissionListTooltipThreatsFrame:SetHeight(26);	-- minimum height
-	local usedHeight = GameTooltip_InsertFrame(GameTooltip, GarrisonMissionListTooltipThreatsFrame);
-	GarrisonMissionListTooltipThreatsFrame:SetHeight(usedHeight);
+	if ( numThreats > 0 ) then
+		local usedHeight = GameTooltip_InsertFrame(GameTooltip, GarrisonMissionListTooltipThreatsFrame);
+		GarrisonMissionListTooltipThreatsFrame:SetHeight(usedHeight);
+	else
+		GarrisonMissionListTooltipThreatsFrame:Hide();
+	end
 end
 
 function GarrisonMissionPageFollowerFrame_OnMouseUp(self, button)
@@ -1709,8 +1718,12 @@ function GarrisonMissionComplete_OnMissionComplete(self, missionID, succeeded)
 			else
 				self.currentMission.failedEncounter = 1;
 			end
+		end		
+		local animIndex = 0;		
+		if ( GarrisonMissionFrame.MissionComplete.Stage.EncountersFrame.numEncounters == 0 ) then
+			animIndex = GarrisonMissionComplete_FindAnimIndexFor(GarrisonMissionComplete_AnimRewards) - 1;
 		end
-		GarrisonMissionComplete_BeginAnims(self);
+		GarrisonMissionComplete_BeginAnims(self, animIndex);
 	end
 end
 
@@ -1897,7 +1910,8 @@ end
 
 function GarrisonMissionComplete_SetNumEncounters(numEncounters)
 	local self = GarrisonMissionFrame.MissionComplete.Stage.EncountersFrame;
-	
+	self.numEncounters = numEncounters;
+
 	for i = 1, 3 do
 		local encounter = self["Encounter"..i];
 		if ( i <= numEncounters ) then

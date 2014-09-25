@@ -2202,7 +2202,7 @@ function LFGListInviteDialog_Show(self, resultID)
 	self.DeclineButton:SetShown(not informational);
 	self.AcknowledgeButton:SetShown(informational);
 
-	if ( GroupHasOfflineMember(LE_PARTY_CATEGORY_HOME) ) then
+	if ( not informational and GroupHasOfflineMember(LE_PARTY_CATEGORY_HOME) ) then
 		self:SetHeight(250);
 		self.OfflineNotice:Show();
 		LFGListInviteDialog_UpdateOfflineNotice(self);
