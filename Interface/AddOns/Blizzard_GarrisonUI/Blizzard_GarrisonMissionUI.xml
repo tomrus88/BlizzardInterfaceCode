@@ -2882,6 +2882,7 @@
 												else
 													self:GetParent().Lock:Show();
 													self:GetParent().Lock:SetAlpha(1);
+													GarrisonMissionFrame.MissionComplete.NextMissionButton:SetEnabled(true);
 												end
 											</OnFinished>
 										</Scripts>

@@ -272,6 +272,16 @@ function AddonList_Update()
 		else
 			name, title, notes, loadable, reason, security = GetAddOnInfo(addonIndex);
 
+			local character = nil;
+			if (InGlue()) then
+				-- Get the character from the current list (nil is all characters)
+				character = UIDropDownMenu_GetSelectedValue(AddonCharacterDropDown);
+				if ( character == ALL ) then
+					character = nil;
+				end
+			else
+				character = UnitName("player");
+			end
 			checkbox = _G["AddonListEntry"..i.."Enabled"];
 			local checkboxState = GetAddOnEnableState(character, addonIndex);
 			enabled = (checkboxState > 0);
@@ -279,12 +289,6 @@ function AddonList_Update()
 			if (not InGlue()) then
 				checkbox:SetChecked(enabled);
 			else
-				-- Get the character from the current list (nil is all characters)
-				local character = UIDropDownMenu_GetSelectedValue(AddonCharacterDropDown);
-				if ( character == ALL ) then
-					character = nil;
-				end
-
 				TriStateCheckbox_SetState(checkboxState, checkbox);
 				if (checkboxState == 1 ) then
 					checkbox.AddonTooltip = ENABLED_FOR_SOME;

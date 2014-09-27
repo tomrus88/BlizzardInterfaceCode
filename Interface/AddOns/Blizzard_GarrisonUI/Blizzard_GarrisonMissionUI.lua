@@ -1642,7 +1642,7 @@ end
 
 function GarrisonMissionComplete_OnLoad(self)
 	self:RegisterEvent("GARRISON_FOLLOWER_XP_CHANGED");
-	self:RegisterEvent("GARRISON_MISSION_COMPLETED");
+	self:RegisterEvent("GARRISON_MISSION_COMPLETE_RESPONSE");
 	self.pendingXPAwards = { };
 	self:SetFrameLevel(GarrisonMissionFrame.MissionCompleteBackground:GetFrameLevel() + 2);
 end
@@ -1650,8 +1650,8 @@ end
 function GarrisonMissionComplete_OnEvent(self, event, ...)
 	if (event == "GARRISON_FOLLOWER_XP_CHANGED" and self:IsVisible()) then
 		GarrisonMissionComplete_AnimFollowerXP(...);
-	elseif ( event == "GARRISON_MISSION_COMPLETED" ) then
-		GarrisonMissionComplete_OnMissionComplete(self, ...);
+	elseif ( event == "GARRISON_MISSION_COMPLETE_RESPONSE" ) then
+		GarrisonMissionComplete_OnMissionCompleteResponse(self, ...);
 	end
 end
 
@@ -1695,40 +1695,45 @@ GARRISON_MISSION_CHEST_MODELS = {
 	{[PLAYER_FACTION_GROUP[0]] = 54913, [PLAYER_FACTION_GROUP[1]] = 54912},
 }
 
-function GarrisonMissionComplete_OnMissionComplete(self, missionID, succeeded)
+function GarrisonMissionComplete_OnMissionCompleteResponse(self, missionID, canComplete, succeeded)
 	if ( self.currentMission and self.currentMission.missionID == missionID ) then
-		self.currentMission.succeeded = succeeded;
-		if ( succeeded ) then
-			self.currentMission.failedEncounter = nil;
-		else
-			-- pick an encounter to fail
-			local uncounteredMechanics = self.Stage.EncountersFrame.uncounteredMechanics;
-			local failedEncounters = { };
-			for i = 1, #uncounteredMechanics do
-				if ( #uncounteredMechanics[i] > 0 ) then
-					tinsert(failedEncounters, i);
-				end
-			end
-			-- It's possible that there are no encounters with uncountered mechanics on a failed mission because of lower-level followers
-			if ( #failedEncounters > 0 ) then
-				local rnd = random(1, #failedEncounters);
-				self.currentMission.failedEncounter = failedEncounters[rnd];
-			elseif ( #self.animInfo ) then
-				self.currentMission.failedEncounter = random(1, #self.animInfo);
+		GarrisonMissionFrame.MissionComplete.NextMissionButton:Enable();
+		if ( canComplete ) then
+			self.currentMission.succeeded = succeeded;
+			if ( succeeded ) then
+				self.currentMission.failedEncounter = nil;
 			else
-				self.currentMission.failedEncounter = 1;
+				-- pick an encounter to fail
+				local uncounteredMechanics = self.Stage.EncountersFrame.uncounteredMechanics;
+				local failedEncounters = { };
+				for i = 1, #uncounteredMechanics do
+					if ( #uncounteredMechanics[i] > 0 ) then
+						tinsert(failedEncounters, i);
+					end
+				end
+				-- It's possible that there are no encounters with uncountered mechanics on a failed mission because of lower-level followers
+				if ( #failedEncounters > 0 ) then
+					local rnd = random(1, #failedEncounters);
+					self.currentMission.failedEncounter = failedEncounters[rnd];
+				elseif ( #self.animInfo ) then
+					self.currentMission.failedEncounter = random(1, #self.animInfo);
+				else
+					self.currentMission.failedEncounter = 1;
+				end
+			end		
+			local animIndex = 0;		
+			if ( GarrisonMissionFrame.MissionComplete.Stage.EncountersFrame.numEncounters == 0 ) then
+				animIndex = GarrisonMissionComplete_FindAnimIndexFor(GarrisonMissionComplete_AnimRewards) - 1;
 			end
-		end		
-		local animIndex = 0;		
-		if ( GarrisonMissionFrame.MissionComplete.Stage.EncountersFrame.numEncounters == 0 ) then
-			animIndex = GarrisonMissionComplete_FindAnimIndexFor(GarrisonMissionComplete_AnimRewards) - 1;
+			GarrisonMissionComplete_BeginAnims(self, animIndex);
+			GarrisonMissionFrame.MissionComplete.NextMissionButton:Disable();
 		end
-		GarrisonMissionComplete_BeginAnims(self, animIndex);
 	end
 end
 
 function GarrisonMissionComplete_Initialize(missionList, index)
 	local self = GarrisonMissionFrame.MissionComplete;
+	self.NextMissionButton:Enable();
 	if (not missionList or #missionList == 0 or index == 0) then
 		GarrisonMissionFrame_HideCompleteMissions();
 		return;
@@ -1840,7 +1845,6 @@ function GarrisonMissionComplete_Initialize(missionList, index)
 
 	self.currentMission.materialMultiplier = select(8, C_Garrison.GetPartyMissionInfo(self.currentMission.missionID));
 
-	self.NextMissionButton:Disable();
 	self.BonusRewards.ChestModel.OpenAnim:Stop();
 	self.BonusRewards.ChestModel.LockBurstAnim:Stop();
 	self.BonusRewards.ChestModel:SetAlpha(1);
@@ -1882,6 +1886,7 @@ function GarrisonMissionComplete_Initialize(missionList, index)
 		PlaySound("UI_Garrison_Mission_Complete_Encounter_Chance");
 		C_Garrison.MarkMissionComplete(mission.missionID);
 	end
+	self.NextMissionButton:Disable();
 end
 
 function GarrisonMissionComplete_SetFollowerLevel(followerFrame, level, quality, currXP, maxXP)
@@ -1978,6 +1983,7 @@ function GarrisonMissionCompleteNextButton_OnClick(self)
 end
 
 function GarrisonMissionCompleteChest_OnMouseDown(self)
+	GarrisonMissionFrame.MissionComplete.NextMissionButton:Enable();
 	if ( C_Garrison.CanOpenMissionChest(GarrisonMissionFrame.MissionComplete.currentMission.missionID) ) then
 		-- hide the click frame
 		self:Hide();
@@ -1985,12 +1991,14 @@ function GarrisonMissionCompleteChest_OnMouseDown(self)
 		local bonusRewards = GarrisonMissionFrame.MissionComplete.BonusRewards;
 		bonusRewards.waitForEvent = true;
 		bonusRewards.waitForTimer = true;
+		bonusRewards.success = false;
 		bonusRewards:RegisterEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE");
 		bonusRewards.ChestModel:SetAnimation(154);
 		bonusRewards.ChestModel.OpenAnim:Play();
 		C_Timer.After(1.1, GarrisonMissionComplete_OnRewardTimer);
 		C_Garrison.MissionBonusRoll(GarrisonMissionFrame.MissionComplete.currentMission.missionID);
 		PlaySound("UI_Garrison_CommandTable_ChestUnlock_Gold_Success");
+		GarrisonMissionFrame.MissionComplete.NextMissionButton:Disable();
 	end
 end
 
@@ -2012,16 +2020,24 @@ function GarrisonMissionComplete_OnRewardTimer()
 	end
 end
 
-function GarrisonMissionComplete_OnRewardEvent(self)
-	self:UnregisterEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE");
-	self.waitForEvent = nil;
-	if ( not self.waitForTimer ) then
-		GarrisonMissionComplete_ShowRewards(self);
+function GarrisonMissionComplete_OnRewardEvent(self, event, ...)
+	local missionID, success = ...;
+	if ( GarrisonMissionFrame.MissionComplete.currentMission and GarrisonMissionFrame.MissionComplete.currentMission.missionID == missionID ) then
+		self:UnregisterEvent("GARRISON_MISSION_BONUS_ROLL_COMPLETE");
+		self.waitForEvent = nil;
+		self.success = success;
+		if ( not self.waitForTimer ) then
+			GarrisonMissionComplete_ShowRewards(self);
+		end
 	end
 end
 
 function GarrisonMissionComplete_ShowRewards(self)
 	GarrisonMissionFrame.MissionComplete.NextMissionButton:Enable();
+	if ( not self.success ) then
+		return;
+	end
+
 	local currentMission = GarrisonMissionFrame.MissionComplete.currentMission;
 
 	local numRewards = currentMission.numRewards;
@@ -2064,7 +2080,7 @@ GARRISON_ANIMATION_LENGTH = 1;
 function GarrisonMissionComplete_AnimLine(self, entry)
 	GarrisonMissionComplete_SetEncounterModels(self);
 	entry.duration = 0.5;
-	
+
 	local encountersFrame = self.Stage.EncountersFrame;
 	local mechanicsFrame = self.Stage.EncountersFrame.MechanicsFrame;
 	local numMechs = 0;
@@ -2281,6 +2297,8 @@ function GarrisonMissionComplete_AnimLockBurst(self, entry)
 	if ( self.currentMission.succeeded ) then
 		self.BonusRewards.ChestModel.LockBurstAnim:Play();
 		PlaySound("UI_Garrison_CommandTable_ChestUnlock");
+	else
+		self.NextMissionButton:Enable();
 	end
 end
 
@@ -2296,7 +2314,7 @@ local ANIMATION_CONTROL = {
 	[7] = { duration = 0.75,	onStartFunc = GarrisonMissionComplete_AnimRewards },				-- reward panel
 	[8] = { duration = 0,		onStartFunc = GarrisonMissionComplete_AnimLockBurst },				-- explode the lock if mission successful	
 	[9] = { duration = 0.5,		onStartFunc = GarrisonMissionComplete_AnimFollowersIn },			-- show all the mission followers
-	[10] = { duration = 0.1,	onStartFunc = GarrisonMissionComplete_AnimXP },						-- follower xp
+	[10] = { duration = 0,		onStartFunc = GarrisonMissionComplete_AnimXP },						-- follower xp
 };
 
 function GarrisonMissionComplete_FindAnimIndexFor(func)

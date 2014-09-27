@@ -278,12 +278,13 @@ function CharacterServicesMaster_OnCharacterListUpdate()
 		local num = math.min(GetNumCharacters(), MAX_CHARACTERS_DISPLAYED);
 
 		for i = 1, num do
-			if (select(14, GetCharacterInfo(GetCharIDFromIndex(i))) == guid) then
+			if (select(14, GetCharacterInfo(GetCharIDFromIndex(i + CHARACTER_LIST_OFFSET))) == guid) then
 				local button = _G["CharSelectCharacterButton"..i];
 				CharacterSelectButton_OnClick(button);
 				button.selection:Show();
 				C_CharacterServices.ApplyLevelUp();
 				UpdateCharacterSelection(CharacterSelect);
+				UpdateCharacterList(true);
 				break;
 			end
 		end

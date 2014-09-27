@@ -313,6 +313,10 @@ function CharacterSelect_OnUpdate(self, elapsed)
 			CharacterSelectButton_OnDragStart(self.pressDownButton);
 		end
 	end
+
+	if ( C_CharacterServices.HasQueuedUpgrade() ) then
+		CharacterServicesMaster_OnCharacterListUpdate();
+	end
 end
 
 function CharacterSelect_OnKeyDown(self,key)
@@ -900,7 +904,15 @@ function RealmSplit_SetChoiceText()
 end
 
 function CharacterSelect_PaidServiceOnClick(self, button, down, service)
-	PAID_SERVICE_CHARACTER_ID = GetCharIDFromIndex(self:GetID() + CHARACTER_LIST_OFFSET);
+	local translatedIndex =  GetCharIDFromIndex(self:GetID() + CHARACTER_LIST_OFFSET);
+	if (translatedIndex <= 0 or translatedIndex > GetNumCharacters()) then
+		-- Somehow our character order got borked, reset the offset and get an updated character list.
+		CHARACTER_LIST_OFFSET = 0;
+		GetCharacterListUpdate();
+		return;
+	end
+
+	PAID_SERVICE_CHARACTER_ID = translatedIndex;
 	PAID_SERVICE_TYPE = service;
 	PlaySound("gsCharacterSelectionCreateNew");
 	if (CharacterSelect.undeleting) then
