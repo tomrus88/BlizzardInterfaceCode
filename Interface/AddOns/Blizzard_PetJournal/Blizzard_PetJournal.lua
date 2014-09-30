@@ -2583,6 +2583,10 @@ function ToySpellButton_UpdateButton(self)
 
 	local itemID, toyName, icon = C_ToyBox.GetToyInfo(self.itemID);
 
+	if (itemID == nil) then
+		return;
+	end
+
 	if string.len(toyName) == 0 then
 		toyName = itemID;
 	end

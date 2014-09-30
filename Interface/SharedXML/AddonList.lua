@@ -512,6 +512,7 @@ function AddonList_DisableOutOfDate()
 			DisableAddOn(i);
 		end
 	end
+	SaveAddOns();
 end
 
 function AddonListCharacterDropDown_OnClick(self)

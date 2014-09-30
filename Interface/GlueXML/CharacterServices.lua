@@ -267,7 +267,10 @@ function CharacterServicesMaster_OnEvent(self, event, ...)
 end
 
 function CharacterServicesMaster_OnCharacterListUpdate()
-	if (CHARACTER_UPGRADE_CREATE_CHARACTER or C_CharacterServices.GetStartAutomatically()) then
+	if (CharacterServicesMaster.waitingForLevelUp) then
+		C_CharacterServices.ApplyLevelUp();
+		CharacterServicesMaster.waitingForLevelUp = false;
+	elseif (CHARACTER_UPGRADE_CREATE_CHARACTER or C_CharacterServices.GetStartAutomatically()) then
 		CharSelectServicesFlowFrame:Show();
 		CharacterServicesMaster_SetFlow(CharacterServicesMaster, CharacterUpgradeFlow);
 		CHARACTER_UPGRADE_CREATE_CHARACTER = false;
@@ -282,9 +285,9 @@ function CharacterServicesMaster_OnCharacterListUpdate()
 				local button = _G["CharSelectCharacterButton"..i];
 				CharacterSelectButton_OnClick(button);
 				button.selection:Show();
-				C_CharacterServices.ApplyLevelUp();
 				UpdateCharacterSelection(CharacterSelect);
-				UpdateCharacterList(true);
+				GetCharacterListUpdate();
+				CharacterServicesMaster.waitingForLevelUp = true;
 				break;
 			end
 		end
@@ -725,6 +728,7 @@ function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 		end
 	end
 
+	CharacterSelect_SaveCharacterOrder();
 	-- Set up the GlowBox around the show characters
 	self.frame.ControlsFrame.GlowBox:SetHeight(58 * num);
 	if (CharacterSelectCharacterFrame.scrollBar:IsShown()) then
