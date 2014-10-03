@@ -588,7 +588,7 @@ function GarrisonBuildingInfoBox_ShowBuilding(ID, owned, showLock)
 		id, name, texPrefix, icon, description, rank, currencyID, currencyQty, goldQty, buildTime, needsPlan, isPrebuilt, possSpecs, upgrades, canUpgrade, isMaxLevel, hasFollowerSlot = C_Garrison.GetBuildingInfo(ID);
 	end
 	-- currencyID, currencyQty, and goldQty from above are the cost of the building's current level, which we do not display. What we do display is the cost of the next level.
-	if ( id ) then
+	if ( id and owned ) then
 		_, _, _, _, _, currencyID, currencyQty, goldQty = C_Garrison.GetBuildingUpgradeInfo(id);
 	end
 	infoBox.canActivate = canActivate;
