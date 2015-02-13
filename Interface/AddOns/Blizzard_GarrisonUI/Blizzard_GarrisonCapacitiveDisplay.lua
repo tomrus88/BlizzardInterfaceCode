@@ -37,6 +37,11 @@ function GarrisonCapacitiveDisplayFrame_Update(self, success, maxShipments, plot
 			return;
 		end
 
+		if ( C_Garrison.IsOnShipmentQuestForNPC() ) then
+			maxShipments = 1;
+			self.maxShipments = 1;
+		end
+
 		local available = maxShipments - numPending;
 
 		self.available = available;

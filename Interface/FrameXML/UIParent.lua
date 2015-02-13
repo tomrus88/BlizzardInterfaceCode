@@ -380,6 +380,11 @@ function RaidFrame_LoadUI()
 	UIParentLoadAddOn("Blizzard_RaidUI");
 end
 
+function SocialFrame_LoadUI()
+	AchievementFrame_LoadUI();
+	UIParentLoadAddOn("Blizzard_SocialUI");
+end
+
 function TalentFrame_LoadUI()
 	UIParentLoadAddOn("Blizzard_TalentUI");
 end
@@ -1551,6 +1556,7 @@ function UIParent_OnEvent(self, event, ...)
 			if ( not CollectionsJournal ) then
 				CollectionsJournal_LoadUI();
 			end
+			HeirloomsJournal:SetFindClosestUpgradeablePage(isPendingHeirloomUpgrade);
 			ShowUIPanel(CollectionsJournal);
 			CollectionsJournal_SetTab(CollectionsJournal, 4);
 		end
