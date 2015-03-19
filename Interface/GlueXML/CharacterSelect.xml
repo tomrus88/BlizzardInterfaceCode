@@ -436,7 +436,7 @@
 							</OnEvent>
 							<OnClick>
 								if ( IsVeteranTrialAccount() ) then
-									ReactivateAccount();
+									SubscriptionRequestDialog_Open();
 								else
 									UpgradeAccount();
 								end

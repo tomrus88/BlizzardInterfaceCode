@@ -349,7 +349,7 @@ function CharacterSelect_OnKeyDown(self,key)
 			CharacterSelect_Exit();
 		end
 	elseif ( key == "ENTER" ) then
-		if (CharSelectServicesFlowFrame:IsShown() or CharacterSelect.undeleting) then
+		if (CharSelectServicesFlowFrame:IsShown() or CharacterSelect.undeleting or AccountReactivationInProgressDialog:IsShown()) then
 			return;
 		end
 		CharacterSelect_EnterWorld();
@@ -487,15 +487,13 @@ function CharacterSelect_OnEvent(self, event, ...)
 			CharacterSelect_CheckVeteranStatus();
 		end
 	elseif ( event == "TOKEN_CAN_VETERAN_BUY_UPDATE" ) then
-		CAN_BUY_RESULT_FOUND = true;
+		local result = ...;
+		CAN_BUY_RESULT_FOUND = result;
 		CharacterSelect_CheckVeteranStatus();
 	elseif ( event == "TOKEN_MARKET_PRICE_UPDATED" ) then
 		local result = ...;
-		-- TODO: Use lua enum
-		if (result == 1) then
-			MARKET_PRICE_UPDATED = true;
-			CharacterSelect_CheckVeteranStatus();
-		end
+		MARKET_PRICE_UPDATED = result;
+		CharacterSelect_CheckVeteranStatus();
 	end
 end
 
@@ -760,9 +758,6 @@ function CharacterSelectButton_OnClick(self)
 	local id = self:GetID() + CHARACTER_LIST_OFFSET;
 	if ( id ~= CharacterSelect.selectedIndex ) then
 		CharacterSelect_SelectCharacter(id);
-		if ( self.isVeteranLocked ) then
-			SubscriptionRequestDialog_Open();
-		end
 	end
 end
 
@@ -771,7 +766,7 @@ function CharacterSelectButton_OnDoubleClick(self)
 	if ( id ~= CharacterSelect.selectedIndex ) then
 		CharacterSelect_SelectCharacter(id);
 	end
-	if (not CharacterSelect.undeleting) then
+	if (not CharacterSelect.undeleting and not AccountReactivationInProgressDialog:IsShown()) then
 		CharacterSelect_EnterWorld();
 	end
 end
@@ -827,6 +822,7 @@ function CharacterSelect_SelectCharacter(index, noCreate)
 		local charID = GetCharIDFromIndex(index);
 		SelectCharacter(charID);
 
+		ReactivateAccountDialog_Open();
 		local backgroundFileName = GetSelectBackgroundModel(charID);
 		CharacterSelect.currentBGTag = SetBackgroundModel(CharacterSelectModel, backgroundFileName);
 	end
@@ -1218,10 +1214,6 @@ function GetIndexFromCharID(charID)
 	return 0;
 end
 
-VETERAN_FEATURE_1 = "Continue where you left off!"
-VETERAN_FEATURE_2 = "Reunite with your friends!"
-VETERAN_FEATURE_3 = "Revive your hero"
-
 ACCOUNT_UPGRADE_FEATURES = {
 	VETERAN = { [1] = { icon = "Interface\\Icons\\achievement_bg_returnxflags_def_wsg", text = VETERAN_FEATURE_1 },
 		  [2] = { icon = "Interface\\Icons\\achievement_reputation_01", text = VETERAN_FEATURE_2 },
@@ -1452,8 +1444,14 @@ function CharacterSelect_UpdateStoreButton()
 	end
 end
 
+GlueDialogTypes["TOKEN_GAME_TIME_OPTION_NOT_AVAILABLE"] = {
+	text = ACCOUNT_REACTIVATE_OPTION_UNAVAILABLE,
+	button1 = OKAY,
+	escapeHides = true,
+}
+
 function CharacterSelect_CheckVeteranStatus()
-	if (IsVeteranTrialAccount() and TOKEN_COUNT_UPDATED and (C_WowTokenGlue.GetTokenCount() > 0 or CAN_BUY_RESULT_FOUND and MARKET_PRICE_UPDATED)) then
+	if (IsVeteranTrialAccount() and TOKEN_COUNT_UPDATED and ((C_WowTokenGlue.GetTokenCount() > 0 or CAN_BUY_RESULT_FOUND) and MARKET_PRICE_UPDATED)) then
 		ReactivateAccountDialog_Open();
 	elseif (IsVeteranTrialAccount()) then
 		if (not TOKEN_COUNT_UPDATED) then
@@ -1472,21 +1470,25 @@ function CharacterSelect_UpdateButtonState()
 	local servicesEnabled = not CharSelectServicesFlowFrame:IsShown();
 	local undeleting = CharacterSelect.undeleting;
 	local undeleteEnabled, undeleteOnCooldown = GetCharacterUndeleteStatus();
+	local redemptionInProgress = AccountReactivationInProgressDialog:IsShown();
 
 	local boostInProgress = select(18,GetCharacterInfo(GetCharacterSelection()));
-	CharSelectEnterWorldButton:SetEnabled(servicesEnabled and not undeleting and not boostInProgress);
+	CharSelectEnterWorldButton:SetEnabled(servicesEnabled and not undeleting and not boostInProgress and not redemptionInProgress);
 	CharacterSelectBackButton:SetEnabled(servicesEnabled and not undeleting and not boostInProgress);
-	CharacterSelectDeleteButton:SetEnabled(servicesEnabled and not undeleting);
-	CharSelectChangeRealmButton:SetEnabled(servicesEnabled and not undeleting);
-	CharSelectUndeleteCharacterButton:SetEnabled(servicesEnabled and undeleteEnabled and not undeleteOnCooldown);
-	CharacterSelectAddonsButton:SetEnabled(servicesEnabled and not undeleting);
-	CopyCharacterButton:SetEnabled(servicesEnabled and not undeleting);
-	ActivateFactionChange:SetEnabled(servicesEnabled and not undeleting);
-	ActivateFactionChange.texture:SetDesaturated(not (servicesEnabled and not undeleting));
-	CharacterTemplatesFrame.CreateTemplateButton:SetEnabled(servicesEnabled and not undeleting);
-	CharacterSelectMenuButton:SetEnabled(servicesEnabled);
-	CharSelectCreateCharacterButton:SetEnabled(servicesEnabled);
-	StoreButton:SetEnabled(servicesEnabled and not undeleting);
+	CharacterSelectDeleteButton:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
+	CharSelectChangeRealmButton:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
+	CharSelectUndeleteCharacterButton:SetEnabled(servicesEnabled and undeleteEnabled and not undeleteOnCooldown and not redemptionInProgress);
+	CharacterSelectAddonsButton:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
+	CopyCharacterButton:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
+	ActivateFactionChange:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
+	ActivateFactionChange.texture:SetDesaturated(not (servicesEnabled and not undeleting and not redemptionInProgress));
+	CharacterTemplatesFrame.CreateTemplateButton:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
+	CharacterSelectMenuButton:SetEnabled(servicesEnabled and not redemptionInProgress);
+	CharSelectCreateCharacterButton:SetEnabled(servicesEnabled and not redemptionInProgress);
+	StoreButton:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
+	CharacterServicesTokenNormal:SetEnabled(not redemptionInProgress);
+	CharacterServicesTokenWoDFree:SetEnabled(not redemptionInProgress);
+	CharSelectAccountUpgradeButton:SetEnabled(not redemptionInProgress);
 end
 
 -- CHARACTER UNDELETE
