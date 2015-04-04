@@ -1055,7 +1055,7 @@ function BrowseWowTokenResults_OnEvent(self, event, ...)
 		if (result == LE_TOKEN_RESULT_ERROR_DISABLED) then
 			self.disabled = true;
 		end
-		BrowseWowTokenResults_Update();
+		BrowseWowTokenResults_Update(true);
 	elseif (event == "TOKEN_STATUS_CHANGED") then
 		self.disabled = not C_WowTokenPublic.GetCommerceSystemStatus();
 		AuctionWowToken_UpdateMarketPrice();
@@ -1112,14 +1112,16 @@ function BrowseWowTokenResults_OnEvent(self, event, ...)
 	end
 end
 
-function BrowseWowTokenResults_Update()
+function BrowseWowTokenResults_Update(skipPriceCheck)
 	if (AuctionFrameBrowse.selectedClass == TOKEN_FILTER_LABEL) then
 		if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_GAME_TIME_AUCTION_HOUSE) and C_WowTokenPublic.GetCommerceSystemStatus()) then
 			WowTokenGameTimeTutorial:Show();
 			SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_GAME_TIME_AUCTION_HOUSE, true);
 		end
 		BrowseWowTokenResults:Show();
-		AuctionWowToken_UpdateMarketPrice();
+		if (not skipPriceCheck) then
+			AuctionWowToken_UpdateMarketPrice();
+		end
 		BrowseBidButton:Hide();
 		BrowseBuyoutButton:Hide();
 		BrowseBidPrice:Hide();
