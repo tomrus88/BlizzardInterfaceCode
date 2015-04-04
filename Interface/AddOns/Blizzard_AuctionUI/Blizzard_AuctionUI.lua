@@ -800,25 +800,7 @@ function AuctionFrameFilter_OnClick(self, button)
 		AuctionFrameBrowse.selectedInvtype = nil;
 		AuctionFrameBrowse.selectedInvtypeIndex = nil;
 		if (AuctionFrameBrowse.selectedClass == TOKEN_FILTER_LABEL) then
-			if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_GAME_TIME_AUCTION_HOUSE) and C_WowTokenPublic.GetCommerceSystemStatus()) then
-				WowTokenGameTimeTutorial:Show();
-				SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_GAME_TIME_AUCTION_HOUSE, true);
-			end
-			BrowseWowTokenResults:Show();
-			AuctionWowToken_UpdateMarketPrice();
-			BrowseBidButton:Hide();
-			BrowseBuyoutButton:Hide();
-			BrowseBidPrice:Hide();
-			for i=1, NUM_BROWSE_TO_DISPLAY do
-				local button = _G["BrowseButton"..i];
-				button:Hide();
-			end
-			BrowseNoResultsText:Hide();
-			BrowseQualitySort:Hide();
-			BrowseLevelSort:Hide();
-			BrowseDurationSort:Hide();
-			BrowseHighBidderSort:Hide();
-			BrowseCurrentBidSort:Hide();
+			BrowseWowTokenResults_Update();
 		else
 			BrowseBidButton:Show();
 			BrowseBuyoutButton:Show();
@@ -1132,6 +1114,26 @@ end
 
 function BrowseWowTokenResults_Update()
 	if (AuctionFrameBrowse.selectedClass == TOKEN_FILTER_LABEL) then
+		if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_GAME_TIME_AUCTION_HOUSE) and C_WowTokenPublic.GetCommerceSystemStatus()) then
+			WowTokenGameTimeTutorial:Show();
+			SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_GAME_TIME_AUCTION_HOUSE, true);
+		end
+		BrowseWowTokenResults:Show();
+		AuctionWowToken_UpdateMarketPrice();
+		BrowseBidButton:Hide();
+		BrowseBuyoutButton:Hide();
+		BrowseBidPrice:Hide();
+		for i=1, NUM_BROWSE_TO_DISPLAY do
+			local button = _G["BrowseButton"..i];
+			button:Hide();
+		end
+		BrowseNoResultsText:Hide();
+		BrowseQualitySort:Hide();
+		BrowseLevelSort:Hide();
+		BrowseDurationSort:Hide();
+		BrowseHighBidderSort:Hide();
+		BrowseCurrentBidSort:Hide();
+		BrowseScrollFrameScrollBar:Hide();
 		local marketPrice;
 		if (WowToken_IsWowTokenAuctionDialogShown()) then
 			marketPrice = C_WowTokenPublic.GetGuaranteedPrice();

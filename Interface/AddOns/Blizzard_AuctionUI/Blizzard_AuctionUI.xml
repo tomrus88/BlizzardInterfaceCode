@@ -729,6 +729,7 @@
 						<Scripts>
 							<OnLoad function="BrowseWowTokenResults_OnLoad"/>
 							<OnEvent function="BrowseWowTokenResults_OnEvent"/>
+							<OnShow function="BrowseWowTokenResults_Update"/>
 						</Scripts>
 					</Frame>
 					<Button name="BrowseQualitySort" inherits="AuctionSortButtonTemplate" text="RARITY">
@@ -2302,6 +2303,7 @@
 				StaticPopup_Hide("CANCEL_AUCTION");
 				CloseSideDressUpFrame(self);
 				SetAuctionsTabShowing(false);
+				AuctionWowToken_CancelUpdateTicker();
 				CloseAuctionHouse();
 			</OnHide>
 		</Scripts>
