@@ -61,8 +61,7 @@ Import("SILVER_AMOUNT_TEXTURE_STRING");
 Import("COPPER_AMOUNT_SYMBOL");
 Import("COPPER_AMOUNT_TEXTURE");
 Import("COPPER_AMOUNT_TEXTURE_STRING");
-Import("SHORTDATE_ABBR");
-Import("SHORTDATE_ABBR_EU");
+Import("SHORTDATE");
 Import("AUCTION_TIME_LEFT1_DETAIL");
 Import("AUCTION_TIME_LEFT2_DETAIL");
 Import("AUCTION_TIME_LEFT3_DETAIL");
@@ -82,24 +81,10 @@ Import("MINUTES_ABBR");
 Import("LE_CONSUMABLE_TOKEN_REDEEM_FOR_SUB_AMOUNT_30_DAYS");
 Import("LE_CONSUMABLE_TOKEN_REDEEM_FOR_SUB_AMOUNT_2700_MINUTES");
 Import("LE_TOKEN_RESULT_SUCCESS");
+Import("LE_TOKEN_RESULT_ERROR_OTHER");
+Import("LE_TOKEN_RESULT_ERROR_DISABLED");
 
 RedeemIndex = nil;
-
--- From Blizzard_StoreUISecure.lua
-local CURRENCY_UNKNOWN = 0;
-local CURRENCY_USD = 1;
-local CURRENCY_GBP = 2;
-local CURRENCY_KRW = 3;
-local CURRENCY_EUR = 4;
-local CURRENCY_RUB = 5;
-local CURRENCY_ARS = 8;
-local CURRENCY_CLP = 9;
-local CURRENCY_MXN = 10;
-local CURRENCY_BRL = 11;
-local CURRENCY_AUD = 12;
-local CURRENCY_CPT = 14;
-local CURRENCY_TPT = 15;
-local CURRENCY_BETA = 16;
 
 function WowTokenRedemptionFrame_OnLoad(self)
 	RedeemIndex = select(3, C_WowTokenPublic.GetCommerceSystemStatus());
@@ -151,16 +136,6 @@ function GetTimeLeftMinuteString(minutes)
 	return str;
 end
 
-function GetDateFormatString()
-	local currencyID = C_PurchaseAPI.GetCurrencyID();
-
-	if (currencyID == CURRENCY_EUR or currencyID == CURRENCY_GBP or currencyID == CURRENCY_RUB) then
-		return SHORTDATE_ABBR_EU;
-	else
-		return SHORTDATE_ABBR;
-	end
-end
-
 function GetRedemptionString()
 	local isSub, remaining = C_WowTokenSecure.GetRedemptionInfo();
 
@@ -174,8 +149,7 @@ function GetRedemptionString()
 
 		local str = isSub and TOKEN_REDEEM_GAME_TIME_RENEWAL_FORMAT or TOKEN_REDEEM_GAME_TIME_EXPIRATION_FORMAT;
 
-		local dateFormat = GetDateFormatString();
-		return str:format(dateFormat:format(oldDate.day, oldDate.month, oldDate.year), dateFormat:format(newDate.day, newDate.month, newDate.year))
+		return str:format(SHORTDATE:format(oldDate.day, oldDate.month, oldDate.year), SHORTDATE:format(newDate.day, newDate.month, newDate.year))
 	elseif (RedeemIndex == LE_CONSUMABLE_TOKEN_REDEEM_FOR_SUB_AMOUNT_2700_MINUTES) then
 		return TOKEN_REDEEM_GAME_TIME_EXPIRATION_FORMAT_MINUTES:format(GetTimeLeftMinuteString(remaining), GetTimeLeftMinuteString(remaining + 2700));
 	end
@@ -183,6 +157,11 @@ end
 
 function WowTokenRedemptionFrame_OnEvent(self, event, ...)
 	if (event == "TOKEN_REDEEM_FRAME_SHOW") then
+		if (not C_WowTokenPublic.GetCommerceSystemStatus()) then
+			Outbound.RedeemFailed(LE_TOKEN_RESULT_ERROR_DISABLED);
+			C_WowTokenSecure.CancelRedeem();
+			return;
+		end
 		C_WowTokenPublic.UpdateTokenCount();
 		C_WowTokenSecure.GetRemainingGameTime();
 		self.Display.Format:Hide();

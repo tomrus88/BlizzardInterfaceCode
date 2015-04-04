@@ -231,6 +231,7 @@ function CharacterSelect_OnHide(self)
 	CharacterSelect_SaveCharacterOrder();
 	CharacterDeleteDialog:Hide();
 	CharacterRenameDialog:Hide();
+	AccountReactivate_CloseDialogs();
 	if ( DeclensionFrame ) then
 		DeclensionFrame:Hide();
 	end
@@ -822,6 +823,9 @@ function CharacterSelect_SelectCharacter(index, noCreate)
 		local charID = GetCharIDFromIndex(index);
 		SelectCharacter(charID);
 
+		if (not MARKET_PRICE_UPDATED or MARKET_PRICE_UPDATED == LE_TOKEN_RESULT_ERROR_DISABLED) then
+			AccountReactivate_RecheckEligibility();
+		end
 		ReactivateAccountDialog_Open();
 		local backgroundFileName = GetSelectBackgroundModel(charID);
 		CharacterSelect.currentBGTag = SetBackgroundModel(CharacterSelectModel, backgroundFileName);

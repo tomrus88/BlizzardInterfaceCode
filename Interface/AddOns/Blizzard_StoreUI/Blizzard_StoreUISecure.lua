@@ -174,6 +174,7 @@ Import("SILVER_AMOUNT_TEXTURE_STRING");
 Import("COPPER_AMOUNT_SYMBOL");
 Import("COPPER_AMOUNT_TEXTURE");
 Import("COPPER_AMOUNT_TEXTURE_STRING");
+Import("SPELL_FAILED_TOO_MANY_OF_ITEM");
 
 --Lua enums
 Import("LE_STORE_ERROR_INVALID_PAYMENT_METHOD");
@@ -186,6 +187,7 @@ Import("LE_STORE_ERROR_ALREADY_OWNED");
 Import("LE_STORE_ERROR_PARENTAL_CONTROLS_NO_PURCHASE");
 Import("LE_STORE_ERROR_PURCHASE_DENIED");
 Import("LE_STORE_ERROR_CONSUMABLE_TOKEN_OWNED");
+Import("LE_STORE_ERROR_TOO_MANY_TOKENS");
 Import("LE_TOKEN_RESULT_SUCCESS");
 Import("LE_CONSUMABLE_TOKEN_REDEEM_FOR_SUB_AMOUNT_30_DAYS");
 Import("LE_CONSUMABLE_TOKEN_REDEEM_FOR_SUB_AMOUNT_2700_MINUTES");
@@ -577,6 +579,10 @@ local errorData = {
 		title = BLIZZARD_STORE_ERROR_TITLE_CONSUMABLE_TOKEN_OWNED,
 		msg = BLIZZARD_STORE_ERROR_MESSAGE_CONSUMABLE_TOKEN_OWNED,
 	},
+	[LE_STORE_ERROR_TOO_MANY_TOKENS] = {
+		title = BLIZZARD_STORE_ERROR_TITLE_CONSUMABLE_TOKEN_OWNED,
+		msg = SPELL_FAILED_TOO_MANY_OF_ITEM,
+	},
 };
 
 local tooltipSides = {};
@@ -712,6 +718,14 @@ function StoreFrame_UpdateCard(card,entryID,discountReset)
 			card.CurrentPrice:SetPoint("TOPLEFT", card.Description, "BOTTOMLEFT", 0, -28);
 			card.NormalPrice:ClearAllPoints();
 			card.NormalPrice:SetPoint("TOPLEFT", card.Description, "BOTTOMLEFT", 0, -28);
+		end
+
+		if (discount) then
+			card.BuyButton:ClearAllPoints();
+			card.BuyButton:SetPoint("TOPLEFT", card.NormalPrice, "BOTTOMLEFT", 0, -20);
+		else
+			card.BuyButton:ClearAllPoints();
+			card.BuyButton:SetPoint("TOPLEFT", card.CurrentPrice, "BOTTOMLEFT", 0, -20);
 		end
 	end
 	

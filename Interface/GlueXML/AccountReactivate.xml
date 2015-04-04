@@ -51,11 +51,14 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button parentKey="Accept" inherits="GlueDialogButtonTemplate" text="ACCOUNT_REACTIVATE_ACCEPT">
+			<Button parentKey="Accept" inherits="GluePanelButtonTemplate" text="ACCOUNT_REACTIVATE_ACCEPT">
 				<Size x="320" y="48"/>
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.Description" relativePoint="BOTTOM" x="0" y="-4"/>
 				</Anchors>
+				<NormalFont style="GlueFontNormal"/>
+				<HighlightFont style="GlueFontHighlight"/>
+				<DisabledFont style="GlueFontDisable"/>
 				<Scripts>
 					<OnClick function="ReactivateAccountDialog_OnReactivate"/>
 				</Scripts>
@@ -345,5 +348,8 @@
 				</Scripts>
 			</Button>
 		</Frames>
+		<Scripts>
+			<OnHide function="AccountReactivate_RecheckEligibility"/>
+		</Scripts>
 	</Frame>
 </Ui>

@@ -800,7 +800,7 @@ function AuctionFrameFilter_OnClick(self, button)
 		AuctionFrameBrowse.selectedInvtype = nil;
 		AuctionFrameBrowse.selectedInvtypeIndex = nil;
 		if (AuctionFrameBrowse.selectedClass == TOKEN_FILTER_LABEL) then
-			if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_GAME_TIME_AUCTION_HOUSE)) then
+			if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_GAME_TIME_AUCTION_HOUSE) and C_WowTokenPublic.GetCommerceSystemStatus()) then
 				WowTokenGameTimeTutorial:Show();
 				SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_GAME_TIME_AUCTION_HOUSE, true);
 			end
@@ -1075,6 +1075,7 @@ function BrowseWowTokenResults_OnEvent(self, event, ...)
 		end
 		BrowseWowTokenResults_Update();
 	elseif (event == "TOKEN_STATUS_CHANGED") then
+		self.disabled = not C_WowTokenPublic.GetCommerceSystemStatus();
 		AuctionWowToken_UpdateMarketPrice();
 	elseif (event == "TOKEN_BUY_RESULT") then
 		local result = ...;
