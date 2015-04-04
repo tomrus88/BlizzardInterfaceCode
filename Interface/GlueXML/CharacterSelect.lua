@@ -350,7 +350,7 @@ function CharacterSelect_OnKeyDown(self,key)
 			CharacterSelect_Exit();
 		end
 	elseif ( key == "ENTER" ) then
-		if (CharSelectServicesFlowFrame:IsShown() or CharacterSelect.undeleting or AccountReactivationInProgressDialog:IsShown()) then
+		if (not CharacterSelect_AllowedToEnterWorld()) then
 			return;
 		end
 		CharacterSelect_EnterWorld();
@@ -601,13 +601,13 @@ function UpdateCharacterList(skipSelect)
 				_G["CharSelectCharacterButton"..index.."ButtonTextLocation"]:SetFontObject("GlueFontHighlightSmall");
 				_G["CharSelectCharacterButton"..index.."ButtonTextLocation"]:SetText(CHARACTER_UPGRADE_CHARACTER_LIST_LABEL);
 			else
-				if ( locked ) then
+				if ( CharacterSelect.undeleting ) then
+					_G["CharSelectCharacterButton"..index.."ButtonTextInfo"]:SetFormattedText(CHARACTER_SELECT_INFO_DELETED, level, class);
+				elseif ( locked ) then
 					_G["CharSelectCharacterButton"..index.."ButtonTextInfo"]:SetFormattedText(CHARACTER_SELECT_INFO..CHARSELECT_CHAR_INACTIVE_CHAR, level, class);
 					button.isVeteranLocked = true;
 				elseif( ghost ) then
 					_G["CharSelectCharacterButton"..index.."ButtonTextInfo"]:SetFormattedText(CHARACTER_SELECT_INFO_GHOST, level, class);
-				elseif ( CharacterSelect.undeleting ) then
-					_G["CharSelectCharacterButton"..index.."ButtonTextInfo"]:SetFormattedText(CHARACTER_SELECT_INFO_DELETED, level, class);
 				else
 					_G["CharSelectCharacterButton"..index.."ButtonTextInfo"]:SetFormattedText(CHARACTER_SELECT_INFO, level, class);
 				end
@@ -767,7 +767,7 @@ function CharacterSelectButton_OnDoubleClick(self)
 	if ( id ~= CharacterSelect.selectedIndex ) then
 		CharacterSelect_SelectCharacter(id);
 	end
-	if (not CharacterSelect.undeleting and not AccountReactivationInProgressDialog:IsShown()) then
+	if (CharacterSelect_AllowedToEnterWorld()) then
 		CharacterSelect_EnterWorld();
 	end
 end
@@ -879,6 +879,20 @@ function CharacterSelect_ChangeRealm()
 	PlaySound("gsCharacterSelectionDelCharacter");
 	CharacterSelect_SaveCharacterOrder();
 	RequestRealmList(true);
+end
+
+function CharacterSelect_AllowedToEnterWorld()
+	if (CharacterSelect.undeleting) then
+		return false;
+	elseif (AccountReactivationInProgressDialog:IsShown()) then
+		return false;
+	elseif (GoldReactivateConfirmationDialog:IsShown()) then
+		return false;
+	elseif (TokenReactivateConfirmationDialog:IsShown()) then
+		return false;
+	end
+
+	return true;
 end
 
 function CharacterSelectFrame_OnMouseDown(button)
@@ -1474,7 +1488,7 @@ function CharacterSelect_UpdateButtonState()
 	local servicesEnabled = not CharSelectServicesFlowFrame:IsShown();
 	local undeleting = CharacterSelect.undeleting;
 	local undeleteEnabled, undeleteOnCooldown = GetCharacterUndeleteStatus();
-	local redemptionInProgress = AccountReactivationInProgressDialog:IsShown();
+	local redemptionInProgress = AccountReactivationInProgressDialog:IsShown() or GoldReactivateConfirmationDialog:IsShown() or TokenReactivateConfirmationDialog:IsShown();
 
 	local boostInProgress = select(18,GetCharacterInfo(GetCharacterSelection()));
 	CharSelectEnterWorldButton:SetEnabled(servicesEnabled and not undeleting and not boostInProgress and not redemptionInProgress);
@@ -1492,7 +1506,7 @@ function CharacterSelect_UpdateButtonState()
 	StoreButton:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
 	CharacterServicesTokenNormal:SetEnabled(not redemptionInProgress);
 	CharacterServicesTokenWoDFree:SetEnabled(not redemptionInProgress);
-	CharSelectAccountUpgradeButton:SetEnabled(not redemptionInProgress);
+	CharSelectAccountUpgradeButton:SetEnabled(not redemptionInProgress and not undeleting);
 end
 
 -- CHARACTER UNDELETE
@@ -1549,6 +1563,8 @@ function CharacterSelect_StartCharacterUndelete()
 	CharSelectBackToActiveButton:Show();
 	CharSelectChangeRealmButton:Hide();
 	CharSelectUndeleteLabel:Show();
+
+	AccountReactivate_CloseDialogs();
 
 	CharacterServicesMaster_UpdateServiceButton();
 	StartCharacterUndelete();
