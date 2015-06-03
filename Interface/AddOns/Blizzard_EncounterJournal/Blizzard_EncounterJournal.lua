@@ -167,8 +167,34 @@ function EncounterJournal_OnLoad(self)
 	end
 	
 	-- set the suggestion panel frame to open by default
-	instanceSelect.suggestTab:Disable();
-	EncounterJournal.suggestFrame:Show();
+	EJSuggestFrame_OpenFrame();
+end
+
+function EncounterJournal_HasChangedContext(instanceID, instanceType, difficultyID)
+	if ( instanceType == "none" ) then
+		-- we've gone from a dungeon to the open world
+		return EncounterJournal.lastInstance ~= nil;
+	elseif ( instanceID ~= 0 and (instanceID ~= EncounterJournal.lastInstance or EJ_GetDifficulty() ~= difficultyID) ) then
+		-- dungeon or difficulty has changed
+		return true;
+	end	
+	return false;
+end
+
+function EncounterJournal_ResetDisplay(instanceID, instanceType, difficultyID)
+	if ( instanceType == "none" ) then
+		EncounterJournal.lastInstance = nil;
+		EJSuggestFrame_OpenFrame();
+	else
+		EJ_ContentTab_Select(EncounterJournal.instanceSelect.dungeonsTab.id); 
+
+		EncounterJournal_DisplayInstance(instanceID);
+		EncounterJournal.lastInstance = instanceID;
+		-- try to set difficulty to current instance difficulty
+		if ( EJ_IsValidInstanceDifficulty(difficultyID) ) then
+			EJ_SetDifficulty(difficultyID);
+		end
+	end
 end
 
 function EncounterJournal_OnShow(self)
@@ -187,18 +213,8 @@ function EncounterJournal_OnShow(self)
 	--automatically navigate to the current dungeon if you are in one;
 	local instanceID = EJ_GetCurrentInstance();
 	local _, instanceType, difficultyID = GetInstanceInfo();
-	if( instanceType == "none" and EncounterJournal.lastInstance ~= 0 ) then
-		EJ_ContentTab_Select(instanceSelect.suggestTab.id);
-		EncounterJournal.lastInstance = 0;
-	elseif ( instanceID ~= 0 and instanceType ~= "none" and (instanceID ~= EncounterJournal.lastInstance or EJ_GetDifficulty() ~= difficultyID) ) then
-		EJ_ContentTab_Select(instanceSelect.dungeonsTab.id); 
-
-		EncounterJournal_DisplayInstance(instanceID);
-		EncounterJournal.lastInstance = instanceID;
-		-- try to set difficulty to current instance difficulty
-		if ( EJ_IsValidInstanceDifficulty(difficultyID) ) then
-			EJ_SetDifficulty(difficultyID);
-		end
+	if ( EncounterJournal_HasChangedContext(instanceID, instanceType, difficultyID) ) then
+		EncounterJournal_ResetDisplay(instanceID, instanceType, difficultyID);
 	elseif ( EncounterJournal.queuedPortraitUpdate ) then
 		-- fixes portraits when switching between fullscreen and windowed mode
 		EncounterJournal_UpdatePortraits();
@@ -2236,38 +2252,42 @@ function EJSuggestFrame_RefreshDisplay()
 		local suggestion = self.Suggestion1;
 		local data = self.suggestions[1];
 		
-		suggestion.centerDisplay:SetHeight(suggestion:GetHeight());
-		suggestion.centerDisplay:Show();
-		suggestion.centerDisplay.title:SetHeight(0);
-		suggestion.centerDisplay.description:SetHeight(0);
-		suggestion.centerDisplay.title:SetText(data.title);
-		suggestion.centerDisplay.description:SetText(data.description);
+		local centerDisplay = suggestion.centerDisplay;
+		local titleText = centerDisplay.title.text;
+		local descText = centerDisplay.description.text;
+		
+		centerDisplay:SetHeight(suggestion:GetHeight());
+		centerDisplay:Show();
+		centerDisplay.title:SetHeight(0);
+		centerDisplay.description:SetHeight(0);
+		titleText:SetText(data.title);
+		descText:SetText(data.description);
 
 		-- find largest font that will not go past 2 lines
 		for i = 1, #AdventureJournal_LeftTitleFonts do
-			suggestion.centerDisplay.title:SetFontObject(AdventureJournal_LeftTitleFonts[i]);
-			local numLines = suggestion.centerDisplay.title:GetNumLines();
-			if ( numLines <= 2 and not suggestion.centerDisplay.title:IsTruncated() ) then
+			titleText:SetFontObject(AdventureJournal_LeftTitleFonts[i]);
+			local numLines = titleText:GetNumLines();
+			if ( numLines <= 2 and not titleText:IsTruncated() ) then
 				break;
 			end
 		end
 		
 		-- resize the title to be 2 lines at most
-		local numLines = min(2, suggestion.centerDisplay.title:GetNumLines());
-		local fontHeight = select(2, suggestion.centerDisplay.title:GetFont());
-		suggestion.centerDisplay.title:SetHeight(numLines * fontHeight + 2);
-		suggestion.centerDisplay.description:SetHeight(suggestion.centerDisplay.description:GetStringHeight());
+		local numLines = min(2, titleText:GetNumLines());
+		local fontHeight = select(2, titleText:GetFont());
+		centerDisplay.title:SetHeight(numLines * fontHeight + 2);
+		centerDisplay.description:SetHeight(descText:GetStringHeight());
 		
 		-- adjust the center display to keep the text centered	
-		local top = suggestion.centerDisplay.title:GetTop();
-		local bottom = suggestion.centerDisplay.description:GetBottom();
-		suggestion.centerDisplay:SetHeight(top - bottom);
+		local top = centerDisplay.title:GetTop();
+		local bottom = centerDisplay.description:GetBottom();
+		centerDisplay:SetHeight(top - bottom);
 		
 		if ( data.buttonText and #data.buttonText > 0 ) then
 			suggestion.button:SetText( data.buttonText );
 			
 			local btnWidth = max( suggestion.button:GetTextWidth()+42, 150 );
-			btnWidth = min( btnWidth, suggestion.centerDisplay:GetWidth() );
+			btnWidth = min( btnWidth, centerDisplay:GetWidth() );
 			suggestion.button:SetWidth( btnWidth );
 			suggestion.button:Show();
 		end
@@ -2284,6 +2304,14 @@ function EJSuggestFrame_RefreshDisplay()
 		
 		suggestion.prevButton:SetEnabled(C_AdventureJournal.GetPrimaryOffset() > 0);
 		suggestion.nextButton:SetEnabled(C_AdventureJournal.GetPrimaryOffset() < C_AdventureJournal.GetNumAvailableSuggestions()-1);
+		
+		if ( titleText:IsTruncated() ) then
+			centerDisplay.title:SetScript("OnEnter", EJSuggestFrame_SuggestionTextOnEnter);
+			centerDisplay.title:SetScript("OnLeave", GameTooltip_Hide);
+		else
+			centerDisplay.title:SetScript("OnEnter", nil);
+			centerDisplay.title:SetScript("OnLeave", nil);
+		end
 		
 		EJSuggestFrame_UpdateRewards(suggestion);
 	else
@@ -2426,7 +2454,7 @@ function AdventureJournal_Reward_OnEnter(self)
 			rewardHeaderText = rewardData.rewardDesc;
 		elseif ( rewardData.isRewardTable ) then
 			local difficultyStr = "";
-			if ( suggestion.difficultyID and suggestion.difficultyID > 1 ) then
+			if ( not suggestion.hideDifficulty and suggestion.difficultyID and suggestion.difficultyID > 1 ) then
 				for i=1, #EJ_DIFFICULTIES do
 					local entry = EJ_DIFFICULTIES[i];
 					if ( EJ_DIFFICULTIES[i].difficultyID == suggestion.difficultyID ) then
@@ -2625,7 +2653,6 @@ function AdventureJournal_Reward_OnMouseDown(self)
 	local data = EncounterJournal.suggestFrame.suggestions[index];
 	if ( data.ej_instanceID ) then
 		EncounterJournal_DisplayInstance(data.ej_instanceID);
-		EncounterJournal.lastInstance = instanceID;
 		-- try to set difficulty to current instance difficulty
 		if ( EJ_IsValidInstanceDifficulty(data.difficultyID) ) then
 			EJ_SetDifficulty(data.difficultyID);

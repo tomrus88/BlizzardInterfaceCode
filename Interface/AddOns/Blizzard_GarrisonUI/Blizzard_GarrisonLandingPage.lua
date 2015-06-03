@@ -42,6 +42,18 @@ function GarrisonLandingPage_UpdateTabs(self)
 	end
 end
 
+function GarrisonLandingPageTab_OnEnter(self)
+	self.LeftHighlight:Show();
+	self.MiddleHighlight:Show();
+	self.RightHighlight:Show();
+end
+
+function GarrisonLandingPageTab_OnLeave(self)
+	self.LeftHighlight:Hide();
+	self.MiddleHighlight:Hide();
+	self.RightHighlight:Hide();
+end
+
 function GarrisonLandingPage_OnShow(self)
 	GarrisonLandingPage_UpdateTabs(self);
 	if (C_Garrison.IsInvasionAvailable()) then
@@ -580,6 +592,10 @@ GarrisonLandingShipFollowerList = {};
 
 function GarrisonLandingShipFollowerList:Load(followerType)
 	GarrisonShipyardFollowerList.Load(self, followerType, self:GetParent().ShipFollowerTab);
+end
+
+function GarrisonLandingShipFollowerList:UpdateValidSpellHighlight(followerID, followerInfo)
+	GarrisonShipyardFollowerList.UpdateValidSpellHighlight(self, followerID, followerInfo, true);
 end
 
 function GarrisonLandingShipFollowerList:ShowFollower(followerID)

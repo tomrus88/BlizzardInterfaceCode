@@ -750,6 +750,11 @@
 		</Layers>
 		<Frames>
 			<Frame parentKey="RewardsFrame" inherits="GarrisonShipyardMissionRewardsFrameTemplate, GarrisonMissionPageRewardTemplate">
+				<Scripts>
+					<OnLoad>
+						self.tooltipText = GARRISON_SHIPYARD_MISSION_CHANCE_TOOLTIP_TEXT;
+					</OnLoad>
+				</Scripts>
 			</Frame>
 		</Frames>
 	</Frame>
@@ -780,7 +785,7 @@
 			<Layer level="ARTWORK">
 				<Texture parentKey="NameBG" atlas="ShipMission_NameBG" useAtlasSize="true" hidden="true">
 					<Anchors>
-						<Anchor point="CENTER" relativeKey="$parent.Name" relativePoint="CENTER" x="0" y="6"/>
+						<Anchor point="TOP" relativeKey="$parent.Name" relativePoint="TOP" x="0" y="4"/>
 					</Anchors>
 				</Texture>
 			</Layer>
@@ -852,7 +857,7 @@
 			<Layer level="ARTWORK">
 				<Texture parentKey="NameBG" atlas="ShipMission_NameBG" useAtlasSize="true">
 					<Anchors>
-						<Anchor point="CENTER" relativeKey="$parent.Name" relativePoint="CENTER" x="0" y="6"/>
+						<Anchor point="TOP" relativeKey="$parent.Name" relativePoint="TOP" x="0" y="4"/>
 					</Anchors>
 				</Texture>
 			</Layer>
@@ -875,7 +880,7 @@
 				</Anchors>
 			</Frame>
 			<CinematicModel parentKey="BoatDeathAnimations" facingLeft="true" inherits="GarrisonCinematicModelBaseTemplate">
-				<Size x="250" y="250"/>
+				<Size x="400" y="250"/>
 				<Anchors>
 					<Anchor point="CENTER"/>
 				</Anchors>
@@ -1118,7 +1123,7 @@
 			<Layer level="OVERLAY" textureSubLevel="3">
 				<Texture parentKey="Selection" atlas="ShipMission_FollowerListButton-Select" useAtlasSize="true" hidden="true">
 					<Anchors>
-						<Anchor point="TOPLEFT"/>
+						<Anchor point="TOPLEFT" x="0" y="-1"/>
 					</Anchors>
 				</Texture>
 				<FontString parentKey="BoatName" inherits="GameFontHighlight" text="Carrier" justifyH="RIGHT">
@@ -1517,6 +1522,7 @@
 			<OnClick function="GarrisonShipEquipment_OnClick"/>
 			<OnEnter function="GarrisonShipEquipment_OnEnter"/>
 			<OnLeave function="GarrisonShipEquipment_OnHide"/>
+			<OnReceiveDrag function="GarrisonShipEquipment_OnReceiveDrag"/>
 		</Scripts>
 	</Button>
 	
@@ -1563,14 +1569,14 @@
 						<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" y="12"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="XPText" inherits="GameFontHighlightLarge2" justifyH="RIGHT" text="3500 XP">
-					<Anchors>
-						<Anchor point="TOPRIGHT" x="-10" y="-36"/>
-					</Anchors>
-				</FontString>
 				<FontString parentKey="XPLabel" inherits="GameFontHighlight" justifyH="RIGHT" text="GARRISON_FOLLOWER_XP_STRING">
 					<Anchors>
-						<Anchor point="TOPRIGHT" relativeKey="$parent.XPText" relativePoint="BOTTOMRIGHT" y="0"/>
+						<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-12" y="-68"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="XPText" inherits="GameFontHighlightLarge2" justifyH="RIGHT">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.XPLabel" relativePoint="TOPRIGHT" x="0" y="2"/>
 					</Anchors>
 				</FontString>
 				<Texture parentKey="Portrait" atlas="Ships_CargoShip-List" useAtlasSize="true">
@@ -1781,9 +1787,14 @@
 							GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 							GameTooltip:SetText(GARRISON_SHIPYARD_NO_SHIPS_TOOLTIP, nil, nil, nil, nil, true);
 							GameTooltip:Show();
+						else
+							GarrisonMissionFrameTab_OnEnter(self);
 						end
 					</OnEnter>
-					<OnLeave function="GameTooltip_Hide"/>
+					<OnLeave>
+						GarrisonMissionFrameTab_OnLeave(self);
+						GameTooltip_Hide(self);
+					</OnLeave>
 				</Scripts>
 			</Button>
 			
@@ -1805,6 +1816,9 @@
 				<Frames>
 					<Frame parentKey="MaterialFrame" inherits="MaterialFrameTemplate">
 						<Size x="316" y="43"/>
+						<KeyValues>
+							<KeyValue key="currencyType" value="1101" type="number"/>
+						</KeyValues>
 						<Anchors>
 							<Anchor point="TOP" relativePoint="BOTTOM" y="8"/>
 						</Anchors>
@@ -1857,7 +1871,7 @@
 							<Frame parentKey="FogFrame2" parentArray="FogFrames" inherits="FogFrameTemplate"/>
 							<Frame parentKey="FogFrame3" parentArray="FogFrames" inherits="FogFrameTemplate"/>
 							
-							<Frame parentKey="CompleteDialog" frameStrata="DIALOG" enableMouse="true" hidden="true">
+							<Frame parentKey="CompleteDialog" toplevel="true" enableMouse="true" hidden="true">
 								<Size x="956" y="637"/>
 								<Anchors>
 									<Anchor point="TOPLEFT" x="2" y="-22"/>

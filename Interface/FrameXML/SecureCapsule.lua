@@ -92,6 +92,7 @@ retain("IsModifiedClick");
 retain("GetTime");
 retain("UnitAffectingCombat");
 retain("GetCVar");
+retain("GMError");
 
 --For auth challenge
 take("C_AuthChallenge");
@@ -225,6 +226,7 @@ take("VAS_RACE_CHANGE_CONFIRMATION");
 take("VAS_RACE_CHANGE_VALIDATION_DESCRIPTION");
 take("VAS_FACTION_CHANGE_VALIDATION_DESCRIPTION");
 take("VAS_RACE_CHANGE_INELIGIBLE");
+take("VAS_APPEARANCE_CHANGE_VALIDATION_DESCRIPTION");
 
 -- For Battle.net Token
 if ( IsGMClient() ) then

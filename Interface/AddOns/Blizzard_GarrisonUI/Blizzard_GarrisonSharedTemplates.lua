@@ -1,6 +1,5 @@
 GARRISON_FOLLOWER_BUSY_COLOR = { 0, 0.06, 0.22, 0.44 };
 GARRISON_FOLLOWER_INACTIVE_COLOR = { 0.22, 0.06, 0, 0.44 };
-GARRISON_HIGH_THREAT_VALUE = 300
 local minFollowersForThreatCountersFrame = 10;
 
 ---------------------------------------------------------------------------------
@@ -44,6 +43,7 @@ function GarrisonFollowerList:Setup(mainFrame, followerType, followerTemplate, i
 	self:RegisterEvent("GARRISON_FOLLOWER_XP_CHANGED");
 	self:RegisterEvent("GARRISON_FOLLOWER_UPGRADED");
 	self:RegisterEvent("CURRENT_SPELL_CAST_CHANGED");
+	self:RegisterEvent("CURSOR_UPDATE");
 	self:SetScript("OnEvent", GarrisonFollowerList_OnEvent);
 end
 
@@ -128,9 +128,12 @@ function GarrisonFollowerList_OnEvent(self, event, ...)
 				PlaySound("UI_Garrison_CommandTable_Follower_LevelUp");
 			end
 		end
-	elseif (event == "CURRENT_SPELL_CAST_CHANGED") then
+	elseif (event == "CURRENT_SPELL_CAST_CHANGED" or event == "CURSOR_UPDATE") then
 		if (self.followerTab and self.followerTab.followerID and self:IsShown()) then
-			self:ShowFollower(self.followerTab.followerID);
+			local followerID = self.followerTab.followerID;
+			local followerInfo = C_Garrison.GetFollowerInfo(followerID);
+			followerInfo.abilities = C_Garrison.GetFollowerAbilities(followerID);
+			self:UpdateValidSpellHighlight(followerID, followerInfo);
 		end
 	end
 
@@ -587,13 +590,14 @@ local statusPriority = {
 
 function GarrisonFollowerList_SortFollowers(self)
 	local followers = self.followers;
-	local followerCounters = GarrisonMissionFrame.followerCounters;
-	local followerTraits = GarrisonMissionFrame.followerTraits;
-	local checkAbilities = followerCounters and followerTraits and GarrisonMissionFrame.MissionTab:IsVisible();
+	local mainFrame = self:GetParent();
+	local followerCounters = mainFrame.followerCounters;
+	local followerTraits = mainFrame.followerTraits;
+	local checkAbilities = followerCounters and followerTraits and mainFrame.MissionTab and mainFrame.MissionTab:IsVisible();
 	local mentorLevel, mentorItemLevel = 0, 0;
-	if ( checkAbilities ) then
-		mentorLevel = GarrisonMissionFrame.MissionTab.MissionPage.mentorLevel or 0;
-		mentorItemLevel = GarrisonMissionFrame.MissionTab.MissionPage.mentorItemLevel or 0;
+	if ( checkAbilities and mainFrame.MissionTab and mainFrame.MissionTab.MissionPage ) then
+		mentorLevel = mainFrame.MissionTab.MissionPage.mentorLevel or 0;
+		mentorItemLevel = mainFrame.MissionTab.MissionPage.mentorItemLevel or 0;
 	end
 	local comparison = function(index1, index2)
 		local follower1 = followers[index1];
@@ -723,7 +727,25 @@ function GarrisonFollowerPage_SetItem(itemFrame, itemID, itemLevel)
 	itemFrame:Hide();
 end
 
+function GarrisonFollowerList:UpdateValidSpellHighlight(followerID, followerInfo, hideCounters)
+	for i=1, #followerInfo.abilities do
+		local ability = followerInfo.abilities[i];
+		local abilityFrame = self.followerTab.AbilitiesFrame.Abilities[i];
+		if ( followerInfo and followerInfo.isCollected and followerInfo.status ~= GARRISON_FOLLOWER_WORKING and followerInfo.status ~= GARRISON_FOLLOWER_ON_MISSION and
+			SpellCanTargetGarrisonFollowerAbility(followerID, ability.id) ) then
+			abilityFrame.IconButton.ValidSpellHighlight:Show();
+			if ( not ability.temporary ) then
+				abilityFrame.IconButton.OldIcon:SetTexture(ability.icon);
+				abilityFrame.IconButton.OldIcon:SetAlpha(0);
+			end
+		else
+			abilityFrame.IconButton.ValidSpellHighlight:Hide();
+		end
+	end
+end
+
 function GarrisonFollowerList:ShowFollower(followerID)
+	local followerList = self;
 	local self = self.followerTab;
 	local lastUpdate = self.lastUpdate;
 	local followerInfo = C_Garrison.GetFollowerInfo(followerID);
@@ -857,15 +879,6 @@ function GarrisonFollowerList:ShowFollower(followerID)
 		abilityFrame.Name:SetText(ability.name);
 		abilityFrame.IconButton.Icon:SetTexture(ability.icon);
 		abilityFrame.IconButton.abilityID = ability.id;
-		if ( followerInfo and followerInfo.isCollected and followerInfo.status ~= GARRISON_FOLLOWER_WORKING and followerInfo.status ~= GARRISON_FOLLOWER_IN_PARTY and SpellCanTargetGarrisonFollowerAbility(followerInfo.followerID, ability.id) ) then
-			abilityFrame.IconButton.ValidSpellHighlight:Show();
-			if ( not ability.temporary ) then
-				abilityFrame.IconButton.OldIcon:SetTexture(ability.icon);
-				abilityFrame.IconButton.OldIcon:SetAlpha(0);
-			end
-		else
-			abilityFrame.IconButton.ValidSpellHighlight:Hide();
-		end
 
 		local hasCounters = false;
 		if ( ability.counters and not ability.isTrait and not self.isLandingPage ) then
@@ -904,6 +917,7 @@ function GarrisonFollowerList:ShowFollower(followerID)
 		end
 		abilityFrame:Show();
 	end
+	followerList:UpdateValidSpellHighlight(followerID, followerInfo);
 
 	if ( lastAbilityAnchor ) then
 		self.AbilitiesFrame.AbilitiesText:Show();
@@ -1049,7 +1063,21 @@ function GarrisonFollower_DisplayUpgradeConfirmation(followerID)
 				return true;
 			end
 		else
-			StaticPopup_Show("CONFIRM_FOLLOWER_UPGRADE", name, nil, followerID);
+			local text;
+			local hasReroll, rerollAbilities, rerollTraits = C_Garrison.TargetSpellHasFollowerReroll();
+			if ( hasReroll ) then
+				if ( rerollAbilities and rerollTraits ) then
+					text = CONFIRM_GARRISON_FOLLOWER_REROLL_ALL;
+				elseif ( rerollAbilities ) then
+					text = CONFIRM_GARRISON_FOLLOWER_REROLL_ABILITIES;
+				else
+					text = CONFIRM_GARRISON_FOLLOWER_REROLL_TRAITS;
+				end
+				text = string.format(text, name);
+			else
+				text = string.format(CONFIRM_GARRISON_FOLLOWER_UPGRADE, name);
+			end
+			StaticPopup_Show("CONFIRM_FOLLOWER_UPGRADE", text, nil, followerID);
 			return true;
 		end
 	end
