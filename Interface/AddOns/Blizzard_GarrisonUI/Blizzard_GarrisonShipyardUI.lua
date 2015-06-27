@@ -847,6 +847,7 @@ end
 function GarrisonShipyardMap_OnEvent(self, event, ...)
 	if (event == "GARRISON_MISSION_LIST_UPDATE" or event == "GARRISON_RANDOM_MISSION_ADDED" or event == "GARRISON_MISSION_AREA_BONUS_ADDED") then
 		GarrisonShipyardMap_UpdateMissions();
+		GarrisonShipyardMap_CheckTutorials();
 		if (event == "GARRISON_MISSION_AREA_BONUS_ADDED") then
 			local bonusAbilityID = ...;
 			table.insert(self.pendingBonusArea, bonusAbilityID);
@@ -873,6 +874,9 @@ function GarrisonShipyardMap_OnShow(self)
 end
 
 function GarrisonShipyardMap_OnHide(self)
+	if ( GarrisonMissionTutorialFrame:GetParent() == self ) then
+		GarrisonMissionTutorialFrame:Hide();
+	end
 	GarrisonShipFollowerPlacer:SetScript("OnUpdate", nil);
 end
 
@@ -1228,6 +1232,7 @@ end
 
 function GarrisonMissionFrame_OnClickShipyardTutorialButton(self)
 	PlaySound("igMainMenuOptionCheckBoxOn");
+	GarrisonMissionTutorialFrame:Hide();
 	GarrisonShipyardMap_CheckTutorials();
 end
 
@@ -1256,7 +1261,8 @@ end
 
 function GarrisonShipyardMap_CheckTutorials()
 	local missionList = GarrisonShipyardFrame.MissionTab.MissionList;
-	if (missionList.CompleteDialog:IsShown() or GarrisonShipyardFrame.MissionComplete:IsShown()) then
+	if ( missionList.CompleteDialog:IsShown() or GarrisonShipyardFrame.MissionComplete:IsShown() or
+		(GarrisonMissionTutorialFrame:GetParent() == missionList and GarrisonMissionTutorialFrame:IsShown()) ) then
 		return;
 	end
 	for i = 1, #missionList.missions do
@@ -1462,7 +1468,7 @@ function GarrisonShipyardMapMission_SetTooltip(info, inProgress)
 		local missionInfo = C_Garrison.GetBasicMissionInfo(info.missionID);
 		GarrisonMissionListTooltipThreatsFrame:Hide();
 		
-		if (not info.isComplete) then
+		if (not info.isComplete and missionInfo and missionInfo.timeLeft) then
 			local timeLeft = missionInfo.timeLeft;
 			tooltipFrame.InProgressTimeLeft:SetText(format(GARRISON_SHIPYARD_MISSION_INPROGRESS_TIMELEFT, timeLeft));
 			GarrisonShipyardMapMission_SetBottomWidget(tooltipFrame.InProgressTimeLeft);
@@ -1544,28 +1550,30 @@ function GarrisonShipyardMapMission_SetTooltip(info, inProgress)
 	end
 	
 	local bonusEffects = C_Garrison.GetMissionBonusAbilityEffects(info.missionID);
-	if (#bonusEffects > 0) then
-		GarrisonShipyardMapMission_AnchorToBottomWidget(tooltipFrame.BonusTitle, 0, -tooltipFrame.BonusTitle.yspacing);
-		tooltipFrame.BonusTitle:Show();
-		GarrisonShipyardMapMission_SetBottomWidget(tooltipFrame.BonusTitle);
-	else
-		tooltipFrame.BonusTitle:Hide();
-	end
-	for i=1, #bonusEffects do
-		local effectFrame = tooltipFrame.BonusEffects[i];
-		if (not effectFrame) then
-			effectFrame = CreateFrame("FRAME", "GarrisonBonusEffectTooltip" .. i, tooltipFrame, "GarrisonBonusEffectFrameTemplate");
-			tooltipFrame.BonusEffects[i] = effectFrame;
+	if (bonusEffects) then
+		if (#bonusEffects > 0) then
+			GarrisonShipyardMapMission_AnchorToBottomWidget(tooltipFrame.BonusTitle, 0, -tooltipFrame.BonusTitle.yspacing);
+			tooltipFrame.BonusTitle:Show();
+			GarrisonShipyardMapMission_SetBottomWidget(tooltipFrame.BonusTitle);
+		else
+			tooltipFrame.BonusTitle:Hide();
 		end
-		GarrisonShipyardMapMission_AnchorToBottomWidget(effectFrame, 3, -effectFrame.yspacing);
-		effectFrame.Icon:SetTexture(bonusEffects[i].icon);
-		effectFrame.Name:SetText(bonusEffects[i].name);
-		effectFrame.Description:SetText(bonusEffects[i].description);
-		effectFrame:Show();
-		GarrisonShipyardMapMission_SetBottomWidget(effectFrame, -3);
-	end
-	for i=#bonusEffects + 1, #tooltipFrame.BonusEffects do
-		tooltipFrame.BonusEffects[i]:Hide();
+		for i=1, #bonusEffects do
+			local effectFrame = tooltipFrame.BonusEffects[i];
+			if (not effectFrame) then
+				effectFrame = CreateFrame("FRAME", "GarrisonBonusEffectTooltip" .. i, tooltipFrame, "GarrisonBonusEffectFrameTemplate");
+				tooltipFrame.BonusEffects[i] = effectFrame;
+			end
+			GarrisonShipyardMapMission_AnchorToBottomWidget(effectFrame, 3, -effectFrame.yspacing);
+			effectFrame.Icon:SetTexture(bonusEffects[i].icon);
+			effectFrame.Name:SetText(bonusEffects[i].name);
+			effectFrame.Description:SetText(bonusEffects[i].description);
+			effectFrame:Show();
+			GarrisonShipyardMapMission_SetBottomWidget(effectFrame, -3);
+		end
+		for i=#bonusEffects + 1, #tooltipFrame.BonusEffects do
+			tooltipFrame.BonusEffects[i]:Hide();
+		end
 	end
 	
 	tooltipFrame.ShipsString:Hide();
