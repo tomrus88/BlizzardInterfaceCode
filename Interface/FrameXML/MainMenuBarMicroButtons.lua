@@ -436,10 +436,6 @@ function EJMicroButton_OnLoad(self)
 	end
 
 	--events that can trigger a refresh of the adventure journal
-	self:RegisterEvent("UNIT_LEVEL");
-	self:RegisterEvent("QUEST_ACCEPTED");
-	self:RegisterEvent("QUEST_REMOVED");
-	self:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE");
 	self:RegisterEvent("VARIABLES_LOADED");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 end
@@ -454,33 +450,36 @@ function EJMicroButton_OnEvent(self, event, ...)
 		end
 		UpdateMicroButtons();
 	elseif( event == "VARIABLES_LOADED" ) then
-		local lastTimeOpened = tonumber(GetCVar("advJournalLastOpened"));
-		if ( UnitLevel("player") >= EJMicroButton.minLevel and UnitFactionGroup("player") ~= "Neutral" ) then		
-			if ( GetServerTime() - lastTimeOpened > EJ_ALERT_TIME_DIFF ) then
-				EJMicroButtonAlert:Show();
-				MicroButtonPulse(EJMicroButton);
+		local showAlert = GetCVarBool("showAdventureJournalAlerts");
+		if( showAlert ) then
+			local lastTimeOpened = tonumber(GetCVar("advJournalLastOpened"));
+			if ( UnitLevel("player") >= EJMicroButton.minLevel and UnitFactionGroup("player") ~= "Neutral" ) then		
+				if ( GetServerTime() - lastTimeOpened > EJ_ALERT_TIME_DIFF ) then
+					EJMicroButtonAlert:Show();
+					MicroButtonPulse(EJMicroButton);
+				end
+			
+				if ( lastTimeOpened ~= 0 ) then
+					SetCVar("advJournalLastOpened", GetServerTime() );
+				end
 			end
-		
-			if ( lastTimeOpened ~= 0 ) then
-				SetCVar("advJournalLastOpened", GetServerTime() );
-			end
+			
+			EJMicroButton_UpdateAlerts(true);
 		end
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		C_AdventureJournal.UpdateSuggestions();	
 	elseif ( event == "UNIT_LEVEL" and arg1 == "player" ) then		
-		EJMicroButton_UpdateNewAdventureNotice();
-	elseif ( event == "QUEST_ACCEPTED" or event == "QUEST_REMOVED" ) then
-		EJMicroButton_UpdateNewAdventureNotice();
+		EJMicroButton_UpdateNewAdventureNotice(true);
 	elseif event == "PLAYER_AVG_ITEM_LEVEL_UPDATE" then
 		local playerLevel = UnitLevel("player");
 		if ( playerLevel == MAX_PLAYER_LEVEL_TABLE[GetExpansionLevel()]) then
-			EJMicroButton_UpdateNewAdventureNotice();
+			EJMicroButton_UpdateNewAdventureNotice(false);
 		end
 	end
 end
 
-function EJMicroButton_UpdateNewAdventureNotice()
-	if ( EJMicroButton:IsEnabled() and C_AdventureJournal.UpdateSuggestions() ) then
+function EJMicroButton_UpdateNewAdventureNotice(levelUp)
+	if ( EJMicroButton:IsEnabled() and C_AdventureJournal.UpdateSuggestions(levelUp) ) then
 		if( not EncounterJournal or not EncounterJournal:IsShown() ) then
 			EJMicroButton.Flash:Show();
 			EJMicroButton.NewAdventureNotice:Show();
@@ -491,6 +490,18 @@ end
 function EJMicroButton_ClearNewAdventureNotice()
 	EJMicroButton.Flash:Hide();
 	EJMicroButton.NewAdventureNotice:Hide();
+end
+
+function EJMicroButton_UpdateAlerts( flag )
+	if ( flag ) then
+		EJMicroButton:RegisterEvent("UNIT_LEVEL");
+		EJMicroButton:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE");
+		EJMicroButton_UpdateNewAdventureNotice(false)
+	else
+		EJMicroButton:UnregisterEvent("UNIT_LEVEL");
+		EJMicroButton:UnregisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE");
+		EJMicroButton_ClearNewAdventureNotice()
+	end
 end
 
 --Micro Button alerts
