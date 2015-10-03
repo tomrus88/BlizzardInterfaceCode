@@ -535,7 +535,7 @@ function UpdateCharacterSelection(self)
 		button.selection:Hide();
 		button.upButton:Hide();
 		button.downButton:Hide();
-		if (self.undeleting) then
+		if (self.undeleting or CharSelectServicesFlowFrame:IsShown()) then
 			paidServiceButton:Hide();
 			CharacterSelectButton_DisableDrag(button);
 		else

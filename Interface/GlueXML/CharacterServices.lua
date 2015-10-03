@@ -56,6 +56,7 @@
 ----
 
 local CHARACTER_UPGRADE_CREATE_CHARACTER = false;
+local CHARACTER_UPGRADE_CREATE_CHARACTER_DATA = nil;
 
 local UPGRADE_90_MAX_LEVEL = 90;
 local UPGRADE_100_MAX_LEVEL = 100;
@@ -156,6 +157,12 @@ local defaultProfessions = {
 	["PLATE"] = { [1] = 164, [2] = 186 },
 	["LEATHERMAIL"] = { [1] = 165, [2] = 393 },
 	["CLOTH"] = { [1] = 197, [2] = 333 },
+};
+
+GlueDialogTypes["PRODUCT_ASSIGN_TO_TARGET_FAILED"] = {
+	text = BLIZZARD_STORE_INTERNAL_ERROR,
+	button1 = OKAY,
+	escapeHides = true,
 };
 
 local CharacterUpgradeCharacterSelectBlock = { Back = false, Next = false, Finish = false, AutoAdvance = true, ActiveLabel = SELECT_CHARACTER_ACTIVE_LABEL, ResultsLabel = SELECT_CHARACTER_RESULTS_LABEL };
@@ -422,6 +429,7 @@ function CharacterServicesMaster_OnLoad(self)
 	
 	self:RegisterEvent("PRODUCT_DISTRIBUTIONS_UPDATED");
 	self:RegisterEvent("CHARACTER_UPGRADE_STARTED");
+	self:RegisterEvent("PRODUCT_ASSIGN_TO_TARGET_FAILED");
 end
 
 local completedGuid;
@@ -432,6 +440,8 @@ function CharacterServicesMaster_OnEvent(self, event, ...)
 	elseif (event == "CHARACTER_UPGRADE_STARTED") then
 		UpdateCharacterList(true);
 		UpdateCharacterSelection(CharacterSelect);
+	elseif (event == "PRODUCT_ASSIGN_TO_TARGET_FAILED") then
+		GlueDialog_Show("PRODUCT_ASSIGN_TO_TARGET_FAILED");
 	end
 end
 
@@ -442,9 +452,14 @@ function CharacterServicesMaster_OnCharacterListUpdate()
 		CharacterServicesMaster.waitingForLevelUp = false;
 	elseif (CHARACTER_UPGRADE_CREATE_CHARACTER or startAutomatically) then
 		CharSelectServicesFlowFrame:Show();
-		CharacterUpgradeFlow.data = CharacterUpgrade_Items[automaticProduct].paid;
+		if (CHARACTER_UPGRADE_CREATE_CHARACTER) then
+			CharacterUpgradeFlow.data = CHARACTER_UPGRADE_CREATE_CHARACTER_DATA;
+		else
+			CharacterUpgradeFlow.data = CharacterUpgrade_Items[automaticProduct].paid;
+		end
 		CharacterServicesMaster_SetFlow(CharacterServicesMaster, CharacterUpgradeFlow);
 		CHARACTER_UPGRADE_CREATE_CHARACTER = false;
+		CHARACTER_UPGRADE_CREATE_CHARACTER_DATA = nil;
 		C_SharedCharacterServices.SetStartAutomatically(false);
 	elseif (C_CharacterServices.HasQueuedUpgrade()) then
 		local guid = C_CharacterServices.GetQueuedUpgradeGUID();
@@ -895,6 +910,15 @@ local function enableScroll(scrollBar)
 	scrollBar:GetParent():EnableMouseWheel(true);
 end
 
+local function replaceAllScripts()
+	for i = 1, math.min(GetNumCharacters(), MAX_CHARACTERS_DISPLAYED) do
+		local button = _G["CharSelectCharacterButton"..i];
+		replaceScripts(button);
+		button.upButton:Hide();
+		button.downButton:Hide();
+	end
+end
+
 function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 	for i = 1, 3 do
 		if (self.frame.BonusResults[i]) then
@@ -955,6 +979,7 @@ function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 
 	local numEligible = 0;
 	self.hasVeteran = false;
+	replaceAllScripts();
 	for i = 1, num do
 		local button = _G["CharSelectCharacterButton"..i];
 		_G["CharSelectPaidService"..i]:Hide();
@@ -969,7 +994,6 @@ function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 			if (level >= UPGRADE_BONUS_LEVEL) then
 				self.frame.ControlsFrame.BonusIcons[i]:Show();
 			end
-			replaceScripts(button);
 			button.buttonText.name:SetTextColor(1.0, 0.82, 0);
 			button.buttonText.Info:SetTextColor(1, 1, 1);
 			button.buttonText.Location:SetTextColor(0.5, 0.5, 0.5);
@@ -1001,7 +1025,9 @@ function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 
 	local errorFrame = CharacterUpgradeMaxCharactersFrame;
 	errorFrame:Hide();
-	if (num < MAX_CHARACTERS_DISPLAYED) then
+	self.frame.ControlsFrame.OrLabel:Hide();
+	self.frame.ControlsFrame.CreateCharacterButton:Hide();
+	if (num < MAX_CHARACTERS_DISPLAYED_BASE) then
 		self.frame.ControlsFrame.OrLabel:Show();
 		self.frame.ControlsFrame.CreateCharacterButton:Show();
 		self.frame.ControlsFrame.CreateCharacterButton:SetID(CharacterSelect.createIndex);
@@ -1029,9 +1055,15 @@ function CharacterUpgradeCharacterSelectBlock:FormatResult()
 	local name, _, class, classFileName, _, level, _, _, _, _, _, _, _, _, prof1, prof2 = GetCharacterInfo(self.charid);
 	if (level >= UPGRADE_BONUS_LEVEL) then
 		local defaults = defaultProfessions[classDefaultProfessionMap[classFileName]];
-		if (prof1 == 0) then
+		if (prof1 == 0 and prof2 == 0) then
 			prof1 = defaults[1];
 			prof2 = defaults[2];
+		elseif (prof1 == 0) then
+			if (prof2 == defaults[1]) then
+				prof1 = defaults[2];
+			else
+				prof1 = defaults[1];
+			end
 		elseif (prof2 == 0) then
 			if (prof1 == defaults[1]) then
 				prof2 = defaults[2];
@@ -1110,6 +1142,7 @@ end
 function CharacterUpgradeCreateCharacter_OnClick(self)
 	CharacterUpgradeCharacterSelectBlock.createNum = GetNumCharacters();
 	CHARACTER_UPGRADE_CREATE_CHARACTER = true;
+	CHARACTER_UPGRADE_CREATE_CHARACTER_DATA = CharacterServicesMaster.flow.data;
 	CharacterSelect_SelectCharacter(self:GetID());
 end
 

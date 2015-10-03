@@ -26,6 +26,7 @@ local NumUpgradeDistributions = 0;
 local JustOrderedBoost = false;
 local BoostProduct = nil;
 local VASReady = false;
+local UnrevokeWaitingForProducts = false;
 
 --Imports
 Import("C_PurchaseAPI");
@@ -95,6 +96,8 @@ Import("BLIZZARD_STORE_CONFIRMATION_SERVICES_EUR");
 Import("BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE");
 Import("BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE_EUR");
 Import("BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE_KR");
+Import("BLIZZARD_STORE_CONFIRMATION_OTHER");
+Import("BLIZZARD_STORE_CONFIRMATION_OTHER_EUR");
 Import("BLIZZARD_STORE_BROWSE_TEST_CURRENCY");
 Import("BLIZZARD_STORE_BATTLE_NET_BALANCE");
 Import("BLIZZARD_STORE_CURRENCY_FORMAT_USD");
@@ -197,6 +200,7 @@ Import("BLIZZARD_STORE_DISCLAIMER_FACTION_CHANGE_CN");
 Import("BLIZZARD_STORE_DISCLAIMER_RACE_CHANGE_CN");
 Import("BLIZZARD_STORE_DISCLAIMER_APPEARANCE_CHANGE_CN");
 Import("BLIZZARD_STORE_DISCLAIMER_NAME_CHANGE_CN");
+Import("BLIZZARD_STORE_BOOST_UNREVOKED_CONSUMPTION");
 Import("TOOLTIP_DEFAULT_COLOR");
 Import("TOOLTIP_DEFAULT_BACKGROUND_COLOR");
 Import("CHARACTER_UPGRADE_LOG_OUT_NOW");
@@ -465,6 +469,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_GENERIC,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_USD,
 		paymentMethodText = BLIZZARD_STORE_PAYMENT_METHOD,
 		paymentMethodSubtext = BLIZZARD_STORE_PAYMENT_METHOD_EXTRA,
@@ -491,6 +496,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_EUR,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES_EUR,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE_EUR,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER_EUR,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_GBP,
 		paymentMethodText = BLIZZARD_STORE_PAYMENT_METHOD,
 		paymentMethodSubtext = BLIZZARD_STORE_PAYMENT_METHOD_EXTRA,
@@ -520,6 +526,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_SECOND_CHANCE_KR,
 		servicesConfirmationNotice = BLIZZARD_STORE_SECOND_CHANCE_KR,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE_KR,
+		expansionConfirmationNotice = BLIZZARD_STORE_SECOND_CHANCE_KR,
 		browseWarning = BLIZZARD_STORE_SECOND_CHANCE_KR,
 		paymentMethodText = "",
 		paymentMethodSubtext = "",
@@ -549,6 +556,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_EUR,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES_EUR,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE_EUR,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER_EUR,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_EUR,
 		paymentMethodText = BLIZZARD_STORE_PAYMENT_METHOD,
 		paymentMethodSubtext = BLIZZARD_STORE_PAYMENT_METHOD_EXTRA,
@@ -578,6 +586,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_EUR,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES_EUR,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE_EUR,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER_EUR,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_RUB,
 		paymentMethodText = BLIZZARD_STORE_PAYMENT_METHOD,
 		paymentMethodSubtext = BLIZZARD_STORE_PAYMENT_METHOD_EXTRA,
@@ -607,6 +616,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_GENERIC,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_ARS,
 		paymentMethodText = BLIZZARD_STORE_PAYMENT_METHOD,
 		paymentMethodSubtext = BLIZZARD_STORE_PAYMENT_METHOD_EXTRA,
@@ -633,6 +643,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_GENERIC,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_CLP,
 		paymentMethodText = BLIZZARD_STORE_PAYMENT_METHOD,
 		paymentMethodSubtext = BLIZZARD_STORE_PAYMENT_METHOD_EXTRA,
@@ -659,6 +670,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_GENERIC,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_MXN,
 		paymentMethodText = BLIZZARD_STORE_PAYMENT_METHOD,
 		paymentMethodSubtext = BLIZZARD_STORE_PAYMENT_METHOD_EXTRA,
@@ -685,6 +697,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_GENERIC,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_BRL,
 		paymentMethodText = BLIZZARD_STORE_PAYMENT_METHOD,
 		paymentMethodSubtext = BLIZZARD_STORE_PAYMENT_METHOD_EXTRA,
@@ -711,6 +724,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_GENERIC,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_AUD,
 		paymentMethodText = BLIZZARD_STORE_PAYMENT_METHOD,
 		paymentMethodSubtext = BLIZZARD_STORE_PAYMENT_METHOD_EXTRA,
@@ -737,6 +751,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_GENERIC,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_CN,
 		paymentMethodText = "",
 		paymentMethodSubtext = "",
@@ -764,6 +779,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_GENERIC,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_VAS_NAME_CHANGE,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_OTHER,
 		licenseAcceptText = BLIZZARD_STORE_LICENSE_ACK_TEXT_TW,
 		paymentMethodText = "",
 		paymentMethodSubtext = "",
@@ -790,6 +806,7 @@ local currencySpecific = {
 		confirmationNotice = BLIZZARD_STORE_CONFIRMATION_TEST,
 		servicesConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES_TEST,
 		vasNameChangeConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_SERVICES_TEST,
+		expansionConfirmationNotice = BLIZZARD_STORE_CONFIRMATION_TEST,
 		paymentMethodText = BLIZZARD_STORE_CONFIRMATION_TEST,
 		paymentMethodSubtext = "",
 		browseHasStar = true,
@@ -1407,6 +1424,7 @@ function StoreFrame_OnLoad(self)
 	self:RegisterEvent("AUTH_CHALLENGE_FINISHED");
 	self:RegisterEvent("TOKEN_MARKET_PRICE_UPDATED");
 	self:RegisterEvent("TOKEN_STATUS_CHANGED");
+	self:RegisterEvent("STORE_BOOST_AUTO_CONSUMED");
 
 	-- We have to call this from CharacterSelect on the glue screen because the addon engine will load
 	-- the store addon more than once if we try to make it ondemand, forcing us to load it before we
@@ -1447,7 +1465,7 @@ function StoreFrame_OnLoad(self)
 		background:SetTexture(0, 0, 0, 0.75);
 	end
 	self:SetPoint("CENTER", nil, "CENTER", 0, 20); --Intentionally not anchored to UIParent.
-
+	StoreDialog:SetPoint("CENTER", nil, "CENTER", 0, 40);
 	StoreFrame_CreateCards(self, NUM_STORE_PRODUCT_CARDS, NUM_STORE_PRODUCT_CARDS_PER_ROW);
 
 	StoreFrame.SplashSingle:Hide();
@@ -1497,7 +1515,18 @@ function StoreFrame_OnEvent(self, event, ...)
 			--FIXME - Not the right place to put this check, but I want to stop the error
 			StoreFrame_SetCategory();
 		end
-		StoreFrame_UpdateActivePanel(self);
+		if (UnrevokeWaitingForProducts) then
+			local productName = C_PurchaseAPI.GetUnrevokedBoostInfo();
+			if (productName and productName ~= "") then
+				StoreFrame:Hide();
+				StoreFrame_ShowUnrevokeConsumptionDialog();
+				UnrevokeWaitingForProducts = false;
+			else
+				StoreFrame_UpdateActivePanel(self);
+			end
+		else
+			StoreFrame_UpdateActivePanel(self);
+		end
 	elseif ( event == "STORE_PURCHASE_LIST_UPDATED" ) then
 		if (JustOrderedProduct) then
 			JustFinishedOrdering = true;
@@ -1532,6 +1561,16 @@ function StoreFrame_OnEvent(self, event, ...)
 		end
 	elseif ( event == "TOKEN_STATUS_CHANGED" ) then
 		StoreFrame_CheckMarketPriceUpdates();
+	elseif ( event == "STORE_BOOST_AUTO_CONSUMED" ) then
+		local productName = C_PurchaseAPI.GetUnrevokedBoostInfo();
+
+		if (not productName or productName == "") then
+			-- This could happen if we hadn't shown the shop yet in this session.
+			C_PurchaseAPI.GetProductList();
+			UnrevokeWaitingForProducts = true;
+		else
+			StoreFrame_ShowUnrevokeConsumptionDialog();
+		end
 	end
 end
 
@@ -1795,6 +1834,13 @@ function StoreFrame_HidePurchaseSent(self)
 	self.PurchaseSentFrame:Hide();
 end
 
+function StoreFrame_ShowUnrevokeConsumptionDialog()
+	local productName, characterName, realmName = C_PurchaseAPI.GetUnrevokedBoostInfo();
+
+	StoreDialog.Description:SetText(BLIZZARD_STORE_BOOST_UNREVOKED_CONSUMPTION:format(productName, characterName, realmName));
+	StoreDialog:Show();
+end
+
 function StoreFramePurchaseSentOkayButton_OnClick(self)
 	StoreFrame_HidePurchaseSent(StoreFrame);
 	if (VASReady) then
@@ -1956,7 +2002,7 @@ function StoreConfirmationFrame_OnLoad(self)
 	self:RegisterEvent("STORE_CONFIRM_PURCHASE");
 end
 
-function StoreConfirmationFrame_SetNotice(self, icon, name, dollars, cents, walletName, upgrade, vasService)
+function StoreConfirmationFrame_SetNotice(self, icon, name, dollars, cents, walletName, upgrade, vasService, expansion)
 	local currency = C_PurchaseAPI.GetCurrencyID();
 
 	SetPortraitToTexture(self.Icon, icon);
@@ -1969,6 +2015,8 @@ function StoreConfirmationFrame_SetNotice(self, icon, name, dollars, cents, wall
 	
 	if (upgrade) then
 		notice = info.servicesConfirmationNotice;
+	elseif (expansion) then
+		notice = info.expansionConfirmationNotice;
 	elseif (vasService) then
 		local characters = C_PurchaseAPI.GetCharactersForRealm(SelectedRealm);
 		local character = characters[SelectedCharacter];
@@ -2058,7 +2106,7 @@ function StoreConfirmationFrame_Update(self)
 	if ( not finalIcon ) then
 		finalIcon = "Interface\\Icons\\INV_Misc_Note_02";
 	end
-	StoreConfirmationFrame_SetNotice(self, finalIcon, productInfo.name, productInfo.currentDollars, productInfo.currentCents, walletName, productInfo.isBoost, productInfo.isVasService);
+	StoreConfirmationFrame_SetNotice(self, finalIcon, productInfo.name, productInfo.currentDollars, productInfo.currentCents, walletName, productInfo.isBoost, productInfo.isVasService, productInfo.isExpansion);
 	IsUpgrade = productInfo.isBoost;
 	if (productInfo.isBoost) then
 		BoostProduct = productInfo.boostProduct;
