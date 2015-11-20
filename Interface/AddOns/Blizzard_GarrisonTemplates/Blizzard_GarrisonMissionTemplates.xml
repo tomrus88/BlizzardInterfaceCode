@@ -107,14 +107,20 @@
 					</Anchors>
 				</Texture>
 				<Texture parentKey="Icon">
-					<Size x="43" y="43"/>
+					<Size x="42" y="42"/>
 					<Anchors>
-						<Anchor point="LEFT"/>
+						<Anchor point="LEFT" x="1"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 			<Layer level="BORDER">
 				<Texture parentKey="ItemBurst" hidden="false" alpha="0" alphaMode="ADD" atlas="BonusChest-Burst-Uncommon" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.Icon"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="IconBorder" file="Interface\Common\WhiteIconFrame">
+					<Size x="42" y="42"/>
 					<Anchors>
 						<Anchor point="CENTER" relativeKey="$parent.Icon"/>
 					</Anchors>
@@ -155,7 +161,7 @@
 		<Animations>
 			<AnimationGroup parentKey="Anim" setToFinalAlpha="true">
 				<Alpha childKey="Icon" duration="0.1" order="1" fromAlpha="0" toAlpha="1"/>
-				<Alpha childKey="ItemBorder" duration="0.15" order="1" fromAlpha="0" toAlpha="1"/>
+				<Alpha childKey="IconBorder" duration="0.15" order="1" fromAlpha="0" toAlpha="1"/>
 				<Alpha childKey="ItemBurst" duration="0.15" order="1" fromAlpha="0" toAlpha="1"/>
 				<Scale childKey="ItemBurst" duration="0.2" order="1" fromScaleX="0.5" fromScaleY="0.5" toScaleX="0.9" toScaleY="0.9"/>
 				<Alpha childKey="ItemBurst" startDelay="0.2" duration="0.5" order="1" fromAlpha="1" toAlpha="0"/>
@@ -608,7 +614,7 @@
 				</Layers>
 				<Animations>
 					<AnimationGroup parentKey="FlashAnim" looping="BOUNCE">
-						<Alpha childKey="Flash" change="-0.75" duration="1.0" smoothing="IN_OUT" order="1"/>
+						<Alpha childKey="Flash" change="-0.75" duration="1.0" smoothing="IN_OUT" order="1" fromAlpha="0.75" toAlpha="0"/>
 					</AnimationGroup>
 				</Animations>
 				<Scripts>
@@ -653,7 +659,10 @@
 			<Anchor point="CENTER"/>
 		</Anchors>
 		<Scripts>
-			<OnLoad function="GarrisonMissionFrame_OnLoad"/>
+			<OnLoad>self:OnLoadMainFrame();</OnLoad>
+			<OnShow>self:OnShowMainFrame();</OnShow>
+			<OnHide>self:OnHideMainFrame();</OnHide>
+			<OnEvent>self:OnEventMainFrame(event, ...);</OnEvent>
 		</Scripts>
 	</Frame>
 	
@@ -916,13 +925,13 @@
 				<Animations>
 					<AnimationGroup parentKey="LockBurstAnim" setToFinalAlpha="true">
 						<Alpha childKey="Lock" startDelay="0.5" duration="0.5" order="1" fromAlpha="1" toAlpha="0"/>
-						<Alpha childKey="KeyholeGlow" smoothing="IN" duration="0.3" order="1" change="1"/>
-						<Alpha childKey="KeyholeGlow" startDelay="0.5" smoothing="IN_OUT" duration="0.5" order="1" change="-1"/>
-						<Alpha childKey="KeyBurst" startDelay="0.3" smoothing="IN_OUT" duration="0.2" order="1" change="1"/>
+						<Alpha childKey="KeyholeGlow" smoothing="IN" duration="0.3" order="1" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="KeyholeGlow" startDelay="0.5" smoothing="IN_OUT" duration="0.5" order="1" fromAlpha="1" toAlpha="0"/>
+						<Alpha childKey="KeyBurst" startDelay="0.3" smoothing="IN_OUT" duration="0.2" order="1" fromAlpha="0" toAlpha="1"/>
 						<Scale childKey="KeyBurst" startDelay="0.3" smoothing="IN" duration="0.2" order="1" scaleX="2.5" scaleY="2.5"/>
-						<Alpha childKey="KeyBurst" startDelay="0.5" smoothing="IN_OUT" duration="0.75" order="1" change="-1"/>
-						<Alpha childKey="LockGlow" startDelay="0.3" smoothing="IN_OUT" duration="0.2" order="1" change="1"/>
-						<Alpha childKey="LockGlow" startDelay="0.5" smoothing="IN_OUT" duration="0.75" order="1" change="-1"/>
+						<Alpha childKey="KeyBurst" startDelay="0.5" smoothing="IN_OUT" duration="0.75" order="1" fromAlpha="1" toAlpha="0"/>
+						<Alpha childKey="LockGlow" startDelay="0.3" smoothing="IN_OUT" duration="0.2" order="1" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="LockGlow" startDelay="0.5" smoothing="IN_OUT" duration="0.75" order="1" fromAlpha="1" toAlpha="0"/>
 						<Scripts>
 							<OnFinished>
 								local missionCompleteFrame = self:GetParent():GetParent():GetParent();
@@ -1338,7 +1347,7 @@
 				<Alpha childKey="LevelupGlow" startDelay="0.75" duration="0.5" order="1" fromAlpha="1" toAlpha="0"/>
 				<Scale childKey="LevelupGlow" duration="0.75" order="1" fromScaleX="2.5" fromScaleY="0.25" toScaleX="2.5" toScaleY="2"/>
 				<Translation childKey="LevelupGlow" duration="0.75" order="1" offsetX="0" offsetY="30"/>
-				<Alpha duration="0.5" order="2" change="-1"/>
+				<Alpha duration="0.5" order="2" fromAlpha="1" toAlpha="0"/>
 				<Scripts>
 					<OnStop>
 						self:GetParent():Hide();

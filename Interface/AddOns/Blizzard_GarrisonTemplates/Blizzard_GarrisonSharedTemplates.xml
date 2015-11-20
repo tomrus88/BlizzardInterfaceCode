@@ -13,25 +13,25 @@
 				</Texture>
 			</Layer>
 			<Layer level="BACKGROUND" textureSubLevel="1">
-				<Texture atlas="_Garr_WoodFrameTile-Top" horizTile="true" useAtlasSize="true">
+				<Texture parentKey="Top" atlas="_Garr_WoodFrameTile-Top" horizTile="true" useAtlasSize="true">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="2"/> 
+						<Anchor point="TOPLEFT" x="2"/>
 						<Anchor point="TOPRIGHT" x="-4"/>
 					</Anchors>
 				</Texture>
-				<Texture atlas="_Garr_WoodFrameTile-Bottom" horizTile="true" useAtlasSize="true">
+				<Texture parentKey="Bottom" atlas="_Garr_WoodFrameTile-Bottom" horizTile="true" useAtlasSize="true">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" />
 						<Anchor point="BOTTOMRIGHT" x="-4"/>
 					</Anchors>
 				</Texture>
-				<Texture atlas="!Garr_WoodFrameTile-Left" vertTile="true" useAtlasSize="true">
+				<Texture parentKey="Left" atlas="!Garr_WoodFrameTile-Left" vertTile="true" useAtlasSize="true">
 					<Anchors>
 						<Anchor point="TOPLEFT"  y="-22"/>
 						<Anchor point="BOTTOMLEFT" />
 					</Anchors>
 				</Texture>
-				<Texture atlas="!Garr_WoodFrameTile-Left" vertTile="true" useAtlasSize="true">
+				<Texture parentKey="Right" atlas="!Garr_WoodFrameTile-Left" vertTile="true" useAtlasSize="true">
 					<Anchors>
 						<Anchor point="TOPRIGHT"  y="-22"/>
 						<Anchor point="BOTTOMRIGHT" />
@@ -40,24 +40,24 @@
 				</Texture>
 			</Layer>
 			<Layer level="BACKGROUND" textureSubLevel="2">
-				<Texture atlas="Garr_WoodFrameCorner" useAtlasSize="true">
+				<Texture parentKey="TopLeftGarrCorner" atlas="Garr_WoodFrameCorner" useAtlasSize="true">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="2" y="-22"/>
 					</Anchors>
 				</Texture>
-				<Texture atlas="Garr_WoodFrameCorner" useAtlasSize="true">
+				<Texture parentKey="TopRightGarrCorner" atlas="Garr_WoodFrameCorner" useAtlasSize="true">
 					<Anchors>
 						<Anchor point="TOPRIGHT" x="-4" y="-22"/>
 					</Anchors>
 					<TexCoords left="1.0" right="0.0" top="0.0" bottom="1.0"/>
 				</Texture>
-				<Texture atlas="Garr_WoodFrameCorner" useAtlasSize="true">
+				<Texture parentKey="BottomLeftGarrCorner" atlas="Garr_WoodFrameCorner" useAtlasSize="true">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT" x="2" y="2"/>
 					</Anchors>
 					<TexCoords left="0.0" right="1.0" top="1.0" bottom="0.0"/>
 				</Texture>
-				<Texture atlas="Garr_WoodFrameCorner" useAtlasSize="true">
+				<Texture parentKey="BottomRightGarrCorner" atlas="Garr_WoodFrameCorner" useAtlasSize="true">
 					<Anchors>
 						<Anchor point="BOTTOMRIGHT" x="-4" y="2"/>
 					</Anchors>
@@ -362,6 +362,12 @@
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.AbilitiesBG" x="2" y="-9"/>
 				</Anchors>
+				<Scripts>
+					<OnShow>
+						local followerList = self:GetParent():GetParent():GetParent():GetParent();
+						self.followerTypeID = followerList.followerType;
+					</OnShow>
+				</Scripts>
 			</Frame>
 			<Frame parentKey="BusyFrame" hidden="true">
 				<Anchors>

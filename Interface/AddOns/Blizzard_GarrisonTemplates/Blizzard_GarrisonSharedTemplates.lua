@@ -8,7 +8,7 @@ local minFollowersForThreatCountersFrame = 10;
 
 GarrisonFollowerList = {};
 
-function GarrisonFollowerList:Load(followerType)
+function GarrisonFollowerList:Initialize(followerType)
 	self.minFollowersForThreatCountersFrame = minFollowersForThreatCountersFrame;
 	self.followerCountString = GARRISON_FOLLOWER_COUNT;
 	self.followerTab = self:GetParent().FollowerTab;
@@ -36,7 +36,7 @@ function GarrisonFollowerList:Setup(mainFrame, followerType, followerTemplate, i
 	HybridScrollFrame_CreateButtons(self.listScroll, followerTemplate, initialOffsetX, -7, nil, nil, nil, -6);
 	self.listScroll.followerFrame = mainFrame;
 	
-	self:UpdateData();
+	GarrisonFollowerList_UpdateFollowers(self);
 
 	self:RegisterEvent("GARRISON_FOLLOWER_LIST_UPDATE");
 	self:RegisterEvent("GARRISON_FOLLOWER_REMOVED");
@@ -88,21 +88,28 @@ end
 
 function GarrisonFollowerList_OnEvent(self, event, ...)
 	if (event == "GARRISON_FOLLOWER_LIST_UPDATE" or event == "GARRISON_FOLLOWER_XP_CHANGED") then
-		if (self.followerTab and self.followerTab.followerID) then
-			self:ShowFollower(self.followerTab.followerID);
+		local followerTypeID = ...;
+		if (followerTypeID == self.followerType) then
+			if (self.followerTab and self.followerTab.followerID and self.followerTab:IsVisible()) then
+				self:ShowFollower(self.followerTab.followerID);
+			end
+			
+			if (self:IsVisible()) then
+				GarrisonFollowerList_DirtyList(self);
+				GarrisonFollowerList_UpdateFollowers(self);
+			end
+			
+			if (self.followerTab and self.followerTab.followerID and self.followerTab:IsVisible()) then
+				local minFollowers = self.minFollowersForThreatCountersFrame or minFollowersForThreatCountersFrame;
+				if (C_Garrison.GetNumFollowers(self.followerType) >= minFollowers) then
+					self:ShowThreatCountersFrame();
+				end
+			end
 		end
-		
-		GarrisonFollowerList_DirtyList(self);
-		GarrisonFollowerList_UpdateFollowers(self);
-
-		local minFollowers = self.minFollowersForThreatCountersFrame or minFollowersForThreatCountersFrame;
-		if (C_Garrison.GetNumFollowers(self.followerType) >= minFollowers) then
-			self:ShowThreatCountersFrame();
-		end
-
 		return true;
 	elseif (event == "GARRISON_FOLLOWER_REMOVED") then
-		if (self.followerTab and self.followerTab.followerID and not C_Garrison.GetFollowerInfo(self.followerTab.followerID) and self.followers) then
+		local followerTypeID = ...;
+		if (followerTypeID == self.followerType and self.followerTab and self.followerTab.followerID and self.followerTab:IsVisible() and not C_Garrison.GetFollowerInfo(self.followerTab.followerID) and self.followers) then
 			-- viewed follower got removed, pick someone else
 			local index = self.followersList[1];
 			if (index and self.followers[index].followerID ~= self.followerTab.followerID) then
@@ -263,12 +270,12 @@ function GarrisonFollowerList:UpdateData()
 					button.PortraitFrame.PortraitRingCover:Show();
 					button.PortraitFrame.PortraitRingCover:SetAlpha(0.5);
 					button.BusyFrame:Show();
-					button.BusyFrame.Texture:SetTexture(unpack(GARRISON_FOLLOWER_INACTIVE_COLOR));
+					button.BusyFrame.Texture:SetColorTexture(unpack(GARRISON_FOLLOWER_INACTIVE_COLOR));
 				elseif ( follower.status ) then
 					button.PortraitFrame.PortraitRingCover:Show();
 					button.PortraitFrame.PortraitRingCover:SetAlpha(0.5);
 					button.BusyFrame:Show();
-					button.BusyFrame.Texture:SetTexture(unpack(GARRISON_FOLLOWER_BUSY_COLOR));
+					button.BusyFrame.Texture:SetColorTexture(unpack(GARRISON_FOLLOWER_BUSY_COLOR));
 					-- get time remaining for follower
 					if ( follower.status == GARRISON_FOLLOWER_ON_MISSION ) then
 						if (follower.level == GARRISON_FOLLOWER_MAX_LEVEL) then
@@ -469,13 +476,13 @@ function GarrisonFollowerList:ExpandButtonAbilities(button, traitsFirst)
 	for i=1, #button.info.abilities do
 		if ( traitsFirst == button.info.abilities[i].isTrait and button.info.abilities[i].icon ) then
 			buttonCount = buttonCount + 1;
-			abHeight = abHeight + GarrisonFollowerButton_AddAbility(button, buttonCount, button.info.abilities[i]);			
+			abHeight = abHeight + GarrisonFollowerButton_AddAbility(button, buttonCount, button.info.abilities[i], self.followerType);
 		end
 	end
 	for i=1, #button.info.abilities do
 		if ( traitsFirst ~= button.info.abilities[i].isTrait and button.info.abilities[i].icon ) then
 			buttonCount = buttonCount + 1;
-			abHeight = abHeight + GarrisonFollowerButton_AddAbility(button, buttonCount, button.info.abilities[i]);			
+			abHeight = abHeight + GarrisonFollowerButton_AddAbility(button, buttonCount, button.info.abilities[i], self.followerType);
 		end
 	end
 
@@ -492,12 +499,13 @@ function GarrisonFollowerList:ExpandButtonAbilities(button, traitsFirst)
 	return abHeight;
 end
 
-function GarrisonFollowerButton_AddAbility(self, index, ability)
+function GarrisonFollowerButton_AddAbility(self, index, ability, followerType)
 	if (not self.Abilities[index]) then
 		self.Abilities[index] = CreateFrame("Frame", nil, self, "GarrisonFollowerListButtonAbilityTemplate");
 		self.Abilities[index]:SetPoint("TOPLEFT", self.Abilities[index-1], "BOTTOMLEFT", 0, -2);
 	end
 	local Ability = self.Abilities[index];
+	Ability.followerTypeID = followerType;
 	Ability.abilityID = ability.id;
 	Ability.Name:SetText(ability.name);
 	Ability.Icon:SetTexture(ability.icon);
@@ -1221,6 +1229,7 @@ function GarrisonThreatCountersFrame_OnLoad(self, followerType, tooltipString)
 	if (followerType == nil) then
 		followerType = LE_FOLLOWER_TYPE_GARRISON_6_0;
 	end
+	self.followerType = followerType;
 	if (tooltipString == nil) then
 		tooltipString = GARRISON_THREAT_COUNTER_TOOLTIP;
 	end
@@ -1269,13 +1278,13 @@ end
 
 function GarrisonThreatCountersFrame_Update(self)
 	for i = 1, #self.ThreatsList do
-		self.ThreatsList[i].Count:SetText(C_Garrison.GetNumFollowersForMechanic(self.ThreatsList[i].id));
+		self.ThreatsList[i].Count:SetText(C_Garrison.GetNumFollowersForMechanic(self.followerType, self.ThreatsList[i].id));
 	end
 end
 
 function GarrisonThreatCounter_OnEnter(self)
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-	local text = string.format(self:GetParent().tooltipString, C_Garrison.GetNumFollowersForMechanic(self.id), self.name);
+	local text = string.format(self:GetParent().tooltipString, C_Garrison.GetNumFollowersForMechanic(self:GetParent().followerType, self.id), self.name);
 	GameTooltip:SetText(text, nil, nil, nil, nil, true);
 end
 
