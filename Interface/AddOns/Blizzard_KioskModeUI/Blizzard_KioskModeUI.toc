@@ -1,8 +1,9 @@
-## Interface: 60200
-## Title: Blizzard Item Alteration UI
+## Interface: 70000
+## Title: Blizzard_KioskModeUI
+## Notes: Kiosk Mode
 ## Secure: 1
 ## Author: Blizzard Entertainment
 ## Version: 1.0
 ## LoadOnDemand: 1
-Blizzard_ItemAlterationUI.xml
+Blizzard_KioskModeUI.xml
 Localization.lua
