@@ -34,14 +34,19 @@ function AccountLogin_OnLoad(self)
 	self:RegisterEvent("LOGIN_STATE_CHANGED");
 	self:RegisterEvent("LAUNCHER_LOGIN_STATUS_CHANGED");
 	self:RegisterEvent("FATAL_AUTHENTICATION_FAILURE");
+
+	--HAAACK. SCREEN_FIRST_DISPLAYED is not working, so we'll just do it here.
+	if ( AccountLogin_CanAutoLogin() ) then
+		AccountLogin_StartAutoLoginTimer();
+	end
 end
 
 function AccountLogin_OnEvent(self, event, ...)
 	if ( event == "SCREEN_FIRST_DISPLAYED" ) then
 		AccountLogin_Update();
-		if ( AccountLogin_CanAutoLogin() ) then
+		--[[if ( AccountLogin_CanAutoLogin() ) then
 			AccountLogin_StartAutoLoginTimer();
-		end
+		end]]
 	elseif ( event == "LOGIN_STATE_CHANGED" ) then
 		local auroraState, connectedToWoW, wowConnectionState, hasRealmList, waitingForRealmList = C_Login.GetState();
 
@@ -82,6 +87,12 @@ function AccountLogin_OnEvent(self, event, ...)
 end
 
 function AccountLogin_OnShow(self)
+	local logoInfo = EXPANSION_LOGOS[GetClientDisplayExpansionLevel()];
+	if ( logoInfo.texture ) then
+		self.UI.GameLogo:SetTexture(logoInfo.texture);
+	elseif ( logoInfo.atlas ) then
+		self.UI.GameLogo:SetAtlas(logoInfo.atlas);
+	end
 	self.UI.AccountEditBox:SetText("");
 	AccountLogin_UpdateSavedData(self);
 
@@ -188,7 +199,6 @@ function WoWAccountSelect_OnLoad(self)
 end
 
 function WoWAccountSelect_OnShow(self)
-	-- JS_TODO: WTF is going on?
 	AccountLogin.UI.AccountEditBox:SetFocus();
 	AccountLogin.UI.AccountEditBox:ClearFocus();
 	self.selectedAccount = 1;
