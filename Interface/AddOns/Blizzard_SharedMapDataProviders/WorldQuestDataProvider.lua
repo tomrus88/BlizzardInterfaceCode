@@ -1,27 +1,45 @@
-AdventureMap_WorldQuestDataProviderMixin = CreateFromMixins(MapCanvasDataProviderMixin);
+WorldQuestDataProviderMixin = CreateFromMixins(MapCanvasDataProviderMixin);
 
-function AdventureMap_WorldQuestDataProviderMixin:OnAdded(mapCanvas)
+function WorldQuestDataProviderMixin:SetMatchWorldMapFilters(matchWorldMapFilters)
+	local wasMatchingWorldMapFilters = self:IsMatchingWorldMapFilters();
+	self.matchWorldMapFilters = matchWorldMapFilters;
+	if wasMatchingWorldMapFilters ~= self:IsMatchingWorldMapFilters() and self:GetMap() and self:GetMap():GetMapID() then
+		self:RefreshAllData();
+	end
+end
+
+function WorldQuestDataProviderMixin:IsMatchingWorldMapFilters()
+	return not not self.matchWorldMapFilters;
+end
+
+function WorldQuestDataProviderMixin:OnAdded(mapCanvas)
 	MapCanvasDataProviderMixin.OnAdded(self, mapCanvas);
 end
 
-function AdventureMap_WorldQuestDataProviderMixin:RemoveAllData()
-	self:GetMap():RemoveAllPinsByTemplate("AdventureMap_WorldQuestPinTemplate");
+function WorldQuestDataProviderMixin:RemoveAllData()
+	self:GetMap():RemoveAllPinsByTemplate("WorldQuestPinTemplate");
 end
 
-function AdventureMap_WorldQuestDataProviderMixin:OnShow()
+function WorldQuestDataProviderMixin:OnShow()
 	assert(self.ticker == nil);
 	self.ticker = C_Timer.NewTicker(1, function() self:RefreshAllData() end);
 end
 
-function AdventureMap_WorldQuestDataProviderMixin:OnHide()
+function WorldQuestDataProviderMixin:OnHide()
 	self.ticker:Cancel();
 	self.ticker = nil;
 end
 
-function AdventureMap_WorldQuestDataProviderMixin:RefreshAllData(fromOnShow)
+function WorldQuestDataProviderMixin:DoesWorldQuestInfoPassFilters(info)
+	local ignoreTypeRequirements = not self:IsMatchingWorldMapFilters();
+	local ignoreTimeRequirements = false;
+	return WorldMap_DoesWorldQuestInfoPassFilters(info, ignoreTypeRequirements, ignoreTimeRequirements);
+end
+
+function WorldQuestDataProviderMixin:RefreshAllData(fromOnShow)
 	self:RemoveAllData();
 
-	local mapAreaID = C_AdventureMap.GetContinentInfo();
+	local mapAreaID = self:GetMap():GetMapID();
 	for zoneIndex = 1, C_MapCanvas.GetNumZones(mapAreaID) do
 		local zoneMapID, zoneName, left, right, top, bottom = C_MapCanvas.GetZoneInfo(mapAreaID, zoneIndex);
 		local taskInfo = C_TaskQuest.GetQuestsForPlayerByMapID(zoneMapID, mapAreaID);
@@ -30,9 +48,8 @@ function AdventureMap_WorldQuestDataProviderMixin:RefreshAllData(fromOnShow)
 			for i, info in ipairs(taskInfo) do
 				if HaveQuestData(info.questId) then
 					if QuestMapFrame_IsQuestWorldQuest(info.questId) then
-						local timeLeftMinutes = C_TaskQuest.GetQuestTimeLeftMinutes(info.questId);
-						if not timeLeftMinutes or timeLeftMinutes > WORLD_QUESTS_TIME_CRITICAL_MINUTES or info.inProgress then
-							self:AddQuest(info);
+						if self:DoesWorldQuestInfoPassFilters(info) then
+							self:AddWorldQuest(info);
 						end
 					end
 				end
@@ -41,12 +58,12 @@ function AdventureMap_WorldQuestDataProviderMixin:RefreshAllData(fromOnShow)
 	end
 end
 
-function AdventureMap_WorldQuestDataProviderMixin:AddQuest(info)
-	local pin = self:GetMap():AcquirePin("AdventureMap_WorldQuestPinTemplate");
+function WorldQuestDataProviderMixin:AddWorldQuest(info)
+	local pin = self:GetMap():AcquirePin("WorldQuestPinTemplate");
 	pin.questID = info.questId;
 	pin.worldQuest = true;
 	pin.numObjectives = info.numObjectives;
-	pin:SetFrameLevel(1000 + self:GetMap():GetNumActivePinsByTemplate("AdventureMap_WorldQuestPinTemplate"));
+	pin:SetFrameLevel(1000 + self:GetMap():GetNumActivePinsByTemplate("WorldQuestPinTemplate"));
 
 	local tagID, tagName, worldQuestType, isRare, isElite, tradeskillLineIndex = GetQuestTagInfo(info.questId);
 	local tradeskillLineID = tradeskillLineIndex and select(7, GetProfessionInfo(tradeskillLineIndex));
@@ -109,22 +126,22 @@ function AdventureMap_WorldQuestDataProviderMixin:AddQuest(info)
 end
 
 --[[ World Quest Pin ]]--
-AdventureMap_WorldQuestPinMixin = CreateFromMixins(MapCanvasPinMixin);
+WorldQuestPinMixin = CreateFromMixins(MapCanvasPinMixin);
 
-function AdventureMap_WorldQuestPinMixin:OnLoad()
-	self:SetAlphaStyle(AM_PIN_ALPHA_STYLE_VISIBLE_WHEN_ZOOMED_IN);
-	self:SetScaleStyle(AM_PIN_SCALE_STYLE_WITH_TERRAIN);
+function WorldQuestPinMixin:OnLoad()
+	self:SetAlphaLimits(2.0, 0.0, 1.0);
+	self:SetScalingLimits(1, 1.0, 0.65);
 
 	self.UpdateTooltip = self.OnMouseEnter;
 end
 
-function AdventureMap_WorldQuestPinMixin:OnMouseEnter()
+function WorldQuestPinMixin:OnMouseEnter()
 	WorldMapTooltip:SetParent(self:GetMap());
 	WorldMapTooltip:SetFrameStrata("TOOLTIP");
 	TaskPOI_OnEnter(self);
 end
 
-function AdventureMap_WorldQuestPinMixin:OnMouseLeave()
+function WorldQuestPinMixin:OnMouseLeave()
 	TaskPOI_OnLeave(self);
 	WorldMapTooltip:SetParent(WorldMapFrame);
 	WorldMapTooltip:SetFrameStrata("TOOLTIP");

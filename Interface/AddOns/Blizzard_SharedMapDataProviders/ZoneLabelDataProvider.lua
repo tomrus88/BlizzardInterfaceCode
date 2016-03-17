@@ -1,21 +1,21 @@
-AdventureMap_ZoneLabelDataProviderMixin = CreateFromMixins(MapCanvasDataProviderMixin);
+ZoneLabelDataProviderMixin = CreateFromMixins(MapCanvasDataProviderMixin);
 
-function AdventureMap_ZoneLabelDataProviderMixin:OnAdded(mapCanvas)
+function ZoneLabelDataProviderMixin:OnAdded(mapCanvas)
 	MapCanvasDataProviderMixin.OnAdded(self, mapCanvas);
 
 	if self.ZoneLabel then
 		self.ZoneLabel:SetParent(mapCanvas);
 	else
-		self.ZoneLabel = CreateFrame("FRAME", nil, mapCanvas, "AdventureMap_ZoneLabelTemplate");
+		self.ZoneLabel = CreateFrame("FRAME", nil, mapCanvas, "ZoneLabelDataProvider_ZoneLabelTemplate");
 		self.ZoneLabel.dataProvider = self;
 	end
 
 	self.ZoneLabel:SetFrameStrata("HIGH");
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:RemoveAllData()
+function ZoneLabelDataProviderMixin:RemoveAllData()
 	self.bestAreaTrigger = nil;
-	self:GetMap():ReleaseAreaTriggers("AdventureMap_ZoneLabel");
+	self:GetMap():ReleaseAreaTriggers("ZoneLabelDataProvider_ZoneLabel");
 
 	self.ZoneLabel.FadeOutAnim:Stop();
 	self.ZoneLabel.FadeInAnim:Stop();
@@ -27,7 +27,7 @@ function AdventureMap_ZoneLabelDataProviderMixin:RemoveAllData()
 	self.activeAreas = nil;
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:RefreshAllData(fromOnShow)
+function ZoneLabelDataProviderMixin:RefreshAllData(fromOnShow)
 	self:RemoveAllData();
 
 	self.numActiveAreas = 0;
@@ -44,7 +44,7 @@ function AdventureMap_ZoneLabelDataProviderMixin:RefreshAllData(fromOnShow)
 	self.ZoneLabel:Show();
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:OnCanvasPanChanged()
+function ZoneLabelDataProviderMixin:OnCanvasPanChanged()
 	-- There are multiple areas in the current camera view, we need to check if one of them is getting closer to the center of the map
 	if self.numActiveAreas > 1 then
 		self:MarkActiveAreasDirty();
@@ -52,7 +52,7 @@ function AdventureMap_ZoneLabelDataProviderMixin:OnCanvasPanChanged()
 end
 
 local EVALUATION_FREQUENCY_SEC = .1;
-function AdventureMap_ZoneLabelDataProviderMixin:MarkActiveAreasDirty()
+function ZoneLabelDataProviderMixin:MarkActiveAreasDirty()
 	if not self.labelDirty and not self.ZoneLabel.FadeOutAnim:IsPlaying() then
 		self.labelDirty = true;
 
@@ -69,7 +69,7 @@ local function GetDistSq(x1, y1, x2, y2)
 	return deltaX * deltaX + deltaY * deltaY;
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:EvaluateBestAreaTrigger()
+function ZoneLabelDataProviderMixin:EvaluateBestAreaTrigger()
 	self.labelDirty = false;
 
 	local mapViewRect = self:GetMap():GetViewRect();
@@ -98,19 +98,19 @@ function AdventureMap_ZoneLabelDataProviderMixin:EvaluateBestAreaTrigger()
 	end
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:OnFadeOutFinished()
+function ZoneLabelDataProviderMixin:OnFadeOutFinished()
 	if not self.labelDirty then
 		self:EvaluateBestAreaTrigger();
 	end
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:OnFadeInFinished()
+function ZoneLabelDataProviderMixin:OnFadeInFinished()
 	if self.labelDirty then
 		self:EvaluateBestAreaTrigger();
 	end
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:CalculateAnchorsForAreaTrigger(areaTrigger)
+function ZoneLabelDataProviderMixin:CalculateAnchorsForAreaTrigger(areaTrigger)
 	local TOP_Y_OFFSET = -30;
 
 	if areaTrigger.isContinent then
@@ -157,7 +157,7 @@ local function ContinentAreaTriggerPredicate(areaTrigger)
 	return not ZoneAreaTriggerPredicate(areaTrigger);
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:OnAreaEnclosedChanged(areaTrigger, areaEnclosed)
+function ZoneLabelDataProviderMixin:OnAreaEnclosedChanged(areaTrigger, areaEnclosed)
 	if areaEnclosed then
 		self.activeAreas[areaTrigger] = true;
 		self.numActiveAreas = self.numActiveAreas + 1;
@@ -173,8 +173,8 @@ local function OnAreaEnclosedChanged(areaTrigger, areaEnclosed)
 	areaTrigger.owner:OnAreaEnclosedChanged(areaTrigger, areaEnclosed);
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:AddZone(zoneMapID, zoneName, left, right, top, bottom)
-	local areaTrigger = self:GetMap():AcquireAreaTrigger("AdventureMap_ZoneLabel");
+function ZoneLabelDataProviderMixin:AddZone(zoneMapID, zoneName, left, right, top, bottom)
+	local areaTrigger = self:GetMap():AcquireAreaTrigger("ZoneLabelDataProvider_ZoneLabel");
 	areaTrigger.owner = self;
 	areaTrigger.name = zoneName;
 	areaTrigger.isContinent = false;
@@ -194,10 +194,10 @@ function AdventureMap_ZoneLabelDataProviderMixin:AddZone(zoneMapID, zoneName, le
 	areaTrigger:Stretch(halfWidth, halfHeight);
 end
 
-function AdventureMap_ZoneLabelDataProviderMixin:AddContinent()
-	local areaTrigger = self:GetMap():AcquireAreaTrigger("AdventureMap_ZoneLabel");
+function ZoneLabelDataProviderMixin:AddContinent()
+	local areaTrigger = self:GetMap():AcquireAreaTrigger("ZoneLabelDataProvider_ZoneLabel");
 	areaTrigger.owner = self;
-	areaTrigger.name = select(2, C_AdventureMap.GetContinentInfo());
+	areaTrigger.name = select(2, C_MapCanvas.GetContinentInfo(self:GetMap():GetMapID()));
 	areaTrigger.isContinent = true;
 
 	self:GetMap():SetAreaTriggerEnclosedCallback(areaTrigger, OnAreaEnclosedChanged);

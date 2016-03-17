@@ -1,8 +1,8 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-	<Script file="AM_ZoneLabelDataProvider.lua"/>
+	<Script file="ZoneLabelDataProvider.lua"/>
 
-	<Frame name="AdventureMap_ZoneLabelTemplate" alpha="0" virtual="true">
+	<Frame name="ZoneLabelDataProvider_ZoneLabelTemplate" alpha="0" virtual="true">
 		<Size x="455" y="63"/>
 
 		<Layers>
@@ -17,7 +17,7 @@
 		</Layers>
 		<Animations>
 			<AnimationGroup parentKey="FadeInAnim" setToFinalAlpha="true">
-				<Alpha fromAlpha="0" toAlpha="1" duration=".3" order="1" />
+				<Alpha fromAlpha="0" toAlpha="1" duration=".3" order="1" smoothing="IN" />
 
 				<Scripts>
 					<OnFinished>
@@ -26,7 +26,7 @@
 				</Scripts>
 			</AnimationGroup>
 			<AnimationGroup parentKey="FadeOutAnim" setToFinalAlpha="true">
-				<Alpha fromAlpha="1" toAlpha="0" duration=".3" order="1" />
+				<Alpha fromAlpha="1" toAlpha="0" duration=".3" order="1" smoothing="OUT"  />
 
 				<Scripts>
 					<OnFinished>
