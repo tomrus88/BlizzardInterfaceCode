@@ -80,6 +80,7 @@ function CharacterSelect_OnShow(self)
 	SetInCharacterSelect(true);
 	CHARACTER_LIST_OFFSET = 0;
 	CharacterSelect_ResetVeteranStatus();
+	CharacterTemplateConfirmDialog:Hide();
 
 	if ( #translationTable == 0 ) then
 		for i = 1, GetNumCharacters() do
@@ -1341,64 +1342,65 @@ function GetIndexFromCharID(charID)
 end
 
 ACCOUNT_UPGRADE_FEATURES = {
-	VETERAN = { [1] = { icon = "Interface\\Icons\\achievement_bg_returnxflags_def_wsg", text = VETERAN_FEATURE_1 },
-		  [2] = { icon = "Interface\\Icons\\achievement_reputation_01", text = VETERAN_FEATURE_2 },
-		  [3] = { icon = "Interface\\Icons\\spell_holy_surgeoflight", text = VETERAN_FEATURE_3 },
-		  logo = "Interface\\Glues\\Common\\Glues-WoW-WODLOGO",
-		  banner = "accountupgradebanner-wod",
-		  buttonText = REACTIVATE_ACCOUNT_NOW,
-		  displayCheck =  function() return true end,
-		  upgradeOnClick = function() SubscriptionRequestDialog_Open() end,
-		  },
-	[LE_EXPANSION_BURNING_CRUSADE] =
-		{ [1] = { icon = "Interface\\Icons\\achievement_level_85", text = UPGRADE_FEATURE_7 },
-		  [2] = { icon = "Interface\\Icons\\achievement_firelands raid_ragnaros", text = UPGRADE_FEATURE_8 },
-		  [3] = { icon = "Interface\\Icons\\Ability_Mount_CelestialHorse", text = UPGRADE_FEATURE_9 },
-		  logo = "Interface\\Glues\\Common\\Glues-WoW-CCLogo",
-		  banner = "accountupgradebanner-cataclysm",
-		  buttonText =  UPGRADE_ACCOUNT_SHORT,
-		  displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
-		  upgradeOnClick = UpgradeAccount,
-		  },
-	[LE_EXPANSION_WRATH_OF_THE_LICH_KING] =
-		{ [1] = { icon = "Interface\\Icons\\achievement_level_85", text = UPGRADE_FEATURE_7 },
-		  [2] = { icon = "Interface\\Icons\\achievement_firelands raid_ragnaros", text = UPGRADE_FEATURE_8 },
-		  [3] = { icon = "Interface\\Icons\\Ability_Mount_CelestialHorse", text = UPGRADE_FEATURE_9 },
-		  logo = "Interface\\Glues\\Common\\Glues-WoW-CCLogo",
-		  banner = "accountupgradebanner-cataclysm",
-		  buttonText =  UPGRADE_ACCOUNT_SHORT,
-		  displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
-		  upgradeOnClick = UpgradeAccount,
-		  },
-	[LE_EXPANSION_CATACLYSM] =
-		{ [1] = { icon = "Interface\\Icons\\achievement_level_90", text = UPGRADE_FEATURE_10 },
-		  [2] = { icon = "Interface\\Glues\\AccountUpgrade\\upgrade-panda", text = UPGRADE_FEATURE_11 },
-		  [3] = { icon = "Interface\\Icons\\achievement_zone_jadeforest", text = UPGRADE_FEATURE_12 },
-		  logo = "Interface\\Glues\\Common\\Glues-WoW-MPLogo",
-		  banner = "accountupgradebanner-mop",
-		  buttonText =  UPGRADE_ACCOUNT_SHORT,
-		  displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
-		  upgradeOnClick = UpgradeAccount,
-		  },
-	[LE_EXPANSION_MISTS_OF_PANDARIA] =
-		{ [1] = { icon = "Interface\\Icons\\Achievement_Quests_Completed_06", text = UPGRADE_FEATURE_2 },
-		  [2] = { icon = "Interface\\Icons\\Achievement_Level_100", text = UPGRADE_FEATURE_14 },
-		  [3] = { icon = "Interface\\Icons\\UI_Promotion_Garrisons", text = UPGRADE_FEATURE_15 },
-		  logo = "Interface\\Glues\\Common\\Glues-WoW-WODLOGO",
-		  banner = "accountupgradebanner-wod",
-		  buttonText =  UPGRADE_ACCOUNT_SHORT,
-		  displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
-		  upgradeOnClick = UpgradeAccount,
-		  },
-	[LE_EXPANSION_WARLORDS_OF_DRAENOR] =
-		{ [1] = { icon = "Interface\\Icons\\ClassIcon_DemonHunter", text = UPGRADE_FEATURE_16 },
-		  [2] = { icon = "Interface\\Icons\\Icon_TreasureMap", text = UPGRADE_FEATURE_17 },
-		  [3] = { icon = "Interface\\Icons\\UI_Promotion_CharacterBoost", text = UPGRADE_FEATURE_18 },
-		  atlasLogo = "Glues-WoW-LegionLogo",
-		  banner = "accountupgradebanner-legion",
-		  buttonText = UPGRADE_ACCOUNT_SHORT,
-		  displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
-		  upgradeOnClick = function()
+	VETERAN = { 
+		[1] = { icon = "Interface\\Icons\\achievement_bg_returnxflags_def_wsg", text = VETERAN_FEATURE_1 },
+		[2] = { icon = "Interface\\Icons\\achievement_reputation_01", text = VETERAN_FEATURE_2 },
+		[3] = { icon = "Interface\\Icons\\spell_holy_surgeoflight", text = VETERAN_FEATURE_3 },
+		logo = "Interface\\Glues\\Common\\Glues-WoW-WODLOGO",
+		banner = "accountupgradebanner-wod",
+		buttonText = REACTIVATE_ACCOUNT_NOW,
+		displayCheck =  function() return true end,
+		upgradeOnClick = function() SubscriptionRequestDialog_Open() end,
+	},
+	[LE_EXPANSION_BURNING_CRUSADE] = {
+		[1] = { icon = "Interface\\Icons\\achievement_level_85", text = UPGRADE_FEATURE_7 },
+		[2] = { icon = "Interface\\Icons\\achievement_firelands raid_ragnaros", text = UPGRADE_FEATURE_8 },
+		[3] = { icon = "Interface\\Icons\\Ability_Mount_CelestialHorse", text = UPGRADE_FEATURE_9 },
+		logo = "Interface\\Glues\\Common\\Glues-WoW-CCLogo",
+		banner = "accountupgradebanner-cataclysm",
+		buttonText =  UPGRADE_ACCOUNT_SHORT,
+		displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
+		upgradeOnClick = UpgradeAccount,
+	},
+	[LE_EXPANSION_WRATH_OF_THE_LICH_KING] = { 
+		[1] = { icon = "Interface\\Icons\\achievement_level_85", text = UPGRADE_FEATURE_7 },
+		[2] = { icon = "Interface\\Icons\\achievement_firelands raid_ragnaros", text = UPGRADE_FEATURE_8 },
+		[3] = { icon = "Interface\\Icons\\Ability_Mount_CelestialHorse", text = UPGRADE_FEATURE_9 },
+		logo = "Interface\\Glues\\Common\\Glues-WoW-CCLogo",
+		banner = "accountupgradebanner-cataclysm",
+		buttonText =  UPGRADE_ACCOUNT_SHORT,
+		displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
+		upgradeOnClick = UpgradeAccount,
+	},
+	[LE_EXPANSION_CATACLYSM] = {
+		[1] = { icon = "Interface\\Icons\\achievement_level_90", text = UPGRADE_FEATURE_10 },
+		[2] = { icon = "Interface\\Glues\\AccountUpgrade\\upgrade-panda", text = UPGRADE_FEATURE_11 },
+		[3] = { icon = "Interface\\Icons\\achievement_zone_jadeforest", text = UPGRADE_FEATURE_12 },
+		logo = "Interface\\Glues\\Common\\Glues-WoW-MPLogo",
+		banner = "accountupgradebanner-mop",
+		buttonText =  UPGRADE_ACCOUNT_SHORT,
+		displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
+		upgradeOnClick = UpgradeAccount,
+	},
+	[LE_EXPANSION_MISTS_OF_PANDARIA] = {
+		[1] = { icon = "Interface\\Icons\\Achievement_Quests_Completed_06", text = UPGRADE_FEATURE_2 },
+		[2] = { icon = "Interface\\Icons\\Achievement_Level_100", text = UPGRADE_FEATURE_14 },
+		[3] = { icon = "Interface\\Icons\\UI_Promotion_Garrisons", text = UPGRADE_FEATURE_15 },
+		logo = "Interface\\Glues\\Common\\Glues-WoW-WODLOGO",
+		banner = "accountupgradebanner-wod",
+		buttonText =  UPGRADE_ACCOUNT_SHORT,
+		displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
+		upgradeOnClick = UpgradeAccount,
+	},
+	[LE_EXPANSION_WARLORDS_OF_DRAENOR] = {
+		[1] = { icon = "Interface\\Icons\\ClassIcon_DemonHunter", text = UPGRADE_FEATURE_16 },
+		[2] = { icon = "Interface\\Icons\\Icon_TreasureMap", text = UPGRADE_FEATURE_17 },
+		[3] = { icon = "Interface\\Icons\\UI_Promotion_CharacterBoost", text = UPGRADE_FEATURE_18 },
+		atlasLogo = "Glues-WoW-LegionLogo",
+		banner = "accountupgradebanner-legion",
+		buttonText = UPGRADE_ACCOUNT_SHORT,
+		displayCheck =  function() return GameLimitedMode_IsActive() or CanUpgradeExpansion() end,
+		upgradeOnClick = function()
 			if ( CharacterSelect_IsStoreAvailable() and C_PurchaseAPI.HasProductType(LE_BATTLEPAY_PRODUCT_ITEM_7_0_BOX_LEVEL) ) then
 				StoreFrame_SetGamesCategory();
 				StoreFrame_SetShown(true);
@@ -1406,12 +1408,17 @@ ACCOUNT_UPGRADE_FEATURES = {
 				-- if the store is down or parentally locked, send the player to the web
 				UpgradeAccount();
 			end
-		  end,
-		  },
+		end,
+	},
 }
 
+local currentLocale = GetLocale();
+if currentLocale == "koKR" or currentLocale == "zhTW" then
+	ACCOUNT_UPGRADE_FEATURES[LE_EXPANSION_WARLORDS_OF_DRAENOR][3] = { icon = "Interface\\Icons\\Achievement_Quests_Completed_06", text = UPGRADE_FEATURE_2 }
+end
+
 -- Account upgrade panel
-function AccountUpgradePanel_GetExpansionTag(isExpanded)
+function AccountUpgradePanel_GetExpansionTag()
 	local tag, logoTag;
 	if ( IsTrialAccount() ) then
 		-- Trial users have the starter edition logo with an upgrade banner that brings you to the lowest expansion level available.
