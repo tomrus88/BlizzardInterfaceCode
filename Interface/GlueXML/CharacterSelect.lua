@@ -12,6 +12,8 @@ CHARACTER_LIST_OFFSET = 0;
 
 CHARACTER_SELECT_BACK_FROM_CREATE = false;
 
+CHARACTER_SELECT_KICKED_FROM_CONVERT = false;
+
 MOVING_TEXT_OFFSET = 12;
 DEFAULT_TEXT_OFFSET = 0;
 CHARACTER_BUTTON_HEIGHT = 57;
@@ -58,6 +60,8 @@ function CharacterSelect_OnLoad(self)
 	self:RegisterEvent("CHARACTER_LIST_RETRIEVAL_RESULT");
 	self:RegisterEvent("DELETED_CHARACTER_LIST_RETRIEVING");
 	self:RegisterEvent("DELETED_CHARACTER_LIST_RETRIEVAL_RESULT");
+    self:RegisterEvent("SHOULD_CONVERT");
+    self:RegisterEvent("CONVERT_RESULT");
 
 	SetCharSelectModelFrame("CharacterSelectModel");
 
@@ -79,6 +83,7 @@ function CharacterSelect_OnShow(self)
 	InitializeCharacterScreenData();
 	SetInCharacterSelect(true);
 	CHARACTER_LIST_OFFSET = 0;
+	CHARACTER_SELECT_KICKED_FROM_CONVERT = false;
 	CharacterSelect_ResetVeteranStatus();
 	CharacterTemplateConfirmDialog:Hide();
 
@@ -123,9 +128,10 @@ function CharacterSelect_OnShow(self)
 
 	-- Gameroom billing stuff (For Korea and China only)
 	if ( SHOW_GAMEROOM_BILLING_FRAME ) then
+		RequestConsumptionConversionInfo();
 		local paymentPlan, hasFallBackBillingMethod, isGameRoom = GetBillingPlan();
-		if ( paymentPlan == 0 ) then
-			-- No payment plan
+		if ( paymentPlan == 0 or ( ( paymentPlan == 1 or paymentPlan == 3 ) and ONLY_SHOW_GAMEROOM_BILLING_FRAME_ON_PERSONAL_TIME ) ) then
+			-- No payment plan or should only show when using consumption time
 			GameRoomBillingFrame:Hide();
 		else
 			local billingTimeLeft = GetBillingTimeRemaining();
@@ -249,6 +255,11 @@ function CharacterSelect_OnHide(self)
 	CharacterDeleteDialog:Hide();
 	CharacterRenameDialog:Hide();
 	AccountReactivate_CloseDialogs();
+	GameRoomBillingFrame_HideConversionButton();
+	ConvertConfirmationFrame:Hide();
+	CharacterSelectConvertInterstitial:Hide();
+	ConversionInProgressDialog:Hide();
+	
 	if ( DeclensionFrame ) then
 		DeclensionFrame:Hide();
 	end
@@ -388,7 +399,11 @@ function CharacterSelect_OnEvent(self, event, ...)
 			self.undeleteNoCharacters = true;
 			return;
 		elseif (not CHARACTER_SELECT_BACK_FROM_CREATE and numChars == 0) then
-			GlueParent_SetScreen("charcreate");
+			if (IsKioskModeEnabled()) then
+				GlueParent_SetScreen("kioskmodesplash");
+			else
+				GlueParent_SetScreen("charcreate");
+			end
 			return;
 		end
 
@@ -519,8 +534,19 @@ function CharacterSelect_OnEvent(self, event, ...)
 	elseif ( event == "DELETED_CHARACTER_LIST_RETRIEVAL_RESULT" ) then
 		local success = ...;
 		CharacterSelect_SetRetrievingCharacters(false, success);
+	elseif ( event == "SHOULD_CONVERT" ) then
+       	GameRoomBillingFrame_ShowConversionButton();
+    elseif ( event == "CONVERT_RESULT" ) then
+		local result = ...;
+
+		if (result ~= LE_CONVERT_RESULT_SUCCESS) then
+			ConversionInProgressDialog:Hide();
+			GlueDialog_Show("CONVERT_RESULT_ERROR");
+		else
+			CHARACTER_SELECT_KICKED_FROM_CONVERT = true;
 		end
-	end
+    end
+end
 
 function CharacterSelect_SetPendingTrialBoost(hasPendingTrialBoost, factionID, specID)
 	CharacterSelect.hasPendingTrialBoost = hasPendingTrialBoost;
@@ -2583,4 +2609,61 @@ function CharacterSelect_CheckApplyBoostToUnlockTrialCharacter(guid)
 
 		StoreFrame_SelectLevel100BoostProduct(guid);
 	end
+end
+
+-- CONVERSION
+
+GlueDialogTypes["CONVERT_RESULT_ERROR"] = {
+    text = CONVERT_ERROR_OTHER,
+	button1 = OKAY,
+	showAlert = 1,
+}
+
+function GameRoomBillingFrameConvertMe_OnClick(self)
+    local frame = CharacterSelectConvertInterstitial;
+    
+    local minutes, days, endTime = GetConsumptionConversionInfo();
+    
+    frame.Before:SetText(FormatLargeNumber(minutes));
+    frame.After:SetText(days);
+	frame.Description:SetText("<html><body><p align=\"center\">"..CONVERT_DESCRIPTION.."</p></body></html>");
+    frame.ConvertNowDescription:SetText(CONVERT_NOW_DESCRIPTION:format(days));
+    frame:Show();
+end
+
+function GameRoomBillingFrame_ShowConversionButton()
+	if (not GameRoomBillingFrame:IsShown()) then
+		local minutes = GetConsumptionConversionInfo();
+		GameRoomBillingFrameText:SetFormattedText(CONVERT_LEFTOVER_MINUTES, minutes);
+		GameRoomBillingFrame:SetHeight(GameRoomBillingFrameText:GetHeight() + 26);
+		GameRoomBillingFrame:Show();
+	end
+	GameRoomBillingFrame.ConvertMe:Show();
+    GameRoomBillingFrame:SetHeight(GameRoomBillingFrame:GetHeight() + 26);
+	CharacterSelectServerAlertFrame:SetPoint("BOTTOMRIGHT", CharacterSelectUI, "TOPLEFT", 260, -564);
+end
+
+function GameRoomBillingFrame_HideConversionButton()
+	if (GameRoomBillingFrame.ConvertMe:IsShown()) then
+		GameRoomBillingFrame.ConvertMe:Hide();
+		GameRoomBillingFrame:SetHeight(GameRoomBillingFrame:GetHeight() - 26);
+		CharacterSelectServerAlertFrame:SetPoint("BOTTOMRIGHT", CharacterSelectUI, "TOPLEFT", 260, -570);
+	end
+end
+
+function ConvertInterstitialConvertNow_OnClick(self)
+    self:GetParent():Hide();
+    local frame = ConvertConfirmationFrame;
+    
+    local minutes, days, newTime = GetConsumptionConversionInfo();
+    local newDate = date("*t", newTime);
+    
+    frame.Text:SetText(CONVERT_CONFIRMATION_DESCRIPTION:format(minutes, days, SHORTDATE:format(newDate.day, newDate.month, newDate.year)));
+    frame:Show();
+end
+
+function ConvertConfirmationConfirmButton_OnClick(self)
+    self:GetParent():Hide();
+    ConvertConsumptionTime();
+    ConversionInProgressDialog:Show();
 end
