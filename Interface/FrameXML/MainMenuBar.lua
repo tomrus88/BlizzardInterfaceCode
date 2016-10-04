@@ -144,7 +144,7 @@ function MainMenuBar_UpdateExperienceBars(newLevel)
 	local artifactItemID, _, _, _, artifactTotalXP, artifactPointsSpent, _, _, _, _, _, _, artifactMaxed = C_ArtifactUI.GetEquippedArtifactInfo();
 	local showArtifact = artifactItemID and not artifactMaxed and GetCVarBool("showArtifactXPBar");
 	local showXP = newLevel < MAX_PLAYER_LEVEL and not IsXPUserDisabled();
-	local showHonor = newLevel >= MAX_PLAYER_LEVEL and (IsWatchingHonorAsXP() or InActiveBattlefield());
+	local showHonor = newLevel >= MAX_PLAYER_LEVEL and (IsWatchingHonorAsXP() or InActiveBattlefield() or IsInActiveWorldPVP());
 	local showRep = name;
 	local numBarsShowing = 0;
 	--******************* EXPERIENCE **************************************
@@ -714,6 +714,8 @@ function HonorWatchBar_OnLoad(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("HONOR_XP_UPDATE");
 	self:RegisterEvent("CVAR_UPDATE");
+	self:RegisterEvent("ZONE_CHANGED");
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA");
     self.OverlayFrame.Text:SetPoint("CENTER", 0, -1);
 	self.StatusBar:SetOnAnimatedValueChangedCallback(MainMenuBar_HonorUpdateOverlayFrameText);
 	self.StatusBar.OnFinishedCallback = function(...)

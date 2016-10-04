@@ -114,7 +114,7 @@ UIChildWindows = {
 };
 
 function UpdateUIParentRelativeToDebugMenu()
-	if (DebugMenu.IsVisible()) then
+	if (DebugMenu and DebugMenu.IsVisible()) then
 		UIParent:SetPoint("TOPLEFT", 0, -DebugMenu.GetMenuHeight());
 	else
 		UIParent:SetPoint("TOPLEFT", 0, 0);
@@ -1347,13 +1347,13 @@ function UIParent_OnEvent(self, event, ...)
 			dialog.data2 = arg2;
 		end
 	elseif ( event == "SPELL_CONFIRMATION_PROMPT" ) then
-		local spellID, confirmType, text, duration, currencyID = ...;
+		local spellID, confirmType, text, duration, currencyID, difficultyID = ...;
 		if ( confirmType == LE_SPELL_CONFIRMATION_PROMPT_TYPE_STATIC_TEXT ) then
 			StaticPopup_Show("SPELL_CONFIRMATION_PROMPT", text, duration, spellID);
 		elseif ( confirmType == LE_SPELL_CONFIRMATION_PROMPT_TYPE_SIMPLE_WARNING ) then
 			StaticPopup_Show("SPELL_CONFIRMATION_WARNING", text, nil, spellID);
 		elseif ( confirmType == LE_SPELL_CONFIRMATION_PROMPT_TYPE_BONUS_ROLL ) then
-			BonusRollFrame_StartBonusRoll(spellID, text, duration, currencyID);
+			BonusRollFrame_StartBonusRoll(spellID, text, duration, currencyID, difficultyID);
 		end
 	elseif ( event == "SPELL_CONFIRMATION_TIMEOUT" ) then
 		local spellID, confirmType = ...;
@@ -4615,10 +4615,14 @@ function PrintLootSpecialization()
 	end
 end
 
-function BuildIconArray(parent, baseName, template, rowSize, numRows)
+function BuildIconArray(parent, baseName, template, rowSize, numRows, onButtonCreated)
 	local previousButton = CreateFrame("CheckButton", baseName.."1", parent, template);
 	local cornerButton = previousButton;
-	previousButton:SetPoint("TOPLEFT", 24, -85);
+	previousButton:SetID(1);
+	previousButton:SetPoint("TOPLEFT", 26, -85);
+	if ( onButtonCreated ) then
+		onButtonCreated(parent, previousButton);
+	end
 	
 	local numIcons = rowSize * numRows;
 	for i = 2, numIcons do
@@ -4633,6 +4637,9 @@ function BuildIconArray(parent, baseName, template, rowSize, numRows)
 		
 		previousButton = newButton;
 		newButton:Hide();
+		if ( onButtonCreated ) then
+			onButtonCreated(parent, newButton);
+		end
 	end
 end
 
