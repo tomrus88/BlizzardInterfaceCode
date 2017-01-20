@@ -387,6 +387,14 @@ function GetBalanceRedemptionString()
 	return string.format(TOKEN_REDEEM_BALANCE_FORMAT, balanceStr, addedStr);
 end
 
+function WowTokenRedemptionFrame_OnShow(self)
+	PlaySound("igMainMenuOpen");
+end
+
+function WowTokenRedemptionFrame_OnHide(self)
+	PlaySound("igMainMenuClose");
+end
+
 function WowTokenRedemptionFrame_OnEvent(self, event, ...)
 	if (event == "TOKEN_REDEEM_FRAME_SHOW") then
 		self.LeftDisplay.RedeemButton:Disable();
@@ -404,7 +412,6 @@ function WowTokenRedemptionFrame_OnEvent(self, event, ...)
 			self.LeftDisplay.Format:Hide();
 			self.LeftDisplay.Spinner:Show();
 			if (BalanceEnabled) then
-				WowTokenRedemptionFrame_EnableBalance(self);
 				C_WowTokenSecure.CanRedeemForBalance();
 				self.RightDisplay.Format:Hide();
 				self.RightDisplay.Spinner:Show();
@@ -626,6 +633,7 @@ dialogs = {
 		end,
 		button2 = CANCEL,
 		button2OnClick = function(self) self:Hide(); C_WowTokenSecure.CancelRedeem(); PlaySound("igMainMenuClose"); end,
+		validate = function() return C_WowTokenSecure.IsRedemptionStillValid(); end,
 		onHide = function(self)
 			dialogs["WOW_TOKEN_REDEEM_CONFIRMATION_SUB"].spinner = true;
 			dialogs["WOW_TOKEN_REDEEM_CONFIRMATION_SUB"].confirmationDesc = nil;
@@ -660,6 +668,7 @@ dialogs = {
 		confirmationDesc = nil, -- Now set in reaction to an event
 		confDescIsFunction = true,
 		button1 = ACCEPT,
+		validate = function() return C_WowTokenSecure.IsRedemptionStillValid(); end,
 		button1OnClick = function(self) 
 			self:Hide(); 
 			if (C_WowTokenSecure.GetTokenCount() > 0) then 
@@ -920,8 +929,10 @@ function WowTokenDialog_SetDialog(self, dialogName)
 			self.Spinner:SetPoint("BOTTOM", 0, 32);
 			height = height + 16;
 		end
+		self.Button1:Disable();
 	else
 		self.Spinner:Hide();
+		self.Button1:Enable();
 	end
 
 	if (dialog.noButtons) then
@@ -1091,6 +1102,7 @@ function WowTokenDialog_OnEvent(self, event, ...)
 		else
 			Outbound.RedeemFailed(result);
 			C_WowTokenSecure.CancelRedeem();
+			self:Hide();
 		end
 	elseif (event == "AUCTION_HOUSE_CLOSED") then
 		WowTokenDialog_HideDialog("WOW_TOKEN_CREATE_AUCTION");
