@@ -91,6 +91,7 @@ function CharacterSelect_OnLoad(self)
     self:RegisterEvent("SHOULD_CONVERT");
     self:RegisterEvent("CONVERT_RESULT");
     self:RegisterEvent("VAS_CHARACTER_QUEUE_STATUS_UPDATE");
+    self:RegisterEvent("LOGIN_STATE_CHANGED");
 
     SetCharSelectModelFrame("CharacterSelectModel");
 
@@ -127,33 +128,7 @@ function CharacterSelect_OnShow(self)
 
     UpdateAddonButton();
 
-    local serverName, isPVP, isRP = GetServerName();
-    local connected = IsConnectedToServer();
-    local serverType = "";
-    if ( serverName ) then
-        if( not connected ) then
-            serverName = serverName.."\n("..SERVER_DOWN..")";
-        end
-        if ( isPVP ) then
-            if ( isRP ) then
-                serverType = RPPVP_PARENTHESES;
-            else
-                serverType = PVP_PARENTHESES;
-            end
-        elseif ( isRP ) then
-            serverType = RP_PARENTHESES;
-        end
-        CharSelectRealmName:SetText(serverName.." "..serverType);
-        CharSelectRealmName:Show();
-    else
-        CharSelectRealmName:Hide();
-    end
-
-    if ( connected ) then
-        GetCharacterListUpdate();
-    else
-        UpdateCharacterList();
-    end
+    CharacterSelect_UpdateState();
 
     -- Gameroom billing stuff (For Korea and China only)
     if ( SHOW_GAMEROOM_BILLING_FRAME ) then
@@ -306,6 +281,36 @@ function CharacterSelect_OnHide(self)
 
     AccountReactivate_CloseDialogs();
     SetInCharacterSelect(false);
+end
+
+function CharacterSelect_UpdateState()
+    local serverName, isPVP, isRP = GetServerName();
+    local connected = IsConnectedToServer();
+    local serverType = "";
+    if ( serverName ) then
+        if( not connected ) then
+            serverName = serverName.."\n("..SERVER_DOWN..")";
+        end
+        if ( isPVP ) then
+            if ( isRP ) then
+                serverType = RPPVP_PARENTHESES;
+            else
+                serverType = PVP_PARENTHESES;
+            end
+        elseif ( isRP ) then
+            serverType = RP_PARENTHESES;
+        end
+        CharSelectRealmName:SetText(serverName.." "..serverType);
+        CharSelectRealmName:Show();
+    else
+        CharSelectRealmName:Hide();
+    end
+
+    if ( connected ) then
+        GetCharacterListUpdate();
+    else
+        UpdateCharacterList();
+    end
 end
 
 function CharacterSelect_SaveCharacterOrder()
@@ -577,12 +582,14 @@ function CharacterSelect_OnEvent(self, event, ...)
             GlueDialog_Show("OKAY_WITH_URL_INDEX", ERROR_MANUAL_UNREVOKE_FAILURE, urlIndex);
         end
     elseif ( event == "VAS_CHARACTER_QUEUE_STATUS_UPDATE" ) then
-            local guid, minutes = ...;
-            VAS_QUEUE_TIMES[guid] = minutes;
-            if (not IsCharacterListUpdatePending()) then
-                UpdateCharacterList();
-            end
-  end
+        local guid, minutes = ...;
+        VAS_QUEUE_TIMES[guid] = minutes;
+        if (not IsCharacterListUpdatePending()) then
+            UpdateCharacterList();
+        end
+    elseif ( event == "LOGIN_STATE_CHANGED" ) then
+        CharacterSelect_UpdateState();
+    end
 end
 
 function CharacterSelect_SetPendingTrialBoost(hasPendingTrialBoost, factionID, specID)
@@ -718,8 +725,10 @@ function UpdateCharacterList(skipSelect)
 
     for i=1, characterLimit, 1 do
         local name, race, class, classFileName, classID, level, zone, sex, ghost, PCC, PRC, PFC, PRCDisabled, guid, _, _, _, boostInProgress, _, locked, isTrialBoost, isTrialBoostLocked, revokedCharacterUpgrade = GetCharacterInfo(GetCharIDFromIndex(i+CHARACTER_LIST_OFFSET));
-        local productID, vasServiceState, vasServiceErrors = C_StoreGlue.GetVASPurchaseStateInfo(guid);
-        local productInfo;
+        local productID, vasServiceState, vasServiceErrors, productInfo;
+        if (guid) then
+            productID, vasServiceState, vasServiceErrors = C_StoreGlue.GetVASPurchaseStateInfo(guid);
+        end
         if (productID) then
             productInfo = C_StoreSecure.GetProductInfo(productID);
         end
@@ -759,7 +768,7 @@ function UpdateCharacterList(skipSelect)
                 else
                     locationText:SetText("");
                 end
-			elseif (vasServiceState == Enum.VasPurchaseProgress.WaitingOnQueue) then
+			elseif (vasServiceState == Enum.VasPurchaseProgress.WaitingOnQueue and not VAS_QUEUE_TIMES[guid]) then
 				C_StoreGlue.RequestCharacterQueueTime(guid);
             elseif (vasServiceState == Enum.VasPurchaseProgress.ProcessingFactionChange) then
                 infoText:SetText(CHARACTER_UPGRADE_PROCESSING);
@@ -2791,7 +2800,7 @@ function CharacterSelect_CheckApplyBoostToUnlockTrialCharacter(guid)
 end
 
 function CharacterSelect_CheckApplyBoostToUnrevokeBoost(guid)
-    local productID = Enum.BattlepayBoostProduct.Level100Bost;
+    local productID = Enum.BattlepayBoostProduct.Level100Boost;
     local hasBoost, useFreeBoost = CharacterSelect_CheckBoostProduct(productID);
 
     if hasBoost then

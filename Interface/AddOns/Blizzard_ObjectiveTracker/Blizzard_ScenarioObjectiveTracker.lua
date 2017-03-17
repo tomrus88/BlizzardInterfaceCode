@@ -41,6 +41,7 @@ function SCENARIO_TRACKER_MODULE:OnFreeLine(line)
 		line.Glow.Anim:Stop();
 		line.Sheen.Anim:Stop();
 		line.CheckFlash.Anim:Stop();
+		line.CheckFlash:SetAlpha(0);
 		line.completed = nil;
 	end
 end
@@ -852,6 +853,11 @@ function SCENARIO_CONTENT_TRACKER_MODULE:Update()
 				else
 					stageBlock.Stage:SetPoint("TOPLEFT", 15, -18);
 				end
+			end
+			if (not stageBlock.appliedAlready) then
+				-- Ugly hack to get around :IsTruncated failing if used during load
+				C_Timer.After(1, function() stageBlock.Stage:ApplyFontObjects(); end);
+				stageBlock.appliedAlready = true;
 			end
 			ScenarioStage_CustomizeBlock(stageBlock, scenarioType);
 		end

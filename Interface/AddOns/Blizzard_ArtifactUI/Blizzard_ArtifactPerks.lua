@@ -278,7 +278,7 @@ function ArtifactPerksMixin:RefreshPowerTiers()
 	self:RefreshFinalPowerForTier(1, self:AreAllGoldMedalsPurchasedByTier(1));
 	self:RefreshFinalPowerForTier(2, self:AreAllPowersPurchasedByTier(2));
 
-	if C_ArtifactUI.GetArtifactTier() >= 2 then
+	if C_ArtifactUI.GetArtifactTier() >= 2 or C_ArtifactUI.IsMaxedByRulesOrEffect() then
 		local finalTier2Button = self:GetFinalPowerButtonByTier(2);
 		if finalTier2Button then
 			self.CrestFrame:ClearAllPoints();
@@ -370,7 +370,7 @@ function ArtifactPerksMixin:TryRefresh()
 		end
 
 		self.queuePlayingReveal = false;
-		local hasBoughtAnyPowers = C_ArtifactUI.GetTotalPurchasedRanks() > 0;
+		local hasBoughtAnyPowers = ArtifactUI_HasPurchasedAnything();
 		if self.newItem then
 			self.hasBoughtAnyPowers = hasBoughtAnyPowers;
 			self.wasFinalPowerButtonUnlockedByTier = {};
@@ -383,6 +383,7 @@ function ArtifactPerksMixin:TryRefresh()
 			end
 		end
 
+		local finalTier2WasUnlocked = self.wasFinalPowerButtonUnlockedByTier[2];
 		self:RefreshPowers(self.newItem);
 		
 		self.TitleContainer:SetPointsRemaining(C_ArtifactUI.GetPointsRemaining());
@@ -391,11 +392,22 @@ function ArtifactPerksMixin:TryRefresh()
 		self.newItem = nil;
 		self.isAppearanceChanging = nil;
 		
-		if not self.numArtifactTraitsRefunded and C_ArtifactUI.GetArtifactTier() == 2 then
+		if not self.numArtifactTraitsRefunded and (C_ArtifactUI.GetArtifactTier() == 2 or C_ArtifactUI.IsMaxedByRulesOrEffect())then
 			self:ShowTier2();
 			self.CrestFrame.CrestRune1:SetAlpha(1.0);
 			self.CrestFrame.RunePulse:Play();
 			self.Model.BackgroundFront:SetAlpha(self.Model.backgroundFrontTargetAlpha);
+			if C_ArtifactUI.IsMaxedByRulesOrEffect() then
+				local finalTier1Button = self:GetFinalPowerButtonByTier(1);
+				if finalTier1Button then
+					finalTier1Button:Show();
+				end
+				
+				local finalTier2Button = self:GetFinalPowerButtonByTier(2);
+				if finalTier2Button then
+					finalTier2Button:Show();
+				end
+			end
 		end
 		
 		if self.queuePlayingReveal then
@@ -403,7 +415,7 @@ function ArtifactPerksMixin:TryRefresh()
 		elseif self.numArtifactTraitsRefunded then
 			self:AnimateTraitRefund(self.numArtifactTraitsRefunded);
 			self.numArtifactTraitsRefunded = nil;
-		elseif self.wasFinalPowerButtonUnlockedByTier[2] then
+		elseif not finalTier2WasUnlocked and self.wasFinalPowerButtonUnlockedByTier[2] then
 			self:AnimateInCurvedLine(4);
 		else
 			if C_ArtifactUI:IsAtForge() and self:ShouldShowTierGlow() then 
@@ -417,6 +429,10 @@ function ArtifactPerksMixin:TryRefresh()
 end
 
 function ArtifactPerksMixin:HasPurchasedAnythingInCurrentTier()
+	if C_ArtifactUI.IsMaxedByRulesOrEffect() then
+		return true;
+	end
+	
 	local tier = C_ArtifactUI.GetArtifactTier();
 	if tier == 1 then
 		return C_ArtifactUI.GetTotalPurchasedRanks() > 0;
@@ -830,7 +846,7 @@ function ArtifactPerksMixin:RefreshDependencies(powers)
 		end
 
 		-- Artificially link the starting and last power if they're both purchased to complete the circle
-		if lastTier2Power and lastTier2Power:IsCompletelyPurchased() then
+		if lastTier2Power and lastTier2Power:IsCompletelyPurchased() and lastTier2Power:HasSpentAny() then
 			local startingTier2Power = self:GetStartingPowerButtonByTier(2);
 			if startingTier2Power and startingTier2Power:IsCompletelyPurchased() and not startingTier2Power.links[lastTier2Power:GetPowerID()] then
 				local lineContainer = self:GenerateCurvedLine(lastTier2Power, startingTier2Power, ArtifactLineMixin.LINE_STATE_CONNECTED, artifactArtInfo);

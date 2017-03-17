@@ -125,7 +125,7 @@ function ArtifactPowerButtonMixin:PlayPurchaseAnimation()
 			self.PointBurstLeft:SetVertexColor(1, 0.81960784313725, 0.3921568627451);
 			self.PointBurstRight:SetVertexColor(1, 0.81960784313725, 0.3921568627451);
 			self.FinalPointSpentAnim:Play();
-			if C_ArtifactUI.GetTotalPurchasedRanks() > 0 then
+			if ArtifactUI_HasPurchasedAnything() then
 				PlayArtifactTraitSound("UI_70_Artifact_Forge_Trait_FinalRank");
 			end
 		else
@@ -133,7 +133,7 @@ function ArtifactPowerButtonMixin:PlayPurchaseAnimation()
 			self.PointBurstLeft:SetVertexColor(0.30980392156863, 1, 0.2156862745098);
 			self.PointBurstRight:SetVertexColor(0.30980392156863, 1, 0.2156862745098);
 			self.PointSpentAnim:Play();
-			if C_ArtifactUI.GetTotalPurchasedRanks() > 0 then
+			if ArtifactUI_HasPurchasedAnything() then
 				PlayArtifactTraitSound("UI_70_Artifact_Forge_Trait_RankUp");
 			end
 		end
@@ -422,6 +422,10 @@ function ArtifactPowerButtonMixin:IsCompletelyPurchased()
 	return self.isCompletelyPurchased;
 end
 
+function ArtifactPowerButtonMixin:HasSpentAny()
+	return self.hasSpentAny;
+end
+
 function ArtifactPowerButtonMixin:ArePrereqsMet()
 	return self.prereqsMet;
 end
@@ -563,7 +567,7 @@ function ArtifactPowerButtonMixin:ShouldGlow(totalPurchasedRanks, isAtForge)
 end
 
 function ArtifactPowerButtonMixin:EvaluateStyle()
-	if C_ArtifactUI.GetTotalPurchasedRanks() == 0 and not self.prereqsMet then
+	if not ArtifactUI_HasPurchasedAnything() and not self.prereqsMet then
 		self:SetStyle(ARTIFACT_POWER_STYLE_RUNE);	
 	elseif C_ArtifactUI.IsAtForge() and C_ArtifactUI.IsViewedArtifactEquipped() then
 		if self.isMaxRank then
@@ -578,7 +582,7 @@ function ArtifactPowerButtonMixin:EvaluateStyle()
 			self:SetStyle(ARTIFACT_POWER_STYLE_UNPURCHASED_LOCKED);
 		end
 	else
-		if C_ArtifactUI.GetTotalPurchasedRanks() == 0 and C_ArtifactUI.GetNumObtainedArtifacts() <= 1 then
+		if not ArtifactUI_HasPurchasedAnything() and C_ArtifactUI.GetNumObtainedArtifacts() <= 1 then
 			self:SetStyle(ARTIFACT_POWER_STYLE_RUNE);
 		elseif C_ArtifactUI.IsPowerKnown(self.powerID) then
 			self:SetStyle(ARTIFACT_POWER_STYLE_PURCHASED_READ_ONLY);
