@@ -29,6 +29,7 @@ local STORE_IS_LOADED = false;
 local ADDON_LIST_RECEIVED = false;
 CAN_BUY_RESULT_FOUND = false;
 TOKEN_COUNT_UPDATED = false;
+REALM_CHANGE_IS_AUTO = false;
 
 CharacterSelectLockedButtonMixin = {};
 
@@ -92,6 +93,7 @@ function CharacterSelect_OnLoad(self)
     self:RegisterEvent("CONVERT_RESULT");
     self:RegisterEvent("VAS_CHARACTER_QUEUE_STATUS_UPDATE");
     self:RegisterEvent("LOGIN_STATE_CHANGED");
+    self:RegisterEvent("CHARACTER_UPGRADE_UNREVOKE_RESULT");
 
     SetCharSelectModelFrame("CharacterSelectModel");
 
@@ -128,7 +130,8 @@ function CharacterSelect_OnShow(self)
 
     UpdateAddonButton();
 
-    CharacterSelect_UpdateState();
+    local FROM_LOGIN_STATE_CHANGE = false;
+    CharacterSelect_UpdateState(FROM_LOGIN_STATE_CHANGE);
 
     -- Gameroom billing stuff (For Korea and China only)
     if ( SHOW_GAMEROOM_BILLING_FRAME ) then
@@ -274,16 +277,28 @@ function CharacterSelect_OnHide(self)
         StoreFrame:Hide();
     end
     CopyCharacterFrame:Hide();
-    if (AddonDialog:IsShown()) then
+    if ( AddonDialog:IsShown() ) then
         AddonDialog:Hide();
         HasShownAddonOutOfDateDialog = false;
+    end
+
+    if ( self.undeleting ) then
+        CharacterSelect_EndCharacterUndelete();
+    end
+
+    if ( CharSelectServicesFlowFrame:IsShown() ) then
+        CharSelectServicesFlowFrame:Hide();
     end
 
     AccountReactivate_CloseDialogs();
     SetInCharacterSelect(false);
 end
 
-function CharacterSelect_UpdateState()
+function CharacterSelect_SetAutoSwitchRealm(isAuto)
+    REALM_CHANGE_IS_AUTO = isAuto;
+end
+
+function CharacterSelect_UpdateState(fromLoginState)
     local serverName, isPVP, isRP = GetServerName();
     local connected = IsConnectedToServer();
     local serverType = "";
@@ -306,10 +321,16 @@ function CharacterSelect_UpdateState()
         CharSelectRealmName:Hide();
     end
 
-    if ( connected ) then
-        GetCharacterListUpdate();
-    else
-        UpdateCharacterList();
+    if (fromLoginState == REALM_CHANGE_IS_AUTO) then
+        if ( connected ) then
+            if (fromLoginState) then
+                CharacterSelectUI:Hide();
+                CharacterSelectUI:Show();
+            end
+            GetCharacterListUpdate();
+        else
+            UpdateCharacterList();
+        end
     end
 end
 
@@ -588,7 +609,8 @@ function CharacterSelect_OnEvent(self, event, ...)
             UpdateCharacterList();
         end
     elseif ( event == "LOGIN_STATE_CHANGED" ) then
-        CharacterSelect_UpdateState();
+        local FROM_LOGIN_STATE_CHANGE = true;
+        CharacterSelect_UpdateState(FROM_LOGIN_STATE_CHANGE);
     end
 end
 
@@ -970,7 +992,7 @@ function UpdateCharacterList(skipSelect)
         end
     end
 
-    if ( numChars == 0 ) then
+    if ( numChars == 0 and not skipSelect ) then
         CharacterSelect.selectedIndex = 0;
         CharacterSelect_SelectCharacter(CharacterSelect.selectedIndex, 1);
         return;
@@ -1168,6 +1190,7 @@ end
 function CharacterSelect_ChangeRealm()
     PlaySound("gsCharacterSelectionDelCharacter");
     CharacterSelect_SaveCharacterOrder();
+    CharacterSelect_SetAutoSwitchRealm(false);
     C_RealmList.RequestChangeRealmList();
 end
 
@@ -1186,8 +1209,12 @@ function CharacterSelect_AllowedToEnterWorld()
         return false;
     end
 
-    local isTrialBoost, isTrialBoostLocked = select(21, GetCharacterInfo(GetCharacterSelection()));
+    local isTrialBoost, isTrialBoostLocked, _, vasServiceInProgress = select(21, GetCharacterInfo(GetCharacterSelection()));
     if (isTrialBoost and (isTrialBoostLocked or not C_CharacterServices.IsTrialBoostEnabled())) then
+        return false;
+    end
+
+    if (vasServiceInProgress) then
         return false;
     end
 

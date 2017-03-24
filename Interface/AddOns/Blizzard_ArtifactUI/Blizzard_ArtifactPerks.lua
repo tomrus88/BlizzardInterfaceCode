@@ -197,9 +197,8 @@ function ArtifactPerksMixin:GetFinalPowerButtonByTier(tier)
 end
 
 function ArtifactPerksMixin:RefreshPowers(newItem)
-	self.powerButtonPool:ReleaseAll();
-
 	if newItem or not self.powerIDToPowerButton then
+		self.powerButtonPool:ReleaseAll();
 		self.powerIDToPowerButton = {};
 	end
 

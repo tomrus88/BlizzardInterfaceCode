@@ -384,7 +384,7 @@ function QuickJoinToastMixin:SetCachedQueueData(queues)
 end
 
 function QuickJoinToastMixin:ClearCachedQueueData()
-	self.SetCachedQueueData(nil);
+	self:SetCachedQueueData(nil);
 end
 
 function QuickJoinToastMixin:GetCurrentText(updateQueues)
