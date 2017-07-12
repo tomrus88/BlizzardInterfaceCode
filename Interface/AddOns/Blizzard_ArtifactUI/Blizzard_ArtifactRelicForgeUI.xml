@@ -2,56 +2,45 @@
 ..\..\FrameXML\UI.xsd">
 	<Script file="Blizzard_ArtifactRelicForgeUI.lua"/>
 	
-	<Frame name="TempSelectTemplate" virtual="true">
-		<Size x="72" y="72" />
+	<Frame name="ArtifactsRelicForgeRelicSlotTemplate" inherits="ArtifactsRelicSlotTemplate" virtual="true">
+		<Size x="72" y="72"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture parentKey="SelectedCircle" atlas="Relic-Rankselected-circle" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY" textureSubLevel="1">
+				<Texture parentKey="SelectedGlow" atlas="Relic-Rankselected-UpperGlow" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
 		<Frames>
-			<Frame parentKey="SelectionBox" hidden="false" setAllPoints="true">
+			<Frame parentKey="DarkGlow" hidden="false" frameLevel="3000" setAllPoints="true">
 				<Layers>
 					<Layer level="ARTWORK">
-						<Texture parentKey="Top">
-							<Size x="0" y="2"/>
+						<Texture atlas="Relic-Rankdisable-DarkGlow" useAtlasSize="true">
 							<Anchors>
-								<Anchor point="TOPLEFT"/>
-								<Anchor point="TOPRIGHT"/>
+								<Anchor point="CENTER"/>
 							</Anchors>
-							<Color r="0" g="1" b="0"/>
 						</Texture>
-						<Texture parentKey="Bottom">
-							<Size x="0" y="2"/>
-							<Anchors>
-								<Anchor point="BOTTOMLEFT"/>
-								<Anchor point="BOTTOMRIGHT"/>
-							</Anchors>
-							<Color r="0" g="1" b="0"/>
-						</Texture>
-						<Texture parentKey="Left">
-							<Size x="2" y="0"/>
-							<Anchors>
-								<Anchor point="TOPLEFT"/>
-								<Anchor point="BOTTOMLEFT"/>
-							</Anchors>
-							<Color r="0" g="1" b="0"/>
-						</Texture>
-						<Texture parentKey="Right">
-							<Size x="2" y="0"/>
-							<Anchors>
-								<Anchor point="TOPRIGHT"/>
-								<Anchor point="BOTTOMRIGHT"/>
-							</Anchors>
-							<Color r="0" g="1" b="0"/>
-						</Texture>				
 					</Layer>
 				</Layers>
 			</Frame>
-			<Button parentKey="AttuneButton" inherits="UIPanelButtonTemplate" hidden="true" text="Attune">
+			<Button parentKey="AttuneButton" inherits="UIPanelButtonTemplate" hidden="true" text="Attune" frameLevel="100">
 				<Size x="100" y="22"/>
 				<Anchors>
-					<Anchor point="TOP" relativePoint="BOTTOM" x="0" y="0"/>
+					<Anchor point="TOP" relativePoint="BOTTOM" x="0" y="10"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
 						local relicSlot = self:GetParent():GetID();
-						self:GetParent():GetParent():Foo(relicSlot);
+						C_ArtifactRelicForgeUI.AttuneSocketedRelic(relicSlot);
 					</OnClick>
 				</Scripts>
 			</Button>			
@@ -175,6 +164,8 @@
 		<Scripts>
 			<OnLoad method="OnLoad"/>
 			<OnClick method="OnClick"/>
+			<OnEnter method="OnEnter"/>
+			<OnLeave function="GameTooltip_Hide"/>
 		</Scripts>
 		<Animations>
 			<AnimationGroup parentKey="Test" looping="REPEAT">
@@ -365,9 +356,9 @@
 					</Layer>
 				</Layers>
 				<Frames>
-					<Button parentKey="RelicSlot1" id="1" parentArray="RelicSlots" inherits="ArtifactsRelicSlotTemplate, TempSelectTemplate" />
-					<Button parentKey="RelicSlot2" id="2" parentArray="RelicSlots" inherits="ArtifactsRelicSlotTemplate, TempSelectTemplate" />
-					<Button parentKey="RelicSlot3" id="3" parentArray="RelicSlots" inherits="ArtifactsRelicSlotTemplate, TempSelectTemplate" />
+					<Button parentKey="RelicSlot1" id="1" parentArray="RelicSlots" inherits="ArtifactsRelicForgeRelicSlotTemplate" />
+					<Button parentKey="RelicSlot2" id="2" parentArray="RelicSlots" inherits="ArtifactsRelicForgeRelicSlotTemplate" />
+					<Button parentKey="RelicSlot3" id="3" parentArray="RelicSlots" inherits="ArtifactsRelicForgeRelicSlotTemplate" />
 				</Frames>
 				<Scripts>
 					<OnShow method="OnShow" />
@@ -412,6 +403,13 @@
 					<Anchor point="TOPRIGHT" x="-84" y="-68"/>
 				</Anchors>
 				<Layers>
+					<Layer level="BACKGROUND" textureSubLevel="-1">
+						<Texture parentKey="SelectedGlow" atlas="Relic-Rankselected-UpperGlow" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
 					<Layer level="BACKGROUND">
 						<Texture atlas="Relicforge-Slot-background" useAtlasSize="true">
 							<Anchors>
@@ -431,15 +429,10 @@
 					</Layer>
 				</Layers>
 				<Frames>
-					<Frame parentKey="SelectionBox" inherits="TempSelectTemplate">
-						<Anchors>
-							<Anchor point="CENTER"/>
-						</Anchors>
-					</Frame>
 					<Button parentKey="AttuneButton" inherits="UIPanelButtonTemplate" text="Attune">
 						<Size x="100" y="22"/>
 						<Anchors>
-							<Anchor point="TOP" relativePoint="BOTTOM" relativeKey="$parent.SelectionBox" x="0" y="0"/>
+							<Anchor point="BOTTOM" x="0" y="-28"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -456,6 +449,7 @@
 					<OnEnter method="OnEnter"/>
 					<OnLeave function="GameTooltip_Hide"/>
 					<OnClick method="OnClick"/>
+					<OnDragStart method="OnDragStart" />
 				</Scripts>
 			</Button>
 		</Frames>

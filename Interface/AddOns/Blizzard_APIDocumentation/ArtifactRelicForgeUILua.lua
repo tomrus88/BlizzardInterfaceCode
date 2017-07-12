@@ -94,6 +94,10 @@ local ArtifactRelicForgeUILua =
 			},
 		},
 		{
+			Name = "PickUpPreviewRelic",
+			Type = "Function",
+		},
+		{
 			Name = "SetPreviewRelicFromCursor",
 			Type = "Function",
 
