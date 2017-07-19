@@ -30,12 +30,30 @@ local ConsoleLua =
 			},
 		},
 		{
+			Name = "GetFontHeight",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "fontHeightInPixels", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "PrintAllMatchingCommands",
 			Type = "Function",
 
 			Arguments =
 			{
 				{ Name = "partialCommandText", Type = "string", Nilable = false },
+			},
+		},
+		{
+			Name = "SetFontHeight",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "fontHeightInPixels", Type = "number", Nilable = false },
 			},
 		},
 	},
