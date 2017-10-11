@@ -382,17 +382,6 @@
 						</EdgeSize>
 					</Backdrop>
 				</Frame>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<Texture>
-							<Anchors>
-								<Anchor point="TOPLEFT" x="11" y="-12"/>
-								<Anchor point="BOTTOMRIGHT" x="-12" y="9"/>
-							</Anchors>
-							<Color r="0" g="0" b="0" a="1"/>
-						</Texture>
-					</Layer>
-				</Layers>
 				<Button inherits="StoreDropDownMenuButtonTemplate" id="1">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="16" y="-16"/>
@@ -1020,7 +1009,7 @@
 						<Color r="1" g="0.84" b="0.55" />
 					</FontString>
 				</Layer>
-				 <Layer level="OVERLAY">
+				<Layer level="OVERLAY">
 					<Texture parentKey="Strikethrough" inherits="store-strikethrough" hidden="true">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeKey="$parent.NormalPrice" />
@@ -1035,6 +1024,15 @@
 				</Layer>
 			</Layers>
 			<Frames>
+				<Frame parentKey="DisabledOverlay" frameLevel="1000" setAllPoints="true" hidden="true">
+					<Layers>
+						<Layer level="OVERLAY" textureSubLevel="1">
+							<Texture setAllPoints="true" alpha=".55">
+								<Color r="0" g="0" b="0"/>
+							</Texture>
+						</Layer>
+					</Layers>
+				</Frame>
 				<Button parentKey="Magnifier" hidden="true">
 					<Size x="31" y="35" />
 					<Anchors>
@@ -1062,6 +1060,8 @@
 					</Anchors>
 					<Scripts>
 						<OnClick function="StoreFrameBuyButton_OnClick" />
+						<OnEnter function="StoreFrameBuyButton_OnEnter" />
+						<OnLeave function="StoreFrameBuyButton_OnLeave" />
 					</Scripts>
 				</Button>
 			</Frames>
@@ -1508,6 +1508,17 @@
 				</Layer>
 			</Layers>
 			<Scripts>
+				<!--
+							WARNING: ScopeModifiers don't work for templates!
+				These functions will fail to load properly if this template is instantiated outside
+				of the initial LoadAddon call becuase we'll have lost the scoped modifiers and the
+				reference to the addon environment if we instantiate them later.
+				
+				Except for the first category, which is declared in .xml, we have to manually set these
+				scripts after the frame has been instantiated in Lua for them to work properly.
+
+				-->
+				
 				<OnEnter function="StoreCategory_OnEnter" />
 				<OnLeave function="StoreCategory_OnLeave" />
 				<OnClick function="StoreCategory_OnClick" />
@@ -2745,12 +2756,32 @@
 			</Scripts>
 		</Frame>
 		
-		<Frame name="StoreBulletPointTemplate" inherits="BulletPointWithTextureTemplate" virtual="true">
+		<Frame name="StoreBulletPointTemplate" inherits="BulletPointWithTextureTemplate" hyperlinksEnabled="true" virtual="true">
 			<Scripts>
 				<OnLoad inherit="prepend">
 					self.Text:SetFontObject("GameFontNormalMed1");
 					self.Text:SetTextColor(1, 0.84, 0.55);
 				</OnLoad>
+				<OnHyperlinkEnter>
+					local grandparent = self:GetParent():GetParent();
+					local onEnterScript = grandparent:GetScript("OnEnter");
+					if onEnterScript then
+						onEnterScript(grandparent);
+					end
+				</OnHyperlinkEnter>
+				<OnHyperlinkLeave>
+					local grandparent = self:GetParent():GetParent();
+					local onLeaveScript = grandparent:GetScript("OnLeave");
+					if onLeaveScript then
+						onLeaveScript(grandparent);
+					end
+				</OnHyperlinkLeave>
+				<OnHyperlinkClick>
+					local linkType, index = string.split(":", link);
+					if ( linkType == "urlIndex" ) then
+						LoadURLIndex(tonumber(index));
+					end
+				</OnHyperlinkClick>
 			</Scripts>
 		</Frame>
 	</ScopedModifier>
