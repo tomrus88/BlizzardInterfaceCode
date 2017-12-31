@@ -1380,8 +1380,8 @@ function StoreFrame_UpdateCard(card, entryID, discountReset, forceModelUpdate)
 	end
 
 	if (card == StoreFrame.SplashSingle) then
-		if bit.band(entryInfo.sharedData.flags, Enum.BattlepayDisplayFlag.CardDoesNotShowModel) == Enum.BattlepayDisplayFlag.CardDoesNotShowModel then
-			StoreFrameSplashSingle_SetStyle(StoreFrame.SplashSingle, "no-model");
+		if bit.band(entryInfo.sharedData.flags, Enum.BattlepayDisplayFlag.UseHorizontalLayoutForFullCard) == Enum.BattlepayDisplayFlag.UseHorizontalLayoutForFullCard then
+			StoreFrameSplashSingle_SetStyle(StoreFrame.SplashSingle, "horizontal");
 		else
 			StoreFrameSplashSingle_SetStyle(StoreFrame.SplashSingle, nil);
 		end
@@ -1463,7 +1463,12 @@ function StoreFrame_UpdateCard(card, entryID, discountReset, forceModelUpdate)
 		StoreProductCard_HideIcon(card);
 	end
 
-	if (discounted) then
+	if bit.band(entryInfo.sharedData.flags, Enum.BattlepayDisplayFlag.HiddenPrice) == Enum.BattlepayDisplayFlag.HiddenPrice then
+		card.NormalPrice:Hide();
+		card.SalePrice:Hide();
+		card.Strikethrough:Hide();
+		card.CurrentPrice:Hide();
+	elseif (discounted) then
 		StoreProductCard_ShowDiscount(card, currencyFormat(entryInfo.sharedData.currentDollars, entryInfo.sharedData.currentCents), discountReset);
 	else
 		card.NormalPrice:Hide();
@@ -3364,6 +3369,7 @@ function StoreProductCard_CheckShowStorePreviewOnClick(self)
 		showPreview = IsModifiedClick("DRESSUP");
 	end
 	if ( showPreview ) then
+		local entryInfo = C_StoreSecure.GetEntryInfo(self:GetID());		
 		if ( entryInfo.displayID ) then
 			StoreFrame_ShowPreview(entryInfo.name, entryInfo.displayID, entryInfo.modelSceneID);
 		end
@@ -3512,7 +3518,9 @@ function StoreProductCard_ShowModel(self, entryInfo, showShadows, forceModelUpda
 	local modelSceneID = entryInfo.sharedData.modelSceneID or cards[1].modelSceneID; -- Shared data can specify a scene to override, otherwise use the scene for the model on the card
 
 	self.ModelScene:Show();
-	self.Shadows:SetShown(showShadows);
+	if self.Shadows then
+		self.Shadows:SetShown(showShadows);
+	end
 	self.ModelScene:SetFromModelSceneID(modelSceneID, forceModelUpdate);
 
 	local hasMultipleModels = #cards > 1;
@@ -4139,6 +4147,7 @@ function VASCharacterSelectionChangeIconFrame_SetIcons(character, serviceType)
 
 	local fromIcon = frame.FromIcon;
 	fromIcon.Icon:SetAtlas(_G.GetRaceAtlas(string.lower(character.raceFileName), gender), false);
+	fromIcon.Icon:SetTexCoord(0.0625, 0.9375, 0.0625, 0.9375);
 	fromIcon:Show();
 
 	local arrowTex = frame.ArrowTex;
@@ -4978,10 +4987,10 @@ function StoreFrame_CardIsSplashPair(self, card)
 end
 
 function StoreFrameSplashSingle_SetStyle(self, style)
-	if style == "no-model" then
+	if style == "horizontal" then
 		self.SplashBanner:Hide();
 		self.SplashBannerText:Hide();
-		self.ModelScene:Hide();
+		self.ModelScene:SetViewInsets(20, 20, 20, 200);
 
 		self.ProductName:ClearAllPoints();
 		self.CurrentPrice:ClearAllPoints();
@@ -5026,7 +5035,7 @@ function StoreFrameSplashSingle_SetStyle(self, style)
 	else
 		self.SplashBanner:Show();
 		self.SplashBannerText:Show();
-		self.ModelScene:Show();
+		self.ModelScene:SetViewInsets(20, 400, 136, 180);
 
 		self.ProductName:ClearAllPoints();
 		self.CurrentPrice:ClearAllPoints();
