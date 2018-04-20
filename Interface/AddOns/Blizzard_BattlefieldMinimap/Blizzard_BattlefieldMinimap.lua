@@ -54,7 +54,6 @@ end
 
 function BattlefieldMinimap_OnShow(self)
 	PlaySound(SOUNDKIT.IG_QUEST_LOG_OPEN);
-	SetMapToCurrentZone();
 	BattlefieldMinimap_Update();
 	BattlefieldMinimap_UpdateOpacity(BattlefieldMinimapOptions.opacity);
 	BattlefieldMinimapTab:Show();
@@ -91,7 +90,6 @@ function BattlefieldMinimap_OnEvent(self, event, ...)
 	elseif ( event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED" or event == "ZONE_CHANGED_NEW_AREA" or event == "NEW_WMO_CHUNK" ) then
 		if ( BattlefieldMinimap:IsShown() ) then
 			if ( not WorldMapFrame:IsShown() ) then
-				SetMapToCurrentZone();
 				BattlefieldMinimap_Update();
 			end
 		end
@@ -114,7 +112,7 @@ end
 
 function BattlefieldMinimap_Update()
 	-- Fill in map tiles
-	local mapID = C_Map.GetCurrentMapID();
+	local mapID = C_Map.GetBestMapForUnit("player");
 
 	local textures = C_Map.GetMapArtLayerTextures(mapID, 1);
 	for i, texture in ipairs(textures) do
@@ -156,7 +154,7 @@ function BattlefieldMinimap_Update()
 	end
 
 	-- Setup the overlays
-	local numOverlays = GetNumMapOverlays();
+	local numOverlays = 0;
 	local textureCount = 0;
 	-- Use this value to scale the texture sizes and offsets
 	local battlefieldMinimapScale = BattlefieldMinimap1:GetWidth()/256;
@@ -229,7 +227,7 @@ function BattlefieldMinimap_ClearTextures()
 	for i=1, BattlefieldMinimap:GetAttribute("NUM_BATTLEFIELDMAP_OVERLAYS") do
 		_G["BattlefieldMinimapOverlay"..i]:SetTexture(nil);
 	end
-	local numDetailTiles = GetNumberOfDetailTiles();
+	local numDetailTiles = 12;
 	for i=1, numDetailTiles do
 		_G["BattlefieldMinimap"..i]:SetTexture(nil);
 	end
@@ -271,7 +269,7 @@ function BattlefieldMinimap_OnUpdate(self, elapsed)
 	if ( BattlefieldMinimap.resizing ) then
 		local sizeUnit = BattlefieldMinimap:GetWidth()/4;
 		local mapPiece;
-		local numDetailTiles = GetNumberOfDetailTiles();
+		local numDetailTiles = 12;
 		for i=1, numDetailTiles do
 			mapPiece = _G["BattlefieldMinimap"..i];
 			mapPiece:SetWidth(sizeUnit);
@@ -477,7 +475,7 @@ function BattlefieldMinimap_UpdateOpacity(opacity)
 	BattlefieldMinimapOptions.opacity = opacity or OpacityFrameSlider:GetValue();
 	local alpha = 1.0 - BattlefieldMinimapOptions.opacity;
 	BattlefieldMinimapBackground:SetAlpha(alpha);
-	local numDetailTiles = GetNumberOfDetailTiles();
+	local numDetailTiles = 12;
 	for i=1, numDetailTiles do
 		_G["BattlefieldMinimap"..i]:SetAlpha(alpha);
 	end
