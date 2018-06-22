@@ -65,6 +65,8 @@ function ChannelFrameMixin:OnShow()
 		HideUIPanel(CommunitiesFrame);
 	end
 
+	ChatFrameChannelButton:HideTutorial();
+
 	local channel = self:GetList():GetSelectedChannelButton();
 	if channel and channel:ChannelIsCommunity() then
 		C_Club.SetClubPresenceSubscription(channel.clubId);
@@ -213,6 +215,10 @@ function ChannelFrameMixin:CheckShowTutorial()
 			self.Tutorial:Show();
 		end
 	end
+end
+
+function ChannelFrameMixin:HideTutorial()
+	self.Tutorial:Hide();
 end
 
 function ChannelFrameMixin:ShouldShowTutorial()
@@ -438,7 +444,9 @@ function ChannelFrameMixin:CheckChannelAnnounceState(channelID, state)
 	end
 
 	local previousState = self.channelStates[channelID];
-	if (previousState and previousState == "joined") and state == "active" then
+	if state == "joined" then
+		self:ShowChannelManagementTip(channelID);
+	elseif state == "active" then
 		self:ShowChannelAnnounce(channelID);
 	end
 
@@ -473,6 +481,17 @@ function ChannelFrameMixin:ShowChannelAnnounce(channelID)
 			local memberCountMessage = VOICE_CHAT_CHANNEL_MEMBER_COUNT_ACTIVE:format(CountActiveChannelMembers(channel));
 			ChatFrame_DisplaySystemMessageInPrimary(VOICE_CHAT_CHANNEL_ANNOUNCE:format(atlas..announce, communicationMode, memberCountMessage));
 		end
+	end
+end
+
+function ChannelFrameMixin:ShowChannelManagementTip(channelID)
+	local channel = C_VoiceChat.GetChannel(channelID);
+	if channel and GetPartyCategoryFromChannelType(channel.channelType) ~= nil then
+		local atlas = CreateAtlasMarkup("voicechat-channellist-icon-headphone-off");
+		local useNotBound = true;
+		local useParentheses = true;
+		local announceText = VOICE_CHAT_CHANNEL_MANAGEMENT_TIP:format(atlas, GetBindingKeyForAction("TOGGLECHATTAB", useNotBound, useParentheses));
+		ChatFrame_DisplaySystemMessageInPrimary(announceText);
 	end
 end
 
@@ -551,10 +570,17 @@ function ChannelFrameMixin:OnCommunityFavoriteChanged(clubId)
 end
 
 function ChannelFrameMixin:OnMemberActiveStateChanged(memberID, channelID, isActive)
-	if not C_VoiceChat.IsMemberLocalPlayer(memberID, channelID) then
+	if C_VoiceChat.IsMemberLocalPlayer(memberID, channelID) then
+		if not isActive then
+			ChatFrame_DisplaySystemMessageInPrimary(VOICE_CHAT_CHANNEL_ANNOUNCE_PLAYER_LEFT);
+		end
+	else
+		local memberName = C_VoiceChat.GetMemberName(memberID, channelID);
 		if isActive then
+			ChatFrame_DisplaySystemMessageInPrimary(VOICE_CHAT_CHANNEL_ANNOUNCE_MEMBER_ACTIVE:format(memberName));
 			PlaySound(SOUNDKIT.UI_VOICECHAT_MEMBERJOINCHANNEL);
 		else
+			ChatFrame_DisplaySystemMessageInPrimary(VOICE_CHAT_CHANNEL_ANNOUNCE_MEMBER_LEFT:format(memberName));
 			PlaySound(SOUNDKIT.UI_VOICECHAT_MEMBERLEAVECHANNEL);
 		end
 	end

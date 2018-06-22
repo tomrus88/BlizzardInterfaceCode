@@ -20,6 +20,15 @@ local IslandsQueueUI =
 			},
 		},
 		{
+			Name = "GetIslandsMaxGroupSize",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "maxGroupSize", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetIslandsWeeklyQuestID",
 			Type = "Function",
 

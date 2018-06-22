@@ -786,7 +786,7 @@ function ChatFrame_ResolveChannelName(communityChannel)
 	local streamInfo = C_Club.GetStreamInfo(clubId, streamId);
 	local streamName = streamInfo and ChatFrame_TruncateToMaxLength(streamInfo.name, MAX_COMMUNITY_NAME_LENGTH) or "";
 
-	if streamInfo.streamType == Enum.ClubStreamType.General then
+	if streamInfo and streamInfo.streamType == Enum.ClubStreamType.General then
 		local communityName = clubInfo and ChatFrame_TruncateToMaxLength(clubInfo.shortName or clubInfo.name, MAX_COMMUNITY_NAME_LENGTH_NO_CHANNEL) or "";
 		return communityName;
 	else
@@ -2087,7 +2087,7 @@ end
 
 SlashCmdList["CHANNEL"] = function(msg, editBox)
 	msg = SubstituteChatMessageBeforeSend(msg);
-	SendChatMessage(msg, "CHANNEL", editBox.languageID, editBox:GetAttribute("channelTarget"));
+	SendChatMessage(msg, "CHANNEL", editBox.languageID, ChatEdit_GetChannelTarget(editBox));
 end
 
 SlashCmdList["FRIENDS"] = function(msg)
@@ -2712,10 +2712,17 @@ function ChatFrame_ContainsChannel(chatFrame, channel)
 	return false;
 end
 
-function ChatFrame_AddCommunitiesChannel(chatFrame, clubId, streamId)
+function ChatFrame_AddCommunitiesChannel(chatFrame, clubId, streamId, setEditBoxToChannel)
 	local channelName = Chat_GetCommunitiesChannelName(clubId, streamId);
 	local channelIndex = ChatFrame_AddChannel(chatFrame, channelName);
 	chatFrame:AddMessage(COMMUNITIES_CHANNEL_ADDED_TO_CHAT_WINDOW:format(channelIndex, ChatFrame_ResolveChannelName(channelName)), DEFAULT_CHAT_CHANNEL_COLOR:GetRGB());
+	
+	if setEditBoxToChannel then
+		chatFrame.editBox:SetAttribute("channelTarget", channelIndex);
+		chatFrame.editBox:SetAttribute("chatType", "CHANNEL");
+		chatFrame.editBox:SetAttribute("stickyType", "CHANNEL");
+		ChatEdit_UpdateHeader(chatFrame.editBox);
+	end
 end
 
 function ChatFrame_CanAddChannel()
@@ -2816,7 +2823,7 @@ do
 				local defaulteditbox = securecall(GetDefaultChatEditBox);
 				self:SetAttribute("chatType", defaulteditbox:GetAttribute("chatType"));
 				self:SetAttribute("tellTarget", defaulteditbox:GetAttribute("tellTarget"));
-				self:SetAttribute("channelTarget", defaulteditbox:GetAttribute("channelTarget"));
+				self:SetAttribute("channelTarget", ChatEdit_GetChannelTarget(defaulteditbox));
 				self:SetText(line);
 				ChatEdit_SendText(self);
 			end
@@ -2847,6 +2854,22 @@ function ChatFrame_UpdateColorByID(self, chatTypeID, r, g, b)
 	self:AdjustMessageColors(TransformColorByID);
 end
 
+function ChatFrame_GetDefaultChatTarget(chatFrame)
+	if #chatFrame.messageTypeList == 1 and #chatFrame.channelList == 0 then
+		return chatFrame.messageTypeList[1], nil;
+	elseif #chatFrame.messageTypeList == 0 and #chatFrame.channelList == 1 then
+		local channelName = chatFrame.channelList[1];
+		local localID = GetChannelName(channelName);
+		if localID ~= 0 then
+			return "CHANNEL", localID;
+		else
+			return "CHANNEL", channelName;
+		end
+	end
+	
+	return nil;
+end
+
 function ChatFrame_ConfigEventHandler(self, event, ...)
 	if ( event == "PLAYER_ENTERING_WORLD" ) then
 		self.defaultLanguage = GetDefaultLanguage();
@@ -2871,6 +2894,16 @@ function ChatFrame_ConfigEventHandler(self, event, ...)
 		-- Do more stuff!!!
 		ChatFrame_RegisterForMessages(self, GetChatWindowMessages(self:GetID()));
 		ChatFrame_RegisterForChannels(self, GetChatWindowChannels(self:GetID()));
+		
+		local defaultChatType, defaultChannelTarget = ChatFrame_GetDefaultChatTarget(self);
+		if defaultChatType then
+			local editBox = self.editBox;
+			editBox:SetAttribute("chatType", defaultChatType);
+			editBox:SetAttribute("stickyType", defaultChatType);
+			editBox:SetAttribute("channelTarget", defaultChannelTarget);
+			ChatEdit_UpdateHeader(editBox);
+		end
+		
 		-- GMOTD may have arrived before this frame registered for the event
 		if ( not self.checkedGMOTD and self:IsEventRegistered("GUILD_MOTD") ) then
 			self.checkedGMOTD = true;
@@ -3561,7 +3594,7 @@ function ChatFrame_OpenChat(text, chatFrame, desiredCursorPosition)
 			editBox:SetAttribute("chatType", "SAY");
 		end
 	end
-
+	
 	ChatEdit_UpdateHeader(editBox);
 	return editBox;
 end
@@ -3804,6 +3837,11 @@ function ChatFrame_DisplaySystemMessageInPrimary(messageTag)
 	DEFAULT_CHAT_FRAME:AddMessage(messageTag, info.r, info.g, info.b, info.id);
 end
 
+function ChatFrame_DisplaySystemMessageInCurrent(messageTag)
+	local info = ChatTypeInfo["SYSTEM"];
+	SELECTED_CHAT_FRAME:AddMessage(messageTag, info.r, info.g, info.b, info.id);
+end
+
 -- ChatEdit functions
 
 local ChatEdit_LastTell = {};
@@ -3906,7 +3944,7 @@ function ChatEdit_ActivateChat(editBox)
 		ChatEdit_DeactivateChat(ACTIVE_CHAT_EDIT_BOX);
 	end
 	ACTIVE_CHAT_EDIT_BOX = editBox;
-
+	
 	ChatEdit_SetLastActiveWindow(editBox);
 
 	--Stop any sort of fading
@@ -4093,6 +4131,16 @@ function ChatEdit_TryInsertQuestLinkForQuestID(questID)
 	return ChatEdit_TryInsertChatLink(GetQuestLink(questID));
 end
 
+function ChatEdit_GetChannelTarget(editBox)
+	local channelTarget = editBox:GetAttribute("channelTarget"); -- may be a name or an index
+	if channelTarget == nil then
+		return 0;
+	end
+	
+	local localID = GetChannelName(channelTarget);
+	return localID;
+end
+
 function ChatEdit_GetLastTellTarget()
 	for i=1, #ChatEdit_LastTell do
 		local value = ChatEdit_LastTell[i];
@@ -4183,16 +4231,16 @@ function ChatEdit_UpdateHeader(editBox)
 	elseif ( type == "EMOTE" ) then
 		header:SetFormattedText(CHAT_EMOTE_SEND, UnitName("player"));
 	elseif ( type == "CHANNEL" ) then
-		local channel, channelName, instanceID, isCommunitiesChannel = GetChannelName(editBox:GetAttribute("channelTarget"));
+		local localID, channelName, instanceID, isCommunitiesChannel = GetChannelName(ChatEdit_GetChannelTarget(editBox));
 		if ( channelName ) then
 			if ( isCommunitiesChannel ) then
 				channelName = ChatFrame_ResolveChannelName(channelName);
 			elseif ( instanceID > 0 ) then
 				channelName = channelName.." "..instanceID;
 			end
-			info = ChatTypeInfo["CHANNEL"..channel];
-			editBox:SetAttribute("channelTarget", channel);
-			header:SetFormattedText(CHAT_CHANNEL_SEND, channel, channelName);
+			info = ChatTypeInfo["CHANNEL"..localID];
+			editBox:SetAttribute("channelTarget", localID);
+			header:SetFormattedText(CHAT_CHANNEL_SEND, localID, channelName);
 		end
 	elseif ( (type == "PARTY") and
 		 (not IsInGroup(LE_PARTY_CATEGORY_HOME) and IsInGroup(LE_PARTY_CATEGORY_INSTANCE)) ) then
@@ -4251,7 +4299,7 @@ function ChatEdit_AddHistory(editBox)
 	if ( type == "WHISPER" ) then
 		text = text.." "..editBox:GetAttribute("tellTarget");
 	elseif ( type == "CHANNEL" ) then
-		text = "/"..editBox:GetAttribute("channelTarget");
+		text = "/"..ChatEdit_GetChannelTarget(editBox);
 	end
 
 	local editBoxText = editBox:GetText();
@@ -4287,7 +4335,7 @@ function ChatEdit_SendText(editBox, addHistory)
 				editBox.chatFrame:AddMessage(format(BN_UNABLE_TO_RESOLVE_NAME, target), info.r, info.g, info.b);
 			end
 		elseif ( type == "CHANNEL") then
-			SendChatMessage(text, type, editBox.languageID, editBox:GetAttribute("channelTarget"));
+			SendChatMessage(text, type, editBox.languageID, ChatEdit_GetChannelTarget(editBox));
 		else
 			SendChatMessage(text, type, editBox.languageID);
 		end

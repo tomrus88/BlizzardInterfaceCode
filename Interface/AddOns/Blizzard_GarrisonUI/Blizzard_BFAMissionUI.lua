@@ -99,9 +99,9 @@ do
 
 			closeButtonBorder = "AllianceFrame_ExitBorder",
 			closeButtonBorderX = 0,
-			closeButtonBorderY = 0,
+			closeButtonBorderY = -1,
 			closeButtonX = 4,
-			closeButtonY = 3,
+			closeButtonY = 4,
 
 			BackgroundTile = "UI-Frame-Alliance-BackgroundTile",
 

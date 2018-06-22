@@ -764,13 +764,13 @@ local function WidgetLayout(widgetContainer, sortedWidgets)
 
 	for index, widgetFrame in ipairs(sortedWidgets) do
 		if ( index == 1 ) then
-			widgetFrame:SetPoint("TOPLEFT", widgetContainer, "TOPLEFT", 0, 0);
-			widgetsHeight = widgetsHeight + widgetFrame:GetHeight();
+			widgetFrame:SetPoint("TOPLEFT", widgetContainer, "TOPLEFT", 0, -10);
 		else
 			local relative = sortedWidgets[index - 1];
 			widgetFrame:SetPoint("TOPLEFT", relative, "BOTTOMLEFT", 0, -10);
-			widgetsHeight = widgetsHeight + widgetFrame:GetHeight() + 10;
 		end
+
+		widgetsHeight = widgetsHeight + widgetFrame:GetHeight() + 10;
 
 		local widgetWidth = widgetFrame:GetWidth();
 		if widgetWidth > maxWidgetWidth then
@@ -792,7 +792,9 @@ function GameTooltip_AddWidgetSet(self, widgetSetID)
 
 	if widgetSetID then
 		if not self.widgetContainer then
-			self.widgetContainer = CreateFrame("FRAME");
+			self.widgetContainer = CreateFrame("FRAME", nil, self);
+		else
+			self.widgetContainer:SetParent(self);
 		end
 
 		UIWidgetManager:RegisterWidgetSetContainer(widgetSetID, self.widgetContainer, WidgetLayout);
@@ -924,6 +926,30 @@ function EmbeddedItemTooltip_SetSpellByQuestReward(self, rewardIndex, questID)
 		SetItemButtonCount(self, 0);
 		self.Icon:SetTexture(texture);
 		self.Tooltip:SetPoint("TOPLEFT", self.Icon, "TOPRIGHT", 0, 10);
+		EmbeddedItemTooltip_UpdateSize(self);
+		return true;
+	end
+	return false;
+end
+
+function EmbeddedItemTooltip_SetCurrencyByID(self, currencyID, quantity)
+	local name, _, texture, _, _, _, _, quality = GetCurrencyInfo(currencyID);
+	if name and texture then
+		self.itemID = nil;
+		self.spellID = nil;
+		self.itemTextureSet = false;
+		EmbeddedItemTooltip_PrepareForItem(self);
+		self.Tooltip:SetOwner(self, "ANCHOR_NONE");
+		self.Tooltip:SetPoint("TOPLEFT", self.Icon, "TOPRIGHT", 0, 10);
+
+		local displayQuantity;
+		name, texture, displayQuantity, quality = CurrencyContainerUtil.GetCurrencyContainerInfo(currencyID, quantity, name, texture, quality);		
+		self.Tooltip:SetCurrencyByID(currencyID, quantity);
+		SetItemButtonQuality(self, quality, currencyID);
+		self.Icon:SetTexture(texture);
+		SetItemButtonCount(self, displayQuantity); 
+
+		self:Show();
 		EmbeddedItemTooltip_UpdateSize(self);
 		return true;
 	end

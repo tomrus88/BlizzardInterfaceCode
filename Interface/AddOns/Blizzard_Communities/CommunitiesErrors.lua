@@ -1,5 +1,6 @@
 local errorFrame = CreateFrame("FRAME");
 errorFrame:RegisterEvent("CLUB_ERROR");
+errorFrame:RegisterEvent("CLUB_REMOVED");
 
 local actionStrings = 
 {
@@ -80,6 +81,13 @@ local errorStrings =
 	[Enum.ClubErrorType.ErrorClubTicketHasConsumedAllowedRedeemCount] = "ERROR_CLUB_TICKET_HAS_CONSUMED_ALLOWED_REDEEM_COUNT",
 };
 
+local clubRemovedStrings = 
+{
+	[Enum.ClubRemovedReason.Removed] = CLUB_REMOVED_REASON_REMOVED,
+	[Enum.ClubRemovedReason.Banned] = CLUB_REMOVED_REASON_BANNED,
+	[Enum.ClubRemovedReason.ClubDestroyed] = CLUB_REMOVED_REASON_CLUB_DESTROYED,
+};
+
 local function GetErrorString(error, community)
 	local key = errorStrings[error];
 	if key then
@@ -110,7 +118,13 @@ errorFrame:SetScript("OnEvent", function(self, event, ...)
 	if event == "CLUB_ERROR" then
 		local errorString = GetCommunitiesErrorString(...);
 		if errorString then
-			UIErrorsFrame:AddMessage(errorString, RED_FONT_COLOR:GetRGB());
+			UIErrorsFrame:AddExternalErrorMessage(errorString);
+		end
+	elseif event == "CLUB_REMOVED" then
+		local clubId, clubName, clubRemovedReason = ...;
+		if (clubName ~= nil and clubRemovedStrings[clubRemovedReason] ~= nil) then
+			local errorString = clubRemovedStrings[clubRemovedReason]:format(clubName);
+			UIErrorsFrame:AddExternalErrorMessage(errorString);
 		end
 	end
 end);

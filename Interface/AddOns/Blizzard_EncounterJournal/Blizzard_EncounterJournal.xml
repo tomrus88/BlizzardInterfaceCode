@@ -1889,8 +1889,7 @@
 					<Layer level="BACKGROUND">
 						<Texture name="$parentBG" file="Interface\EncounterJournal\UI-EJ-Cataclysm" parentKey="bg">
 							<Anchors>
-								<Anchor point="TOPLEFT" x="0" y="0"/>
-								<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+								<Anchor point="TOPLEFT" x="3" y="-1"/>
 							</Anchors>
 						</Texture>
 					</Layer>

@@ -350,13 +350,13 @@
 			<Frame parentKey="EditStreamDialog" frameStrata="DIALOG" inherits="CommunitiesEditStreamDialogTemplate" hidden="true">
 				<Size x="320" y="260"/>
 				<Anchors>
-					<Anchor point="CENTER" relativeTo="UIParent"/>
+					<Anchor point="TOP" relativeTo="UIParent" x="0" y="-142"/>
 				</Anchors>
 			</Frame>
 			<Frame parentKey="NotificationSettingsDialog" frameStrata="DIALOG" inherits="CommunitiesNotificationSettingsDialogTemplate" hidden="true">
 				<Size x="638" y="508"/>
 				<Anchors>
-					<Anchor point="CENTER" relativeTo="UIParent"/>
+					<Anchor point="TOP" relativeTo="UIParent" x="0" y="-142"/>
 				</Anchors>
 			</Frame>
 			<Button parentKey="AddToChatButton" inherits="AddToChatButtonTemplate">
@@ -389,7 +389,7 @@
 			</Button>
 			<Frame parentKey="GuildMemberDetailFrame" frameLevel="100" inherits="CommunitiesGuildMemberDetailFrameTemplate" hidden="true">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-8" y="-80"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-8" y="-76"/>
 				</Anchors>
 			</Frame>
 		</Frames>

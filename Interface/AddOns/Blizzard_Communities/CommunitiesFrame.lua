@@ -20,6 +20,7 @@ local COMMUNITIES_FRAME_EVENTS = {
 	"CLUB_REMOVED",
 	"CLUB_SELF_MEMBER_ROLE_UPDATED",
 	"STREAM_VIEW_MARKER_UPDATED",
+	"BN_DISCONNECTED",
 };
 
 local COMMUNITIES_STATIC_POPUPS = {
@@ -71,9 +72,10 @@ function CommunitiesFrameMixin:OnShow()
 	local clubId = self:GetSelectedClubId();
 	if clubId  then
 		C_Club.SetClubPresenceSubscription(clubId);
+	else
+		SetPortraitToTexture(self.PortraitOverlay.Portrait, "Interface\\Icons\\Achievement_General_StayClassy");
 	end
-
-	SetPortraitToTexture(self.PortraitOverlay.Portrait, "Interface\\Icons\\Achievement_General_StayClassy");
+	
 	FrameUtil.RegisterFrameForEvents(self, COMMUNITIES_FRAME_EVENTS);
 	self:UpdateClubSelection();
 	UpdateMicroButtons();
@@ -124,7 +126,7 @@ function CommunitiesFrameMixin:OnEvent(event, ...)
 		local clubId = ...;
 		self:AddNewClubId(clubId);
 	elseif event == "CLUB_REMOVED" then
-		local clubId = ...;
+		local clubId, clubName, clubRemovedReason = ...;
 		if clubId == self:GetSelectedClubId() then
 			self:UpdateClubSelection();
 		end
@@ -144,6 +146,8 @@ function CommunitiesFrameMixin:OnEvent(event, ...)
 		if self.CommunitiesListDropDownMenu:IsShown() then
 			self.CommunitiesListDropDownMenu:UpdateUnreadNotification();
 		end
+	elseif event == "BN_DISCONNECTED" then
+		HideUIPanel(self);
 	end
 end
 
@@ -370,6 +374,10 @@ function CommunitiesFrameMixin:ValidateDisplayMode()
 			self:SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.CHAT);
 		elseif displayMode == nil then
 			self:SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.CHAT);
+		end
+		
+		if displayMode == COMMUNITIES_FRAME_DISPLAY_MODES.ROSTER then
+			self.GuildMemberListDropDownMenu:SetShown(isGuildCommunitySelected);
 		end
 	end	
 end

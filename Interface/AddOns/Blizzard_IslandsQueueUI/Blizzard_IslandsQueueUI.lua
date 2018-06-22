@@ -1,6 +1,8 @@
 local ISLANDS_QUEUE_WIDGET_SET_ID = 127; 
 local ISLANDS_QUEUE_LEFT_CARD_ROTATION = math.rad(4.91);
+local ISLANDS_QUEUE_CENTER_CARD_ROTATION = math.rad(-3.16);
 local ISLANDS_QUEUE_RIGHT_CARD_ROTATION = math.rad(-1.15); 
+
 IslandsQueueWeeklyQuestMixin = { }; 
 
 local ButtonTooltips = 
@@ -13,9 +15,9 @@ local ButtonTooltips =
 
 local ButtonPressedSounds = 
 {
-	SOUNDKIT.UI_80_ISLANDS_TABLE_FIND_GROUP,
-	SOUNDKIT.UI_80_ISLANDS_TABLE_FIND_GROUP,
-	SOUNDKIT.UI_80_ISLANDS_TABLE_FIND_GROUP,
+	SOUNDKIT.UI_80_ISLANDS_TABLE_SELECT_DIFFICULTY,
+	SOUNDKIT.UI_80_ISLANDS_TABLE_SELECT_DIFFICULTY,
+	SOUNDKIT.UI_80_ISLANDS_TABLE_SELECT_DIFFICULTY,
 	SOUNDKIT.UI_80_ISLANDS_TABLE_FIND_GROUP_PVP,
 };
 
@@ -63,6 +65,9 @@ function IslandsQueueWeeklyQuestMixin:UpdateQuestProgressBar()
 	else
 		self.OverlayFrame.Spark:Hide();
 	end
+	
+	self.QuestReward.CompletedCheck:SetShown(numFulfilled >= numRequired);
+	self.QuestReward.Completed = self.QuestReward.CompletedCheck:IsShown();
 end
 
 function IslandsQueueWeeklyQuestMixin:Refresh()
@@ -87,8 +92,8 @@ local function WidgetsLayout(widgetContainer, sortedWidgets)
 			widgetFrame.Portrait:SetRotation(ISLANDS_QUEUE_LEFT_CARD_ROTATION);
 			SetWidgetFrameAnchors(widgetFrame, widgetContainer.LeftCard)
 		elseif ( index == 2 ) then 
-			widgetFrame.Background:SetRotation(0); 
-			widgetFrame.Portrait:SetRotation(0);
+			widgetFrame.Background:SetRotation(ISLANDS_QUEUE_CENTER_CARD_ROTATION); 
+			widgetFrame.Portrait:SetRotation(ISLANDS_QUEUE_CENTER_CARD_ROTATION);
 			SetWidgetFrameAnchors(widgetFrame, widgetContainer.CenterCard)
 		elseif ( index == 3 ) then 
 			widgetFrame.Background:SetRotation(ISLANDS_QUEUE_RIGHT_CARD_ROTATION); 
@@ -99,7 +104,8 @@ local function WidgetsLayout(widgetContainer, sortedWidgets)
 end
 
 function IslandsQueueFrameMixin:OnLoad()
-	SetPortraitToTexture(self.portrait, "Interface\\Icons\\icon_treasuremap");	
+	self.portrait:Hide(); 
+	SetPortraitToTexture(self.ArtOverlayFrame.portrait, "Interface\\Icons\\icon_treasuremap");
 	UIWidgetManager:RegisterWidgetSetContainer(ISLANDS_QUEUE_WIDGET_SET_ID, self.IslandCardsFrame, WidgetsLayout);
 	self:RegisterEvent("ISLANDS_QUEUE_CLOSE"); 
 end
@@ -113,6 +119,17 @@ end
 function IslandsQueueFrameMixin:OnShow()
 	PlaySound(SOUNDKIT.UI_80_ISLANDS_TABLE_OPEN);
 	self.DifficultySelectorFrame:SetInitialDifficulty(); 
+	self.DifficultySelectorFrame:UpdateQueueText();
+	
+	if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_ISLANDS_QUEUE_INFO_FRAME)) then
+		self.TutorialFrame:Show();
+	end
+	
+	if(UnitLevel("player") >= GetMaxLevelForExpansionLevel(LE_EXPANSION_BATTLE_FOR_AZEROTH)) then	
+		self.WeeklyQuest:Show(); 
+	else 
+		self.WeeklyQuest:Hide();
+	end
 end
 
 function IslandsQueueFrameMixin:OnHide()
@@ -124,17 +141,54 @@ IslandsQueueFrameDifficultyMixin = { };
 
 function IslandsQueueFrameDifficultyMixin:OnQueueClick()
 	C_IslandsQueue.QueueForIsland(self:GetActiveDifficulty());
+	SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_ISLANDS_QUEUE_BUTTON, true);
+	self.QueueButton.FlashAnim:Stop(); 
+	self.QueueButton.Flash:Hide();
+end
+
+function IslandsQueueFrameDifficultyMixin:QueueButtonSetState(isEnabled)
+	if (isEnabled) then 
+		self.QueueButton:Enable(); 
+		self.QueueButton.TooltipText = nil
+	else 
+		self.QueueButton:Disable(); 
+		self.QueueButton.TooltipText = ISLANDS_QUEUE_CANNOT_QUEUE_ERROR:format(C_IslandsQueue.GetIslandsMaxGroupSize()); 
+	end
+end
+
+function IslandsQueueFrameDifficultyMixin:UpdateQueueText()
+	if (C_IslandsQueue.GetIslandsMaxGroupSize() == GetNumGroupMembers()) then 
+		self.QueueButton:SetText(ISLANDS_QUEUE_SET_SAIL); 
+	else 
+		self.QueueButton:SetText(ISLANDS_QUEUE_FIND_CREW);
+	end
+end
+
+function IslandsQueueFrameDifficultyMixin:OnShow()
+	self:UpdateQueueText(); 
+	if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_ISLANDS_QUEUE_BUTTON)) then
+		self.QueueButton.Flash:Show();
+		self.QueueButton.FlashAnim:Play();
+	end
 end
 
 function IslandsQueueFrameDifficultyMixin:OnLoad()
 	self.difficultyPool = CreateFramePool("BUTTON", self, "IslandsQueueFrameDifficultyButtonTemplate");
+	self:RegisterEvent("GROUP_ROSTER_UPDATE");
+end
+
+function IslandsQueueFrameDifficultyMixin:OnEvent(event, ...)
+	if (event == "GROUP_ROSTER_UPDATE") then 
+		self:RefreshDifficultyButtons(); 
+		self:UpdateQueueText();
+	end
 end
 
 function IslandsQueueFrameDifficultyMixin:SetInitialDifficulty()
 	self:RefreshDifficultyButtons(); 
-	
-	local firstDifficulty = self.difficultyPool:GetNextActive(); 
-	self:SetActiveDifficulty(firstDifficulty); 
+	if (self.firstDifficulty) then
+		self:SetActiveDifficulty(self.firstDifficulty); 
+	end
 end
 
 function IslandsQueueFrameDifficultyMixin:RefreshDifficultyButtons()
@@ -144,14 +198,38 @@ function IslandsQueueFrameDifficultyMixin:RefreshDifficultyButtons()
 	for buttonIndex, islandDifficultyId in ipairs(islandDifficultyIds) do
 		local button = self.difficultyPool:Acquire();		
 		if (buttonIndex == 1) then 
-			button:SetPoint("CENTER", self.Background, "CENTER", -60, 15); 
+			self.firstDifficulty = button; 
+			button:SetPoint("CENTER", self.Background, "CENTER", -63, 15); 
 		else
-			button:SetPoint("RIGHT", self.previousDifficulty, "RIGHT", 40, 0);
+			button:SetPoint("RIGHT", self.previousDifficulty, "RIGHT", 42, 0);
 		end
 		button.NormalTexture:SetAtlas("islands-queue-difficultyselector-"..buttonIndex);
 		self.previousDifficulty = button; 
 		button.difficulty = islandDifficultyId;
 		button.tooltipText = ButtonTooltips[buttonIndex]; 
+		local isAvailable, _, _, totalGroupSizeRequired = IsLFGDungeonJoinable(button.difficulty);
+		
+		if (not isAvailable) then 
+			button.notAvailableText = LFGConstructDeclinedMessage(button.difficulty); 
+			button.NormalTexture:SetDesaturated(true);
+			button:SetAlpha(.5); 
+			button:SetEnabled(false); 
+			button.CanQueue = false; 
+		elseif (totalGroupSizeRequired) then
+			if (totalGroupSizeRequired ~= GetNumGroupMembers()) then
+				button.notAvailableText = ISLANDS_QUEUE_PARTY_REQUIREMENTS:format(totalGroupSizeRequired);  
+				button.CanQueue = false; 
+			else 
+				button.notAvailableText = nil;
+				button.CanQueue = true;
+			end
+			button:SetEnabled(true); 
+		else 
+			button.notAvailableText = nil;
+			button.NormalTexture:SetDesaturated(false);
+			button:SetEnabled(true);
+			button.CanQueue = true;
+		end
 		button.soundkitID = ButtonPressedSounds[buttonIndex];
 		button:Show(); 
 	end
@@ -163,6 +241,7 @@ function IslandsQueueFrameDifficultyMixin:SetActiveDifficulty(difficultyButton)
 	for button in self.difficultyPool:EnumerateActive() do
 		if (button.difficulty == self.activeDifficulty) then 
 			button.SelectedTexture:SetShown(true);
+			self:QueueButtonSetState(button.CanQueue); 
 		else
 			button.SelectedTexture:SetShown(false);
 		end

@@ -299,7 +299,7 @@ end
 
 local NOTIFICATION_LINE_TEXTURE_SIZE_Y = 8;
 function CommunitiesChatMixin:AddNotification(notification, atlas, r, g, b, backfill)
-	local textureMarkup = CreateAtlasMarkup(atlas, NOTIFICATION_LINE_TEXTURE_SIZE_Y, 256, 0, 3);
+	local textureMarkup = CreateAtlasMarkup(atlas, NOTIFICATION_LINE_TEXTURE_SIZE_Y, 200, 0, 3);
 	if backfill then
 		self.MessageFrame:BackFillMessage(textureMarkup, 1, 1, 1);
 		self.MessageFrame:BackFillMessage(notification, r, g, b);

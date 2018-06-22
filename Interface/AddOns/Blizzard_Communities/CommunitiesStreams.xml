@@ -81,8 +81,8 @@
 	
 	<Frame name="CommunitiesEditStreamDialogTemplate" frameStrata="DIALOG" mixin="CommunitiesEditStreamDialogMixin" virtual="true">
 		<Size x="350" y="320"/>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-			<BackgroundInsets left="11" right="12" top="12" bottom="11"/>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background-Dark" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets left="11" right="11" top="11" bottom="11"/>
 			<TileSize val="32"/>
 			<EdgeSize val="32"/>
 		</Backdrop>
@@ -149,6 +149,11 @@
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.TypeLabel" relativePoint="LEFT" x="-3" y="0"/>
 				</Anchors>
+				<Scripts>
+					<OnClick>
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+					</OnClick>
+				</Scripts>
 			</CheckButton>
 			<Button parentKey="Accept" inherits="UIPanelButtonTemplate" text="ACCEPT">
 				<Size x="100" y="20"/>

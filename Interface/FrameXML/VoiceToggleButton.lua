@@ -31,6 +31,18 @@ function VoiceToggleMuteMixin:IsForPublicChannel()
 	return true;	-- default to showing public channel silence state
 end
 
+local function GetMuteSelfButtonTooltipText(muteState)
+	if muteState == MUTE_SILENCE_STATE_NONE  then
+		return MicroButtonTooltipText(VOICE_TOOLTIP_MUTE_MIC, "TOGGLE_VOICE_SELF_MUTE");
+	elseif muteState == MUTE_SILENCE_STATE_MUTE  then
+		return MicroButtonTooltipText(VOICE_TOOLTIP_UNMUTE_MIC, "TOGGLE_VOICE_SELF_MUTE");
+	elseif muteState == MUTE_SILENCE_STATE_SILENCE  then
+		return MicroButtonTooltipText(VOICE_TOOLTIP_SILENCED_MUTE_MIC, "TOGGLE_VOICE_SELF_MUTE");
+	elseif muteState == MUTE_SILENCE_STATE_BOTH  then
+		return MicroButtonTooltipText(VOICE_TOOLTIP_SILENCED_UNMUTE_MIC, "TOGGLE_VOICE_SELF_MUTE");
+	end
+end
+
 function VoiceToggleMuteMixin:SetupMuteButton()
 	local function GetSelfMuteAndSilenceState()
 		local isMuted = C_VoiceChat.IsMuted();
@@ -52,10 +64,7 @@ function VoiceToggleMuteMixin:SetupMuteButton()
 
 	self:SetAccessorFunction(GetSelfMuteAndSilenceState);
 	self:SetMutatorFunction(C_VoiceChat.ToggleMuted);
-	self:AddStateTooltipString(MUTE_SILENCE_STATE_NONE, VOICE_TOOLTIP_MUTE_MIC);
-	self:AddStateTooltipString(MUTE_SILENCE_STATE_MUTE, VOICE_TOOLTIP_UNMUTE_MIC);
-	self:AddStateTooltipString(MUTE_SILENCE_STATE_SILENCE, VOICE_TOOLTIP_SILENCED_MUTE_MIC);
-	self:AddStateTooltipString(MUTE_SILENCE_STATE_BOTH, VOICE_TOOLTIP_SILENCED_UNMUTE_MIC);
+	self:SetTooltipFunction(GetMuteSelfButtonTooltipText);
 end
 
 function VoiceToggleMuteMixin:OnLoad()
@@ -75,6 +84,14 @@ function VoiceToggleMuteMixin:OnLoad()
 	self:UpdateVisibleState();
 end
 
+local function GetDeafenSelfButtonTooltipText(isDeafened)
+	if isDeafened then
+		return MicroButtonTooltipText(VOICE_TOOLTIP_UNDEAFEN, "TOGGLE_VOICE_SELF_DEAFEN");
+	else
+		return MicroButtonTooltipText(VOICE_TOOLTIP_DEAFEN, "TOGGLE_VOICE_SELF_DEAFEN");
+	end
+end
+
 VoiceToggleDeafenMixin = CreateFromMixins(VoiceToggleButtonOnlyVisibleWhenLoggedInMixin);
 
 function VoiceToggleDeafenMixin:OnLoad()
@@ -84,8 +101,7 @@ function VoiceToggleDeafenMixin:OnLoad()
 	self:AddStateAtlas(false, "chatframe-button-icon-speaker-on");
 	self:AddStateAtlas(true, "chatframe-button-icon-speaker-off");
 	self:AddStateAtlasFallback("chatframe-button-icon-speaker-on");
-	self:AddStateTooltipString(false, VOICE_TOOLTIP_DEAFEN);
-	self:AddStateTooltipString(true, VOICE_TOOLTIP_UNDEAFEN);
+	self:SetTooltipFunction(GetDeafenSelfButtonTooltipText);
 	self:RegisterStateUpdateEvent("VOICE_CHAT_DEAFENED_CHANGED");
 	self:UpdateVisibleState();
 end
@@ -136,9 +152,7 @@ function RosterSelfDeafenButtonMixin:OnLoad()
 	self:AddStateAtlas(false, "voicechat-icon-speaker");
 	self:AddStateAtlas(true, "voicechat-icon-speaker-mute");
 	self:SetUseIconAsHighlight(true);
-
-	self:AddStateTooltipString(false, VOICE_TOOLTIP_DEAFEN);
-	self:AddStateTooltipString(true, VOICE_TOOLTIP_UNDEAFEN);
+	self:SetTooltipFunction(GetDeafenSelfButtonTooltipText);
 
 	self:RegisterStateUpdateEvent("VOICE_CHAT_DEAFENED_CHANGED");
 	self:UpdateVisibleState();

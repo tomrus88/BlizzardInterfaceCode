@@ -431,8 +431,8 @@ function CommunitiesListEntryMixin:SetClubInfo(clubInfo, isInvitation, isTicket)
 		self.GuildTabardBackground:SetShown(isGuild);
 		self.GuildTabardBorder:SetShown(isGuild);
 		self.Icon:SetShown(not isInvitation and not isGuild and not isTicket);
-		self.Icon:SetSize(42, 42);
-		self.Icon:SetPoint("TOPLEFT", 8, -15);
+		self.Icon:SetSize(38, 38);
+		self.Icon:SetPoint("TOPLEFT", 11, -15);
 		self.CircleMask:SetShown(not isInvitation and not isGuild);
 		self.IconRing:SetShown(not isInvitation and not isGuild and not isTicket);
 		self.IconRing:SetAtlas(clubInfo.clubType == Enum.ClubType.BattleNet and "communities-ring-blue" or "communities-ring-gold");
@@ -483,7 +483,7 @@ function CommunitiesListEntryMixin:SetAddCommunity()
 
 	self.Icon:SetAtlas("communities-icon-addgroupplus");
 	self.Icon:SetSize(32, 32);
-	self.Icon:SetPoint("TOPLEFT", 11, -18);
+	self.Icon:SetPoint("TOPLEFT", 17, -18);
 end
 
 function CommunitiesListEntryMixin:SetGuildFinder()
@@ -685,6 +685,7 @@ end
 function CommunitiesListDropDownMenu_Initialize(self)
 	local clubs = C_Club.GetSubscribedClubs();
 	if clubs ~= nil then
+		CommunitiesUtil.SortClubs(clubs);
 		local info = UIDropDownMenu_CreateInfo();
 		local parent = self:GetParent();
 		for i, clubInfo in ipairs(clubs) do

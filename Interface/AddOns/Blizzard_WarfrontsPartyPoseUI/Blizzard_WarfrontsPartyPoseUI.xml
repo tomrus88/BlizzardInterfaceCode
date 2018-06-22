@@ -14,11 +14,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<ModelScene parentKey="ModelScene" enableMouse="false" useParentLevel="true" inherits="PartyPoseModelFrameTemplate">
-				<Anchors>
-					<Anchor point="CENTER"/>
-				</Anchors>
-			</ModelScene>
+			<ModelScene parentKey="ModelScene" useParentLevel="true" inherits="PartyPoseModelFrameTemplate" />
 			<Button parentKey="LeaveButton" inherits="UIPanelButtonNoTooltipTemplate">
 				<Size x="164" y="22"/>
 				<Anchors>

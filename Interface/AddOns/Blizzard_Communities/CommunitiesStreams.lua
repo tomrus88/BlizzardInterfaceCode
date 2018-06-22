@@ -41,7 +41,7 @@ function CommunitiesStreamDropDownMenu_Initialize(self)
 	
 	info.mouseOverIcon = nil;
 	
-	if self:GetCommunitiesFrame():GetPrivilegesForClub(clubId).canCreateStream then
+	if self:GetCommunitiesFrame():GetPrivilegesForClub(clubId).canCreateStream and #streams < 50 then
 		info.text = GREEN_FONT_COLOR:WrapTextInColorCode(COMMUNITIES_CREATE_CHANNEL);
 		info.value = nil;
 		info.customCheckIconAtlas = "communities-icon-addgroupplus";
@@ -90,7 +90,7 @@ function CommunitiesEditStreamDialogMixin:OnLoad()
 		function() 
 			self.NameEdit:SetFocus() 
 		end);
-	self.Cancel:SetScript("OnClick", function() self:Hide(); end);
+	self.Cancel:SetScript("OnClick", function() self:Hide(); PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON); end);
 	self.NameEdit:SetScript("OnTextChanged", function() self:UpdateAcceptButton(); end);
 end
 
@@ -113,6 +113,7 @@ function CommunitiesEditStreamDialogMixin:ShowCreateDialog(clubId)
 		local leadersAndModeratorsOnly = editStreamDialog.TypeCheckBox:GetChecked();
 		C_Club.CreateStream(clubId, editStreamDialog.NameEdit:GetText(), editStreamDialog.Description.EditBox:GetText(), leadersAndModeratorsOnly);
 		editStreamDialog:Hide();
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 	end);
 	self:Show();
 	self.NameEdit:SetFocus();
@@ -133,6 +134,7 @@ function CommunitiesEditStreamDialogMixin:ShowEditDialog(clubId, stream)
 		local leadersAndModeratorsOnly = editStreamDialog.TypeCheckBox:GetChecked();
 		C_Club.EditStream(clubId, stream.streamId, editStreamDialog.NameEdit:GetText(), editStreamDialog.Description.EditBox:GetText(), leadersAndModeratorsOnly)
 		editStreamDialog:Hide();
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 	end);
 	self.Delete:SetScript("OnClick", function(self)
 		StaticPopup_Show("CONFIRM_DESTROY_COMMUNITY_STREAM", nil, nil, { clubId = clubId, streamId = stream.streamId, });
@@ -359,9 +361,11 @@ function CommunitiesAddToChatDropDown_Initialize(self, level)
 				local communityPart = ChatFrame_TruncateToMaxLength(clubInfo.name, MAX_COMMUNITY_NAME_LENGTH);
 				local streamPart = ChatFrame_TruncateToMaxLength(streamInfo.name, MAX_CHAT_TAB_STREAM_NAME_LENGTH);
 				local chatFrameName = COMMUNITIES_NAME_AND_STREAM_NAME:format(communityPart, streamPart);
-				local frame, chatFrameIndex = FCF_OpenNewWindow(chatFrameName);
+				local noDefaultChannels = true;
+				local frame, chatFrameIndex = FCF_OpenNewWindow(chatFrameName, noDefaultChannels);
 				C_Club.AddClubStreamToChatWindow(clubId, streamId, chatFrameIndex);
-				ChatFrame_AddCommunitiesChannel(frame, clubId, streamId);
+				local setEditBoxToChannel = true;
+				ChatFrame_AddCommunitiesChannel(frame, clubId, streamId, setEditBoxToChannel);
 			end
 		end;
 

@@ -1,4 +1,3 @@
-local AZERITE_POWER_SPELL_VISUAL_KIT_ID = 96781; -- Heart of Azeroth Channel Spell.
 IslandsPartyPoseMixin = CreateFromMixins(PartyPoseMixin);
 
 function IslandsPartyPoseMixin:SetLeaveButtonText()
@@ -54,7 +53,6 @@ do
 	};
 
 	function IslandsPartyPoseMixin:LoadScreenData(mapID, winner)
-		self.rewardPool:ReleaseAll();
 		local partyPoseInfo = C_PartyPose.GetPartyPoseInfoByMapID(mapID);
 		UIWidgetManager:RegisterWidgetSetContainer(partyPoseInfo.widgetSetID, self.Score);
 
@@ -70,9 +68,6 @@ do
 			self.TitleText:SetText(PARTY_POSE_DEFEAT);
 			self:SetModelScene(partyPoseInfo.defeatModelSceneID, LE_PARTY_CATEGORY_INSTANCE);
 		end
-
-		self:PlayModelSceneAnimations();
-		self:ApplyVisualKitToEachActor(AZERITE_POWER_SPELL_VISUAL_KIT_ID);
 
 		self:SetupTheme(islandsStyleData[playerFactionGroup]);
 	end

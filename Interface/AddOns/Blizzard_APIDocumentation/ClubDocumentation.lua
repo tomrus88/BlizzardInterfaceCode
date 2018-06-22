@@ -438,9 +438,27 @@ local Club =
 			},
 		},
 		{
+			Name = "GetMessagesBefore",
+			Type = "Function",
+			Documentation = { "Get downloaded messages before (and including) the specified messageId limited by count. These are filtered by ignored players" },
+
+			Arguments =
+			{
+				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "streamId", Type = "string", Nilable = false },
+				{ Name = "newest", Type = "ClubMessageIdentifier", Nilable = false },
+				{ Name = "count", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "messages", Type = "table", InnerType = "ClubMessageInfo", Nilable = false },
+			},
+		},
+		{
 			Name = "GetMessagesInRange",
 			Type = "Function",
-			Documentation = { "Get all downloaded messages in the given range." },
+			Documentation = { "Get downloaded messages in the given range. These are filtered by ignored players" },
 
 			Arguments =
 			{
@@ -587,18 +605,6 @@ local Club =
 			},
 		},
 		{
-			Name = "RequestMoreMessagesAfter",
-			Type = "Function",
-			Documentation = { "Call this when the user scrolls near the bottom of the message view, and more need to be displayed." },
-
-			Arguments =
-			{
-				{ Name = "clubId", Type = "string", Nilable = false },
-				{ Name = "streamId", Type = "string", Nilable = false },
-				{ Name = "messageId", Type = "ClubMessageIdentifier", Nilable = false },
-			},
-		},
-		{
 			Name = "RequestMoreMessagesBefore",
 			Type = "Function",
 			Documentation = { "Call this when the user scrolls near the top of the message view, and more need to be displayed. The history will be downloaded backwards (newest to oldest)." },
@@ -608,6 +614,12 @@ local Club =
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "streamId", Type = "string", Nilable = false },
 				{ Name = "messageId", Type = "ClubMessageIdentifier", Nilable = true },
+				{ Name = "count", Type = "number", Nilable = true },
+			},
+
+			Returns =
+			{
+				{ Name = "alreadyHasMessages", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -934,6 +946,8 @@ local Club =
 			Payload =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "clubName", Type = "string", Nilable = true },
+				{ Name = "clubRemovedReason", Type = "ClubRemovedReason", Nilable = false },
 			},
 		},
 		{
@@ -1190,16 +1204,17 @@ local Club =
 		{
 			Name = "ClubMemberPresence",
 			Type = "Enumeration",
-			NumValues = 5,
+			NumValues = 6,
 			MinValue = 0,
-			MaxValue = 4,
+			MaxValue = 5,
 			Fields =
 			{
 				{ Name = "Unknown", Type = "ClubMemberPresence", EnumValue = 0 },
 				{ Name = "Online", Type = "ClubMemberPresence", EnumValue = 1 },
-				{ Name = "Offline", Type = "ClubMemberPresence", EnumValue = 2 },
-				{ Name = "Away", Type = "ClubMemberPresence", EnumValue = 3 },
-				{ Name = "Busy", Type = "ClubMemberPresence", EnumValue = 4 },
+				{ Name = "OnlineMobile", Type = "ClubMemberPresence", EnumValue = 2 },
+				{ Name = "Offline", Type = "ClubMemberPresence", EnumValue = 3 },
+				{ Name = "Away", Type = "ClubMemberPresence", EnumValue = 4 },
+				{ Name = "Busy", Type = "ClubMemberPresence", EnumValue = 5 },
 			},
 		},
 		{
@@ -1213,6 +1228,20 @@ local Club =
 				{ Name = "Available", Type = "ClubInvitationCandidateStatus", EnumValue = 0 },
 				{ Name = "InvitePending", Type = "ClubInvitationCandidateStatus", EnumValue = 1 },
 				{ Name = "AlreadyMember", Type = "ClubInvitationCandidateStatus", EnumValue = 2 },
+			},
+		},
+		{
+			Name = "ClubRemovedReason",
+			Type = "Enumeration",
+			NumValues = 4,
+			MinValue = 0,
+			MaxValue = 3,
+			Fields =
+			{
+				{ Name = "None", Type = "ClubRemovedReason", EnumValue = 0 },
+				{ Name = "Banned", Type = "ClubRemovedReason", EnumValue = 1 },
+				{ Name = "Removed", Type = "ClubRemovedReason", EnumValue = 2 },
+				{ Name = "ClubDestroyed", Type = "ClubRemovedReason", EnumValue = 3 },
 			},
 		},
 		{
