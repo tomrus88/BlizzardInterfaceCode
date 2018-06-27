@@ -11,12 +11,12 @@ local IslandsQueueUI =
 			Type = "Function",
 		},
 		{
-			Name = "GetIslandDifficultyIds",
+			Name = "GetIslandDifficultyInfo",
 			Type = "Function",
 
 			Returns =
 			{
-				{ Name = "lfgIslandDifficultyIds", Type = "table", InnerType = "number", Nilable = false },
+				{ Name = "islandDifficultyInfo", Type = "table", InnerType = "IslandsQueueDifficultyInfo", Nilable = false },
 			},
 		},
 		{
@@ -46,6 +46,15 @@ local IslandsQueueUI =
 				{ Name = "difficultyID", Type = "number", Nilable = false },
 			},
 		},
+		{
+			Name = "RequestPreloadRewardData",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "questId", Type = "number", Nilable = false },
+			},
+		},
 	},
 
 	Events =
@@ -64,6 +73,15 @@ local IslandsQueueUI =
 
 	Tables =
 	{
+		{
+			Name = "IslandsQueueDifficultyInfo",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "difficultyId", Type = "number", Nilable = false },
+				{ Name = "previewRewardQuestId", Type = "number", Nilable = false },
+			},
+		},
 	},
 };
 

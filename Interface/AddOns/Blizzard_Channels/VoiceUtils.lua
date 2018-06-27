@@ -59,6 +59,8 @@ local voiceChatStatusToGameError =
 	[Enum.VoiceChatStatusCode.ProxyConnectionTimeOut] = LE_GAME_ERR_VOICE_CHAT_SERVICE_LOST,
 	[Enum.VoiceChatStatusCode.ProxyConnectionUnexpectedDisconnect] = LE_GAME_ERR_VOICE_CHAT_SERVICE_LOST,
 	[Enum.VoiceChatStatusCode.PlayerSilenced] = LE_GAME_ERR_VOICE_CHAT_PLAYER_SILENCED,
+	[Enum.VoiceChatStatusCode.PlayerVoiceChatParentalDisabled] = LE_GAME_ERR_VOICE_CHAT_PARENTAL_DISABLE_ALL,
+	[Enum.VoiceChatStatusCode.Disabled] = LE_GAME_ERR_VOICE_CHAT_DISABLED,
 };
 
 function Voice_GetGameErrorFromStatusCode(statusCode)
@@ -78,6 +80,21 @@ function Voice_GetGameErrorStringFromStatusCode(statusCode)
 			return _G[stringId];
 		end
 	end
+end
+
+local SUPPRESS_ALERT_MESSAGE = true;
+local voiceChatStatusAlertBlacklist =
+{
+	[Enum.VoiceChatStatusCode.PlayerVoiceChatParentalDisabled] = SUPPRESS_ALERT_MESSAGE,
+	[Enum.VoiceChatStatusCode.Disabled] = SUPPRESS_ALERT_MESSAGE,
+};
+
+function Voice_GetGameAlertStringFromStatusCode(statusCode)
+	if voiceChatStatusAlertBlacklist[statusCode] == SUPPRESS_ALERT_MESSAGE then
+		return nil;
+	end
+
+	return Voice_GetGameErrorStringFromStatusCode(statusCode);
 end
 
 local partyCategoryToChannelType =

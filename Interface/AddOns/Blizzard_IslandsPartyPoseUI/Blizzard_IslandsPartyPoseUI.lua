@@ -1,7 +1,7 @@
 IslandsPartyPoseMixin = CreateFromMixins(PartyPoseMixin);
 
 function IslandsPartyPoseMixin:SetLeaveButtonText()
-	self.LeaveButton.Text:SetText(ISLAND_LEAVE);
+	self.LeaveButton:SetText(ISLAND_LEAVE);
 end
 
 do

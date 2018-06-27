@@ -192,7 +192,7 @@ function VoiceChatHeadsetButtonMixin:ShowTooltip()
 end
 
 function VoiceChatHeadsetButtonMixin:Update()
-	if self:GetVoiceChannel() or self:IsCommunityChannel() then
+	if self:GetVoiceChannel() or (self:IsCommunityChannel() and C_VoiceChat.CanPlayerUseVoiceChat()) then
 		self:SetShown(true);
 
 		local isActive = self:IsVoiceActive();

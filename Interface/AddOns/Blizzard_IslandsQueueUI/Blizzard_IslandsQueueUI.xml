@@ -39,6 +39,7 @@
 				<Scripts>
 					<OnClick>
 						self:GetParent():Hide(); 
+						PlaySound(SOUNDKIT.UI_80_ISLANDS_TUTORIAL_CLOSE);
 						SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_ISLANDS_QUEUE_INFO_FRAME, true);
 					</OnClick>
 				</Scripts>
@@ -50,6 +51,7 @@
 				<Scripts>
 					<OnClick>
 						self:GetParent():Hide(); 
+						PlaySound(SOUNDKIT.UI_80_ISLANDS_TUTORIAL_CLOSE);
 						SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_ISLANDS_QUEUE_INFO_FRAME, true);
 					</OnClick>
 				</Scripts>
@@ -233,20 +235,31 @@
 			</Layer>
 		</Layers>
 		<Scripts>
+			<OnLoad>
+				self.UpdateTooltip = self:GetScript("OnEnter"); 
+			</OnLoad>
 			<OnClick>
 				self:GetParent():SetActiveDifficulty(self); 
 				PlaySound(self.soundkitID);
 			</OnClick>
 			<OnEnter>
 				if (self.tooltipText) then
-					GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-					GameTooltip_SetTitle(GameTooltip, self.tooltipText, HIGHLIGHT_FONT_COLOR);
+					EmbeddedItemTooltip:SetOwner(self, "ANCHOR_RIGHT");
+					GameTooltip_SetTitle(EmbeddedItemTooltip, self.tooltipText, HIGHLIGHT_FONT_COLOR);
 					if (self.notAvailableText) then 
-						GameTooltip_AddColoredLine(GameTooltip, self.notAvailableText, RED_FONT_COLOR, true);
+						GameTooltip_AddColoredLine(EmbeddedItemTooltip, self.notAvailableText, RED_FONT_COLOR, true);
 					end
-					GameTooltip:Show();
+					if (HaveQuestData(self.questId) and HaveQuestRewardData(self.questId)) then
+						GameTooltip_AddQuestRewardsToTooltip(EmbeddedItemTooltip, self.questId, TOOLTIP_QUEST_REWARDS_STYLE_ISLANDS_QUEUE); 
+					else 
+						GameTooltip_AddColoredLine(EmbeddedItemTooltip, RETRIEVING_DATA, RED_FONT_COLOR, true);
+					end
+					EmbeddedItemTooltip:Show();
 				end
 			</OnEnter>
+			<OnLeave>
+				EmbeddedItemTooltip:Hide();
+			</OnLeave> 
 		</Scripts>
 	</Button>
 	<Frame name="IslandsQueueScreenDifficultySelector" mixin="IslandsQueueFrameDifficultyMixin" virtual="true">
@@ -304,6 +317,7 @@
 		<Scripts>
 			<OnLoad method="OnLoad"/> 
 			<OnShow method="OnShow"/>
+			<OnHide method="OnHide"/>
 			<OnEvent method="OnEvent"/>
 		</Scripts>
 	</Frame> 

@@ -142,14 +142,14 @@ function UpdateMicroButtons()
 	end
 
 	GuildMicroButton_UpdateTabard();
-	if ( IsTrialAccount() or (IsVeteranTrialAccount() and not IsInGuild()) or factionGroup == "Neutral" or IsKioskModeEnabled() ) then
+	if ( IsCommunitiesUIDisabledByTrialAccount() or factionGroup == "Neutral" or IsKioskModeEnabled() ) then
 		GuildMicroButton:Disable();
 		if (IsKioskModeEnabled()) then
 			SetKioskTooltip(GuildMicroButton);
 		else
 			GuildMicroButton.disabledTooltip = ERR_RESTRICTED_ACCOUNT_TRIAL;
 		end
-	elseif ( not BNConnected() ) then
+	elseif ( C_Club.IsEnabled() and not BNConnected() ) then
 		GuildMicroButton:Disable();
 		GuildMicroButton.disabledTooltip = BLIZZARD_COMMUNITIES_SERVICES_UNAVAILABLE;
 	elseif ( GuildFrameIsOpen() ) then

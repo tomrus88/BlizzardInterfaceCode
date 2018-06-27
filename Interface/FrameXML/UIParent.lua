@@ -780,6 +780,10 @@ function ToggleCalendar()
 	end
 end
 
+function IsCommunitiesUIDisabledByTrialAccount()
+	return IsTrialAccount() or (not C_Club.IsEnabled() and IsVeteranTrialAccount() and not IsInGuild());
+end
+
 function ToggleGuildFrame()
 	if (IsKioskModeEnabled()) then
 		return;
@@ -790,7 +794,7 @@ function ToggleGuildFrame()
 		return;
 	end
 
-	if ( IsTrialAccount() or (IsVeteranTrialAccount() and not IsInGuild()) ) then
+	if ( IsCommunitiesUIDisabledByTrialAccount() ) then
 		UIErrorsFrame:AddMessage(ERR_RESTRICTED_ACCOUNT_TRIAL, 1.0, 0.1, 0.1, 1.0);
 		return;
 	end
@@ -2537,12 +2541,8 @@ function FramePositionDelegate:ShowUIPanel(frame, force)
 end
 
 function FramePositionDelegate:ShowUIPanelFailed(frame)
-	local showFailedFunc = GetUIPanelWindowInfo(frame, "showFailedFunc");
-	if ( type(showFailedFunc) ~= "function" ) then
-		showFailedFunc = _G[showFailedFunc];
-	end
-	if ( showFailedFunc ) then
-		showFailedFunc(frame);
+	if GetUIPanelWindowInfo(frame, "showFailedFunc") then
+		frame:ExecuteAttribute("UIPanelLayout-showFailedFunc");
 	end
 end
 

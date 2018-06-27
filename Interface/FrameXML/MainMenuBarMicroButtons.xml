@@ -210,7 +210,7 @@
 				self:RegisterEvent("PLAYER_GUILD_UPDATE");
 				self:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT");
 				GuildMicroButton_UpdateTabard(true);
-				if ( IsTrialAccount() or (IsVeteranTrialAccount() and not IsInGuild()) ) then
+				if ( IsCommunitiesUIDisabledByTrialAccount() ) then
 					self:Disable();
 					self.disabledTooltip = ERR_RESTRICTED_ACCOUNT_TRIAL;
 				end

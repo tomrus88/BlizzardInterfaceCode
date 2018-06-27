@@ -22,10 +22,13 @@ end
 
 VoiceToggleMuteMixin = CreateFromMixins(VoiceToggleButtonOnlyVisibleWhenLoggedInMixin);
 
-MUTE_SILENCE_STATE_NONE		= 0
-MUTE_SILENCE_STATE_MUTE		= 1
-MUTE_SILENCE_STATE_SILENCE	= 2
-MUTE_SILENCE_STATE_BOTH		= 3
+MUTE_SILENCE_STATE_NONE = 0;
+MUTE_SILENCE_STATE_MUTE = 1;
+MUTE_SILENCE_STATE_SILENCE = 2;
+MUTE_SILENCE_STATE_PARENTAL_MUTE = 4;
+
+MUTE_SILENCE_STATE_MUTE_AND_SILENCE = 3;
+MUTE_SILENCE_STATE_MUTE_AND_PARENTAL_MUTE = 5;
 
 function VoiceToggleMuteMixin:IsForPublicChannel()
 	return true;	-- default to showing public channel silence state
@@ -38,30 +41,25 @@ local function GetMuteSelfButtonTooltipText(muteState)
 		return MicroButtonTooltipText(VOICE_TOOLTIP_UNMUTE_MIC, "TOGGLE_VOICE_SELF_MUTE");
 	elseif muteState == MUTE_SILENCE_STATE_SILENCE  then
 		return MicroButtonTooltipText(VOICE_TOOLTIP_SILENCED_MUTE_MIC, "TOGGLE_VOICE_SELF_MUTE");
-	elseif muteState == MUTE_SILENCE_STATE_BOTH  then
+	elseif muteState == MUTE_SILENCE_STATE_MUTE_AND_SILENCE  then
 		return MicroButtonTooltipText(VOICE_TOOLTIP_SILENCED_UNMUTE_MIC, "TOGGLE_VOICE_SELF_MUTE");
+	elseif muteState == MUTE_SILENCE_STATE_PARENTAL_MUTE  then
+		return MicroButtonTooltipText(VOICE_TOOLTIP_PARENTAL_MUTE_MIC, "TOGGLE_VOICE_SELF_MUTE");
+	elseif muteState == MUTE_SILENCE_STATE_MUTE_AND_PARENTAL_MUTE  then
+		return MicroButtonTooltipText(VOICE_TOOLTIP_PARENTAL_UNMUTE_MIC, "TOGGLE_VOICE_SELF_MUTE");
 	end
 end
 
 function VoiceToggleMuteMixin:SetupMuteButton()
 	local function GetSelfMuteAndSilenceState()
-		local isMuted = C_VoiceChat.IsMuted();
-		local isSilenced = C_VoiceChat.IsSilenced();
-
-		local stateVal = MUTE_SILENCE_STATE_NONE;
-		if isMuted then
-			stateVal = stateVal + MUTE_SILENCE_STATE_MUTE;
-		end
-
-		local isForPublicChannel = self:IsForPublicChannel();
-
-		if isForPublicChannel and isSilenced then
-			stateVal = stateVal + MUTE_SILENCE_STATE_SILENCE;
-		end
-
-		return stateVal;
+		self.stateFlags:ClearAll();
+		self.stateFlags:SetOrClear(MUTE_SILENCE_STATE_MUTE, C_VoiceChat.IsMuted());
+		self.stateFlags:SetOrClear(MUTE_SILENCE_STATE_SILENCE, self:IsForPublicChannel() and C_VoiceChat.IsSilenced());
+		self.stateFlags:SetOrClear(MUTE_SILENCE_STATE_PARENTAL_MUTE, C_VoiceChat.IsParentalMuted());
+		return self.stateFlags:GetFlags();
 	end
 
+	self.stateFlags = CreateFromMixins(FlagsMixin);
 	self:SetAccessorFunction(GetSelfMuteAndSilenceState);
 	self:SetMutatorFunction(C_VoiceChat.ToggleMuted);
 	self:SetTooltipFunction(GetMuteSelfButtonTooltipText);
@@ -75,7 +73,9 @@ function VoiceToggleMuteMixin:OnLoad()
 	self:AddStateAtlas(MUTE_SILENCE_STATE_NONE, "chatframe-button-icon-mic-on");
 	self:AddStateAtlas(MUTE_SILENCE_STATE_MUTE, "chatframe-button-icon-mic-off");
 	self:AddStateAtlas(MUTE_SILENCE_STATE_SILENCE, "chatframe-button-icon-mic-silenced");
-	self:AddStateAtlas(MUTE_SILENCE_STATE_BOTH, "chatframe-button-icon-mic-silenced-off");
+	self:AddStateAtlas(MUTE_SILENCE_STATE_MUTE_AND_SILENCE, "chatframe-button-icon-mic-silenced-off");
+	self:AddStateAtlas(MUTE_SILENCE_STATE_PARENTAL_MUTE, "voicechat-icon-mic-silenced");
+	self:AddStateAtlas(MUTE_SILENCE_STATE_MUTE_AND_PARENTAL_MUTE, "voicechat-icon-mic-mutesilenced");
 	self:AddStateAtlasFallback("chatframe-button-icon-mic-on");
 
 	self:RegisterStateUpdateEvent("VOICE_CHAT_MUTED_CHANGED");
@@ -177,7 +177,9 @@ function RosterSelfMuteButtonMixin:OnLoad()
 	self:AddStateAtlas(MUTE_SILENCE_STATE_NONE, "voicechat-icon-mic");
 	self:AddStateAtlas(MUTE_SILENCE_STATE_MUTE, "voicechat-icon-mic-mute");
 	self:AddStateAtlas(MUTE_SILENCE_STATE_SILENCE, "voicechat-icon-mic-silenced");
-	self:AddStateAtlas(MUTE_SILENCE_STATE_BOTH, "voicechat-icon-mic-mutesilenced");
+	self:AddStateAtlas(MUTE_SILENCE_STATE_MUTE_AND_SILENCE, "voicechat-icon-mic-mutesilenced");
+	self:AddStateAtlas(MUTE_SILENCE_STATE_PARENTAL_MUTE, "voicechat-icon-mic-silenced");
+	self:AddStateAtlas(MUTE_SILENCE_STATE_MUTE_AND_PARENTAL_MUTE, "voicechat-icon-mic-mutesilenced");
 	self:SetUseIconAsHighlight(true);
 
 	self:RegisterStateUpdateEvent("VOICE_CHAT_MUTED_CHANGED");
@@ -193,28 +195,20 @@ RosterMemberMuteButtonMixin = CreateFromMixins(RosterToggleButtonMixin);
 
 function RosterMemberMuteButtonMixin:SetupMuteButton()
 	local function GetMemberMuteAndSilenceState()
-		local isMuted = self:IsMuted();
-		local isSilenced = self:IsSilenced();
-
-		local stateVal = MUTE_SILENCE_STATE_NONE;
-		if isMuted then
-			stateVal = stateVal + MUTE_SILENCE_STATE_MUTE;
-		end
-
-		if isSilenced then
-			stateVal = stateVal + MUTE_SILENCE_STATE_SILENCE;
-		end
-
-		return stateVal;
+		self.stateFlags:ClearAll();
+		self.stateFlags:SetOrClear(MUTE_SILENCE_STATE_MUTE, self:IsMuted());
+		self.stateFlags:SetOrClear(MUTE_SILENCE_STATE_SILENCE, self:IsSilenced());
+		return self.stateFlags:GetFlags();
 	end
 
+	self.stateFlags = CreateFromMixins(FlagsMixin);
 	self:SetAccessorFunction(GetMemberMuteAndSilenceState);
 	self:SetMutatorFunctionThroughSelf(self.ToggleMuted);
 
 	self:AddStateTooltipString(MUTE_SILENCE_STATE_NONE, MUTE);
 	self:AddStateTooltipString(MUTE_SILENCE_STATE_MUTE, UNMUTE);
 	self:AddStateTooltipString(MUTE_SILENCE_STATE_SILENCE, MUTE_SILENCED);
-	self:AddStateTooltipString(MUTE_SILENCE_STATE_BOTH, UNMUTE_SILENCED);
+	self:AddStateTooltipString(MUTE_SILENCE_STATE_MUTE_AND_SILENCE, UNMUTE_SILENCED);
 end
 
 function RosterMemberMuteButtonMixin:OnLoad()
@@ -226,7 +220,7 @@ function RosterMemberMuteButtonMixin:OnLoad()
 	self:AddStateAtlas(MUTE_SILENCE_STATE_NONE, "voicechat-icon-speaker");
 	self:AddStateAtlas(MUTE_SILENCE_STATE_MUTE, "voicechat-icon-speaker-mute");
 	self:AddStateAtlas(MUTE_SILENCE_STATE_SILENCE, "voicechat-icon-speaker-silenced");
-	self:AddStateAtlas(MUTE_SILENCE_STATE_BOTH, "voicechat-icon-speaker-mutesilenced");
+	self:AddStateAtlas(MUTE_SILENCE_STATE_MUTE_AND_SILENCE, "voicechat-icon-speaker-mutesilenced");
 	self:SetUseIconAsHighlight(true);
 
 	self:RegisterStateUpdateEvent("VOICE_CHAT_CHANNEL_MEMBER_MUTE_FOR_ME_CHANGED");

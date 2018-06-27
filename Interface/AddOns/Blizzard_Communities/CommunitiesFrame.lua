@@ -15,7 +15,6 @@ local COMMUNITIES_FRAME_EVENTS = {
 	"CLUB_STREAMS_LOADED",
 	"CLUB_STREAM_ADDED",
 	"CLUB_STREAM_REMOVED",
-	"CLUB_STREAM_SUBSCRIBED",
 	"CLUB_ADDED",
 	"CLUB_REMOVED",
 	"CLUB_SELF_MEMBER_ROLE_UPDATED",
@@ -36,17 +35,6 @@ local COMMUNITIES_STATIC_POPUPS = {
 	"CONFIRM_LEAVE_AND_DESTROY_COMMUNITY",
 	"CONFIRM_LEAVE_COMMUNITY",
 };
-
-local function RangeIsEmpty(range)
-	return range.newestMessageId.epoch < range.oldestMessageId.epoch or (range.newestMessageId.epoch == range.oldestMessageId.epoch and range.newestMessageId.position < range.oldestMessageId.position);
-end
-
-local function RequestInitialMessages(clubId, streamId)
-	local ranges = C_Club.GetMessageRanges(clubId, streamId);
-	if (not ranges or #ranges == 0 or RangeIsEmpty(ranges[#ranges])) then
-		C_Club.RequestMoreMessagesBefore(clubId, streamId, nil);
-	end
-end
 
 function CommunitiesFrameMixin:OnLoad()
 	CallbackRegistryBaseMixin.OnLoad(self);
@@ -120,11 +108,6 @@ function CommunitiesFrameMixin:OnEvent(event, ...)
 			if isSelectedClub then
 				self:UpdateStreamDropDown();
 			end
-		end
-	elseif event == "CLUB_STREAM_SUBSCRIBED" then
-		local clubId, streamId = ...;
-		if clubId == self:GetSelectedClubId() and streamId == self:GetSelectedStreamId() then
-			RequestInitialMessages(clubId, streamId);
 		end
 	elseif event == "CLUB_ADDED" then
 		local clubId = ...;
@@ -480,6 +463,7 @@ function CommunitiesFrameMixin:OnClubSelected(clubId)
 				self:SelectStream(clubId, selectedStream.streamId);
 			else
 				local streams = C_Club.GetStreams(clubId);
+				CommunitiesUtil.SortStreams(streams);
 				if #streams >= 1 then
 					self:SelectStream(clubId, streams[1].streamId);
 				else
@@ -594,7 +578,7 @@ function CommunitiesFrameMixin:SelectStream(clubId, streamId)
 					self:SetFocusedStream(clubId, streamId);
 					C_Club.SetAutoAdvanceStreamViewMarker(clubId, streamId);
 					if C_Club.IsSubscribedToStream(clubId, streamId) then
-						RequestInitialMessages(clubId, streamId);
+						self.Chat:RequestInitialMessages(clubId, streamId);
 					end
 					
 					self:TriggerEvent(CommunitiesFrameMixin.Event.StreamSelected, streamId);

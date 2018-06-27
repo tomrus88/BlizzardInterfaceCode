@@ -1219,23 +1219,23 @@ function UnitPopup_HideButtons ()
 				shown = false;
 			end
 		elseif ( value == "VOICE_CHAT" ) then
-			if not isLocalPlayer and not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or not isLocalPlayer and not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_MICROPHONE_VOLUME" then
-			if not isLocalPlayer then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or not isLocalPlayer then
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_SPEAKER_VOLUME" then
-			if not isLocalPlayer then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or not isLocalPlayer then
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_SETTINGS" then
-			if not isLocalPlayer then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or not isLocalPlayer then
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_USER_VOLUME" then
-			if isLocalPlayer or not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or isLocalPlayer or not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
 				shown = false;
 			end
 		elseif value == "COMMUNITIES_LEAVE" then

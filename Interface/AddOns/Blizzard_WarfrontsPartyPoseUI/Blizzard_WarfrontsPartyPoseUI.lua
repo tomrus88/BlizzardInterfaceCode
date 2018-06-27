@@ -41,7 +41,7 @@ function WarfrontsPartyPoseMixin:AddModelSceneActors(playerFactionGroup)
 end
 
 function WarfrontsPartyPoseMixin:SetLeaveButtonText()
-	self.LeaveButton.Text:SetText(WARFRONTS_LEAVE);
+	self.LeaveButton:SetText(WARFRONTS_LEAVE);
 end
 
 do

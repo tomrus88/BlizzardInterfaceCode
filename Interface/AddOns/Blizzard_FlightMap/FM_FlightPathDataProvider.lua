@@ -90,7 +90,7 @@ function FlightMap_FlightPathDataProviderMixin:ShowBackgroundRoutesFromCurrent()
 	end
 
 	for slotIndex, pin in pairs(self.slotIndexToPin) do
-		if pin.taxiNodeData.state == Enum.FlightPathState.Reachable then
+		if pin:GetTaxiNodeState() == Enum.FlightPathState.Reachable then
 			for routeIndex = 1, 1 do
 				local sourceSlotIndex = TaxiGetNodeSlot(slotIndex, routeIndex, true);
 				local destinationSlotIndex = TaxiGetNodeSlot(slotIndex, routeIndex, false);
@@ -101,7 +101,7 @@ function FlightMap_FlightPathDataProviderMixin:ShowBackgroundRoutesFromCurrent()
 					return; -- Incorrect flight data, will look broken until the data is adjusted
 				end
 				
-				if startPin:ShouldShowOutgoingFlightPathPreviews() and not startPin.linkedPins[destinationPin] and not destinationPin.linkedPins[startPin] then
+				if startPin:ShouldShowOutgoingFlightPathPreviews() and destinationPin:GetTaxiNodeState() == Enum.FlightPathState.Reachable and not startPin.linkedPins[destinationPin] and not destinationPin.linkedPins[startPin] then
 					startPin.linkedPins[destinationPin] = true;
 					destinationPin.linkedPins[startPin] = true;
 
@@ -218,8 +218,8 @@ end
 function FlightMap_FlightPointPinMixin:OnMouseLeave()
 	if self.taxiNodeData.state == Enum.FlightPathState.Reachable then
 		self.Icon:SetAtlas(self.atlasFormat:format("Taxi_Frame_Gray"));
+		self.owner:RemoveRouteToPin(self);
 	end
-	self.owner:RemoveRouteToPin(self);
 	GameTooltip_Hide();
 end
 

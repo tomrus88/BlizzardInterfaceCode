@@ -8,6 +8,7 @@ local COMMUNITIES_CHAT_FRAME_EVENTS = {
 	"CLUB_MESSAGE_UPDATED",
 	"CLUB_MESSAGE_HISTORY_RECEIVED",
 	"CLUB_UPDATED",
+	"CLUB_STREAM_SUBSCRIBED",
 };
 
 function GetCommunitiesChatPermissionOptions()
@@ -94,6 +95,12 @@ function CommunitiesChatMixin:OnEvent(event, ...)
 		if clubId == self:GetCommunitiesFrame():GetSelectedClubId() then
 			self:AddBroadcastMessage(clubId);
 		end
+	elseif event == "CLUB_STREAM_SUBSCRIBED" then
+		local clubId, streamId = ...;
+		local communitiesFrame = self:GetCommunitiesFrame();
+		if clubId == communitiesFrame:GetSelectedClubId() and streamId == communitiesFrame:GetSelectedStreamId() then
+			self:RequestInitialMessages(clubId, streamId);
+		end
 	end
 end
 
@@ -135,15 +142,25 @@ function CommunitiesChatMixin:GetMessagesToDisplay()
 	return C_Club.GetMessagesBefore(clubId, streamId, newestMessageId, MAX_NUM_CHAT_LINES_PER_REQUEST);
 end
 
-function CommunitiesChatMixin:HasAllMessages()
-	return self.messageRangeOldest and self.messageRangeOldest.epoch == 0;
+function CommunitiesChatMixin:HasAllMessages(clubId, streamId)
+	return self.messageRangeOldest and C_Club.IsBeginningOfStream(clubId, streamId, self.messageRangeOldest);
+end
+
+local function RangeIsEmpty(range)
+	return range.newestMessageId.epoch < range.oldestMessageId.epoch or (range.newestMessageId.epoch == range.oldestMessageId.epoch and range.newestMessageId.position < range.oldestMessageId.position);
+end
+
+function CommunitiesChatMixin:RequestInitialMessages(clubId, streamId)
+	local ranges = C_Club.GetMessageRanges(clubId, streamId);
+	if (not ranges or #ranges == 0 or RangeIsEmpty(ranges[#ranges])) then
+		C_Club.RequestMoreMessagesBefore(clubId, streamId, nil);
+		self.requestedMoreHistory = true;
+	else
+		self.requestedMoreHistory = false;
+	end
 end
 
 function CommunitiesChatMixin:RequestMoreHistory()
-	if self.requestedMoreHistory or self:HasAllMessages() then
-		return;
-	end
-	
 	local communitiesFrame = self:GetCommunitiesFrame();
 	local clubId = communitiesFrame:GetSelectedClubId();
 	local streamId = communitiesFrame:GetSelectedStreamId();
@@ -151,12 +168,20 @@ function CommunitiesChatMixin:RequestMoreHistory()
 		return;
 	end
 
+	if self.requestedMoreHistory or self:HasAllMessages(clubId, streamId) then
+		return;
+	end
+	
 	local hasMessages = C_Club.RequestMoreMessagesBefore(clubId, streamId, self.messageRangeOldest, MAX_NUM_CHAT_LINES_PER_REQUEST);
 	if hasMessages then
 		self:BackfillMessages(MAX_NUM_CHAT_LINES_PER_REQUEST);
 	else
 		self.requestedMoreHistory = true;
 	end
+end
+
+local function MessageIsEqual(messageId, compareMessageId)
+	return messageId.epoch == compareMessageId.epoch and messageId.position == messageId.position;
 end
 
 function CommunitiesChatMixin:BackfillMessages(maxCount)
@@ -171,7 +196,8 @@ function CommunitiesChatMixin:BackfillMessages(maxCount)
 		return;
 	end
 	
-	for index = #messages, 1, -1 do
+	local lastIndex = #messages - (MessageIsEqual(messages[#messages].messageId, self.messageRangeOldest) and 1 or 0);
+	for index = lastIndex, 1, -1 do
 		local message = messages[index];
 		self:AddMessage(clubId, streamId, message, true);
 	end

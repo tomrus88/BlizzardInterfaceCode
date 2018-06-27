@@ -31,6 +31,25 @@ function CommunitiesUtil.SortClubs(clubs)
 	end);
 end
 
+local STREAM_TYPE_SORT_ORDER = {
+	[Enum.ClubStreamType.Guild] = 1,
+	[Enum.ClubStreamType.General] = 2,
+	[Enum.ClubStreamType.Officer] = 3,
+	[Enum.ClubStreamType.Other] = 4,
+};
+
+local function CompareStreams(lhsStream, rhsStream)
+	if lhsStream.streamType ~= rhsStream.streamType then
+		return STREAM_TYPE_SORT_ORDER[lhsStream.streamType] < STREAM_TYPE_SORT_ORDER[rhsStream.streamType];
+	else
+		return lhsStream.creationTime < rhsStream.creationTime;
+	end
+end
+
+function CommunitiesUtil.SortStreams(streams)
+	table.sort(streams, CompareStreams);
+end
+
 local PRESENCE_SORT_ORDER = {
 	[Enum.ClubMemberPresence.Online] = 1,
 	[Enum.ClubMemberPresence.Away] = 2,

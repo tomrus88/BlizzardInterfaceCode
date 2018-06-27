@@ -27,9 +27,7 @@ function CommunitiesStreamDropDownMenu_Initialize(self)
 	end
 	
 	local streams = C_Club.GetStreams(clubId);
-	if not streams then
-		return;
-	end
+	CommunitiesUtil.SortStreams(streams);
 	
 	local streamToNotificationSetting = CommunitiesUtil.GetStreamNotificationSettingsLookup(clubId);
 	local canEditStream = self:GetCommunitiesFrame():GetPrivilegesForClub(clubId).canDestroyStream;
@@ -225,6 +223,7 @@ function CommunitiesNotificationSettingsDialogMixin:Refresh()
 		
 		local scrollHeight = 105;
 		local streams = C_Club.GetStreams(clubId);
+		CommunitiesUtil.SortStreams(streams);
 		local previousEntry = nil;
 		for i, stream in ipairs(streams) do
 			local button = self.buttonPool:Acquire();

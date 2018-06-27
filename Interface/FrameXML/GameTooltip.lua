@@ -23,6 +23,14 @@ TOOLTIP_QUEST_REWARDS_STYLE_PVP_BOUNTY = {
 	wrapHeaderText = false,
 }
 
+TOOLTIP_QUEST_REWARDS_STYLE_ISLANDS_QUEUE = {
+	headerText = ISLAND_QUEUE_REWARD_FOR_WINNING,
+	headerColor = NORMAL_FONT_COLOR,
+	prefixBlankLineCount = 0,
+	postHeaderBlankLineCount = 1,
+	wrapHeaderText = false,
+}
+
 function GameTooltip_UnitColor(unit)
 	local r, g, b;
 	if ( UnitPlayerControlled(unit) ) then

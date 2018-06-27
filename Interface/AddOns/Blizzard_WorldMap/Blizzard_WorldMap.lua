@@ -389,7 +389,9 @@ function WorldMapMixin:ClearFocusedQuestID()
 end
 
 function WorldMapMixin:PingQuestID(questID)
-	self:TriggerEvent("PingQuestID", questID);
+	if self:IsVisible() then
+		self:TriggerEvent("PingQuestID", questID);
+	end
 end
 
 -- ============================================ GLOBAL API ===============================================================================
