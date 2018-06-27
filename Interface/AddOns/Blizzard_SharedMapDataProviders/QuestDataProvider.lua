@@ -92,8 +92,7 @@ function QuestDataProviderMixin:RefreshAllData(fromOnShow)
 
 	self:AssignMissingNumbersToPins();
 
-	self.poiQuantizer:Clear();
-	self.poiQuantizer:Quantize(pinsToQuantize);
+	self.poiQuantizer:ClearAndQuantize(pinsToQuantize);
 
 	for i, pin in pairs(pinsToQuantize) do
 		pin:SetPosition(pin.quantizedX or pin.normalizedX, pin.quantizedY or pin.normalizedY);
@@ -251,14 +250,22 @@ function QuestPinMixin:OnMouseEnter()
 				end
 			end
 		else
-
+			local numObjectives = GetNumQuestLeaderBoards(questLogIndex);
+			for i = 1, numObjectives do
+				local text, objectiveType, finished = GetQuestLogLeaderBoard(i, questLogIndex);
+				if ( text and not finished ) then
+					WorldMapTooltip:AddLine(QUEST_DASH..text, 1, 1, 1, true);
+				end
+			end
 		end
 	end
 	WorldMapTooltip:Show();
+	self:GetMap():TriggerEvent("SetHighlightedQuestPOI", self.questID);
 end
 
 function QuestPinMixin:OnMouseLeave()
 	WorldMapTooltip:Hide();
+	self:GetMap():TriggerEvent("ClearHighlightedQuestPOI");
 end
 
 function QuestPinMixin:OnClick(button)

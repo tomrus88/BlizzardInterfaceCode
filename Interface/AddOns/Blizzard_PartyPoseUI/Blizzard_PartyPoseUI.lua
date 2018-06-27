@@ -173,6 +173,7 @@ function PartyPoseMixin:SetRewards()
 
 	local name, typeID, subtypeID, iconTextureFile, moneyBase, moneyVar, experienceBase, experienceVar, numStrangers, numRewards = GetLFGCompletionReward();
 	if not numRewards or numRewards == 0 then
+		self.RewardAnimations.RewardFrame:Hide();
 		return;
 	end
 
@@ -209,6 +210,7 @@ function PartyPoseMixin:SetRewards()
 			return left.id < right.id;
 		end);
 
+		self.RewardAnimations.RewardFrame:Show();
 		self:PlayNextRewardAnimation();
 	end);
 end

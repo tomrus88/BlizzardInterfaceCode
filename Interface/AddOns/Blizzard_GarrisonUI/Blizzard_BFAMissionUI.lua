@@ -38,7 +38,7 @@ do
 			titleSrollRight = "HordeFrame_Title-End",
 			titleScollMiddle = "_HordeFrame_Title-Tile",
 
-			TopperOffset = -33,
+			TopperOffset = -34,
 			Topper = "HordeFrame-Header",
 			topperBehindFrame = false,
 

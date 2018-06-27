@@ -153,7 +153,7 @@
 					<Anchor point="BOTTOM" x="0" y="10"/> 
 				</Anchors>
 				<Frames>
-					<Button parentKey="RewardFrame" inherits="PartyPoseRewardsButtonTemplate">
+					<Button parentKey="RewardFrame" inherits="PartyPoseRewardsButtonTemplate" hidden="true">
 						<Anchors>
 							<Anchor point="CENTER" />
 						</Anchors>

@@ -259,6 +259,7 @@ function UIWidgetManagerMixin:ProcessWidget(widgetID, widgetSetID, widgetType)
 
 				-- If this is a widget with a timer, update the timer list
 				if widgetInfo.hasTimer then
+					widgetFrame.hasTimer = true;
 					self:UpdateTimerList(widgetID, widgetFrame);
 				end
 
@@ -393,6 +394,7 @@ function UIWidgetManagerMixin:UnregisterWidgetSetContainer(widgetSetID, widgetCo
 		self:RemoveAllWidgetsInWidgetSet(widgetSetID);
 		self:UpdateWidgetSetContainerLayout(widgetSetID);
 		self.registeredWidgetSetContainers[widgetSetID] = nil;
+		self.layoutUpdateSetsPending[widgetSetID] = nil;
 	end
 end
 

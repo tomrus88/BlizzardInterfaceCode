@@ -60,6 +60,27 @@ function FlightMap_FlightPathDataProviderMixin:HighlightRouteToPin(pin)
 		lineContainer.Fill:SetEndPoint("CENTER", destinationPin);
 
 		lineContainer:Show();
+
+		startPin:Show();
+		destinationPin:Show();
+	end
+end
+
+function FlightMap_FlightPathDataProviderMixin:RemoveRouteToPin(pin)
+	if self.highlightLinePool then
+		self.highlightLinePool:ReleaseAll();
+	end
+
+	local slotIndex = pin.taxiNodeData.slotIndex;
+	for routeIndex = 1, GetNumRoutes(slotIndex) do
+		local sourceSlotIndex = TaxiGetNodeSlot(slotIndex, routeIndex, true);
+		local destinationSlotIndex = TaxiGetNodeSlot(slotIndex, routeIndex, false);
+
+		local startPin = self.slotIndexToPin[sourceSlotIndex];
+		local destinationPin = self.slotIndexToPin[destinationSlotIndex];
+
+		startPin:SetShown(startPin:GetTaxiNodeState() ~= Enum.FlightPathState.Unreachable);
+		destinationPin:SetShown(destinationPin:GetTaxiNodeState() ~= Enum.FlightPathState.Unreachable);
 	end
 end
 
@@ -108,15 +129,9 @@ local function OnHighlightLineFadeFinish(anim)
 	anim.releasePool:Release(anim:GetParent());
 end
 
-function FlightMap_FlightPathDataProviderMixin:RemoveRoute()
-	if not self.highlightLinePool then
-		return;
-	end
-	self.highlightLinePool:ReleaseAll();
-end
-
 function FlightMap_FlightPathDataProviderMixin:AddFlightNode(taxiNodeData)
-	local pin = self:GetMap():AcquirePin("FlightMap_FlightPointPinTemplate");
+	local playAnim = taxiNodeData.state ~= Enum.FlightPathState.Unreachable;
+	local pin = self:GetMap():AcquirePin("FlightMap_FlightPointPinTemplate", playAnim);
 	self.slotIndexToPin[taxiNodeData.slotIndex] = pin;
 
 	pin:SetPosition(taxiNodeData.position:GetXY());
@@ -161,8 +176,12 @@ function FlightMap_FlightPointPinMixin:OnLoad()
 	self:UseFrameLevelType("PIN_FRAME_LEVEL_FLIGHT_POINT");
 end
 
-function FlightMap_FlightPointPinMixin:OnAcquired()
-	self.OnAddAnim:Play();
+function FlightMap_FlightPointPinMixin:OnAcquired(playAnim)
+	if playAnim then
+		self.OnAddAnim:Play();
+	else
+		self:SetAlpha(1);
+	end
 end
 
 function FlightMap_FlightPointPinMixin:OnClick(button)
@@ -187,7 +206,6 @@ function FlightMap_FlightPointPinMixin:OnMouseEnter()
 		end
 
 		self.Icon:SetAtlas(self.atlasFormat:format("Taxi_Frame_Yellow"));
-		self.owner:RemoveRoute();
 		
 		self.owner:HighlightRouteToPin(self);
 	elseif self.taxiNodeData.state == Enum.FlightPathState.Unreachable then
@@ -201,7 +219,12 @@ function FlightMap_FlightPointPinMixin:OnMouseLeave()
 	if self.taxiNodeData.state == Enum.FlightPathState.Reachable then
 		self.Icon:SetAtlas(self.atlasFormat:format("Taxi_Frame_Gray"));
 	end
+	self.owner:RemoveRouteToPin(self);
 	GameTooltip_Hide();
+end
+
+function FlightMap_FlightPointPinMixin:GetTaxiNodeState()
+	return self.taxiNodeData.state;
 end
 
 function FlightMap_FlightPointPinMixin:UpdatePinSize(pinType)

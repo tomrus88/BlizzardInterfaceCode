@@ -244,14 +244,20 @@ function OrderHallTalentFrameMixin:RefreshAllData()
 	
 	self:SetUseStyleTextures(isThemed);
 	
-	if (classAgnostic and not isThemed) then
+	if (isThemed) then
+		self.TitleText:Hide();
+		self.BackButton:Hide();
+	elseif (classAgnostic and not isThemed) then
 		self.TitleText:SetText(UnitName("npc"));
+		self.TitleText:Show();
 		self.BackButton:Show();
 	elseif (titleText) then
 		self.TitleText:SetText(titleText);
+		self.TitleText:Show();
 		self.BackButton:Hide();
 	else 
 		self.TitleText:SetText(ORDER_HALL_TALENT_TITLE);
+		self.TitleText:Show();
 		self.BackButton:Hide();
 	end
 

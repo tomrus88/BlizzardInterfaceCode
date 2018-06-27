@@ -11,6 +11,8 @@ local SEASON_STATE_PRESEASON = 2;
 local SEASON_STATE_ACTIVE = 3;
 local SEASON_STATE_DISABLED = 4;
 
+local CONQUEST_CURRENCY_ID = 1602;
+
 ---------------------------------------------------------------
 -- PVP FRAME
 ---------------------------------------------------------------
@@ -147,6 +149,7 @@ end
 function PVPUIFrame_ConfigureRewardFrame(rewardFrame, honor, experience, itemRewards, currencyRewards)
 	local itemID, currencyID;
 	local rewardTexture, rewardQuantity;
+	rewardFrame.conquestAmount = 0;
 
 	-- artifact-level currency trumps item
 	if currencyRewards then
@@ -157,7 +160,8 @@ function PVPUIFrame_ConfigureRewardFrame(rewardFrame, honor, experience, itemRew
 				currencyID = reward.id;
 				rewardTexture = texture;
 				rewardQuantity = reward.quantity;
-				break;
+			elseif reward.id == CONQUEST_CURRENCY_ID then
+				rewardFrame.conquestAmount = reward.quantity;
 			end
 		end
 	end
@@ -1198,6 +1202,14 @@ function PVPRewardTemplate_OnEnter(self)
 	else
 		GameTooltip_AddColoredLine(EmbeddedItemTooltip, REWARD_FOR_PVP_WIN_HONOR:format(BreakUpLargeNumbers(self.honor)), HIGHLIGHT_FONT_COLOR);
 	end
+	if self.conquestAmount > 0 then
+		local currencyInfo = C_CurrencyInfo.GetBasicCurrencyInfo(CONQUEST_CURRENCY_ID, self.conquestAmount);
+		if currencyInfo then
+			local text = BONUS_OBJECTIVE_REWARD_WITH_COUNT_FORMAT:format(currencyInfo.icon, currencyInfo.displayAmount, currencyInfo.name);
+			local currencyColor = GetColorForCurrencyReward(CONQUEST_CURRENCY_ID, self.conquestAmount);
+			EmbeddedItemTooltip:AddLine(text, currencyColor:GetRGB());
+		end
+	end
 	if self.itemID then
 		EmbeddedItemTooltip:AddLine(" ");
 		EmbeddedItemTooltip_SetItemByID(EmbeddedItemTooltip.ItemTooltip, self.itemID);
@@ -1523,7 +1535,9 @@ function PVPConquestBarMixin:OnEvent(event, ...)
 end
 
 function PVPConquestBarMixin:Update()
-	self:SetDisabled(ConquestFrame.seasonState == SEASON_STATE_PRESEASON or ConquestFrame.seasonState == SEASON_STATE_OFFSEASON);
+	local locked = UnitLevel("player") < MAX_PLAYER_LEVEL;
+	self:SetDisabled(ConquestFrame.seasonState == SEASON_STATE_PRESEASON or ConquestFrame.seasonState == SEASON_STATE_OFFSEASON or locked);
+	self.Lock:SetShown(locked);
 
 	local current, max, rewardItemID = self:GetConquestLevelInfo();
 	if max == 0 or self.disabled then
@@ -1577,7 +1591,10 @@ function PVPConquestBarMixin:SetDisabled(disabled)
 		self.Reward.Ring:SetDesaturated(disabled);
 		self.Reward.Icon:SetDesaturated(disabled);
 		self.Label:SetAlpha(disabled and 0 or 1);
-		self:SetAlpha(disabled and 0.6 or 1);
+		local alpha = disabled and 0.6 or 1;
+		self.Border:SetAlpha(alpha);
+		self.Background:SetAlpha(alpha);
+		self.Reward:SetAlpha(alpha);
 		self.disabled = disabled;
 	end
 end

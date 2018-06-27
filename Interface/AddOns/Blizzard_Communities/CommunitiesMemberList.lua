@@ -15,7 +15,7 @@ local COMMUNITIES_MEMBER_LIST_ENTRY_EVENTS = {
 	"CLUB_MEMBER_PRESENCE_UPDATED",
 	"CLUB_MEMBER_ROLE_UPDATED",
 	"VOICE_CHAT_CHANNEL_MEMBER_ACTIVE_STATE_CHANGED",
-	"PLAYER_GUILD_UPDATE",
+	"GUILD_ROSTER_UPDATE",
 };
 
 COMMUNITY_MEMBER_ROLE_NAMES = {
@@ -687,12 +687,27 @@ function CommunitiesMemberListEntryMixin:OnEvent(event, ...)
 			self:UpdateVoiceButtons();
 			self:UpdateNameFrame();
 		end
-	elseif event == "PLAYER_GUILD_UPDATE" then
+	elseif event == "GUILD_ROSTER_UPDATE" then
 		local clubId = self:GetMemberList():GetSelectedClubId();
-		local clubInfo = C_Club.GetClubInfo(clubId);
-		if clubInfo and clubInfo.clubType == Enum.ClubType.Guild then
-			self:RefreshExpandedColumns();
+		if clubId == nil then
+			return;
 		end
+		
+		local clubInfo = C_Club.GetClubInfo(clubId);
+		if clubInfo == nil or clubInfo.clubType ~= Enum.ClubType.Guild then
+			return;
+		end
+		
+		if self.memberInfo == nil then
+			return;
+		end
+		
+		self.memberInfo = C_Club.GetMemberInfo(clubId, self.memberInfo.memberId);
+		if self.memberInfo == nil then
+			return;
+		end
+		
+		self:RefreshExpandedColumns();
 	end
 end
 

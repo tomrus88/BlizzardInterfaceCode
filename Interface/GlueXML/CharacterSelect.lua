@@ -51,11 +51,12 @@ function GenerateBuildString(buildNumber)
 end
 
 function CharacterSelectLockedButtonMixin:OnEnter()
-    -- TODO: Less than ideal, but this text needs to be dynamic and shouldn't require a full character refresh.
-    -- The only reason for these padlock tooltips (at the moment) is to spend boost tokens, or setup purchase
-    -- of a boost token in the shop.
-    local tooltipFooter = CHARACTER_SELECT_REVOKED_BOOST_TOKEN_LOCKED_TOOLTIP_HELP_SHOP;
-    if C_CharacterServices.HasRequiredBoostForUnrevoke() then
+	local requiresPurchase = IsExpansionTrialCharacter(self.guid) and CanUpgradeExpansion() or not C_CharacterServices.HasRequiredBoostForUnrevoke();
+
+    local tooltipFooter;
+    if requiresPurchase then
+		tooltipFooter = CHARACTER_SELECT_REVOKED_BOOST_TOKEN_LOCKED_TOOLTIP_HELP_SHOP;
+	else
         tooltipFooter = CHARACTER_SELECT_REVOKED_BOOST_TOKEN_LOCKED_TOOLTIP_HELP_USE_BOOST;
     end
 
@@ -876,7 +877,13 @@ function UpdateCharacterList(skipSelect)
                 locationText:SetFontObject("GlueFontDisableSmall");
 
                 if isExpansionTrialCharacter then
-					if IsExpansionTrial() or CanUpgradeExpansion() then
+					if IsExpansionTrial() then
+						if isTrialBoostLocked then
+							locationText:SetText(CHARACTER_SELECT_INFO_EXPANSION_TRIAL_BOOST_BUY_EXPANSION);
+						else
+							locationText:SetText(nil);
+						end
+					elseif CanUpgradeExpansion() then
 						locationText:SetText(CHARACTER_SELECT_INFO_EXPANSION_TRIAL_BOOST_BUY_EXPANSION);
 					else
 						locationText:SetText(CHARACTER_SELECT_INFO_TRIAL_BOOST_APPLY_BOOST_TOKEN);

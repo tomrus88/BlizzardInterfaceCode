@@ -1657,8 +1657,8 @@ function AchievementObjectives_DisplayProgressiveAchievement (objectivesFrame, i
 		miniAchievement.icon:SetTexture(iconpath);
 		if ( index == 1 ) then
 			miniAchievement:SetPoint("TOPLEFT", objectivesFrame, "TOPLEFT", -4, -4);
-		elseif ( index == 7 ) then
-			miniAchievement:SetPoint("TOPLEFT", miniTable[1], "BOTTOMLEFT", 0, -8);
+		elseif ( mod(index, 6) == 1 ) then
+			miniAchievement:SetPoint("TOPLEFT", miniTable[index - 6], "BOTTOMLEFT", 0, -8);
 		else
 			miniAchievement:SetPoint("TOPLEFT", miniTable[index-1], "TOPRIGHT", 4, 0);
 		end

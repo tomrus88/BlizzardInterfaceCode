@@ -147,7 +147,7 @@ function QuestUtils_AddQuestCurrencyRewardsToTooltip(questID, tooltip, currencyC
 					local color = ITEM_QUALITY_COLORS[quality];
 					tooltip:AddLine(text, color.r, color.g, color.b);
 				else
-					local text = BONUS_OBJECTIVE_REWARD_WITH_COUNT_FORMAT:format(texture, currencyInfo.numItems, currencyInfo.name);
+					local text = BONUS_OBJECTIVE_REWARD_WITH_COUNT_FORMAT:format(currencyInfo.texture, currencyInfo.numItems, currencyInfo.name);
 					local currencyColor = GetColorForCurrencyReward(currencyInfo.currencyID, currencyInfo.numItems);
 					tooltip:AddLine(text, currencyColor:GetRGB());
 				end

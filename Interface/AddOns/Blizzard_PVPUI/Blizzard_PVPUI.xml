@@ -290,6 +290,28 @@
 					<OnLeave function="GameTooltip_Hide"/>
 				</Scripts>
 			</Frame>
+			<Frame parentKey="Lock" hidden="true">
+				<Size x="36" y="47"/>
+				<Anchors>
+					<Anchor point="CENTER" x="11" y="3"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture atlas="honorsystem-bar-lock" setAllPoints="true"/>
+					</Layer>
+					<Layer level="HIGHLIGHT">
+						<Texture atlas="honorsystem-bar-lock" alpha="0.1" setAllPoints="true"/>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						GameTooltip:SetOwner(self, 'ANCHOR_RIGHT');
+						GameTooltip:SetText(string.format(FEATURE_BECOMES_AVAILABLE_AT_LEVEL, MAX_PLAYER_LEVEL_TABLE[LE_EXPANSION_LEVEL_CURRENT]));
+						GameTooltip:Show();
+					</OnEnter>
+					<OnLeave function="GameTooltip_Hide"/>
+				</Scripts>
+			 </Frame>
 		</Frames>
 		<BarTexture atlas="_pvpqueue-conquestbar-fill-yellow"/>
 		<BarColor r="1" g="1" b="1"/>

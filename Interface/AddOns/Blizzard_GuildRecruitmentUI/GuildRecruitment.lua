@@ -51,6 +51,15 @@ end
 
 function CommunitiesGuildRecruitmentFrame_OnShow(self)
 	RequestGuildApplicantsList();
+	if not IsGuildLeader() then
+		self.Tab1:Hide();
+		self.Tab2:SetPoint("LEFT", self.Tab1, "LEFT");
+		PanelTemplates_SetTab(self, 2);
+	else
+		self.Tab1:Show();
+		self.Tab2:SetPoint("LEFT", self.Tab1, "RIGHT");
+	end
+	
 	CommunitiesGuildRecruitmentFrame_Update(self);
 end
 

@@ -23,11 +23,12 @@ local function GetVoiceChannelNotificationColor(channel)
 		local chatInfo = Voice_GetChatInfoForChannelType(channel);
 		if chatInfo then
 			return Chat_GetChannelColor(chatInfo);
+		elseif channel.channelType == Enum.ChatChannelType.Communities then
+			return Chat_GetCommunitiesChannelColor(channel.clubId, channel.streamId);
 		end
 	end
 
-	-- Default fallback for voice chat notifications
-	return NORMAL_FONT_COLOR:GetRGB();
+	return DEFAULT_CHAT_CHANNEL_COLOR:GetRGB();
 end
 
 function Voice_GetVoiceChannelNotificationColor(channelID)

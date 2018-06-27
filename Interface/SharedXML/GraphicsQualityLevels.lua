@@ -529,7 +529,6 @@ VideoData["Graphics_SSAODropDown"]={
 		},
 		{
 			text = VIDEO_OPTIONS_ULTRA,
-			tooltip = VIDEO_OPTIONS_SSAO_ULTRA,
 		},
 	},
 

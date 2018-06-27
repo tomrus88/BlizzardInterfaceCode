@@ -553,7 +553,7 @@
 						</Anchors>
 					</CheckButton>
 					
-					<CheckButton name="$parentCheckbox5" inherits="GuildPermissionCheckBoxTemplate" id="5">
+					<CheckButton parentKey="InviteCheckbox" name="$parentCheckbox5" inherits="GuildPermissionCheckBoxTemplate" id="5">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentRosterLabel" relativePoint="BOTTOMLEFT" x="0" y="-3"/>
 						</Anchors>

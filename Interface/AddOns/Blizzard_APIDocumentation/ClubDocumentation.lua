@@ -305,6 +305,15 @@ local Club =
 			},
 		},
 		{
+			Name = "GetGuildClubId",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "guildClubId", Type = "string", Nilable = true },
+			},
+		},
+		{
 			Name = "GetInfoFromLastCommunityChatLine",
 			Type = "Function",
 
@@ -946,7 +955,15 @@ local Club =
 			Payload =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
-				{ Name = "clubName", Type = "string", Nilable = true },
+			},
+		},
+		{
+			Name = "ClubRemovedMessage",
+			Type = "Event",
+			LiteralName = "CLUB_REMOVED_MESSAGE",
+			Payload =
+			{
+				{ Name = "clubName", Type = "string", Nilable = false },
 				{ Name = "clubRemovedReason", Type = "ClubRemovedReason", Nilable = false },
 			},
 		},
@@ -1090,14 +1107,15 @@ local Club =
 		{
 			Name = "ClubType",
 			Type = "Enumeration",
-			NumValues = 3,
+			NumValues = 4,
 			MinValue = 0,
-			MaxValue = 2,
+			MaxValue = 3,
 			Fields =
 			{
 				{ Name = "BattleNet", Type = "ClubType", EnumValue = 0 },
 				{ Name = "Character", Type = "ClubType", EnumValue = 1 },
 				{ Name = "Guild", Type = "ClubType", EnumValue = 2 },
+				{ Name = "Other", Type = "ClubType", EnumValue = 3 },
 			},
 		},
 		{

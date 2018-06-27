@@ -77,6 +77,7 @@ local classFilenameToAtlas = {
 	["WARLOCK"] = "ClassTrial-Warlock-Ring",
 	["MONK"] = "ClassTrial-Monk-Ring",
 	["DRUID"] = "ClassTrial-Druid-Ring",
+	["DEMONHUNTER"] = "ClassTrial-DemonHunter-Ring",
 };
 
 function ClassTrial_SetHasAvailableBoost(hasBoost)
@@ -247,6 +248,14 @@ function ExpansionTrialDialogMixin:SetupDialogType(expansionTrialUpgrade)
 	end
 
 	self.expansionTrialUpgrade = expansionTrialUpgrade;
+end
+
+function ExpansionTrialDialogMixin:IsShowingExpansionTrialUpgrade()
+	return self:IsShown() and self.expansionTrialUpgrade;
+end
+
+function ClassTrial_IsExpansionTrialUpgradeDialogShowing()
+	return ExpansionTrialThanksForPlayingDialog:IsShowingExpansionTrialUpgrade();
 end
 
 function ExpansionTrialDialogMixin:OnShow()

@@ -21,6 +21,8 @@ function CommunitiesUtil.SortClubs(clubs)
 			return lhsClub.favoriteTimeStamp < rhsClub.favoriteTimeStamp;
 		elseif lhsClub.favoriteTimeStamp ~= nil or rhsClub.favoriteTimeStamp ~= nil then
 			return lhsClub.favoriteTimeStamp ~= nil;
+		elseif lhsClub.clubType ~= rhsClub.clubType then
+			return lhsClub.clubType == Enum.ClubType.Character;
 		elseif lhsClub.joinTime ~= nil and rhsClub.joinTime ~= nil then
 			return lhsClub.joinTime > rhsClub.joinTime;
 		else
@@ -101,14 +103,26 @@ function CommunitiesUtil.DoesCommunityHaveUnreadMessages(clubId)
 	return CommunitiesUtil.DoesCommunityHaveOtherUnreadMessages(clubId, nil);
 end
 
-function CommunitiesUtil.DoesCommunityHaveOtherUnreadMessages(clubId, ignoreStreamId)
+function CommunitiesUtil.DoesCommunityHaveOtherUnreadMessages(clubId, ignoreStreamId)	
+	local streamToNotificationSetting = CommunitiesUtil.GetStreamNotificationSettingsLookup(clubId);
 	for i, stream in ipairs(C_Club.GetStreams(clubId)) do
-		if stream.streamId ~= ignoreStreamId then
+		-- TODO:: Support mention-based notifications once we have support for mentions.
+		if stream.streamId ~= ignoreStreamId and streamToNotificationSetting[stream.streamId] == Enum.ClubStreamNotificationFilter.All then
 			if CommunitiesUtil.DoesCommunityStreamHaveUnreadMessages(clubId, stream.streamId) then
 				return true;
 			end
 		end
 	end
+end
+
+function CommunitiesUtil.GetStreamNotificationSettingsLookup(clubId)
+	local streamNotificationSettings = C_Club.GetClubStreamNotificationSettings(clubId);
+	local streamToNotificationSetting = {};
+	for i, streamNotificationSetting in ipairs(streamNotificationSettings) do
+		streamToNotificationSetting[streamNotificationSetting.streamId] = streamNotificationSetting.filter;
+	end
+	
+	return streamToNotificationSetting;
 end
 
 function CommunitiesUtil.DoesCommunityStreamHaveUnreadMessages(clubId, streamId)

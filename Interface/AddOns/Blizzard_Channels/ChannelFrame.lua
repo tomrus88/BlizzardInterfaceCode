@@ -575,13 +575,16 @@ function ChannelFrameMixin:OnMemberActiveStateChanged(memberID, channelID, isAct
 			ChatFrame_DisplaySystemMessageInPrimary(VOICE_CHAT_CHANNEL_ANNOUNCE_PLAYER_LEFT);
 		end
 	else
-		local memberName = C_VoiceChat.GetMemberName(memberID, channelID);
-		if isActive then
-			ChatFrame_DisplaySystemMessageInPrimary(VOICE_CHAT_CHANNEL_ANNOUNCE_MEMBER_ACTIVE:format(memberName));
-			PlaySound(SOUNDKIT.UI_VOICECHAT_MEMBERJOINCHANNEL);
-		else
-			ChatFrame_DisplaySystemMessageInPrimary(VOICE_CHAT_CHANNEL_ANNOUNCE_MEMBER_LEFT:format(memberName));
-			PlaySound(SOUNDKIT.UI_VOICECHAT_MEMBERLEAVECHANNEL);
+		local channel = C_VoiceChat.GetChannel(channelID);
+		if channel and channel.isActive then
+			local memberName = C_VoiceChat.GetMemberName(memberID, channelID) or "";
+			if isActive then
+				ChatFrame_DisplaySystemMessageInPrimary(VOICE_CHAT_CHANNEL_ANNOUNCE_MEMBER_ACTIVE:format(memberName));
+				PlaySound(SOUNDKIT.UI_VOICECHAT_MEMBERJOINCHANNEL);
+			else
+				ChatFrame_DisplaySystemMessageInPrimary(VOICE_CHAT_CHANNEL_ANNOUNCE_MEMBER_LEFT:format(memberName));
+				PlaySound(SOUNDKIT.UI_VOICECHAT_MEMBERLEAVECHANNEL);
+			end
 		end
 	end
 end
