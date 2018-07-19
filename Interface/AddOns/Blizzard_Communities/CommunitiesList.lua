@@ -359,6 +359,11 @@ function CommunitiesListMixin:OnHide()
 end
 
 function CommunitiesListMixin:ScrollToClub(clubId)
+	local hasScrollBar = self.ListScrollFrame.totalHeight > self.ListScrollFrame:GetHeight();
+	if not hasScrollBar then
+		return;
+	end
+	
 	local clubs = self:GetCommunitiesList();
 	if clubs ~= nil then
 		local clubIndex = nil;

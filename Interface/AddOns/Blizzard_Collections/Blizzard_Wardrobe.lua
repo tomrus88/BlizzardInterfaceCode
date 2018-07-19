@@ -604,7 +604,8 @@ function WardrobeTransmogButton_Select(button, fromOnClick)
 		if ( WardrobeCollectionFrame.activeFrame == WardrobeCollectionFrame.ItemsCollectionFrame ) then
 			local _, _, selectedSourceID = WardrobeCollectionFrame_GetInfoForEquippedSlot(button.slot, button.transmogType);
 			local forceGo = (button.transmogType == LE_TRANSMOG_TYPE_ILLUSION);
-			WardrobeCollectionFrame.ItemsCollectionFrame:GoToSourceID(selectedSourceID, button.slot, button.transmogType, forceGo);
+			local FOR_TRANSMOG = true;
+			WardrobeCollectionFrame.ItemsCollectionFrame:GoToSourceID(selectedSourceID, button.slot, button.transmogType, forceGo, FOR_TRANSMOG);
 			WardrobeCollectionFrame.ItemsCollectionFrame:SetTransmogrifierAppearancesShown(true);
 		end
 		WardrobeTransmogFrame_EvaluateModel();
@@ -1837,10 +1838,15 @@ function WardrobeCollectionFrame_OpenTransmogLink(link, transmogType)
 	end
 end
 
-function WardrobeItemsCollectionMixin:GoToSourceID(sourceID, slot, transmogType, forceGo)
+function WardrobeItemsCollectionMixin:GoToSourceID(sourceID, slot, transmogType, forceGo, forTransmog)
 	local categoryID, visualID;
 	if ( transmogType == LE_TRANSMOG_TYPE_APPEARANCE ) then
-		categoryID, visualID = C_TransmogCollection.GetAppearanceSourceInfo(sourceID);
+		if ( slot and forTransmog ) then
+			local slotID = GetInventorySlotInfo(slot);
+			categoryID, visualID = C_TransmogCollection.GetAppearanceSourceInfoForTransmog(slotID, transmogType, sourceID);
+		else
+			categoryID, visualID = C_TransmogCollection.GetAppearanceSourceInfo(sourceID);
+		end
 		slot = slot or WardrobeCollectionFrame_GetSlotFromCategoryID(categoryID);
 	elseif ( transmogType == LE_TRANSMOG_TYPE_ILLUSION ) then
 		visualID = C_TransmogCollection.GetIllusionSourceInfo(sourceID);
