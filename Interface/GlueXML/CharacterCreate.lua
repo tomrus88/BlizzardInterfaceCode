@@ -869,7 +869,10 @@ function CharacterCreateEnumerateClasses()
 		SetupClassButton(button, classID, classData);
 	end
 
-	if (not C_CharacterCreation.CanCreateDemonHunter()) then
+	local isCreatingBoostCharacter = CharacterUpgrade_IsCreatedCharacterUpgrade() or CharacterUpgrade_IsCreatedCharacterTrialBoost();
+	local isBoostValidForDemonHunter = CharacterUpgradeFlow.data and CharacterUpgradeFlow.data.level > 100;
+	local demonHunterBoostIsInvalid = isCreatingBoostCharacter and not isBoostValidForDemonHunter;
+	if (demonHunterBoostIsInvalid or not C_CharacterCreation.CanCreateDemonHunter()) then
         MAX_DISPLAYED_CLASSES_PER_RACE = 11;
         for button in CharacterCreate.classFramePool:EnumerateActive() do
             button:SetSize(44, 44);
