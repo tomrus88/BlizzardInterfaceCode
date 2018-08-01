@@ -216,6 +216,7 @@ end
 function WorldMapMixin:OnMapChanged()
 	MapCanvasMixin.OnMapChanged(self);
 	self:RefreshOverlayFrames();
+	QuestMapFrame_CloseQuestDetails();
 	self:RefreshQuestLog();
 
 	if C_MapInternal then

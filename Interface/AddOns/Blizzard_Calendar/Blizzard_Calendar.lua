@@ -2197,9 +2197,12 @@ function CalendarDayContextMenu_Initialize(self, flags, dayButton, eventButton)
 		UIMenu_AddButton(self, CALENDAR_CREATE_EVENT, nil, CalendarDayContextMenu_CreateEvent);
 
 		-- add guild selections if the player has a guild
-		if ( CanEditGuildEvent() ) then
+		if ( IsInGuild() ) then
 			UIMenu_AddButton(self, CALENDAR_CREATE_GUILD_EVENT, nil, CalendarDayContextMenu_CreateGuildEvent);
-			UIMenu_AddButton(self, CALENDAR_CREATE_GUILD_ANNOUNCEMENT, nil, CalendarDayContextMenu_CreateGuildAnnouncement);
+			
+			if ( CanEditGuildEvent() ) then
+				UIMenu_AddButton(self, CALENDAR_CREATE_GUILD_ANNOUNCEMENT, nil, CalendarDayContextMenu_CreateGuildAnnouncement);
+			end
 		end
 
 		-- add community selections if the player is in a character community
@@ -3769,13 +3772,6 @@ function CalendarCreateEventFrame_Update()
 		-- reset event texture (must come after event type)
 		CalendarCreateEventFrame.selectedTextureIndex = eventInfo.textureIndex;
 		CalendarCreateEventFrame.calendarType = eventInfo.calendarType;
-		CalendarCreateEventTexture_Update();
-		-- update the creator (must come after event texture)
-		CalendarCreateEventCreatorName:SetFormattedText(CALENDAR_EVENT_CREATORNAME, _CalendarFrame_SafeGetName(eventInfo.creator));
-		CalendarCreateEventCreatorName:Show();
-
-		--Hide the communitySelector
-		CalendarCreateEventCommunityDropDown:SetShown(false);
 
 		if eventInfo.calendarType == "COMMUNITY_EVENT" or eventInfo.calendarType == "GUILD_EVENT" then
 			CalendarCreateEventCommunityName:Show();
@@ -3788,6 +3784,14 @@ function CalendarCreateEventFrame_Update()
 		else
 			CalendarCreateEventCommunityName:Hide();
 		end
+
+		CalendarCreateEventTexture_Update();
+		-- update the creator (must come after event texture)
+		CalendarCreateEventCreatorName:SetFormattedText(CALENDAR_EVENT_CREATORNAME, _CalendarFrame_SafeGetName(eventInfo.creator));
+		CalendarCreateEventCreatorName:Show();
+
+		--Hide the communitySelector
+		CalendarCreateEventCommunityDropDown:SetShown(false);
 
 		if ( eventInfo.calendarType == "GUILD_ANNOUNCEMENT" ) then
 			CalendarTitleFrame_SetText(CalendarCreateEventTitleFrame, CALENDAR_EDIT_ANNOUNCEMENT);

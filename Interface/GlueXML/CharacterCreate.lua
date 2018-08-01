@@ -877,11 +877,21 @@ function CharacterCreateEnumerateClasses()
         for button in CharacterCreate.classFramePool:EnumerateActive() do
             button:SetSize(44, 44);
         end
-		local button = FindButtonForClassID(C_CharacterCreation.GetClassIDFromName("DEMONHUNTER"));
+		local demonHunterClassID = C_CharacterCreation.GetClassIDFromName("DEMONHUNTER");
+		local button = FindButtonForClassID(demonHunterClassID);
 		if ( button ) then
 			button:Hide();
 		end
 		CharCreateClassFrame.ClassIcons:Layout();
+		
+		local selectedClassData = C_CharacterCreation.GetSelectedClass();
+		if selectedClassData and selectedClassData.classID == demonHunterClassID then
+			local warriorClassID = C_CharacterCreation.GetClassIDFromName("WARRIOR");
+			local warriorButton = FindButtonForClassID(warriorClassID);
+			if warriorButton then
+				warriorButton:Click();
+			end
+		end
     end
 
 	CharCreateClassFrame.ClassIcons:Layout();
