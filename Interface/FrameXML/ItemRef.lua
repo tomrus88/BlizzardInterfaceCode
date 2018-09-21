@@ -340,11 +340,16 @@ function SetItemRef(link, text, button, chatFrame)
 		local fixedLink = GetFixedLink(text);
 		HandleModifiedItemClick(fixedLink);
 	else
-		ShowUIPanel(ItemRefTooltip);
-		if ( not ItemRefTooltip:IsShown() ) then
-			ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE");
+		local itemName, itemLink = ItemRefTooltip:GetItem();
+		if itemLink == GetFixedLink(text) then
+			HideUIPanel(ItemRefTooltip);
+		else
+			ShowUIPanel(ItemRefTooltip);
+			if ( not ItemRefTooltip:IsShown() ) then
+				ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE");
+			end
+			ItemRefTooltip:SetHyperlink(link);
 		end
-		ItemRefTooltip:SetHyperlink(link);
 	end
 end
 

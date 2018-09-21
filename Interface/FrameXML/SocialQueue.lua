@@ -56,7 +56,8 @@ function SocialQueueUtil_GetQueueName(queue, nameFormatter)
 	elseif ( queue.queueType == "lfglist" ) then
 		local name;
 		if ( queue.lfgListID ) then
-			name = select(3, C_LFGList.GetSearchResultInfo(queue.lfgListID));
+			local searchResultInfo = C_LFGList.GetSearchResultInfo(queue.lfgListID);
+			name = searchResultInfo.name;
 		else
 			if ( queue.activityID ) then
 				name = C_LFGList.GetActivityInfo(queue.activityID);
@@ -112,7 +113,7 @@ function SocialQueueUtil_SetTooltip(tooltip, playerDisplayName, queues, canJoin,
 	if ( firstQueue.queueData.queueType == "lfglist" ) then
 		needTank, needHealer, needDamage = firstQueue.needTank, firstQueue.needHealer, firstQueue.needDamage;
 
-		canEffectivelyJoin = canJoin and C_LFGList.GetSearchResultInfo(firstQueue.queueData.lfgListID);
+		canEffectivelyJoin = canJoin and C_LFGList.HasSearchResultInfo(firstQueue.queueData.lfgListID);
 
 		if ( canEffectivelyJoin ) then
 			isAutoAccept = firstQueue.isAutoAccept; -- Auto accept is set on the premade group entry

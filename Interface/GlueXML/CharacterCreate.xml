@@ -529,6 +529,14 @@
 					<Color r="0.0" g="0.0" b="0.0" a="0.75"/>
 				</Texture>
 			</Layer>
+			<Layer level="OVERLAY" textureSubLevel="1">
+				<Texture parentKey="PadLock" atlas="UI-CharacterCreate-PadLock" hidden="true">
+					<Size x="37" y="45"/>
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="1"/>
+					</Anchors>
+				</Texture>
+			</Layer>
 		</Layers>
 		<Scripts>
 			<OnMouseDown>
@@ -1701,6 +1709,11 @@
 							</Layer>
 						</Layers>
 						<Scripts>
+							<OnLoad function="CharCreateMoreInfoButton_OnLoad"/>
+							<OnEnter function="CharCreateMoreInfoButton_OnEnter"/>
+							<OnLeave>
+								CharacterCreateTooltip:Hide();
+							</OnLeave>
 							<OnClick>
 								PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 								if ( self.infoShown ) then
@@ -2054,7 +2067,7 @@
 									<Layer level="OVERLAY">
 										<FontString inherits="GlueFontNormalSmall" parentKey="number" text="8">
 											<Anchors>
-												<Anchor point="CENTER" relativeKey="$parent.arrow" x="7" y="1"/>
+												<Anchor point="CENTER" relativePoint="LEFT" x="8" y="-3"/>
 											</Anchors>
 										</FontString>
 										<Texture file="Interface\Glues\CharacterCreate\UI-CharacterCreatePatchwerk" alphaMode="ADD">

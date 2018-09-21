@@ -12,6 +12,7 @@ WORGEN_RACE_ID = 22;
 PANDAREN_RACE_ID = 24;
 PANDAREN_ALLIANCE_RACE_ID = 25;
 PANDAREN_HORDE_RACE_ID = 26;
+DEMON_HUNTER_CLASS_ID = 12;
 
 PAID_CHARACTER_CUSTOMIZATION = 1;
 PAID_RACE_CHANGE = 2;
@@ -782,7 +783,7 @@ end
 local function UpdateClassButtonEnabledState(button, classID, classData)
 	local kioskModeData = IsKioskGlueEnabled() and KioskModeSplash_GetModeData();
 	local disableTexture = button.DisableTexture;
-
+	button.PadLock:Hide();
 	if ( classData.enabled == true ) then
 		if (IsKioskGlueEnabled() and (not C_CharacterCreation.IsClassAllowedInKioskMode(classID) or not kioskModeData.classes[classData.fileName])) then
 			button:Disable();
@@ -796,29 +797,41 @@ local function UpdateClassButtonEnabledState(button, classID, classData)
 			disableTexture:Hide();
 		else
 			button:Disable();
-			SetButtonDesaturated(button, true);
-			local validRaces = C_CharacterCreation.GetValidRacesForClass(button.classID);
-			local validRaceNames = {};
-			for i, raceData in ipairs(validRaces) do
-				tinsert(validRaceNames, raceData.name);
-			end
-			local validRaceConcat = table.concat(validRaceNames, ", ");
-			button.tooltip.footer = WrapTextInColorCode(CLASS_DISABLED, "ffff0000") .. "|n|n" .. WrapTextInColorCode(validRaceConcat, "ffff0000");
 			disableTexture:Show();
 		end
+	elseif ( classData.disabledReason == Enum.CreationClassDisabledReason.InvalidForSelectedRace ) then
+		button:Disable();
+		SetButtonDesaturated(button, true);
+		local validRaces = C_CharacterCreation.GetValidRacesForClass(button.classID);
+		local validRaceNames = {};
+		for i, raceData in ipairs(validRaces) do
+			tinsert(validRaceNames, raceData.name);
+		end
+		local validRaceConcat = table.concat(validRaceNames, ", ");
+		button.tooltip.footer = WrapTextInColorCode(CLASS_DISABLED, "ffff0000") .. "|n|n" .. WrapTextInColorCode(validRaceConcat, "ffff0000");
+		disableTexture:Show();
+	elseif ( classData.disabledReason == Enum.CreationClassDisabledReason.InvalidForTrialAccount or classData.disabledReason == Enum.CreationClassDisabledReason.InvalidForVeteranAccount ) then
+		button:Disable();
+		SetButtonDesaturated(button, true);
+		local error = button.classID == DEMON_HUNTER_CLASS_ID and CHAR_CREATE_TRIAL_DEMON_HUNTER or CHAR_CREATE_TRIAL;
+		button.tooltip.footer = WrapTextInColorCode(error, "ffff0000") ;
+		button.PadLock:Show();
+		disableTexture:Show();
 	else
 		button:Disable();
 		SetButtonDesaturated(button, true);
 		local reason;
-		if ( classData.disableReason ) then
-			if ( classData.disableReason == LE_DEMON_HUNTER_CREATION_DISABLED_REASON_HAVE_DH ) then
+		if ( classData.disabledReason ) then
+			if ( classData.disabledReason == Enum.CreationClassDisabledReason.BoostIsTooLowLevel ) then
+				reason = DEMON_HUNTER_RESTRICTED_BOOST_IS_TOO_LOW_LEVEL;
+			elseif ( classData.disabledReason == Enum.CreationClassDisabledReason.HaveDemonHunter ) then
 				reason = DEMON_HUNTER_RESTRICTED_HAS_DEMON_HUNTER;
-			elseif ( classData.disableReason == LE_DEMON_HUNTER_CREATION_DISABLED_REASON_NEED_LEVEL_70 ) then
+			elseif ( classData.disabledReason == Enum.CreationClassDisabledReason.NeedLevel70 ) then
 				reason = DEMON_HUNTER_RESTRICTED_NEED_LEVEL_70;
-			elseif ( classData.disableReason == LE_DEMON_HUNTER_INVALID_CLASS_FOR_BOOST) then
-				reason = CANNOT_CREATE_CURRENT_CLASS_WITH_BOOST;
 			end
-		elseif ( classData.fileName ) then
+		end
+
+		if ( not reason and classData.fileName ) then
 			reason = _G[classData.fileName.."_DISABLED"];
 		end
 
@@ -845,7 +858,12 @@ local function SetupClassButton(button, classID, classData)
 end
 
 function CharacterCreateEnumerateClasses()
-	local classes = C_CharacterCreation.GetAvailableClasses();
+	local boostLevel = nil;
+	if CharacterUpgrade_IsCreatedCharacterUpgrade() and CharacterUpgradeFlow.data then
+		boostLevel = CharacterUpgradeFlow.data.level;
+	end
+	
+	local classes = C_CharacterCreation.GetAvailableClasses(boostLevel);
 
 	CharacterCreate.numClasses = #classes;
 
@@ -868,38 +886,6 @@ function CharacterCreateEnumerateClasses()
 
 		SetupClassButton(button, classID, classData);
 	end
-
-	local boostLevel;
-	if CharacterUpgrade_IsCreatedCharacterTrialBoost() then
-		boostLevel = C_CharacterCreation.GetTrialBoostStartingLevel();
-	elseif CharacterUpgrade_IsCreatedCharacterUpgrade() and CharacterUpgradeFlow.data then
-		boostLevel = CharacterUpgradeFlow.data.level;
-	end
-	
-	local demonHunterIsValid = not boostLevel or boostLevel > 100;
-	if (not demonHunterIsValid or not C_CharacterCreation.CanCreateDemonHunter()) then
-        MAX_DISPLAYED_CLASSES_PER_RACE = 11;
-        for button in CharacterCreate.classFramePool:EnumerateActive() do
-            button:SetSize(44, 44);
-        end
-		local demonHunterClassID = C_CharacterCreation.GetClassIDFromName("DEMONHUNTER");
-		local button = FindButtonForClassID(demonHunterClassID);
-		if ( button ) then
-			button:Hide();
-		end
-		CharCreateClassFrame.ClassIcons:Layout();
-		
-		if ( not demonHunterIsValid ) then
-			local selectedClassData = C_CharacterCreation.GetSelectedClass();
-			if selectedClassData and selectedClassData.classID == demonHunterClassID then
-				local warriorClassID = C_CharacterCreation.GetClassIDFromName("WARRIOR");
-				local warriorButton = FindButtonForClassID(warriorClassID);
-				if warriorButton then
-					warriorButton:Click();
-				end
-			end
-		end
-    end
 
 	CharCreateClassFrame.ClassIcons:Layout();
 end
@@ -1162,6 +1148,24 @@ function CharacterCreate_Finish()
 		else
 			C_CharacterCreation.CreateCharacter(CharacterCreateNameEdit:GetText());
 		end
+	end
+end
+
+function CharCreateMoreInfoButton_OnLoad(self)
+	local okayButtonRight = CharCreateOkayButton:GetRight();
+	local moreButtonLeft = self:GetLeft();
+	if okayButtonRight > moreButtonLeft then
+		self:SetPoint("BOTTOMLEFT", CharCreateOkayButton, "BOTTOMRIGHT", 5, 0);
+		local fontString = self:GetFontString();
+		fontString:SetWidth(self:GetWidth() - 26);
+		fontString:SetHeight(20);
+	end
+end
+
+function CharCreateMoreInfoButton_OnEnter(self)
+	if self:GetFontString():IsTruncated() then
+		CharacterCreateTooltip:SetOwner(self, "ANCHOR_TOP", 0, -5);
+		CharacterCreateTooltip:SetText(self:GetText());
 	end
 end
 
@@ -2426,6 +2430,9 @@ end
 function RequirementsFlowMixin:RemoveScripts()
 	self.completeButton:SetScript("OnEnter", nil);
 	self.completeButton:SetScript("OnLeave", nil);
+	if GlueTooltip:GetOwner() == self.completeButton then
+		self:HideTooltip();
+	end
 end
 
 function RequirementsFlowMixin:DisplayTooltip()

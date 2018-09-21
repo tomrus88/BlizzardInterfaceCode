@@ -482,6 +482,17 @@ function FriendsList_GetScrollFrameTopButton(offset)
 	end
 end
 
+function FriendsList_CanWhisperFriend(friendType, friendIndex)
+	if friendType == FRIENDS_BUTTON_TYPE_BNET then
+		return true;
+	elseif friendType == FRIENDS_BUTTON_TYPE_WOW then
+		local name, level, class, area, isOnline = GetFriendInfo(friendIndex);
+		return isOnline;
+	end
+
+	return false;
+end
+
 function FriendsList_Update(forceUpdate)
 	local numBNetTotal, numBNetOnline = BNGetNumFriends();
 	local numBNetOffline = numBNetTotal - numBNetOnline;
@@ -558,23 +569,8 @@ function FriendsList_Update(forceUpdate)
 			FriendsFrame_SelectFriend(FriendListEntries[1].buttonType, 1);
 			selectedFriend = 1;
 		end
-		-- check if friend is online
-		local isOnline;
-		if ( FriendsFrame.selectedFriendType == FRIENDS_BUTTON_TYPE_WOW ) then
-			local name, level, class, area;
-			name, level, class, area, isOnline = GetFriendInfo(selectedFriend);
-		elseif ( FriendsFrame.selectedFriendType == FRIENDS_BUTTON_TYPE_BNET ) then
-			local bnetIDAccount, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client;
-			bnetIDAccount, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client, isOnline = BNGetFriendInfo(selectedFriend);
-			if ( not accountName ) then
-				isOnline = false;
-			end
-		end
-		if ( isOnline ) then
-			FriendsFrameSendMessageButton:Enable();
-		else
-			FriendsFrameSendMessageButton:Disable();
-		end
+		
+		FriendsFrameSendMessageButton:SetEnabled(FriendsList_CanWhisperFriend(FriendsFrame.selectedFriendType, selectedFriend));
 	else
 		FriendsFrameSendMessageButton:Disable();
 	end

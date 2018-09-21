@@ -672,9 +672,10 @@ EMOTE455_TOKEN = "FORTHEHORDE"
 EMOTE517_TOKEN = "WHOA"
 EMOTE518_TOKEN = "OOPS"
 EMOTE521_TOKEN = "MEOW"
+EMOTE522_TOKEN = "BOOP"
 
 -- NOTE: The indices used to iterate the tokens may not be contiguous, keep that in mind when updating this value.
-local MAXEMOTEINDEX = 521;
+local MAXEMOTEINDEX = 522;
 
 
 ICON_LIST = {
@@ -2359,6 +2360,15 @@ end
 SlashCmdList["EVENTTRACE"] = function(msg)
 	UIParentLoadAddOn("Blizzard_DebugTools");
 	EventTraceFrame_HandleSlashCmd(msg);
+end
+
+if IsGMClient() then
+	SLASH_TEXELVIS1 = "/texelvis";
+	SLASH_TEXELVIS2 = "/tvis";
+	SlashCmdList["TEXELVIS"] = function(msg) 
+		UIParentLoadAddOn("Blizzard_DebugTools");
+		TexelSnappingVisualizer:Show();
+	end
 end
 
 SlashCmdList["TABLEINSPECT"] = function(msg)
@@ -4572,7 +4582,8 @@ function ChatEdit_OnChar(self)
 	end
 	if (command and target and self.autoCompleteSource and self.autoCompleteParams) then --if they typed a command with a autocompletable target
 		local utf8Position = self:GetUTF8CursorPosition();
-		local nameToShow = self.autoCompleteSource(target, 1, utf8Position, unpack(self.autoCompleteParams))[1];
+		local allowFullMatch = false;
+		local nameToShow = self.autoCompleteSource(target, 1, utf8Position, allowFullMatch, unpack(self.autoCompleteParams))[1];
 		if (nameToShow and nameToShow.name) then
 			local name = Ambiguate(nameToShow.name, "all");
 			--We're going to be setting the text programatically which will clear the userInput flag on the editBox.
@@ -4787,7 +4798,7 @@ function ChatEdit_ExtractTellTarget(editBox, msg, chatType)
 		return false;
 	end
 
-	if ( #GetAutoCompleteResults(target, 1, 0, tellTargetExtractionAutoComplete.include, tellTargetExtractionAutoComplete.exclude, true) > 0 ) then
+	if ( #GetAutoCompleteResults(target, 1, 0, true, tellTargetExtractionAutoComplete.include, tellTargetExtractionAutoComplete.exclude) > 0 ) then
 		--Even if there's a space, we still want to let the person keep typing -- they may be trying to type whatever is in AutoComplete.
 		return false;
 	end
@@ -4803,7 +4814,7 @@ function ChatEdit_ExtractTellTarget(editBox, msg, chatType)
 		while ( strfind(target, "%s") ) do
 			--Pull off everything after the last space.
 			target = strmatch(target, "(.+)%s+[^%s]*");
-			if ( #GetAutoCompleteResults(target, 1, 0, tellTargetExtractionAutoComplete.include, tellTargetExtractionAutoComplete.exclude, true) > 0 ) then
+			if ( #GetAutoCompleteResults(target, 1, 0, true, tellTargetExtractionAutoComplete.include, tellTargetExtractionAutoComplete.exclude) > 0 ) then
 				break;
 			end
 		end
