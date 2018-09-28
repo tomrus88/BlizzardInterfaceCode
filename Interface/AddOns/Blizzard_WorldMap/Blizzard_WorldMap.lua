@@ -29,8 +29,6 @@ function WorldMapMixin:Minimize()
 	SetUIPanelAttribute(self, "bottomClampOverride", nil);
 	UpdateUIPanelPositions(self);
 
-	ButtonFrameTemplate_ShowPortrait(self.BorderFrame);
-
 	PortraitFrameTemplate_SetBorder(self.BorderFrame, "PortraitFrameTemplateMinimizable");
 	PortraitFrameTemplate_SetPortraitShown(self.BorderFrame, true);
 

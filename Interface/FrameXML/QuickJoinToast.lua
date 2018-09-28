@@ -152,7 +152,7 @@ end
 
 function QuickJoinToastMixin:UpdateDisplayedFriendCount()
 	local _, numBNetOnline = BNGetNumFriends();
-	local _, numWoWOnline = GetNumFriends();
+	local numWoWOnline = C_FriendList.GetNumOnlineFriends() or 0;
 	self.FriendCount:SetText(numBNetOnline + numWoWOnline);
 end
 
@@ -603,7 +603,7 @@ function QuickJoinToast_GetPriorityFromPlayers(players)
 	local priority = 0;
 	for i=1, #players do
 		local player = players[i].guid;
-		if ( BNGetGameAccountInfoByGUID(player) or IsCharacterFriend(player) ) then
+		if ( BNGetGameAccountInfoByGUID(player) or C_FriendList.IsFriend(player) ) then
 			priority = priority + QUICK_JOIN_CONFIG.PLAYER_FRIEND_VALUE;
 		end
 		if ( IsGuildMember(player) ) then

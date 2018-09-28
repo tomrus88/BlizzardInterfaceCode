@@ -183,7 +183,7 @@ function SocialQueueUtil_GetRelationshipInfo(guid, missingNameFallback, clubId)
 		playerLink = GetPlayerLink(linkName, name);
 	end
 
-	if ( IsCharacterFriend(guid) ) then
+	if ( C_FriendList.IsFriend(guid) ) then
 		return name, FRIENDS_WOW_NAME_COLOR_CODE, "wowfriend", playerLink;
 	end
 

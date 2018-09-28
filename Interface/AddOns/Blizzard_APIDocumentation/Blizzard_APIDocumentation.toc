@@ -144,5 +144,5 @@ WowTokenUIDocumentation.lua
 ZoneAbilityDocumentation.lua
 CalendarDocumentation.lua
 ClubDocumentation.lua
-FriendsDocumentation.lua
+FriendListDocumentation.lua
 # End documentation files here

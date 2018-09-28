@@ -283,6 +283,7 @@ function CharacterCreate_OnLoad(self)
 	self:RegisterEvent("RACE_FACTION_CHANGE_STARTED");
 	self:RegisterEvent("RACE_FACTION_CHANGE_RESULT");
 	self:RegisterEvent("CLASS_TRIAL_CHARACTER_CREATE_RESULT");
+	self:RegisterEvent("CHARACTER_LIST_UPDATE");
 
 	self:SetSequence(0);
 	self:SetCamera(0);
@@ -292,6 +293,8 @@ function CharacterCreate_OnLoad(self)
 	CharacterCreate.numClasses = 0;
 	CharacterCreate.selectedClass = 0;
 	CharacterCreate.selectedGender = 0;
+
+	self.newAlliedRaces = { };
 
 	CharacterCreate.allianceFramePool = CreateFramePool("CHECKBUTTON", CharCreateRaceButtonsFrame.AllianceRaces, "CharCreateRaceButtonTemplate");
 	CharacterCreate.hordeFramePool = CreateFramePool("CHECKBUTTON", CharCreateRaceButtonsFrame.HordeRaces, "CharCreateRaceButtonTemplate");
@@ -522,6 +525,8 @@ function CharacterCreate_OnEvent(self, event, ...)
 	elseif ( event == "CLASS_TRIAL_CHARACTER_CREATE_RESULT" ) then
 		local result = ...
 		HandleClassTrialCreateResult(result);
+	elseif ( event == "CHARACTER_LIST_UPDATE" ) then
+		CharacterCreate_EvaluateNewAlliedRaces();
 	end
 end
 
@@ -639,6 +644,8 @@ end
 function CharacterCreateEnumerateRaces(modeChange)
 	local races = C_CharacterCreation.GetAvailableRaces();
 
+	local inAlliedRaceMode = C_CharacterCreation.GetCurrentRaceMode() == Enum.CharacterCreateRaceMode.AlliedRace;
+
 	if ( #races > MAX_RACES ) then
 		message("Too many races!  Update MAX_RACES");
 		while ( #races > MAX_RACES ) do
@@ -680,6 +687,7 @@ function CharacterCreateEnumerateRaces(modeChange)
 		button.NormalTexture:SetAtlas(atlas);
 		button.PushedTexture:SetAtlas(atlas);
 		button.nameFrame.text:SetText(name);
+		button.NewLabel:SetShown(CharacterCreate_IsNewAlliedRace(raceData.raceID));
 		
 		local kioskModeData = IsKioskGlueEnabled() and KioskModeSplash_GetModeData();
 		local raceList = kioskModeData and KioskModeSplash_GetRaceList();
@@ -693,11 +701,11 @@ function CharacterCreateEnumerateRaces(modeChange)
 			button.tooltip = name;
 			disableTexture:Hide();
 		else
-			if (C_CharacterCreation.ShouldShowAlliedRacesButton() and C_CharacterCreation.GetCurrentRaceMode() == Enum.CharacterCreateRaceMode.AlliedRace and not IsKioskModeEnabled()) then
+			if (C_CharacterCreation.ShouldShowAlliedRacesButton() and inAlliedRaceMode and not IsKioskModeEnabled()) then
 				button:Enable();
 			else
 				button:Disable();
-				if (C_CharacterCreation.GetCurrentRaceMode() == Enum.CharacterCreateRaceMode.AlliedRace and IsKioskModeEnabled()) then
+				if (inAlliedRaceMode and IsKioskModeEnabled()) then
 					hiddenInKiosk = true;
 				end
 			end
@@ -720,7 +728,7 @@ function CharacterCreateEnumerateRaces(modeChange)
 	end
 	
 	if ( PAID_SERVICE_TYPE ) then
-		if ( PAID_SERVICE_TYPE == PAID_FACTION_CHANGE and C_CharacterCreation.GetCurrentRaceMode() == Enum.CharacterCreateRaceMode.Normal and C_CharacterCreation.IsRaceClassValid(PANDAREN_RACE_ID, C_PaidServices.GetCurrentClassID())) then
+		if ( PAID_SERVICE_TYPE == PAID_FACTION_CHANGE and not inAlliedRaceMode and C_CharacterCreation.IsRaceClassValid(PANDAREN_RACE_ID, C_PaidServices.GetCurrentClassID())) then
 			PandarenFactionButtons_Show();
 		else
 			PandarenFactionButtons_Hide();
@@ -728,7 +736,7 @@ function CharacterCreateEnumerateRaces(modeChange)
 		CharacterChangeFixup();
 	end
 
-	CharacterCreate_UpdateAlliedRaceButton();
+	CharacterCreate_UpdateRacesToggleButton();
 	CharCreateRaceButtonsFrame.AllianceRaces:Layout();
 	CharCreateRaceButtonsFrame.HordeRaces:Layout();
 	CharCreateRaceButtonsFrame.NeutralRaces:Layout();
@@ -742,6 +750,10 @@ function CharacterCreateEnumerateRaces(modeChange)
 				CharCreateSelectRace(raceID, true);
 			end
 		end
+	end
+
+	if inAlliedRaceMode then
+		CharacterCreate_MarkNewAlliedRacesSeen();
 	end
 end
 
@@ -1105,16 +1117,23 @@ function CharacterCreate_GetValidAlliedRacePaidServiceOptions()
 	return validOptions;
 end
 
-function CharacterCreate_UpdateAlliedRaceButton()
+function CharacterCreate_UpdateRacesToggleButton()
 	local kioskModeHide = IsKioskGlueEnabled() and KioskModeSplash_GetMode() == "newcharacter";
-	local shouldShow = C_CharacterCreation.ShouldShowAlliedRacesButton() and C_CharacterCreation.GetCurrentRaceMode() == Enum.CharacterCreateRaceMode.Normal and CharacterCreateFrame.state == "CLASSRACE" and not kioskModeHide;
+	local shouldShow = C_CharacterCreation.ShouldShowAlliedRacesButton() and CharacterCreateFrame.state == "CLASSRACE" and not kioskModeHide;
 
 	if (shouldShow and PAID_SERVICE_TYPE) then
 		local validOptions = CharacterCreate_GetValidAlliedRacePaidServiceOptions();
 		shouldShow = validOptions and #validOptions > 0;
 	end
 
-	CharCreateAlliedRacesButton:SetShown(shouldShow);
+	if shouldShow then
+		local inAlliedRaceMode = C_CharacterCreation.GetCurrentRaceMode() == Enum.CharacterCreateRaceMode.AlliedRace;
+		CharCreateCoreRacesButton:SetShown(inAlliedRaceMode);
+		CharCreateAlliedRacesButton:SetShown(not inAlliedRaceMode);
+	else
+		CharCreateCoreRacesButton:Hide();
+		CharCreateAlliedRacesButton:Hide();
+	end
 end
 
 function CharacterCreate_OnKeyDown(self, key)
@@ -1181,7 +1200,7 @@ function CharacterCreate_Back()
 		CharacterCreateNameEdit:Hide();
 		CharacterCreateRandomName:Hide();
 
-		CharacterCreate_UpdateAlliedRaceButton();
+		CharacterCreate_UpdateRacesToggleButton();
 		CharacterCreate_UpdateClassTrialCustomizationFrames();
 
 		--back to awesome gear
@@ -1189,12 +1208,6 @@ function CharacterCreate_Back()
 
 		-- back to normal camera
 		C_CharacterCreation.SetFaceCustomizeCamera(false);
-	elseif (C_CharacterCreation.GetCurrentRaceMode() == Enum.CharacterCreateRaceMode.AlliedRace and (not PAID_SERVICE_TYPE or PAID_SERVICE_TYPE ~= PAID_CHARACTER_CUSTOMIZATION)) then
-		C_CharacterCreation.SetCurrentRaceMode(Enum.CharacterCreateRaceMode.Normal);
-		CharacterCreate_UpdateAlliedRaceButton();	
-		CharCreateRaceButtonsFrame.ClassicBanners:Show();
-		CharCreateRaceButtonsFrame.AlliedRaceBanners:Hide();
-		CharacterCreateEnumerateRaces(true);
 	else
 		if( IsKioskGlueEnabled() ) then
 			PlaySound(SOUNDKIT.GS_CHARACTER_CREATION_CANCEL);
@@ -1230,7 +1243,7 @@ function CharacterCreate_Forward()
 		CharCreatePreviewFrame:Show();
 		CharacterTemplateConfirmDialog:Hide();
 		
-		CharacterCreate_UpdateAlliedRaceButton();
+		CharacterCreate_UpdateRacesToggleButton();
 		CharacterCreate_UpdateClassTrialCustomizationFrames();
 
 		CharCreate_PrepPreviewModels();
@@ -1432,12 +1445,19 @@ function CharacterRace_OnClick(self, id, forceSelect)
 end
 
 function CharCreateAlliedRacesButton_OnClick(self)
-	local raceMode = C_CharacterCreation.GetCurrentRaceMode();
 	C_CharacterCreation.SetCurrentRaceMode(Enum.CharacterCreateRaceMode.AlliedRace);
 	CharCreateRaceButtonsFrame.ClassicBanners:Hide();
 	CharCreateRaceButtonsFrame.AlliedRaceBanners:Show();
-	self:Hide();
 	CharacterCreateEnumerateRaces(true);
+	CharacterCreate_UpdateRacesToggleButton();
+end
+
+function CharCreateCoreRacesButton_OnClick(self)
+	C_CharacterCreation.SetCurrentRaceMode(Enum.CharacterCreateRaceMode.Normal);
+	CharCreateRaceButtonsFrame.ClassicBanners:Show();
+	CharCreateRaceButtonsFrame.AlliedRaceBanners:Hide();
+	CharacterCreateEnumerateRaces(true);
+	CharacterCreate_UpdateRacesToggleButton();
 end
 
 local currentGender;
@@ -2563,4 +2583,50 @@ end
 
 function CharacterCreate_UpdatePreview()
 	CharacterCreateNameEdit:SetEnabled(not isAlliedRacePreview);
+end
+
+function CharacterCreate_MarkNewAlliedRacesSeen()
+	for i, raceID in ipairs(CharacterCreate.newAlliedRaces) do
+		SetCVarBitfield("seenAlliedRaceUnlocks", raceID, true);
+	end
+	wipe(CharacterCreate.newAlliedRaces);
+	CharacterCreate_RefreshNewAlliedRaces();
+end
+
+function CharacterCreate_EvaluateNewAlliedRaces()
+	wipe(CharacterCreate.newAlliedRaces);
+
+	-- first time on this machine? Set the first bit (which would evaluate to Human, but Humans are not an allied race so it's fine)
+	local firstLogin = GetCVar("seenAlliedRaceUnlocks") == "0";
+	if firstLogin then
+		SetCVarBitfield("seenAlliedRaceUnlocks", 1, true);
+	end
+
+	local races = C_CharacterCreation.GetAvailableRaces(Enum.CharacterCreateRaceMode.AlliedRace);
+	for i, raceInfo in ipairs(races) do
+		if raceInfo.enabled then
+			if firstLogin then
+				SetCVarBitfield("seenAlliedRaceUnlocks", raceInfo.raceID, true);
+			elseif not GetCVarBitfield("seenAlliedRaceUnlocks", raceInfo.raceID) then
+				tinsert(CharacterCreate.newAlliedRaces, raceInfo.raceID);
+			end
+		end
+	end
+	
+	CharacterCreate_RefreshNewAlliedRaces();
+end
+
+function CharacterCreate_RefreshNewAlliedRaces()
+	local hasNewAlliedRaces = #CharacterCreate.newAlliedRaces > 0;
+	CharSelectCreateCharacterButton.NewLabel:SetShown(hasNewAlliedRaces);
+	CharCreateAlliedRacesButton.NewLabel:SetShown(hasNewAlliedRaces);
+end
+
+function CharacterCreate_IsNewAlliedRace(raceID)
+	for i, newRaceID in ipairs(CharacterCreate.newAlliedRaces) do
+		if raceID == newRaceID then
+			return true;
+		end
+	end
+	return false;
 end

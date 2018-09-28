@@ -2104,7 +2104,7 @@ SlashCmdList["WHO"] = function(msg)
 		ShowWhoPanel();
 	end
 	WhoFrameEditBox:SetText(msg);
-	SendWho(msg);
+	C_FriendList.SendWho(msg);
 end
 
 SlashCmdList["CHANNEL"] = function(msg, editBox)
@@ -2115,14 +2115,14 @@ end
 SlashCmdList["FRIENDS"] = function(msg)
 	local player, note = strmatch(msg, "%s*([^%s]+)%s*(.*)");
 	if ( player ~= "" or UnitIsPlayer("target") ) then
-		AddOrRemoveFriend(player, note);
+		C_FriendList.AddOrRemoveFriend(player, note);
 	else
 		ToggleFriendsPanel();
 	end
 end
 
 SlashCmdList["REMOVEFRIEND"] = function(msg)
-	RemoveFriend(msg);
+	C_FriendList.RemoveFriend(msg);
 end
 
 SlashCmdList["IGNORE"] = function(msg)
@@ -2135,7 +2135,7 @@ SlashCmdList["IGNORE"] = function(msg)
 				BNSetBlocked(bNetIDAccount, not BNIsBlocked(bNetIDAccount));
 			end
 		else
-			AddOrDelIgnore(msg);
+			C_FriendList.AddOrDelIgnore(msg);
 		end
 	else
 		ToggleIgnorePanel();
@@ -2144,7 +2144,7 @@ end
 
 SlashCmdList["UNIGNORE"] = function(msg)
 	if ( msg ~= "" or UnitIsPlayer("target") ) then
-		DelIgnore(msg);
+		C_FriendList.DelIgnore(msg);
 	else
 		ToggleIgnorePanel();
 	end

@@ -53,7 +53,7 @@ function SetItemRef(link, text, button, chatFrame)
 				if ( ChatEdit_GetActiveWindow() ) then
 					ChatEdit_InsertLink(name);
 				else
-					SendWho(WHO_TAG_EXACT..name);
+					C_FriendList.SendWho(WHO_TAG_EXACT..name);
 				end
 
 			elseif ( button == "RightButton" and (not isGMLink) ) then

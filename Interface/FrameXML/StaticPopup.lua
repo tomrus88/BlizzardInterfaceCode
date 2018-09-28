@@ -2218,7 +2218,7 @@ StaticPopupDialogs["ADD_FRIEND"] = {
 	autoCompleteArgs = { AUTOCOMPLETE_LIST.ADDFRIEND.include, AUTOCOMPLETE_LIST.ADDFRIEND.exclude },
 	maxLetters = 12 + 1 + 64,
 	OnAccept = function(self)
-		AddFriend(self.editBox:GetText());
+		C_FriendList.AddFriend(self.editBox:GetText());
 	end,
 	OnShow = function(self)
 		self.editBox:SetFocus();
@@ -2229,7 +2229,7 @@ StaticPopupDialogs["ADD_FRIEND"] = {
 	end,
 	EditBoxOnEnterPressed = function(self)
 		local parent = self:GetParent();
-		AddFriend(parent.editBox:GetText());
+		C_FriendList.AddFriend(parent.editBox:GetText());
 		parent:Hide();
 	end,
 	EditBoxOnEscapePressed = function(self)
@@ -2249,12 +2249,14 @@ StaticPopupDialogs["SET_FRIENDNOTE"] = {
 	countInvisibleLetters = true,
 	editBoxWidth = 350,
 	OnAccept = function(self)
-		SetFriendNotes(FriendsFrame.NotesID, self.editBox:GetText());
+		if(not C_FriendList.SetFriendNotes(FriendsFrame.NotesID, self.editBox:GetText())) then
+			UIErrorsFrame:AddExternalErrorMessage(ERR_FRIEND_NOT_FOUND);
+		end
 	end,
 	OnShow = function(self)
-		local name, level, class, area, connected, status, note = GetFriendInfo(FriendsFrame.NotesID);
-		if ( note ) then
-			self.editBox:SetText(note);
+		local info = C_FriendList.GetFriendInfo(FriendsFrame.NotesID);
+		if ( info.notes ) then
+			self.editBox:SetText(info.notes);
 		end
 		self.editBox:SetFocus();
 	end,
@@ -2264,7 +2266,9 @@ StaticPopupDialogs["SET_FRIENDNOTE"] = {
 	end,
 	EditBoxOnEnterPressed = function(self)
 		local parent = self:GetParent();
-		SetFriendNotes(FriendsFrame.NotesID, parent.editBox:GetText());
+		if(not C_FriendList.SetFriendNotes(FriendsFrame.NotesID, parent.editBox:GetText())) then
+			UIErrorsFrame:AddExternalErrorMessage(ERR_FRIEND_NOT_FOUND);
+		end
 		parent:Hide();
 	end,
 	EditBoxOnEscapePressed = function(self)
@@ -2492,7 +2496,7 @@ StaticPopupDialogs["ADD_IGNORE"] = {
 	autoCompleteArgs = { AUTOCOMPLETE_LIST.IGNORE.include, AUTOCOMPLETE_LIST.IGNORE.exclude },
 	maxLetters = 12 + 1 + 64, --name space realm (77 max)
 	OnAccept = function(self)
-		AddIgnore(self.editBox:GetText());
+		C_FriendList.AddIgnore(self.editBox:GetText());
 	end,
 	OnShow = function(self)
 		self.editBox:SetFocus();
@@ -2503,7 +2507,7 @@ StaticPopupDialogs["ADD_IGNORE"] = {
 	end,
 	EditBoxOnEnterPressed = function(self)
 		local parent = self:GetParent();
-		AddIgnore(parent.editBox:GetText());
+		C_FriendList.AddIgnore(parent.editBox:GetText());
 		parent:Hide();
 	end,
 	EditBoxOnEscapePressed = function(self)

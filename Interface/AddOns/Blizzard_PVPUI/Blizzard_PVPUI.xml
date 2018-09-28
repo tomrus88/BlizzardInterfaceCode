@@ -864,7 +864,7 @@
 						</Frames>
 					</Button>
 					<!-- Casual  -->
-					<Frame name="HonorFrame" toplevel="true">
+					<Frame name="HonorFrame">
 						<Size x="402" y="403"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" x="220" y="-22"/>
@@ -1008,7 +1008,7 @@
 											</OnClick>
 										</Scripts>
 									</Button>
-									<Frame parentKey="BrawlHelpBox" inherits="GlowBoxTemplate" hidden="false" frameStrata="DIALOG" >
+									<Frame parentKey="BrawlHelpBox" inherits="GlowBoxTemplate" hidden="false" frameStrata="DIALOG">
 										<Size x="230" y="65"/>
 										<Anchors>
 											<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.BrawlButton" x="15" y="0"/>

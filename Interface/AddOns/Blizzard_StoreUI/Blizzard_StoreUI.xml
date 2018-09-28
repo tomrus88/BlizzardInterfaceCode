@@ -2599,7 +2599,7 @@
 									self:GetParent().ValidationDescription:Hide();
 									self:GetParent().ContinueButton:SetEnabled(self:GetText() ~= "");
 								</OnTextChanged>
-								<OnEnter function="VASCharacterSelectionNewCharacterName_OnEnter"/>
+								<OnEnter function="VASCharacterSelection_NewCharacterName_OnEnter"/>
 								<OnLeave>
 									StoreTooltip:Hide();
 								</OnLeave>
@@ -2632,7 +2632,7 @@
 								<Anchor point="TOPRIGHT" relativeKey="$parent.SelectedCharacterFrame" relativePoint="BOTTOMRIGHT" x="8" y="-12"/>
 							</Anchors>
 							<Scripts>
-								<OnTextChanged function="VASCharacterSelection_GuildFactionChangeEditbox_OnTextChanged"/>
+								<OnTextChanged function="VASCharacterSelection_GuildVASEditbox_OnTextChanged"/>
 								<OnEnter function="VASCharacterSelection_NewGuildName_OnEnter"/>
 								<OnLeave function="VASCharacterSelection_ClearStoreTooltip"/>
 							</Scripts>
@@ -2642,7 +2642,7 @@
 								<Anchor point="TOPRIGHT" relativeKey="$parent.SelectedCharacterFrame" relativePoint="BOTTOMRIGHT" x="8" y="-52"/>
 							</Anchors>
 							<Scripts>
-								<OnTextChanged function="VASCharacterSelection_GuildFactionChangeEditbox_OnTextChanged"/>
+								<OnTextChanged function="VASCharacterSelection_GuildVASEditbox_OnTextChanged"/>
 								<OnEnter function="VASCharacterSelection_NewGuildMaster_OnEnter"/>
 								<OnLeave function="VASCharacterSelection_ClearStoreTooltip"/>
 							</Scripts>
@@ -2652,7 +2652,7 @@
 								<Anchor point="TOPRIGHT" relativeKey="$parent.SelectedCharacterFrame" relativePoint="BOTTOMRIGHT" x="8" y="-92"/>
 							</Anchors>
 							<Scripts>
-								<OnTextChanged function="VASCharacterSelection_GuildFactionChangeEditbox_OnTextChanged"/>
+								<OnTextChanged function="VASCharacterSelection_GuildVASEditbox_OnTextChanged"/>
 								<OnEnter function="VASCharacterSelection_OldGuildNewName_OnEnter"/>
 								<OnLeave function="VASCharacterSelection_ClearStoreTooltip"/>
 							</Scripts>
@@ -2665,14 +2665,15 @@
 								<OnClick function="TransferRealmCheckbox_OnClick"/>
 							</Scripts>
 						</CheckButton>
-						<EditBox parentKey="TransferRealmEditbox" letters="100" inherits="StoreEditBoxTemplate">
-							<Size x="140" y="22"/>
+						<EditBox parentKey="TransferRealmEditbox" letters="100" inherits="StoreEditBoxHorizontalLabelTemplate">
 							<Anchors>
 								<Anchor point="TOPRIGHT" relativeKey="$parent.SelectedCharacterFrame" relativePoint="BOTTOMRIGHT" x="8" y="-10"/>
 							</Anchors>
 							<Scripts>
 								<OnCursorChanged function="VASCharacterSelectionTransferRealmEditBox_OnCursorChanged"/>
 								<OnTextChanged function="VASCharacterSelectionTransferRealmEditBox_OnTextChanged"/>
+								<OnEnter function="VASCharacterSelection_TransferRealmEditbox_OnEnter"/>
+								<OnLeave function="VASCharacterSelection_ClearStoreTooltip"/>
 								<OnShow>
 									self:SetFrameLevel(self:GetParent():GetFrameLevel()+7);
 								</OnShow>
@@ -2769,6 +2770,8 @@
 								</Frame>
 							</Frames>
 							<Scripts>
+								<OnEnter function="VASCharacterSelectionChangeIconFrame_OnEnter"/>
+								<OnLeave function="VASCharacterSelectionChangeIconFrame_OnLeave"/>
 								<OnClick function="TransferFactionCheckbox_OnClick"/>
 							</Scripts>
 						</CheckButton>

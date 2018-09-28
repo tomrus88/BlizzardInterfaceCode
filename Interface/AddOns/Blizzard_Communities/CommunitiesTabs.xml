@@ -2,7 +2,7 @@
 ..\..\FrameXML\UI.xsd">
 	<Script file="CommunitiesTabs.lua"/>
 
-	<CheckButton name="CommunitiesFrameTabTemplate" virtual="true">
+	<CheckButton name="CommunitiesFrameTabTemplate" frameLevel="510" virtual="true">
 		<Size x="32" y="32"/>
 		<Layers>
 			<Layer level="BORDER">

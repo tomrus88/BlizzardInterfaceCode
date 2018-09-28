@@ -2967,7 +2967,7 @@ local LFG_LIST_APPLICANT_MEMBER_MENU = {
 	{
 		text = IGNORE_PLAYER,
 		notCheckable = true,
-		func = function(_, name, applicantID) AddIgnore(name); C_LFGList.DeclineApplicant(applicantID); end,
+		func = function(_, name, applicantID) C_FriendList.AddIgnore(name); C_LFGList.DeclineApplicant(applicantID); end,
 		arg1 = nil, --Player name goes here
 		arg2 = nil, --Applicant ID goes here
 		disabled = nil, --Disabled if we don't have a name yet

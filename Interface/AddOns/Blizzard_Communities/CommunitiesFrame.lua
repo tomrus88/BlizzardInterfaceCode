@@ -805,7 +805,7 @@ function CommunitiesFrameMaximizeMinimizeButton_OnLoad(self)
 		communitiesFrame.StreamDropDownMenu:ClearAllPoints();
 		communitiesFrame.StreamDropDownMenu:SetPoint("TOPLEFT", 188, -28);
 		UIDropDownMenu_SetWidth(communitiesFrame.StreamDropDownMenu, 160);
-		ButtonFrameTemplate_ShowPortrait(communitiesFrame);
+		PortraitFrameTemplate_SetPortraitShown(communitiesFrame, true);
 		communitiesFrame.PortraitOverlay:Show();
 		communitiesFrame.VoiceChatHeadset:SetPoint("TOPRIGHT", -8, -26);
 		UpdateUIPanelPositions();
@@ -829,7 +829,7 @@ function CommunitiesFrameMaximizeMinimizeButton_OnLoad(self)
 		communitiesFrame.StreamDropDownMenu:ClearAllPoints();
 		communitiesFrame.StreamDropDownMenu:SetPoint("LEFT", communitiesFrame.CommunitiesListDropDownMenu, "RIGHT", -25, 0);
 		UIDropDownMenu_SetWidth(communitiesFrame.StreamDropDownMenu, 115);
-		ButtonFrameTemplate_HidePortrait(communitiesFrame);
+		PortraitFrameTemplate_SetPortraitShown(communitiesFrame, false);
 		communitiesFrame.PortraitOverlay:Hide();
 		communitiesFrame.VoiceChatHeadset:SetPoint("TOPRIGHT", -10, -26);
 		UpdateUIPanelPositions();
