@@ -640,7 +640,9 @@ function ContainerFrame_Update(self)
 		end
 		
 		itemButton:UpdateItemContextMatching();
-		anyItemMatchesContext = anyItemMatchesContext or itemButton:DoesItemMatchItemContext();
+		if not anyItemMatchesContext then
+			anyItemMatchesContext = itemButton:GetItemContextMatch() == true;
+		end
 		
 		ContainerFrameItemButton_UpdateItemUpgradeIcon(itemButton);
 
@@ -689,7 +691,7 @@ function ContainerFrame_UpdateAll(startingFrom)
 		local frame = _G["ContainerFrame"..i];
 		local bagButton = ContainerFrame_GetBagButton(frame);
 		local hasRelevantItemContext = hasItemContext and bagButton ~= nil;
-		local needsItemContextUpdate = not hasItemContext and bagButton ~= nil and bagButton:DoesItemMatchItemContext() ~= nil;
+		local needsItemContextUpdate = not hasItemContext and bagButton ~= nil and bagButton:GetItemContextMatch() ~= nil;
 		if ( frame:IsShown() or hasRelevantItemContext or needsItemContextUpdate ) then
 			ContainerFrame_Update(frame);
 		end
