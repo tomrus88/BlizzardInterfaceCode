@@ -384,6 +384,7 @@ Import("LE_MODEL_BLEND_OPERATION_NONE");
 
 --Lua constants
 local WOW_TOKEN_CATEGORY_ID = 30;
+local SEE_YOU_LATER_BUNDLE_PRODUCT_ID = 488;
 
 local SPLASH_DISPLAY_TYPE_SINGLE_SPLASH = 1;
 local SPLASH_DISPLAY_TYPE_DUAL_PANE = 2;
@@ -1565,7 +1566,7 @@ function StoreFrame_UpdateCard(card, entryID, discountReset, forceModelUpdate)
 		card.NewTexture:Show();
 	elseif ( card.HotTexture and hot ) then
 		card.HotTexture:Show();
-	elseif ( card.DiscountMiddle and discountPercentage ) then
+	elseif ( card.DiscountMiddle and discountPercentage and entryInfo.productID ~= SEE_YOU_LATER_BUNDLE_PRODUCT_ID ) then
 		if StoreFrame_HasPriceData(entryInfo.productID) then
 			if card.style == "double-wide" then
 				card.DiscountText:SetWidth(200);
@@ -3822,6 +3823,10 @@ function StoreProductCard_ShouldAddDiscountInformationToTooltip(self, entryInfo)
 		return false;
 	end
 	
+	if entryInfo.productID == SEE_YOU_LATER_BUNDLE_PRODUCT_ID then
+		return false;
+	end
+	
 	return self.style == "double-wide"; -- For now, all bundles are double-wide and there are no other double-wide cards.
 end
 
@@ -3890,6 +3895,9 @@ function StoreProductCard_UpdateState(card)
 					name = "";
 					description = BLIZZARD_STORE_LOG_OUT_TO_PURCHASE_THIS_PRODUCT;
 				end
+				
+				description = strtrim(description, "\n\r"); -- Ensure we don't end the description with a new line.
+				
 				StoreTooltip_Show(name, description, entryInfo.sharedData.productDecorator == Enum.BattlepayProductDecorator.WoWToken);
 			end
 		end
