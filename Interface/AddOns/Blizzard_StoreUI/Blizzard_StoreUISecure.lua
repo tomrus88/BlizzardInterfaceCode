@@ -3975,6 +3975,7 @@ function VASCharacterSelectionCharacterSelector_Callback(value, guildFollowInfo)
 	SelectedCharacter = value;
 	GuildMemberAutoCompleteList = nil;
 	GuildMemberNameToGuid = {};
+	IsGuildFollow = false;
 
 	local frame = StoreVASValidationFrame.CharacterSelectionFrame;
 	local character = CharacterList[SelectedCharacter];
