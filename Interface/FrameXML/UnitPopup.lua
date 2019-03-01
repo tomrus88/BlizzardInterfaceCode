@@ -919,10 +919,6 @@ function UnitPopup_HideButtons ()
 			if ( not UnitPopup_CanAddBNetFriend(dropdownMenu, isLocalPlayer, haveBattleTag, isPlayer) ) then
 				shown = false;
 			end
-		elseif ( value == "BATTLETAG_FRIEND" ) then
-			if ( not UnitPopup_CanAddBNetFriend(dropdownMenu, isLocalPlayer, haveBattleTag, isPlayer) ) then
-				shown = false;
-			end
 		elseif ( value == "INVITE" or value == "SUGGEST_INVITE" or value == "REQUEST_INVITE" ) then
 			if ( isLocalPlayer or isOffline ) then
 				shown = false;
@@ -1588,7 +1584,10 @@ function UnitPopup_OnUpdate (elapsed)
 							enable = false;
 						end
 					elseif ( value == "BATTLETAG_FRIEND" ) then
-						if ( not BNFeaturesEnabledAndConnected() ) then
+						local isLocalPlayer = UnitPopup_GetIsLocalPlayer(currentDropDown);
+						local haveBattleTag = UnitPopup_HasBattleTag();
+						local isPlayer = currentDropDown.unit and UnitIsPlayer(currentDropDown.unit);
+						if ( not UnitPopup_CanAddBNetFriend(currentDropDown, isLocalPlayer, haveBattleTag, isPlayer) or not BNFeaturesEnabledAndConnected()) then
 							enable = false;
 						end
 					elseif ( value == "GUILD_BATTLETAG_FRIEND" ) then
@@ -1606,6 +1605,16 @@ function UnitPopup_OnUpdate (elapsed)
 									enable = false;
 								end
 							end
+						else
+							if ( currentDropDown.clubMemberInfo ~= nil and currentDropDown.clubMemberInfo.guid ~= nil ) then
+								local playerGUID = currentDropDown.clubMemberInfo.guid;
+								local player = PlayerLocation:CreateFromGUID(playerGUID);
+
+								if ( not C_PlayerInfo.UnitIsSameServer(player) or C_FriendList.GetFriendInfo(currentDropDown.clubMemberInfo.name) ) then
+									enable = false;
+								end
+							end
+
 						end
 					end
 
