@@ -67,7 +67,6 @@ end
 
 function MainMenuBar_OnLoad(self)
 	self:RegisterEvent("ACTIONBAR_PAGE_CHANGED");
-	self:RegisterEvent("CURRENCY_DISPLAY_UPDATE");
 	self:RegisterEvent("UNIT_LEVEL");
 	self:RegisterEvent("TRIAL_STATUS_UPDATE");
 	
@@ -110,7 +109,7 @@ function MainMenuBar_UpdateExperienceBars(newLevel)
 	if ( not newLevel ) then
 		newLevel = UnitLevel("player");
 	end
-	local showXP = newLevel < MAX_PLAYER_LEVEL and not IsXPUserDisabled();
+	local showXP = newLevel < MAX_PLAYER_LEVEL;
 	local showRep = name;
 	local numBarsShowing = 0;
 	--******************* EXPERIENCE **************************************
@@ -132,7 +131,7 @@ function MainMenuBar_UpdateExperienceBars(newLevel)
 		-- if it's a different faction, save possible friendship id
 		if ( ReputationWatchBar.factionID ~= factionID ) then
 			ReputationWatchBar.factionID = factionID;
-			ReputationWatchBar.friendshipID = GetFriendshipReputation(factionID);
+			ReputationWatchBar.friendshipID = nil;--GetFriendshipReputation(factionID);
 			ReputationWatchBar.StatusBar:Reset();
 		end
 
@@ -150,13 +149,6 @@ function MainMenuBar_UpdateExperienceBars(newLevel)
 				isCapped = true;
 			end
 			colorIndex = 5;		-- always color friendships green
-		elseif (C_Reputation.IsFactionParagon(factionID)) then
-			local currentValue, threshold, _, hasRewardPending = C_Reputation.GetFactionParagonInfo(factionID);
-			min, max  = 0, threshold;
-			value = currentValue % threshold;
-			if hasRewardPending then 
-				value = value + threshold;
-			end
 		else
 			level = reaction;
 		end
@@ -270,7 +262,7 @@ end
 function MainMenuBarVehicleLeaveButton_Update()
 	if ( CanExitVehicle() and ActionBarController_GetCurrentActionBarState() == LE_ACTIONBAR_STATE_MAIN ) then
 		MainMenuBarVehicleLeaveButton:ClearAllPoints();
-		if ( IsPossessBarVisible() ) then
+		if ( --[[IsPossessBarVisible()]] false ) then
 			MainMenuBarVehicleLeaveButton:SetPoint("LEFT", PossessButton2, "RIGHT", 30, 0);
 		elseif ( GetNumShapeshiftForms() > 0 ) then
 			MainMenuBarVehicleLeaveButton:SetPoint("LEFT", "StanceButton"..GetNumShapeshiftForms(), "RIGHT", 30, 0);
@@ -353,7 +345,7 @@ function ExhaustionTick_OnEvent(self, event, ...)
 		end
 
 		-- Hide exhaustion tick if player is max level or XP is turned off
-		if ( UnitLevel("player") == MAX_PLAYER_LEVEL or IsXPUserDisabled() ) then
+		if ( UnitLevel("player") == MAX_PLAYER_LEVEL ) then
 			ExhaustionTick:Hide();
 		end
 	end
