@@ -466,8 +466,8 @@ function TargetFrame_UpdateAuras (self)
                 end
 
                 -- Handle cooldowns
-                frameCooldown = _G[frameName.."Cooldown"];
-                CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
+                --frameCooldown = _G[frameName.."Cooldown"];
+                --CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
 
                 -- Show stealable frame if the target is not the current player and the buff is stealable.
                 local frameStealable = _G[frameName.."Stealable"];
@@ -535,8 +535,8 @@ function TargetFrame_UpdateAuras (self)
 					end
 
 					-- Handle cooldowns
-					frameCooldown = _G[frameName.."Cooldown"];
-					CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
+					--frameCooldown = _G[frameName.."Cooldown"];
+					--CooldownFrame_Set(frameCooldown, expirationTime - duration, duration, duration > 0, true);
 
 					-- set debuff type color
 					if ( debuffType ) then

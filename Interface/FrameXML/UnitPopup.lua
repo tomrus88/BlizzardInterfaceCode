@@ -1811,7 +1811,7 @@ function UnitPopup_OnClick (self)
 		UIDropDownMenu_SetButtonText(1, 2, UnitPopupButtons[button].text);
 		UIDropDownMenu_Refresh(dropdownFrame, nil, 1);
 	elseif ( button == "MASTER_LOOTER" ) then
-		SetLootMethod("master", fullname, 1);
+		SetLootMethod("master", fullname, 2);
 		UIDropDownMenu_SetButtonText(self:GetParent().parentLevel, self:GetParent().parentID, UnitPopupButtons[button].text);
 		UIDropDownMenu_Refresh(dropdownFrame, nil, 1);
 	elseif ( button == "GROUP_LOOT" ) then
@@ -1840,7 +1840,7 @@ function UnitPopup_OnClick (self)
 		local raidDifficultyID = UnitPopupButtons[button].difficultyID;
 		SetRaidDifficulties(false, raidDifficultyID);
 	elseif ( button == "LOOT_PROMOTE" ) then
-		SetLootMethod("master", fullname, 1);
+		SetLootMethod("master", fullname, 2);
 	elseif ( button == "PVP_ENABLE" ) then
 		SetPVP(1);
 	elseif ( button == "PVP_DISABLE" ) then

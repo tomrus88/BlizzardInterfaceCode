@@ -360,7 +360,7 @@ function UnitFrameManaBar_UpdateType (manaBar)
 	if ( manaBar.unit ~= "pet") then
 	    if ( unitFrame:GetName() == "PlayerFrame" ) then
 		    manaBar.tooltipTitle = prefix;
-		    manaBar.tooltipText = _G["NEWBIE_TOOLTIP_MANABAR_"..powerType];
+		    manaBar.tooltipText = _G["NEWBIE_TOOLTIP_MANABAR"..powerType];
 	    else
 		    manaBar.tooltipTitle = nil;
 		    manaBar.tooltipText = nil;

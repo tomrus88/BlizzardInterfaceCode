@@ -1033,12 +1033,12 @@ function CompactUnitFrame_UtilSetBuff(buffFrame, unit, index, filter)
 	end
 	buffFrame:SetID(index);
 	local enabled = expirationTime and expirationTime ~= 0;
-	if enabled then
+	--[[if enabled then
 		local startTime = expirationTime - duration;
 		CooldownFrame_Set(buffFrame.cooldown, startTime, duration, true);
 	else
 		CooldownFrame_Clear(buffFrame.cooldown);
-	end
+	end]]
 	buffFrame:Show();
 end
 
@@ -1113,12 +1113,12 @@ function CompactUnitFrame_UtilSetDebuff(debuffFrame, unit, index, filter, isBoss
 	end
 	debuffFrame:SetID(index);
 	local enabled = expirationTime and expirationTime ~= 0;
-	if enabled then
+	--[[if enabled then
 		local startTime = expirationTime - duration;
 		CooldownFrame_Set(debuffFrame.cooldown, startTime, duration, true);
 	else
 		CooldownFrame_Clear(debuffFrame.cooldown);
-	end
+	end]]
 
 	local color = DebuffTypeColor[debuffType] or DebuffTypeColor["none"];
 	debuffFrame.border:SetVertexColor(color.r, color.g, color.b);
@@ -1501,8 +1501,8 @@ DefaultCompactNamePlateFriendlyFrameOptions = {
 	colorHealthBySelection = true,
 	considerSelectionInCombatAsHostile = false,
 	smoothHealthUpdates = false,
-	displayNameWhenSelected = true,
-	displayNameByPlayerNameRules = true,
+	--displayNameWhenSelected = true,
+	--displayNameByPlayerNameRules = true,
 	showLevel = true,
 
 	selectedBorderColor = CreateColor(1, 1, 1, .35),
@@ -1523,8 +1523,8 @@ DefaultCompactNamePlateEnemyFrameOptions = {
 	colorHealthBySelection = true,
 	considerSelectionInCombatAsHostile = false,
 	smoothHealthUpdates = false,
-	displayNameWhenSelected = true,
-	displayNameByPlayerNameRules = true,
+	--displayNameWhenSelected = true,
+	--displayNameByPlayerNameRules = true,
 	greyOutWhenTapDenied = true,
 	showClassificationIndicator = false,
 	showLevel = true,

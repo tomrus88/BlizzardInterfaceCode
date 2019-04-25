@@ -2255,6 +2255,15 @@ SlashCmdList["EVENTTRACE"] = function(msg)
 	EventTraceFrame_HandleSlashCmd(msg);
 end
 
+if IsGMClient() then
+	SLASH_TEXELVIS1 = "/texelvis";
+	SLASH_TEXELVIS2 = "/tvis";
+	SlashCmdList["TEXELVIS"] = function(msg) 
+		UIParentLoadAddOn("Blizzard_DebugTools");
+		TexelSnappingVisualizer:Show();
+	end
+end
+
 SlashCmdList["TABLEINSPECT"] = function(msg)
 	forceinsecure();
 	UIParentLoadAddOn("Blizzard_DebugTools");
@@ -4094,16 +4103,6 @@ function ChatEdit_InsertLink(text)
 			MacroFrameText:Insert(item or text);
 		end
 		return true;
-	end
-	if ( TradeSkillFrame and TradeSkillFrame.SearchBox:HasFocus() )  then
-		local item;
-		if ( strfind(text, "item:", 1, true) ) then
-			item = GetItemInfo(text);
-		end
-		if ( item ) then
-			TradeSkillFrame.SearchBox:SetText(item);
-			return true;
-		end
 	end
 	if ( CommunitiesFrame and CommunitiesFrame.ChatEditBox:HasFocus() ) then
 		CommunitiesFrame.ChatEditBox:Insert(text);

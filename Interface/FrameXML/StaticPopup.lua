@@ -4188,7 +4188,7 @@ StaticPopupDialogs["AUCTION_HOUSE_DEPRECATED"] = {
 }
 
 local function InviteToClub(clubId, text)
-	local invitationCandidates = C_Club.GetInvitationCandidates(nil, nil, nil, clubId);
+	local invitationCandidates = C_Club.GetInvitationCandidates(nil, nil, nil, nil, clubId);
 	for i, candidate in ipairs(invitationCandidates) do
 		if candidate.name == text then
 			C_Club.SendInvitation(clubId, candidate.memberId);

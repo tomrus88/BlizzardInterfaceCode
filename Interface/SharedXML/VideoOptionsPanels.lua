@@ -333,7 +333,7 @@ function VideoOptionsPanel_Default (self)
 	end
 end
 
-function Graphics_Default (self, classicDefaults)
+function Graphics_Default (self, perControlCallback, classicDefaults)
 	SetDefaultVideoOptions(0, classicDefaults);
 	VideoOptionsPanel_Default( Display_);
 	VideoOptionsPanel_Default( Graphics_);
@@ -341,7 +341,7 @@ function Graphics_Default (self, classicDefaults)
 	FinishChanges(self);
 end
 
-function Advanced_Default (self, classicDefaults)
+function Advanced_Default (self, perControlCallback, classicDefaults)
 	SetDefaultVideoOptions(1, classicDefaults);
 	if(not InGlue()) then
 		SetDefaultVideoOptions(2, classicDefaults);
