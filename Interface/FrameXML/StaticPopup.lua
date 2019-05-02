@@ -2598,25 +2598,14 @@ StaticPopupDialogs["REMOVE_GUILDMEMBER"] = {
 	text = format(REMOVE_GUILDMEMBER_LABEL, "XXX"),
 	button1 = YES,
 	button2 = NO,
-	OnAccept = function(self, data)
-		if data then
-			C_GuildInfo.RemoveFromGuild(data.guid);
-			if CommunitiesFrame then
-				CommunitiesFrame:CloseGuildMemberDetailFrame();
-			end
-		else
-			GuildUninvite(GuildFrame.selectedName);
-			if GuildMemberDetailFrame then
-				GuildMemberDetailFrame:Hide();
-			end
+	OnAccept = function(self)
+		GuildUninvite(GuildFrame.selectedName);
+		if GuildMemberDetailFrame then
+			GuildMemberDetailFrame:Hide();
 		end
 	end,
-	OnShow = function(self, data)
-		if data then
-			self.text:SetFormattedText(REMOVE_GUILDMEMBER_LABEL, data.name);
-		else
-			self.text:SetText(GuildFrame.selectedName);
-		end
+	OnShow = function(self)
+		self.text:SetFormattedText(REMOVE_GUILDMEMBER_LABEL, Ambiguate(GuildFrame.selectedName, "guild"));
 	end,
 	timeout = 0,
 	exclusive = 1,

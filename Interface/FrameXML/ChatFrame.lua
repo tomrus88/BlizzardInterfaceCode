@@ -1989,11 +1989,7 @@ end
 
 SlashCmdList["GUILD_ROSTER"] = function(msg)
 	if ( IsInGuild() ) then
-		GuildFrame_LoadUI();
-		if ( GuildFrame ) then
-			GuildFrameTab2:Click();
-			ShowUIPanel(GuildFrame);
-		end
+		ToggleFriendsFrame(FRIEND_TAB_GUILD);
 	end
 end
 

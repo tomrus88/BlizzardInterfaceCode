@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 11300
 ## Title: PTR Bug Reporter
 ## OnlyBetaAndPTR: 1
 ## Notes: Tool for gathering bugs from PTR

@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 11300
 ## Title: Blizzard Talent UI
 ## LoadOnDemand: 1
 Blizzard_TalentUI.xml

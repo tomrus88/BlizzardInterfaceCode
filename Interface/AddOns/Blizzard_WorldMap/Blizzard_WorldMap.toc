@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 11300
 ## Title: Blizzard World Map UI
 ## Secure: 1
 ## Author: Blizzard Entertainment

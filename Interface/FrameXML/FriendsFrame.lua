@@ -912,6 +912,7 @@ function FriendsFrame_OnEvent(self, event, ...)
 	elseif ( event == "IGNORELIST_UPDATE" or event == "BN_BLOCK_LIST_UPDATED" ) then
 		IgnoreList_Update();
 	elseif ( event == "WHO_LIST_UPDATE" ) then
+		WhoFrame.selectedWho = nil;
 		WhoList_Update();
 		FriendsFrame_Update();
 	elseif ( event == "PLAYER_FLAGS_CHANGED" or event == "BN_INFO_CHANGED") then
@@ -1097,9 +1098,6 @@ function ToggleFriendsFrame(tab, fromCommunityFrame)
 	if ( not tab ) then
 		if ( FriendsFrame:IsShown() or (CommunitiesFrame and CommunitiesFrame:IsShown()) ) then
 			HideUIPanel(FriendsFrame);
-			if (CommunitiesFrame) then
-				HideUIPanel(CommunitiesFrame);
-			end
 		else
 			ShowUIPanel(FriendsFrame);
 		end
@@ -1107,6 +1105,9 @@ function ToggleFriendsFrame(tab, fromCommunityFrame)
 		-- If not in a guild don't do anything when they try to toggle the guild tab
 		if ( tab == FRIEND_TAB_GUILD and not IsInGuild() ) then
 			return;
+		end
+		if (CommunitiesFrame) then
+			HideUIPanel(CommunitiesFrame);
 		end
 		if ( tab == PanelTemplates_GetSelectedTab(FriendsFrame) and FriendsFrame:IsShown() ) then
 			HideUIPanel(FriendsFrame);
@@ -2643,7 +2644,7 @@ function GuildStatus_Update()
 	else
 		numGuildMembers = onlineMembers;
 	end
-	local name, rank, rankIndex, level, class, zone, note, officernote, online;
+	local fullName, rank, rankIndex, level, class, zone, note, officernote, online;
 	local guildName, guildRankName, guildRankIndex = GetGuildInfo("player");
 	local maxRankIndex = GuildControlGetNumRanks() - 1;
 	local button;
@@ -2724,7 +2725,7 @@ function GuildStatus_Update()
 		else
 			GuildMemberRemoveButton:Disable();
 		end
-		if ( (UnitName("player") == name) or (not online) ) then
+		if ( (UnitName("player") == displayedName) or (not online) ) then
 			GuildMemberGroupInviteButton:Disable();
 		else
 			GuildMemberGroupInviteButton:Enable();

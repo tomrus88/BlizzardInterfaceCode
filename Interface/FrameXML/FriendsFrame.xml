@@ -3377,8 +3377,8 @@ TRAVEL PASS
             </Anchors>
             <Scripts>
               <OnClick>
-                InviteByName(GuildFrame.selectedName);
-              </OnClick>
+                InviteToGroup(GuildFrame.selectedName);
+			  </OnClick>
               <OnEnter>
                 GameTooltip_AddNewbieTip(self, GROUP_INVITE, 1.0, 1.0, 1.0, NEWBIE_TOOLTIP_GROUPINVITE, 1);
               </OnEnter>

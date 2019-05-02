@@ -111,9 +111,9 @@ function BattlefieldFrame_Update()
 			button:Hide();
 		else
 			instanceID = GetBattlefieldInstanceInfo(zoneIndex - 1);
-			button:SetText(mapName.." "..instanceID);
+			button:SetText(localizedName.." "..instanceID);
 			-- Set tooltip
-			button.title = mapName.." "..instanceID;
+			button.title = localizedName.." "..instanceID;
 			button.tooltip = NEWBIE_TOOLTIP_ENTER_BATTLEGROUND;
 			button:Show();
 		end

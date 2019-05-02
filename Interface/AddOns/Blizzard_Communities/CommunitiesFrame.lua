@@ -85,6 +85,7 @@ function CommunitiesFrameMixin:OnShow()
 	self.selectedTab = FRIEND_TAB_BLIZZARDGROUPS;
 	PanelTemplates_UpdateTabs(self);
 	FriendsFrame.selectedTab = FRIEND_TAB_BLIZZARDGROUPS; -- Set on FriendsFrame as well.
+	InGuildCheck(self);
 
 	-- Update micromenu notifications.
 	BlizzardGroups_UpdateNotifications();
