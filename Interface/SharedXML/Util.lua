@@ -324,6 +324,18 @@ function Wrap(value, max)
 	return (value - 1) % max + 1;
 end
 
+function ClampDegrees(value)
+	return ClampMod(value, 360);
+end
+
+function ClampMod(value, mod)
+	return ((value % mod) + mod) % mod;
+end
+
+function NegateIf(value, condition)
+	return condition and -value or value;
+end
+
 function PercentageBetween(value, startValue, endValue)
 	if startValue == endValue then
 		return 0.0;

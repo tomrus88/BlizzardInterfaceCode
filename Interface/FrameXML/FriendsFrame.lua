@@ -732,6 +732,13 @@ end
 
 function WhoList_Update()
 	local numWhos, totalCount = C_FriendList.GetNumWhoResults();
+	if (numWhos ~= WhoFrame.numWhos) then
+		-- Moderate hack: if the number of who buttons has changed, selectedIndex might no longer be valid, so just clear it.
+		-- The WHO_LIST_UPDATE handler also clears it, but that event doesn't fire if the Who Frame isn't shown.
+		WhoFrame.selectedWho = nil;
+	end
+	WhoFrame.numWhos = numWhos;
+
 	local name, guild, level, race, class, zone;
 	local button, buttonText, classTextColor, classFileName;
 	local columnTable;
@@ -753,6 +760,7 @@ function WhoList_Update()
 		button.tooltip1 = nil;
 		button.tooltip2 = nil;
 		local info = C_FriendList.GetWhoInfo(whoIndex);
+		name = nil;
 		if ( info ) then
 			name = info.fullName;
 			guild = info.fullGuildName;
@@ -1098,6 +1106,7 @@ function ToggleFriendsFrame(tab, fromCommunityFrame)
 	if ( not tab ) then
 		if ( FriendsFrame:IsShown() or (CommunitiesFrame and CommunitiesFrame:IsShown()) ) then
 			HideUIPanel(FriendsFrame);
+			HideUIPanel(CommunitiesFrame);
 		else
 			ShowUIPanel(FriendsFrame);
 		end

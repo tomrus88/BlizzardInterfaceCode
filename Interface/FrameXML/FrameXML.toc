@@ -1,6 +1,3 @@
-# Do not delete the following line!
-## Interface: 11300
-
 ## add C namespace augmentations here
 ..\SharedXML\C_TimerAugment.lua
 

@@ -548,6 +548,9 @@
 			</Button>
 			
 			<ScrollFrame name="ReputationListScrollFrame" inherits="FauxScrollFrameTemplate">
+				<Size>
+					<AbsDimension x="296" y="354"/>
+				</Size>
 				<Anchors>
 					<Anchor point="TOPRIGHT">
 						<Offset>

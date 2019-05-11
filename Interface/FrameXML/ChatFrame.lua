@@ -3762,7 +3762,8 @@ end
 function ChatFrame_DisplayLevelUp(self, level, ...)
 	-- Level up
 	local info = ChatTypeInfo["SYSTEM"];
-	local arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 = ...;
+	-- Blank arg is numNewPvpTalentSlots (always 0 in Classic).
+	local arg2, arg3, arg4, _, arg5, arg6, arg7, arg8, arg9 = ...;
 
 	local string = LEVEL_UP:format(level);
 	self:AddMessage(string, info.r, info.g, info.b, info.id);

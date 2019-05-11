@@ -689,7 +689,7 @@ local function UnitPopup_TryCreatePlayerLocation(menu, guid)
 		return PlayerLocation:CreateFromCommunityChatData(menu.communityClubID, menu.communityStreamID, menu.communityEpoch, menu.communityPosition);
 	elseif menu.communityClubID and not menu.communityStreamID then
 		return PlayerLocation:CreateFromCommunityInvitation(menu.communityClubID, guid);
-	elseif menu.lineID then
+	elseif C_ChatInfo.IsValidChatLine(menu.lineID) then
 		return PlayerLocation:CreateFromChatLineID(menu.lineID);
 	elseif menu.unit then
 		return PlayerLocation:CreateFromUnit(menu.unit);
@@ -1988,6 +1988,13 @@ function UnitPopup_OnClick (self)
 	elseif ( button == "COMMUNITIES_INVITE" ) then
 		local streams = C_Club.GetStreams(clubInfo.clubId);
 		local defaultStreamId = #streams > 0 and streams[1] or nil;
+		for i, stream in ipairs(streams) do
+			if stream.streamType == Enum.ClubStreamType.General or stream.streamType == Enum.ClubStreamType.Guild then
+				defaultStreamId = stream.streamId;
+				break;
+			end
+		end
+
 		if defaultStreamId then
 			CommunitiesUtil.OpenInviteDialog(clubInfo.clubId, defaultStreamId);
 		end
