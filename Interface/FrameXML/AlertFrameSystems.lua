@@ -14,9 +14,8 @@ function AlertFrameSystems_Register()
 	GarrisonTalentAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("GarrisonTalentAlertFrameTemplate", GarrisonTalentAlertFrame_SetUp);
 	WorldQuestCompleteAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("WorldQuestCompleteAlertFrameTemplate", WorldQuestCompleteAlertFrame_SetUp, WorldQuestCompleteAlertFrame_Coalesce);
 	LegendaryItemAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("LegendaryItemAlertFrameTemplate", LegendaryItemAlertFrame_SetUp);
-	NewPetAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewPetAlertFrameTemplate", NewPetAlertFrame_SetUp);
-	NewMountAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewMountAlertFrameTemplate", NewMountAlertFrame_SetUp); 
-	NewToyAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewToyAlertFrameTemplate", NewToyAlertFrame_SetUp); 
+	NewPetAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("NewPetAlertFrameTemplate", NewPetAlertFrame_SetUp);
+	NewMountAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("NewMountAlertFrameTemplate", NewMountAlertFrame_SetUp);
 end
 
 -- [[ GuildChallengeAlertFrame ]] --
@@ -423,7 +422,7 @@ function AchievementAlertFrame_OnClick (self, button, down)
 end
 
 AchievementAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("AchievementAlertFrameTemplate", AchievementAlertFrame_SetUp, 2, 6);
-AchievementAlertSystem:SetCanShowMoreConditionFunc(function() return not C_PetBattles.IsInBattle() end);
+AchievementAlertSystem:SetCanShowMoreConditionFunc(function() return false end);
 
 -- [[ CriteriaAlertFrame ]] --
 function CriteriaAlertFrame_SetUp(frame, achievementID, criteriaString)
@@ -469,16 +468,16 @@ LOOTWONALERTFRAME_VALUES={
 }
 
 -- NOTE - This may also be called for an externally created frame. (E.g. bonus roll has its own frame)
-function LootWonAlertFrame_SetUp(self, itemLink, quantity, rollType, roll, specID, isCurrency, showFactionBG, lootSource, lessAwesome, isUpgraded, wonRoll, showRatedBG, isSecondaryResult)
+function LootWonAlertFrame_SetUp(self, itemLink, quantity, rollType, roll, specID, isCurrency, showFactionBG, lootSource, lessAwesome, isUpgraded, wonRoll, showRatedBG)
 	local itemName, itemHyperLink, itemRarity, itemTexture, _;
 	if (isCurrency) then
-		local currencyID = C_CurrencyInfo.GetCurrencyIDFromLink(itemLink);
+		local currencyID = C_CurrencyInfo.GetCurrencyIDFromLink(itemLink); 
 		itemName, _, itemTexture, _, _, _, _, itemRarity = GetCurrencyInfo(itemLink);
-		itemName, itemTexture, quantity, itemRarity = CurrencyContainerUtil.GetCurrencyContainerInfoForAlert(currencyID, quantity, itemName, itemTexture, itemRarity);
+		itemName, itemTexture, quantity, itemRarity = CurrencyContainerUtil.GetCurrencyContainerInfoForAlert(currencyID, quantity, itemName, itemTexture, itemRarity); 
 		if ( lootSource == LOOT_SOURCE_GARRISON_CACHE ) then
 			itemName = format(GARRISON_RESOURCES_LOOT, quantity);
 		else
-			if (quantity > 1) then
+			if (quantity > 1) then 
 				itemName = format(CURRENCY_QUANTITY_TEMPLATE, quantity, itemName);
 			end
 		end
@@ -487,7 +486,7 @@ function LootWonAlertFrame_SetUp(self, itemLink, quantity, rollType, roll, specI
 		itemName, itemHyperLink, itemRarity, _, _, _, _, _, _, itemTexture = GetItemInfo(itemLink);
 	end
 
-	local isAzeriteEmpowered = C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(itemHyperLink);
+	local isAzeriteEmpowered = false;
 	local windowInfo = wonRoll and LOOTWONALERTFRAME_VALUES.WonRoll or LOOTWONALERTFRAME_VALUES.Default;
 	if( showFactionBG ) then
 		local factionGroup = UnitFactionGroup("player");
@@ -544,11 +543,7 @@ function LootWonAlertFrame_SetUp(self, itemLink, quantity, rollType, roll, specI
 		self.Icon:SetDrawLayer("BORDER");
 	end
 
-	if isSecondaryResult then
-		self.Label:SetText(YOU_RECEIVED_LABEL);
-	else
-		self.Label:SetText(windowInfo.labelText);
-	end
+	self.Label:SetText(windowInfo.labelText);
 	self.Label:SetPoint("TOPLEFT", self.Icon, "TOPRIGHT", windowInfo.labelOffsetX, windowInfo.labelOffsetY);
 
 	self.isCurrency = isCurrency;
@@ -565,12 +560,8 @@ function LootWonAlertFrame_SetUp(self, itemLink, quantity, rollType, roll, specI
 	end
 	self.IconBorder:SetAtlas(atlas);
 	self.IconBorder:SetDesaturated(desaturate);
-	if not windowInfo.noIconBorder and not isCurrency and C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(itemHyperLink) then
-		self.IconOverlay:SetAtlas("LootToast-Azerite-Border");
-		self.IconOverlay:Show();
-	else
-		self.IconOverlay:Hide();
-	end
+	self.IconOverlay:Hide();
+
 	if ( specID and specID > 0 and not isCurrency ) then
 		local id, name, description, texture, role, class = GetSpecializationInfoByID(specID);
 		self.SpecIcon:SetTexture(texture);
@@ -923,7 +914,8 @@ function NewRecipeLearnedAlertFrame_GetStarTextureFromRank(rank)
 end
 
 function NewRecipeLearnedAlertFrame_SetUp(self, recipeID)
-	local tradeSkillID, skillLineName, parentTradeSkillID = C_TradeSkillUI.GetTradeSkillLineForRecipe(recipeID);
+--[[ Removed for classic
+	local tradeSkillID, skillLineName = C_TradeSkillUI.GetTradeSkillLineForRecipe(recipeID);
 	if tradeSkillID then
 		local recipeName = GetSpellInfo(recipeID);
 		if recipeName then
@@ -941,11 +933,12 @@ function NewRecipeLearnedAlertFrame_SetUp(self, recipeID)
 			else
 				self.Name:SetText(recipeName);
 			end
-			self.tradeSkillID = parentTradeSkillID or tradeSkillID;
+			self.tradeSkillID = tradeSkillID;
 			self.recipeID = recipeID;
 			return true;
 		end
 	end
+]]
 	return false;
 end
 
@@ -964,7 +957,7 @@ NewRecipeLearnedAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewRecipe
 
 -- [[WorldQuestCompleteAlertFrame ]] --
 function WorldQuestCompleteAlertFrame_GetIconForQuestID(questID)
-	local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(questID);
+	local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex, displayTimeLeft = GetQuestTagInfo(questID);
 
 	if ( worldQuestType == LE_QUEST_TAG_TYPE_PVP ) then
 		return "Interface\\Icons\\achievement_arena_2v2_1";
@@ -1119,29 +1112,4 @@ function NewMountAlertFrameMixin:OnClick(button, down)
 
 	SetCollectionsJournalShown(true, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS);
 	MountJournal_SelectByMountID(self.mountID);
-end
-
--- [[ NewToyAlertFrame ]] --
-
-function NewToyAlertFrame_SetUp(frame, toyID)
-	frame:SetUp(toyID);
-end
-
-NewToyAlertFrameMixin = CreateFromMixins(ItemAlertFrameMixin);
-
-function NewToyAlertFrameMixin:SetUp(toyID)
-	self.toyID = toyID;
-
-	local itemID, toyName, icon, isFavorite, hasFanfare, itemQuality = C_ToyBox.GetToyInfo(self.toyID);
-	self:SetUpDisplay(icon, itemQuality, toyName, YOU_EARNED_LABEL);
-end
-
-function NewToyAlertFrameMixin:OnClick(button, down)
-	if AlertFrame_OnClick(self, button, down) then
-		return;
-	end
-
-	CollectionsJournal_LoadUI();
-	ToyBox.autoPageToCollectedToyID = self.toyID;
-	SetCollectionsJournalShown(true, COLLECTIONS_JOURNAL_TAB_INDEX_TOYS);
 end

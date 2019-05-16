@@ -34,7 +34,6 @@ function WorldMap_InvasionDataProviderMixin:OnAdded(owningMap)
 end
 
 function WorldMap_InvasionDataProviderMixin:OnRemoved(owningMap)
-	self.InvasionOverlay:SetParent(nil);
-
 	MapCanvasDataProviderMixin.OnRemoved(self, owningMap);
+	self.InvasionOverlay:SetParent(nil);
 end

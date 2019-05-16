@@ -7,15 +7,6 @@ local QuestLog =
 	Functions =
 	{
 		{
-			Name = "GetMapForQuestPOIs",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
-			},
-		},
-		{
 			Name = "GetMaxNumQuests",
 			Type = "Function",
 			Documentation = { "This is the maximum number of quests a player can be on, including hidden quests, world quests, emissaries etc" },
@@ -33,20 +24,6 @@ local QuestLog =
 			Returns =
 			{
 				{ Name = "maxNumQuestsCanAccept", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "GetNumQuestObjectives",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "questID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "leaderboardCount", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -78,49 +55,6 @@ local QuestLog =
 			},
 		},
 		{
-			Name = "GetQuestsOnMap",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "quests", Type = "table", InnerType = "QuestOnMapInfo", Nilable = false },
-			},
-		},
-		{
-			Name = "GetZoneStoryInfo",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "achievementID", Type = "number", Nilable = false },
-				{ Name = "storyMapID", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "IsLegendaryQuest",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "questID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "isLegendaryQuest", Type = "bool", Nilable = false },
-			},
-		},
-		{
 			Name = "IsOnQuest",
 			Type = "Function",
 
@@ -132,29 +66,6 @@ local QuestLog =
 			Returns =
 			{
 				{ Name = "isOnQuest", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "QuestHasWarModeBonus",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "questID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "hasBonus", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "SetMapForQuestPOIs",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -209,27 +120,9 @@ local QuestLog =
 			},
 		},
 		{
-			Name = "QuestLogCriteriaUpdate",
-			Type = "Event",
-			LiteralName = "QUEST_LOG_CRITERIA_UPDATE",
-			Payload =
-			{
-				{ Name = "questID", Type = "number", Nilable = false },
-				{ Name = "specificTreeID", Type = "number", Nilable = false },
-				{ Name = "description", Type = "string", Nilable = false },
-				{ Name = "numFulfilled", Type = "number", Nilable = false },
-				{ Name = "numRequired", Type = "number", Nilable = false },
-			},
-		},
-		{
 			Name = "QuestLogUpdate",
 			Type = "Event",
 			LiteralName = "QUEST_LOG_UPDATE",
-		},
-		{
-			Name = "QuestPoiUpdate",
-			Type = "Event",
-			LiteralName = "QUEST_POI_UPDATE",
 		},
 		{
 			Name = "QuestRemoved",
@@ -271,11 +164,6 @@ local QuestLog =
 			},
 		},
 		{
-			Name = "QuestlineUpdate",
-			Type = "Event",
-			LiteralName = "QUESTLINE_UPDATE",
-		},
-		{
 			Name = "SuperTrackedQuestChanged",
 			Type = "Event",
 			LiteralName = "SUPER_TRACKED_QUEST_CHANGED",
@@ -288,15 +176,6 @@ local QuestLog =
 			Name = "TaskProgressUpdate",
 			Type = "Event",
 			LiteralName = "TASK_PROGRESS_UPDATE",
-		},
-		{
-			Name = "WorldQuestCompletedBySpell",
-			Type = "Event",
-			LiteralName = "WORLD_QUEST_COMPLETED_BY_SPELL",
-			Payload =
-			{
-				{ Name = "questID", Type = "number", Nilable = false },
-			},
 		},
 	},
 
@@ -332,18 +211,6 @@ local QuestLog =
 				{ Name = "finished", Type = "bool", Nilable = false },
 				{ Name = "numFulfilled", Type = "number", Nilable = false },
 				{ Name = "numRequired", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "QuestOnMapInfo",
-			Type = "Structure",
-			Fields =
-			{
-				{ Name = "questID", Type = "number", Nilable = false },
-				{ Name = "x", Type = "number", Nilable = false },
-				{ Name = "y", Type = "number", Nilable = false },
-				{ Name = "type", Type = "number", Nilable = false },
-				{ Name = "isMapIndicatorQuest", Type = "bool", Nilable = false },
 			},
 		},
 	},

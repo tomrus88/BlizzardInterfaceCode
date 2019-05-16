@@ -8,8 +8,6 @@ function MerchantFrame_OnLoad(self)
 	self:RegisterEvent("MERCHANT_UPDATE");
 	self:RegisterEvent("MERCHANT_CLOSED");
 	self:RegisterEvent("MERCHANT_SHOW");
-	self:RegisterEvent("GUILDBANK_UPDATE_MONEY");
-	self:RegisterEvent("HEIRLOOMS_UPDATED");
 	self:RegisterEvent("MERCHANT_CONFIRM_TRADE_TIMER_REMOVAL");
 	self:RegisterForDrag("LeftButton");
 	self.page = 1;
@@ -19,15 +17,12 @@ function MerchantFrame_OnLoad(self)
 	
 	MoneyFrame_SetMaxDisplayWidth(MerchantMoneyFrame, 160);
 	
-	UIDropDownMenu_SetWidth(self.lootFilter, 132);
-	UIDropDownMenu_Initialize(self.lootFilter, MerchantFrame_InitFilter);
 end
 
 function MerchantFrame_OnEvent(self, event, ...)
-	if ( event == "MERCHANT_UPDATE" and "MERCHANT_FILTER_ITEM_UPDATE" ) then
+	if ( event == "MERCHANT_UPDATE" ) then
 		self.update = true;
 	elseif ( event == "MERCHANT_CLOSED" ) then
-		self:UnregisterEvent("CURRENCY_DISPLAY_UPDATE");
 		StaticPopup_Hide("CONFIRM_MERCHANT_TRADE_TIMER_REMOVAL");
 		HideUIPanel(self);
 	elseif ( event == "MERCHANT_SHOW" ) then
@@ -39,7 +34,7 @@ function MerchantFrame_OnEvent(self, event, ...)
 		self.page = 1;
 		MerchantFrame_UpdateCurrencies();
 		MerchantFrame_Update();
-	elseif ( event == "PLAYER_MONEY" or event == "GUILDBANK_UPDATE_MONEY" or event == "GUILDBANK_UPDATE_WITHDRAWMONEY" ) then
+	elseif ( event == "PLAYER_MONEY" ) then
 		MerchantFrame_UpdateCanRepairAll();
 		MerchantFrame_UpdateRepairButtons();
 	elseif ( event == "CURRENCY_DISPLAY_UPDATE" ) then
@@ -85,25 +80,20 @@ function MerchantFrame_OnUpdate(self, dt)
 end
 
 function MerchantFrame_OnShow(self)
-	local forceUpdate = true;
-	OpenAllBags(self, forceUpdate);
+	OpenAllBags(self);
+	ContainerFrame_UpdateAll();
 	
 	-- Update repair all button status
 	MerchantFrame_UpdateCanRepairAll();
-	MerchantFrame_UpdateGuildBankRepair();
 	PanelTemplates_SetTab(MerchantFrame, 1);
-	ResetSetMerchantFilter();
-	
+
 	MerchantFrame_Update();
 	PlaySound(SOUNDKIT.IG_CHARACTER_INFO_OPEN);
 end
 
 function MerchantFrame_OnHide(self)
 	CloseMerchant();
-	
-	local forceUpdate = true;
-	CloseAllBags(self, forceUpdate);
-
+	CloseAllBags(self);
 	ResetCursor();
 	
 	StaticPopup_Hide("CONFIRM_PURCHASE_TOKEN_ITEM");
@@ -130,7 +120,7 @@ function MerchantFrame_Update()
 		MerchantFrame_CloseStackSplitFrame();
 		MerchantFrame.lastTab = MerchantFrame.selectedTab;
 	end
-	MerchantFrame_UpdateFilterString()
+
 	if ( MerchantFrame.selectedTab == 1 ) then
 		MerchantFrame_UpdateMerchantInfo();
 	else
@@ -140,7 +130,8 @@ function MerchantFrame_Update()
 end
 
 function MerchantFrameItem_UpdateQuality(self, link)
-	local quality = link and select(3, GetItemInfo(link)) or nil;
+	-- No quality borders for Classic.
+	--[[local quality = link and select(3, GetItemInfo(link)) or nil;
 	if ( quality ) then
 		self.Name:SetTextColor(ITEM_QUALITY_COLORS[quality].r, ITEM_QUALITY_COLORS[quality].g, ITEM_QUALITY_COLORS[quality].b);
 	else
@@ -148,7 +139,7 @@ function MerchantFrameItem_UpdateQuality(self, link)
 		MerchantFrame_RegisterForQualityUpdates();
 	end
 	
-	SetItemButtonQuality(self.ItemButton, quality, link);
+	SetItemButtonQuality(self.ItemButton, quality, link);]]
 end
 
 function MerchantFrame_RegisterForQualityUpdates()
@@ -194,7 +185,7 @@ function MerchantFrame_UpdateMerchantInfo()
 	
 	local numMerchantItems = GetMerchantNumItems();
 	
-	MerchantPageText:SetFormattedText(MERCHANT_PAGE_NUMBER, MerchantFrame.page, math.ceil(numMerchantItems / MERCHANT_ITEMS_PER_PAGE));
+	MerchantPageText:SetFormattedText(PAGE_NUMBER, MerchantFrame.page);
 
 	local name, texture, price, stackCount, numAvailable, isPurchasable, isUsable, extendedCost;
 	for i=1, MERCHANT_ITEMS_PER_PAGE do
@@ -266,10 +257,10 @@ function MerchantFrame_UpdateMerchantInfo()
 			MerchantFrameItem_UpdateQuality(merchantButton, itemLink);
 
 			local merchantItemID = GetMerchantItemID(index);
-			local isHeirloom = merchantItemID and C_Heirloom.IsItemHeirloom(merchantItemID);
-			local isKnownHeirloom = isHeirloom and C_Heirloom.PlayerHasHeirloom(merchantItemID);
+			local isHeirloom = false;--merchantItemID and C_Heirloom.IsItemHeirloom(merchantItemID);
+			local isKnownHeirloom = false;--isHeirloom and C_Heirloom.PlayerHasHeirloom(merchantItemID);
 
-			itemButton.showNonrefundablePrompt = not C_MerchantFrame.IsMerchantItemRefundable(index);
+			itemButton.showNonrefundablePrompt = isHeirloom;
 
 			itemButton.hasItem = true;
 			itemButton:SetID(index);
@@ -484,7 +475,6 @@ function MerchantFrame_UpdateBuybackInfo()
 	MerchantFrameBottomRightBorder:Hide();
 	MerchantRepairText:Hide();
 	MerchantPageText:Hide();
-	MerchantGuildBankRepairButton:Hide();
 end
 
 function MerchantPrevPageButton_OnClick()
@@ -613,7 +603,7 @@ function MerchantItemButton_OnModifiedClick(self, button)
 
 			if ( maxStack > 1 ) then
 				local maxPurchasable = min(maxStack, canAfford);
-				StackSplitFrame:OpenStackSplitFrame(maxPurchasable, self, "BOTTOMLEFT", "TOPLEFT", stackCount);
+				OpenStackSplitFrame(maxPurchasable, self, "BOTTOMLEFT", "TOPLEFT", stackCount);
 			end
 			return;
 		end
@@ -684,15 +674,11 @@ function MerchantFrame_ConfirmExtendedItemCost(itemButton, numToPurchase)
 		if ( itemsString ) then
 			itemsString = itemsString .. LIST_DELIMITER .. GetMoneyString(itemButton.price);
 		else
-			if itemButton.price < MERCHANT_HIGH_PRICE_COST then
-				BuyMerchantItem( itemButton:GetID(), numToPurchase );
-				return;
-			end
 			itemsString = GetMoneyString(itemButton.price);
 		end
 	end
 	
-	if ( not usingCurrency and maxQuality <= LE_ITEM_QUALITY_UNCOMMON and not itemButton.showNonrefundablePrompt) or (not itemsString and not itemButton.price) then
+	if ( not usingCurrency and maxQuality <= LE_ITEM_QUALITY_UNCOMMON and not itemButton.showNonrefundablePrompt) then
 		BuyMerchantItem( itemButton:GetID(), numToPurchase );
 		return;
 	end
@@ -775,44 +761,19 @@ function MerchantFrame_UpdateCanRepairAll()
 	end
 end
 
-function MerchantFrame_UpdateGuildBankRepair()
-	local repairAllCost, canRepair = GetRepairAllCost();
-	if ( canRepair ) then
-		SetDesaturation(MerchantGuildBankRepairButtonIcon, false);
-		MerchantGuildBankRepairButton:Enable();
-	else
-		SetDesaturation(MerchantGuildBankRepairButtonIcon, true);
-		MerchantGuildBankRepairButton:Disable();
-	end	
-end
-
 function MerchantFrame_UpdateRepairButtons()
 	if ( CanMerchantRepair() ) then
-		--See if can guildbank repair
-		if ( CanGuildBankRepair() ) then
-			MerchantRepairAllButton:SetWidth(32);
-			MerchantRepairAllButton:SetHeight(32);
-			MerchantRepairItemButton:SetWidth(32);
-			MerchantRepairItemButton:SetHeight(32);
-			MerchantRepairItemButton:SetPoint("RIGHT", MerchantRepairAllButton, "LEFT", -4, 0);
 
-			MerchantRepairAllButton:SetPoint("BOTTOMRIGHT", MerchantFrame, "BOTTOMLEFT", 100, 30);
-			MerchantRepairText:ClearAllPoints();
-			MerchantRepairText:SetPoint("CENTER", MerchantFrame, "BOTTOMLEFT", 80, 68);
-			MerchantGuildBankRepairButton:Show();
-			MerchantFrame_UpdateGuildBankRepair();
-		else
-			MerchantRepairAllButton:SetWidth(36);
-			MerchantRepairAllButton:SetHeight(36);
-			MerchantRepairItemButton:SetWidth(36);
-			MerchantRepairItemButton:SetHeight(36);
-			MerchantRepairItemButton:SetPoint("RIGHT", MerchantRepairAllButton, "LEFT", -2, 0);
+		MerchantRepairAllButton:SetWidth(36);
+		MerchantRepairAllButton:SetHeight(36);
+		MerchantRepairItemButton:SetWidth(36);
+		MerchantRepairItemButton:SetHeight(36);
+		MerchantRepairItemButton:SetPoint("RIGHT", MerchantRepairAllButton, "LEFT", -2, 0);
 
-			MerchantRepairAllButton:SetPoint("BOTTOMRIGHT", MerchantFrame, "BOTTOMLEFT", 160, 32);
-			MerchantRepairText:ClearAllPoints();
-			MerchantRepairText:SetPoint("BOTTOMLEFT", MerchantFrame, "BOTTOMLEFT", 14, 45);
-			MerchantGuildBankRepairButton:Hide();
-		end
+		MerchantRepairAllButton:SetPoint("BOTTOMRIGHT", MerchantFrame, "BOTTOMLEFT", 160, 32);
+		MerchantRepairText:ClearAllPoints();
+		MerchantRepairText:SetPoint("BOTTOMLEFT", MerchantFrame, "BOTTOMLEFT", 14, 45);
+
 		MerchantRepairText:Show();
 		MerchantRepairAllButton:Show();
 		MerchantRepairItemButton:Show();
@@ -821,12 +782,11 @@ function MerchantFrame_UpdateRepairButtons()
 		MerchantRepairText:Hide();
 		MerchantRepairAllButton:Hide();
 		MerchantRepairItemButton:Hide();
-		MerchantGuildBankRepairButton:Hide();
 	end
 end
 
 function MerchantFrame_UpdateCurrencies()
-	local currencies = { GetMerchantCurrencies() };
+	--[[local currencies = { GetMerchantCurrencies() };
 	
 	if ( #currencies == 0 ) then	-- common case
 		MerchantFrame:UnregisterEvent("CURRENCY_DISPLAY_UPDATE");
@@ -886,7 +846,7 @@ function MerchantFrame_UpdateCurrencies()
 		else
 			break;
 		end
-	end
+	end]]
 end
 
 function MerchantFrame_ShowCurrencyTooltip(self)
@@ -913,71 +873,4 @@ function MerchantFrame_UpdateCurrencyAmounts()
 end
 
 
-function MerchantFrame_SetFilter(self, classIndex)
-	SetMerchantFilter(classIndex);
-	MerchantFrame.page = 1;
-	if MerchantFrame:IsVisible() then
-		MerchantFrame_Update();
-	end
-end
-
-function MerchantFrame_UpdateFilterString()
-	local name = ALL;
-	local currFilter = GetMerchantFilter();
-
-	if currFilter == LE_LOOT_FILTER_CLASS then
-		name = UnitClass("player");
-	elseif currFilter == LE_LOOT_FILTER_BOE then
-		name = ITEM_BIND_ON_EQUIP;
-	elseif currFilter == LE_LOOT_FILTER_ALL then
-		name = ALL;
-	else -- Spec
-		local _, specName, _, icon = GetSpecializationInfo(currFilter - LE_LOOT_FILTER_SPEC1 + 1, nil, nil, nil, UnitSex("player"));
-		name = specName;
-	end
-	
-	UIDropDownMenu_SetText(MerchantFrame.lootFilter, name);
-end
-
-function MerchantFrame_InitFilter()
-	local info = UIDropDownMenu_CreateInfo();
-	local currFilter = GetMerchantFilter();
-	local className = UnitClass("player");
-	local sex = UnitSex("player");
-
-	info.func = MerchantFrame_SetFilter;
-	
-	info.text = className;
-	info.checked = (currFilter ~= LE_LOOT_FILTER_BOE and currFilter ~= LE_LOOT_FILTER_ALL);
-	info.arg1 = LE_LOOT_FILTER_CLASS;
-	UIDropDownMenu_AddButton(info);
-	
-	local numSpecs = GetNumSpecializations();
-	for i = 1, numSpecs do
-		local _, name, _, icon = GetSpecializationInfo(i, nil, nil, nil, sex);
-		info.text = name;
-		info.arg1 = LE_LOOT_FILTER_SPEC1 + i - 1;
-		info.checked = currFilter == (LE_LOOT_FILTER_SPEC1 + i - 1);
-		info.leftPadding = 10;
-		UIDropDownMenu_AddButton(info);
-	end
-
-	info.text = ALL_SPECS;
-	info.checked = currFilter == LE_LOOT_FILTER_CLASS;
-	info.arg1 = LE_LOOT_FILTER_CLASS;
-	info.func = MerchantFrame_SetFilter;
-	UIDropDownMenu_AddButton(info);
-	
-	info.leftPadding = nil;
-	info.text = ITEM_BIND_ON_EQUIP;
-	info.checked = currFilter == LE_LOOT_FILTER_BOE;
-	info.arg1 = LE_LOOT_FILTER_BOE;
-	UIDropDownMenu_AddButton(info);
-	
-	info.leftPadding = nil;
-	info.text = ALL;
-	info.checked = currFilter == LE_LOOT_FILTER_ALL;
-	info.arg1 = LE_LOOT_FILTER_ALL;
-	UIDropDownMenu_AddButton(info);
-end
 

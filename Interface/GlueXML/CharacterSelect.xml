@@ -56,20 +56,10 @@
 	</Button>
 	<!-- CharacterButton scripts may occassionally be disabled for Character Services purposes. -->
 	<Button name="CharSelectCharacterButtonTemplate" virtual="true" hidden="true">
-		<Size x="256" y="66"/>
+		<Size x="256" y="70"/>
 		<HitRectInsets>
-			<AbsInset left="-10" right="30" top="0" bottom="15"/>
+			<AbsInset left="0" right="0" top="0" bottom="15"/>
 		</HitRectInsets>
-		<Layers>
-			<Layer level="ARTWORK">
-				<Texture file="Interface\Glues\CharacterSelect\Glue-CharacterSelect-Highlight" alphaMode="ADD" parentKey="selection" hidden="true">
-					<Size x="256" y="70"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" x="-20" y="8"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-		</Layers>
 		<Frames>
 			<Frame name="$parentButtonText" setAllPoints="true" parentKey="buttonText">
 				<Layers>
@@ -169,7 +159,7 @@
 				CharacterSelectButton_OnDragStop(self);
 			</OnMouseUp>
 			<OnEnter>
-				if ( self.selection:IsShown() ) then
+				if ( CharacterSelect.selectedIndex == self.index ) then
 					CharacterSelectButton_ShowMoveButtons(self);
 				end
 				if ( self.isVeteranLocked and CharSelectAccountUpgradeButton:IsEnabled()) then
@@ -190,8 +180,8 @@
 				GlueTooltip:Hide();
 			</OnLeave>
 		</Scripts>
-		<HighlightTexture file="Interface\Glues\CharacterSelect\Glue-CharacterSelect-Hover" alphaMode="ADD">
-			<Size x="256" y="70"/>
+		<HighlightTexture file="Interface\Glues\CharacterSelect\Glue-CharacterSelect-Highlight" alphaMode="ADD">
+			<Size x="256" y="74"/>
 			<Anchors>
 				<Anchor point="TOPLEFT" x="-20" y="8"/>
 			</Anchors>
@@ -512,8 +502,9 @@
 								<Texture name="CharacterSelectLogo">
 									<Size x="256" y="128"/>
 									<Anchors>
-										<Anchor point="TOPLEFT" x="3" y="-7"/>
+										<Anchor point="TOPLEFT" x="8" y="-16"/>
 									</Anchors>
+									<TexCoords left="0.125" right="0.875" top="0.3125" bottom="0.6875"/>
 								</Texture>
 							</Layer>
 						</Layers>
@@ -831,7 +822,7 @@
 					<Button name="CharacterSelectBackButton" inherits="GlueButtonSmallTemplate" text="BACK">
 						<Size x="100" y="35"/>
 						<Anchors>
-							<Anchor point="BOTTOMRIGHT" x="-2" y="10"/>
+							<Anchor point="BOTTOMRIGHT" x="-30" y="25"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
@@ -965,7 +956,7 @@
 						</Scripts>
 					</Button>
 					<Frame name="CharacterSelectCharacterFrame">
-						<Size x="260" y="710"/>
+						<Size x="260" y="642"/>
 						<Anchors>
 							<Anchor point="TOPRIGHT" x="-5" y="-15"/>
 						</Anchors>
@@ -1056,7 +1047,7 @@
 							</Button>
 							<Button name="CharSelectCharacterButton1" inherits="CharSelectCharacterButtonTemplate" id="1">
 								<Anchors>
-									<Anchor point="TOP" x="0" y="-59"/>
+									<Anchor point="TOP" x="0" y="-65"/>
 									<Anchor point="LEFT" x="24" y="0"/>
 								</Anchors>
 							</Button>
@@ -1114,42 +1105,11 @@
 									<Anchor point="LEFT" x="24" y="0"/>
 								</Anchors>
 							</Button>
-								<Button name="CharSelectCharacterButton11" inherits="CharSelectCharacterButtonTemplate" id="11">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="CharSelectCharacterButton10" relativePoint="BOTTOM" x="0" y="13"/>
-									<Anchor point="LEFT" x="24" y="0"/>
-								</Anchors>
-							</Button>
-							<Button name="CharSelectCharacterButton12" inherits="CharSelectCharacterButtonTemplate" id="12">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="CharSelectCharacterButton11" relativePoint="BOTTOM" x="0" y="13"/>
-									<Anchor point="LEFT" x="24" y="0"/>
-								</Anchors>
-							</Button>
 							<Button name="CharSelectCreateCharacterButton" inherits="GluePanelButtonTemplate" hidden="true" text="CREATE_NEW_CHARACTER">
 								<Size x="200" y="45"/>
 								<Anchors>
 									<Anchor point="BOTTOM" x="-18" y="15"/>
 								</Anchors>
-								<Layers>
-									<Layer level="OVERLAY">
-										<FontString parentKey="NewString" inherits="GameFontHighlight" maxLines="1" justifyH="CENTER" text="NEW_ALLIED_RACE_NOTIFICATION" hidden="true">
-											<Anchors>
-												<Anchor point="TOPLEFT" x="8" y="-1"/>
-											</Anchors>
-											<Shadow>
-												<Color r="0.32" g="0.5" b="1.0"/>
-											</Shadow>
-										</FontString>
-
-										<Texture parentKey="NewGlow" atlas="collections-newglow" hidden="true">
-											<Anchors>
-												<Anchor point="TOPLEFT" relativeKey="$parent.NewString" x="-20" y="10"/>
-												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.NewString" x="20" y="-10"/>
-											</Anchors>
-										</Texture>
-									</Layer>
-								</Layers>
 								<Scripts>
 									<OnLoad>
 										self:SetWidth(self:GetTextWidth() + 50);
@@ -1291,18 +1251,6 @@
 									<Anchor point="RIGHT" relativeTo="$parent" relativePoint="LEFT" x="9" y="0"/>
 								</Anchors>
 							</Button>
-							<Button name="CharSelectPaidService11" inherits="CharSelectPaidServiceTemplate" id="11">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="CharSelectCharacterButton11" relativePoint="TOP" x="0" y="6"/>
-									<Anchor point="RIGHT" relativeTo="$parent" relativePoint="LEFT" x="9" y="0"/>
-								</Anchors>
-							</Button>
-							<Button name="CharSelectPaidService12" inherits="CharSelectPaidServiceTemplate" id="12">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="CharSelectCharacterButton12" relativePoint="TOP" x="0" y="6"/>
-									<Anchor point="RIGHT" relativeTo="$parent" relativePoint="LEFT" x="9" y="0"/>
-								</Anchors>
-							</Button>
 
 							<Button name="CharacterServicesProcessingIcon1" inherits="CharacterServicesProcessingIconTemplate" id="1" hidden="true">
 								<Anchors>
@@ -1352,16 +1300,6 @@
 							<Button name="CharacterServicesProcessingIcon10" inherits="CharacterServicesProcessingIconTemplate" id="10" hidden="true">
 								<Anchors>
 									<Anchor point="RIGHT" relativeTo="CharSelectCharacterButton10" relativePoint="LEFT" x="-10" y="4"/>
-								</Anchors>
-							</Button>
-							<Button name="CharacterServicesProcessingIcon11" inherits="CharacterServicesProcessingIconTemplate" id="11" hidden="true">
-								<Anchors>
-									<Anchor point="RIGHT" relativeTo="CharSelectCharacterButton11" relativePoint="LEFT" x="-10" y="4"/>
-								</Anchors>
-							</Button>
-							<Button name="CharacterServicesProcessingIcon12" inherits="CharacterServicesProcessingIconTemplate" id="12" hidden="true">
-								<Anchors>
-									<Anchor point="RIGHT" relativeTo="CharSelectCharacterButton12" relativePoint="LEFT" x="-10" y="4"/>
 								</Anchors>
 							</Button>
 						</Frames>
@@ -2287,10 +2225,10 @@
 								<Anchor point="TOP" relativeTo="CharacterDeleteText1" relativePoint="BOTTOM" x="0" y="-20"/>
 							</Anchors>
 						</FontString>
-						<Texture name="CharacterDeleteAlertIcon" file="Interface\DialogFrame\UI-Dialog-Icon-AlertNew">
-							<Size x="48" y="48"/>
+						<Texture name="CharacterDeleteAlertIcon" file="Interface\DialogFrame\DialogAlertIcon">
+							<Size x="64" y="64"/>
 							<Anchors>
-								<Anchor point="LEFT" x="24" y="10"/>
+								<Anchor point="LEFT" x="12" y="10"/>
 							</Anchors>
 						</Texture>
 					</Layer>

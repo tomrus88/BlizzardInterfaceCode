@@ -461,9 +461,83 @@
 				<HighlightTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Highlight"/>
 				<PushedTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Down"/>
 			</Button>
-			<Frame name="$parentButtonFrame" inherits="FloatingBorderedFrame" parentKey="buttonFrame" alpha="0.2">
+			<!--<Frame name="$parentButtonFrame" inherits="FloatingBorderedFrame" parentKey="buttonFrame" alpha="0.2">-->
+			<Frame name="$parentButtonFrame" parentKey="buttonFrame" alpha="0.2">
 				<Size x="29" y="0"/>
 				<Frames>
+					<Button name="$parentBottomButton" parentKey="bottomButton">
+						<Size x="32" y="32"/>
+						<Anchors>
+							<Anchor point="BOTTOM" x="0" y="-7"/>
+						</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<Texture name="$parentFlash" file="Interface\ChatFrame\UI-ChatIcon-BlinkHilight" hidden="true"/>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								PlaySound(SOUNDKIT.IG_CHAT_BOTTOM);
+								self:GetParent():GetParent():ScrollToBottom();
+							</OnClick>
+						</Scripts>
+						<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollEnd-Up"/>
+						<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollEnd-Down"/>
+						<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollEnd-Disabled"/>
+						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+					</Button>
+					<Button name="$parentDownButton" parentKey="downButton">
+						<Size x="32" y="32"/>
+						<Anchors>
+							<Anchor point="BOTTOM" relativeTo="$parentBottomButton" relativePoint="TOP" x="0" y="-2"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								MessageFrameScrollButton_OnLoad(self);
+							</OnLoad>
+							<OnUpdate>
+								MessageFrameScrollButton_OnUpdate(self, elapsed);
+							</OnUpdate>
+							<OnClick>
+								if ( self:GetButtonState() == "PUSHED" ) then
+									self.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
+								else
+									self:GetParent():GetParent():ScrollDown();
+								end
+								PlaySound(SOUNDKIT.IG_CHAT_SCROLL_DOWN);
+							</OnClick>
+						</Scripts>
+						<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up"/>
+						<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down"/>
+						<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled"/>
+						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+					</Button>
+					<Button name="$parentUpButton" parentKey="upButton">
+						<Size x="32" y="32"/>
+						<Anchors>
+							<Anchor point="BOTTOM" relativeTo="$parentDownButton" relativePoint="TOP" x="0" y="-2"/>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								MessageFrameScrollButton_OnLoad(self);
+							</OnLoad>
+							<OnUpdate>
+								MessageFrameScrollButton_OnUpdate(self, elapsed);
+							</OnUpdate>
+							<OnClick>
+								if ( self:GetButtonState() == "PUSHED" ) then
+									self.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
+								else
+									self:GetParent():GetParent():ScrollUp();
+								end
+								PlaySound(SOUNDKIT.IG_CHAT_SCROLL_UP);
+							</OnClick>
+						</Scripts>
+						<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up"/>
+						<PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Down"/>
+						<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled"/>
+						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+					</Button>
 					<Button name="$parentMinimizeButton" parentKey="minimizeButton">
 						<Size x="32" y="32"/>
 						<Anchors>
@@ -502,7 +576,7 @@
 				<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollEnd-Disabled"/>
 				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
 			</Button>
-			<Slider parentKey="ScrollBar" obeyStepOnDrag="true" valueStep="1" minValue="0" maxValue="1" alpha="0">
+			<!--<Slider parentKey="ScrollBar" obeyStepOnDrag="true" valueStep="1" minValue="0" maxValue="1" alpha="0">
 				<Size x="22" y="0"/>
 				<ThumbTexture name="$parentThumbTexture" parentKey="ThumbTexture" atlas="chatframe-scrollbar-knob" useAtlasSize="true"/>
 				<Scripts>
@@ -513,12 +587,13 @@
 						end
 					</OnValueChanged>
 				</Scripts>
-			</Slider>
+			</Slider>-->
 			<EditBox name="$parentEditBox" inherits="ChatFrameEditBoxTemplate" parentKey="editBox">
 				<Size x="5" y="32"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT" x="-5" y="-2"/>
-					<Anchor point="RIGHT" relativeKey="$parent.ScrollBar" relativePoint="RIGHT" x="5" y="0"/>
+					<!--<Anchor point="RIGHT" relativeKey="$parent.ScrollBar" relativePoint="RIGHT" x="5" y="0"/>-->
+					<Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT" x="5" y="-2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -706,7 +781,8 @@
 	<Button name="ChatFrameMenuButton" frameStrata="LOW" parent="UIParent">
 		<Size x="32" y="32"/>
 		<Anchors>
-			<Anchor point="BOTTOM" relativeTo="ChatFrame1ButtonFrame" relativePoint="BOTTOM" x="0" y="0"/>
+			<!--<Anchor point="BOTTOM" relativeTo="ChatFrame1ButtonFrame" relativePoint="BOTTOM" x="0" y="0"/>-->
+			<Anchor point="BOTTOM" relativeTo="ChatFrame1ButtonFrameUpButton" relativePoint="TOP" x="0" y="-2"/>
 		</Anchors>
 		<Scripts>
 			<OnClick>
@@ -725,7 +801,8 @@
 	</Button>
 	<Button name="ChatFrameChannelButton" frameStrata="LOW" parent="UIParent" mixin="ChannelFrameButtonMixin" inherits="VoiceToggleButtonTemplate">
 		<Anchors>
-			<Anchor point="TOP" relativeTo="ChatFrame1ButtonFrame" relativePoint="TOP" x="0" y="0"/>
+			<!--<Anchor point="TOP" relativeTo="ChatFrame1ButtonFrame" relativePoint="TOP" x="0" y="0"/>-->
+			<Anchor point="BOTTOM" relativeTo="ChatFrameMenuButton" relativePoint="TOP" x="0" y="1"/>
 		</Anchors>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -736,8 +813,14 @@
 				</Texture>
 			</Layer>
 		</Layers>
+		<Scripts>
+			<OnEnter>
+				GameTooltip_AddNewbieTip(self, MicroButtonTooltipText(CHAT_CHANNELS, "TOGGLECHATTAB"), 1.0, 1.0, 1.0, NEWBIE_TOOLTIP_CHANNELTAB, 1);
+			</OnEnter>
+			<OnLeave function="GameTooltip_Hide"/>
+		</Scripts>
 	</Button>
-	<Button name="ChatFrameToggleVoiceDeafenButton" frameStrata="LOW" parent="UIParent" inherits="ToggleVoiceDeafenButtonTemplate">
+	<!--<Button name="ChatFrameToggleVoiceDeafenButton" frameStrata="LOW" parent="UIParent" inherits="ToggleVoiceDeafenButtonTemplate">
 		<Anchors>
 			<Anchor point="TOP" relativeTo="ChatFrameChannelButton" relativePoint="BOTTOM" x="0" y="-2" />
 		</Anchors>
@@ -746,7 +829,7 @@
 		<Anchors>
 			<Anchor point="TOP" relativeTo="ChatFrameToggleVoiceDeafenButton" relativePoint="BOTTOM" x="0" y="-2" />
 		</Anchors>
-	</Button>
+	</Button>-->
 	<Frame name="ChatMenu" inherits="UIMenuTemplate" hidden="true" clampedToScreen="true" parent="UIParent">
 		<Anchors>
 			<Anchor point="BOTTOMLEFT" relativeTo="ChatFrameMenuButton" relativePoint="TOPRIGHT"/>

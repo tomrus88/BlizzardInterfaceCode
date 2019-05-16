@@ -48,7 +48,7 @@ end
 function MapCanvasScrollControllerMixin:WouldCursorPositionBeClick(button, cursorX, cursorY)
 	local mouseButtonInfo = self.mouseButtonInfo[button];
 	if mouseButtonInfo and mouseButtonInfo.down then
-		local MAX_DIST_FOR_CLICK_SQ = 20;
+		local MAX_DIST_FOR_CLICK_SQ = 10;
 		local deltaX, deltaY = cursorX - mouseButtonInfo.startX, cursorY - mouseButtonInfo.startY;
 		return deltaX * deltaX + deltaY * deltaY <= MAX_DIST_FOR_CLICK_SQ;
 	end
@@ -731,8 +731,7 @@ end
 
 function MapCanvasScrollControllerMixin:GetCursorPosition()
 	local currentX, currentY = GetCursorPosition();
-	local effectiveScale = UIParent:GetEffectiveScale();
-	return currentX / effectiveScale, currentY / effectiveScale;
+	return currentX, currentY;
 end
 
 function MapCanvasScrollControllerMixin:GetNormalizedMouseDelta(button)

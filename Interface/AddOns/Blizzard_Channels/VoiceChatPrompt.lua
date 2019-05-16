@@ -63,27 +63,6 @@ end
 
 VoiceChatActivateChannelPromptMixin = {};
 
-function VoiceChatActivateChannelPromptMixin:OnShow()
-	self:RegisterEvent("VOICE_CHAT_CHANNEL_ACTIVATED");
-end
-
-function VoiceChatActivateChannelPromptMixin:OnHide()
-	self:UnregisterEvent("VOICE_CHAT_CHANNEL_ACTIVATED");
-end
-
-function VoiceChatActivateChannelPromptMixin:OnEvent(event, ...)
-	if event == "VOICE_CHAT_CHANNEL_ACTIVATED" then
-		self:OnVoiceChannelActivated(...);
-	end
-end
-
-function VoiceChatActivateChannelPromptMixin:OnVoiceChannelActivated(channelID)
-	-- Hide prompt when channel is externally activated.
-	if channelID == self.channel.channelID then
-		self:Hide();
-	end
-end
-
 function VoiceChatActivateChannelPromptMixin:Setup(channel)
 	self.Icon:SetAtlas("voicechat-icon-headphone-pending");
 
@@ -98,7 +77,6 @@ function VoiceChatActivateChannelPromptMixin:ShowPrompt(channel)
 
 	self:SetExternallyManagedOutroAnimation(true);
 	AlertFrame_ShowNewAlert(self);
-	VoiceChatChannelActivatedNotification:ListenForChannelActivation(self.channel);
 
     C_Timer.After(10, function()
     	self:SetExternallyManagedOutroAnimation(false);
@@ -128,16 +106,15 @@ function VoiceChatActivateChannelPromptMixin:ShouldPromptForChannelActivate(chan
 end
 
 function VoiceChatActivateChannelPromptMixin:ActivateChannel()
+	VoiceChatChannelActivatedNotification:ListenForChannelActivation(self.channel);
 	C_VoiceChat.ActivateChannel(self.channel.channelID);
-	self:UnregisterEvent("VOICE_CHAT_CHANNEL_ACTIVATED");
 end
 
 VoiceChatActivateChannelPromptButtonMixin = {};
 
 function VoiceChatActivateChannelPromptButtonMixin:OnClick()
-	local parent = self:GetParent();
-	parent:ActivateChannel();
-	parent:Hide();
+	self:GetParent():ActivateChannel();
+	self:GetParent():Hide();
 end
 
 VoiceChatChannelActivatedNotificationMixin = {};

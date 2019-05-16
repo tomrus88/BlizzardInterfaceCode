@@ -19,7 +19,7 @@ end
 function StanceBar_Update ()
 	local numForms = GetNumShapeshiftForms();
 	local needFrameMgrUpdate = false;
-	if ( numForms > 0 and not IsPossessBarVisible()) then
+	if ( numForms > 0 ) then
 		if ( StanceBarFrame.numForms ~= numForms ) then
 			--Setup the Stance bar to display the appropriate number of slots
 			if ( numForms == 1 ) then

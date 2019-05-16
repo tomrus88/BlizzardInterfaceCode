@@ -224,7 +224,7 @@
 		</Scripts>
 		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 	</Button>
-	<ItemButton name="OpenMailAttachment" parentArray="OpenMailAttachments" virtual="true">
+	<Button name="OpenMailAttachment" parentArray="OpenMailAttachments" inherits="ItemButtonTemplate" virtual="true">
 		<Scripts>
 			<OnLoad>
 				self:RegisterEvent("MAIL_INBOX_UPDATE");
@@ -261,7 +261,7 @@
 			</OnLeave>
 		</Scripts>
 		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
-	</ItemButton>
+	</Button>
 	<Frame name="MailFrame" toplevel="true" parent="UIParent" enableMouse="true" hidden="true" inherits="ButtonFrameTemplate">
 		<Layers>
 			<Layer level="OVERLAY" textureSubLevel="-1">
@@ -1042,47 +1042,83 @@
 								<Layers>
 									<Layer level="BACKGROUND">
 										<FontString name="OpenMailInvoiceItemLabel" inherits="InvoiceTextFontNormal" text="ITEM_SOLD_COLON">
-											<Size x="240" y="0"/>
+											<Size>
+												<AbsDimension x="240" y="0"/>
+											</Size>
 											<Anchors>
-												<Anchor point="TOPLEFT" x="30" y="-35"/>
+												<Anchor point="TOPLEFT">
+													<Offset>
+														<AbsDimension x="30" y="-35"/>
+													</Offset>
+												</Anchor>
 											</Anchors>
 										</FontString>
 										<FontString name="OpenMailInvoicePurchaser" inherits="InvoiceTextFontNormal" text="PURCHASED_BY_COLON">
 											<Anchors>
-												<Anchor point="TOPLEFT" relativeTo="OpenMailInvoiceItemLabel" relativePoint="BOTTOMLEFT" x="0" y="-5"/>
+												<Anchor point="TOPLEFT" relativeTo="OpenMailInvoiceItemLabel" relativePoint="BOTTOMLEFT">
+													<Offset>
+														<AbsDimension x="0" y="-5"/>
+													</Offset>
+												</Anchor>
 											</Anchors>
 										</FontString>
 										<FontString name="OpenMailInvoiceBuyMode" inherits="InvoiceTextFontSmall">
 											<Anchors>
-												<Anchor point="LEFT" relativeTo="OpenMailInvoicePurchaser" relativePoint="RIGHT" x="5" y="0"/>
+												<Anchor point="LEFT" relativeTo="OpenMailInvoicePurchaser" relativePoint="RIGHT">
+													<Offset>
+														<AbsDimension x="5" y="0"/>
+													</Offset>
+												</Anchor>
 											</Anchors>
 										</FontString>
 										<FontString name="OpenMailInvoiceSalePrice" inherits="InvoiceTextFontNormal" text="SALE_PRICE_COLON">
 											<Anchors>
-												<Anchor point="TOPRIGHT" x="-27" y="-77"/>
+												<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoicePurchaser" relativePoint="BOTTOMLEFT">
+													<Offset>
+														<AbsDimension x="125" y="-26"/>
+													</Offset>
+												</Anchor>
 											</Anchors>
 										</FontString>
 										<FontString name="OpenMailInvoiceDeposit" inherits="InvoiceTextFontNormal" text="DEPOSIT_COLON">
 											<Anchors>
-												<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoiceSalePrice" relativePoint="BOTTOMRIGHT" x="0" y="-22"/>
+												<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoiceSalePrice" relativePoint="BOTTOMRIGHT">
+													<Offset>
+														<AbsDimension x="0" y="-13"/>
+													</Offset>
+												</Anchor>
 											</Anchors>
 										</FontString>
 										<FontString name="OpenMailInvoiceHouseCut" inherits="InvoiceTextFontNormal" text="AUCTION_HOUSE_CUT_COLON">
 											<Anchors>
-												<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoiceDeposit" relativePoint="BOTTOMRIGHT" x="0" y="-22"/>
+												<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoiceDeposit" relativePoint="BOTTOMRIGHT">
+													<Offset>
+														<AbsDimension x="0" y="-13"/>
+													</Offset>
+												</Anchor>
+											</Anchors>
+										</FontString>
+										<FontString name="OpenMailInvoiceAmountReceived" inherits="InvoiceTextFontNormal" text="AMOUNT_RECEIVED_COLON">
+											<Anchors>
+												<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoiceHouseCut" relativePoint="BOTTOMRIGHT">
+													<Offset>
+														<AbsDimension x="0" y="-13"/>
+													</Offset>
+												</Anchor>
 											</Anchors>
 										</FontString>
 										<Texture name="OpenMailArithmeticLine" file="Interface\MailFrame\UI-MailFrame-InvoiceLine">
-											<Size x="256" y="32"/>
+											<Size>
+												<AbsDimension x="256" y="32"/>
+											</Size>
 											<Anchors>
-												<Anchor point="TOP" relativeTo="OpenMailInvoiceHouseCut" relativePoint="BOTTOMRIGHT" x="0" y="-22"/>
+												<Anchor point="TOP" relativeTo="OpenMailInvoiceHouseCut" relativePoint="BOTTOMRIGHT">
+													<Offset>
+														<AbsDimension x="0" y="9"/>
+													</Offset>
+												</Anchor>
 											</Anchors>
-										</Texture>										
-										<FontString name="OpenMailInvoiceAmountReceived" inherits="InvoiceTextFontNormal" text="AMOUNT_RECEIVED_COLON">
-											<Anchors>
-												<Anchor point="TOPRIGHT" relativeTo="OpenMailArithmeticLine" relativePoint="BOTTOMRIGHT" x="-14" y="10"/>
-											</Anchors>
-										</FontString>
+										</Texture>
 										<FontString name="OpenMailInvoiceNotYetSent" inherits="InvoiceTextFontNormal" text="AUCTION_INVOICE_FUNDS_NOT_YET_SENT">
 											<Anchors>
 												<Anchor point="CENTER" relativeTo="OpenMailInvoicePurchaser" relativePoint="BOTTOMLEFT" x="128" y="-90"/>
@@ -1098,7 +1134,11 @@
 								<Frames>
 									<Frame name="OpenMailTransactionAmountMoneyFrame" inherits="SmallMoneyFrameTemplate">
 										<Anchors>
-											<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoiceAmountReceived" relativePoint="BOTTOMRIGHT" x="16" y="-4"/>
+											<Anchor point="RIGHT" relativeTo="OpenMailInvoiceAmountReceived" relativePoint="RIGHT">
+												<Offset>
+													<AbsDimension x="130" y="0"/>
+												</Offset>
+											</Anchor>
 										</Anchors>
 										<Scripts>
 											<OnLoad>
@@ -1109,7 +1149,11 @@
 									</Frame>
 									<Frame name="OpenMailDepositMoneyFrame" inherits="SmallMoneyFrameTemplate">
 										<Anchors>
-											<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoiceDeposit" relativePoint="BOTTOMRIGHT" x="16" y="-4"/>
+											<Anchor point="RIGHT" relativeTo="OpenMailInvoiceDeposit" relativePoint="RIGHT">
+												<Offset>
+													<AbsDimension x="130" y="0"/>
+												</Offset>
+											</Anchor>
 										</Anchors>
 										<Layers>
 											<Layer level="BACKGROUND">
@@ -1129,7 +1173,11 @@
 									</Frame>
 									<Frame name="OpenMailHouseCutMoneyFrame" inherits="SmallMoneyFrameTemplate">
 										<Anchors>
-											<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoiceHouseCut" relativePoint="BOTTOMRIGHT" x="16" y="-4"/>
+											<Anchor point="RIGHT" relativeTo="OpenMailInvoiceHouseCut" relativePoint="RIGHT">
+												<Offset>
+													<AbsDimension x="130" y="0"/>
+												</Offset>
+											</Anchor>
 										</Anchors>
 										<Layers>
 											<Layer level="BACKGROUND">
@@ -1149,7 +1197,11 @@
 									</Frame>
 									<Frame name="OpenMailSalePriceMoneyFrame" inherits="SmallMoneyFrameTemplate">
 										<Anchors>
-											<Anchor point="TOPRIGHT" relativeTo="OpenMailInvoiceSalePrice" relativePoint="BOTTOMRIGHT" x="16" y="-4"/>
+											<Anchor point="RIGHT" relativeTo="OpenMailInvoiceSalePrice" relativePoint="RIGHT">
+												<Offset>
+													<AbsDimension x="130" y="0"/>
+												</Offset>
+											</Anchor>
 										</Anchors>
 										<Scripts>
 											<OnLoad>
@@ -1164,7 +1216,7 @@
 					</Frame>
 				</ScrollChild>
 			</ScrollFrame>
-			<ItemButton name="OpenMailLetterButton">
+			<Button name="OpenMailLetterButton" inherits="ItemButtonTemplate">
 				<Scripts>
 					<OnLoad>
 						self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
@@ -1181,24 +1233,24 @@
 					<OnLeave function="GameTooltip_Hide"/>
 				</Scripts>
 				<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
-			</ItemButton>
-			<ItemButton name="OpenMailAttachmentButton1" inherits="OpenMailAttachment" id="1"/>
-			<ItemButton name="OpenMailAttachmentButton2" inherits="OpenMailAttachment" id="2"/>
-			<ItemButton name="OpenMailAttachmentButton3" inherits="OpenMailAttachment" id="3"/>
-			<ItemButton name="OpenMailAttachmentButton4" inherits="OpenMailAttachment" id="4"/>
-			<ItemButton name="OpenMailAttachmentButton5" inherits="OpenMailAttachment" id="5"/>
-			<ItemButton name="OpenMailAttachmentButton6" inherits="OpenMailAttachment" id="6"/>
-			<ItemButton name="OpenMailAttachmentButton7" inherits="OpenMailAttachment" id="7"/>
-			<ItemButton name="OpenMailAttachmentButton8" inherits="OpenMailAttachment" id="8"/>
-			<ItemButton name="OpenMailAttachmentButton9" inherits="OpenMailAttachment" id="9"/>
-			<ItemButton name="OpenMailAttachmentButton10" inherits="OpenMailAttachment" id="10"/>
-			<ItemButton name="OpenMailAttachmentButton11" inherits="OpenMailAttachment" id="11"/>
-			<ItemButton name="OpenMailAttachmentButton12" inherits="OpenMailAttachment" id="12"/>
-			<ItemButton name="OpenMailAttachmentButton13" inherits="OpenMailAttachment" id="13"/>
-			<ItemButton name="OpenMailAttachmentButton14" inherits="OpenMailAttachment" id="14"/>
-			<ItemButton name="OpenMailAttachmentButton15" inherits="OpenMailAttachment" id="15"/>
-			<ItemButton name="OpenMailAttachmentButton16" inherits="OpenMailAttachment" id="16"/>
-			<ItemButton name="OpenMailMoneyButton">
+			</Button>
+			<Button name="OpenMailAttachmentButton1" inherits="OpenMailAttachment" id="1"/>
+			<Button name="OpenMailAttachmentButton2" inherits="OpenMailAttachment" id="2"/>
+			<Button name="OpenMailAttachmentButton3" inherits="OpenMailAttachment" id="3"/>
+			<Button name="OpenMailAttachmentButton4" inherits="OpenMailAttachment" id="4"/>
+			<Button name="OpenMailAttachmentButton5" inherits="OpenMailAttachment" id="5"/>
+			<Button name="OpenMailAttachmentButton6" inherits="OpenMailAttachment" id="6"/>
+			<Button name="OpenMailAttachmentButton7" inherits="OpenMailAttachment" id="7"/>
+			<Button name="OpenMailAttachmentButton8" inherits="OpenMailAttachment" id="8"/>
+			<Button name="OpenMailAttachmentButton9" inherits="OpenMailAttachment" id="9"/>
+			<Button name="OpenMailAttachmentButton10" inherits="OpenMailAttachment" id="10"/>
+			<Button name="OpenMailAttachmentButton11" inherits="OpenMailAttachment" id="11"/>
+			<Button name="OpenMailAttachmentButton12" inherits="OpenMailAttachment" id="12"/>
+			<Button name="OpenMailAttachmentButton13" inherits="OpenMailAttachment" id="13"/>
+			<Button name="OpenMailAttachmentButton14" inherits="OpenMailAttachment" id="14"/>
+			<Button name="OpenMailAttachmentButton15" inherits="OpenMailAttachment" id="15"/>
+			<Button name="OpenMailAttachmentButton16" inherits="OpenMailAttachment" id="16"/>
+			<Button name="OpenMailMoneyButton" inherits="ItemButtonTemplate">
 				<Scripts>
 					<OnLoad>
 						self:RegisterEvent("MAIL_INBOX_UPDATE");
@@ -1228,7 +1280,7 @@
 					<OnLeave function="GameTooltip_Hide"/>
 				</Scripts>
 				<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
-			</ItemButton>
+			</Button>
 			<Button name="OpenMailCancelButton" inherits="UIPanelButtonTemplate" text="CLOSE">
 				<Size x="80" y="22"/>
 				<Anchors>

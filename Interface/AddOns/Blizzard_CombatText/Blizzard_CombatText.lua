@@ -36,11 +36,11 @@ COMBAT_TEXT_TYPE_INFO["PARRY"] = {r = 1, g = 0.1, b = 0.1, isStaggered = 1, var 
 COMBAT_TEXT_TYPE_INFO["EVADE"] = {r = 1, g = 0.1, b = 0.1, isStaggered = 1, var = "COMBAT_TEXT_SHOW_DODGE_PARRY_MISS"};
 COMBAT_TEXT_TYPE_INFO["IMMUNE"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_DODGE_PARRY_MISS"};
 COMBAT_TEXT_TYPE_INFO["DEFLECT"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_DODGE_PARRY_MISS"};
-COMBAT_TEXT_TYPE_INFO["REFLECT"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_DODGE_PARRY_MISS"};
+--COMBAT_TEXT_TYPE_INFO["REFLECT"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_DODGE_PARRY_MISS"};
 COMBAT_TEXT_TYPE_INFO["RESIST"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_RESISTANCES"};
 COMBAT_TEXT_TYPE_INFO["BLOCK"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_RESISTANCES"};
 COMBAT_TEXT_TYPE_INFO["ABSORB"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_RESISTANCES"};
-COMBAT_TEXT_TYPE_INFO["SPELL_DAMAGE_CRIT"] = {r = 0.79, g = 0.3, b = 0.85, show = 1};
+--COMBAT_TEXT_TYPE_INFO["SPELL_DAMAGE_CRIT"] = {r = 0.79, g = 0.3, b = 0.85, show = 1};
 COMBAT_TEXT_TYPE_INFO["SPELL_DAMAGE"] = {r = 0.79, g = 0.3, b = 0.85, show = 1};
 COMBAT_TEXT_TYPE_INFO["SPELL_MISS"] = {r = 1, g = 1, b = 1, var = "COMBAT_TEXT_SHOW_DODGE_PARRY_MISS"};
 COMBAT_TEXT_TYPE_INFO["SPELL_DODGE"] = {r = 1, g = 1, b = 1, var = "COMBAT_TEXT_SHOW_DODGE_PARRY_MISS"};
@@ -53,19 +53,19 @@ COMBAT_TEXT_TYPE_INFO["SPELL_RESIST"] = {r = 0.79, g = 0.3, b = 0.85, var = "COM
 COMBAT_TEXT_TYPE_INFO["SPELL_BLOCK"] = {r = 1, g = 1, b = 1, var = "COMBAT_TEXT_SHOW_RESISTANCES"};
 COMBAT_TEXT_TYPE_INFO["SPELL_ABSORB"] = {r = 0.79, g = 0.3, b = 0.85, var = "COMBAT_TEXT_SHOW_RESISTANCES"};
 COMBAT_TEXT_TYPE_INFO["PERIODIC_HEAL"] = {r = 0.1, g = 1, b = 0.1, show = 1};
-COMBAT_TEXT_TYPE_INFO["PERIODIC_HEAL_CRIT"] = {r = 0.1, g = 1, b = 0.1, show = 1};
+--COMBAT_TEXT_TYPE_INFO["PERIODIC_HEAL_CRIT"] = {r = 0.1, g = 1, b = 0.1, show = 1};
 COMBAT_TEXT_TYPE_INFO["ENERGIZE"] = {r = 0.1, g = 0.1, b = 1, var = "COMBAT_TEXT_SHOW_ENERGIZE"};
-COMBAT_TEXT_TYPE_INFO["PERIODIC_ENERGIZE"] = {r = 0.1, g = 0.1, b = 1, var = "COMBAT_TEXT_SHOW_PERIODIC_ENERGIZE"};
+--COMBAT_TEXT_TYPE_INFO["PERIODIC_ENERGIZE"] = {r = 0.1, g = 0.1, b = 1, var = "COMBAT_TEXT_SHOW_MANA"};
 COMBAT_TEXT_TYPE_INFO["SPELL_CAST"] = {r = 0.1, g = 1, b = 0.1, show = 1};
-COMBAT_TEXT_TYPE_INFO["SPELL_AURA_END"] = {r = 0.1, g = 1, b = 0.1, var = "COMBAT_TEXT_SHOW_AURAS"};
-COMBAT_TEXT_TYPE_INFO["SPELL_AURA_END_HARMFUL"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_AURAS"};
+COMBAT_TEXT_TYPE_INFO["SPELL_AURA_END"] = {r = 0.1, g = 1, b = 0.1, var = "COMBAT_TEXT_SHOW_AURA_FADE"};
+COMBAT_TEXT_TYPE_INFO["SPELL_AURA_END_HARMFUL"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_AURA_FADE"};
 COMBAT_TEXT_TYPE_INFO["SPELL_AURA_START"] = {r = 0.1, g = 1, b = 0.1, var = "COMBAT_TEXT_SHOW_AURAS"};
 COMBAT_TEXT_TYPE_INFO["SPELL_AURA_START_HARMFUL"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_AURAS"};
 COMBAT_TEXT_TYPE_INFO["SPELL_ACTIVE"] = {r = 1, g = 0.82, b = 0, var = "COMBAT_TEXT_SHOW_REACTIVES"};
 COMBAT_TEXT_TYPE_INFO["FACTION"] = {r = 0.1, g = 0.1, b = 1, var = "COMBAT_TEXT_SHOW_REPUTATION"};
 COMBAT_TEXT_TYPE_INFO["HEAL_CRIT"] = {r = 0.1, g = 1, b = 0.1, show = 1};
 COMBAT_TEXT_TYPE_INFO["HEAL"] = {r = 0.1, g = 1, b = 0.1, show = 1};
-COMBAT_TEXT_TYPE_INFO["DAMAGE_SHIELD"] = {r = 0.79, g = 0.3, b = 0.85, show = 1};
+COMBAT_TEXT_TYPE_INFO["DAMAGE_SHIELD"] = {r = 1, g = 1, b = 1};
 COMBAT_TEXT_TYPE_INFO["SPELL_DISPELLED"] = {r = 1, g = 1, b = 1};
 COMBAT_TEXT_TYPE_INFO["EXTRA_ATTACKS"] = {r = 1, g = 1, b = 1};
 COMBAT_TEXT_TYPE_INFO["SPLIT_DAMAGE"] = {r = 1, g = 1, b = 1, show = 1};
@@ -75,11 +75,15 @@ COMBAT_TEXT_TYPE_INFO["MANA_LOW"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT
 COMBAT_TEXT_TYPE_INFO["ENTERING_COMBAT"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_COMBAT_STATE"};
 COMBAT_TEXT_TYPE_INFO["LEAVING_COMBAT"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_COMBAT_STATE"};
 COMBAT_TEXT_TYPE_INFO["COMBO_POINTS"] = {r = 0.1, g = 0.1, b = 1, var = "COMBAT_TEXT_SHOW_COMBO_POINTS"};
-COMBAT_TEXT_TYPE_INFO["RUNE"] = {r = 0.1, g = 0.1, b = 1, var = "COMBAT_TEXT_SHOW_ENERGIZE"};
-COMBAT_TEXT_TYPE_INFO["PERIODIC_HEAL_ABSORB"] = {r = 0.1, g = 1, b = 0.1, show = 1};
-COMBAT_TEXT_TYPE_INFO["HEAL_CRIT_ABSORB"] = {r = 0.1, g = 1, b = 0.1, show = 1};
-COMBAT_TEXT_TYPE_INFO["HEAL_ABSORB"] = {r = 0.1, g = 1, b = 0.1, show = 1};
-COMBAT_TEXT_TYPE_INFO["ABSORB_ADDED"] = {r = 0.1, g = 1, b = 0.1, show = 1};
+--COMBAT_TEXT_TYPE_INFO["RUNE"] = {r = 0.1, g = 0.1, b = 1, var = "COMBAT_TEXT_SHOW_ENERGIZE"};
+--COMBAT_TEXT_TYPE_INFO["PERIODIC_HEAL_ABSORB"] = {r = 0.1, g = 1, b = 0.1, show = 1};
+--COMBAT_TEXT_TYPE_INFO["HEAL_CRIT_ABSORB"] = {r = 0.1, g = 1, b = 0.1, show = 1};
+--COMBAT_TEXT_TYPE_INFO["HEAL_ABSORB"] = {r = 0.1, g = 1, b = 0.1, show = 1};
+--COMBAT_TEXT_TYPE_INFO["ABSORB_ADDED"] = {r = 0.1, g = 1, b = 0.1, show = 1};
+
+
+COMBAT_TEXT_TYPE_INFO["PROC_RESISTED"] = {r = 1, g = 0.1, b = 0.1, var = "COMBAT_TEXT_SHOW_RESISTANCES"};
+
 
 function CombatText_OnLoad(self)
 	CombatText_UpdateDisplayedMessages();
@@ -146,6 +150,19 @@ function CombatText_OnEvent(self, event, ...)
 			else
 				CombatText.lowMana = nil;
 			end
+			if ( data == "COMBO_POINTS" ) then
+				local comboPoints = GetComboPoints("player", "target");
+				if ( comboPoints > 0 ) then
+					messageType = "COMBO_POINTS";
+					data = comboPoints;
+					-- Show message as a crit if max combo points
+					if ( comboPoints == MAX_COMBO_POINTS ) then
+						displayType = "crit";
+					end
+				else
+					return;
+				end
+			end
 		end
 
 		-- Didn't meet any of the criteria so just return
@@ -196,9 +213,6 @@ function CombatText_OnEvent(self, event, ...)
 			return
 		end
 		message = "-"..BreakUpLargeNumbers(data);
-		if(arg1 and arg1 == "BLOCK" and arg3 and arg3 > 0) then
-			message = COMBAT_TEXT_BLOCK_REDUCED:format(arg3);
-		end
 	elseif ( messageType == "SPELL_CAST" ) then
 		message = "<"..data..">";
 	elseif ( messageType == "SPELL_AURA_START" ) then
@@ -233,7 +247,7 @@ function CombatText_OnEvent(self, event, ...)
 		else
 			message = "+"..BreakUpLargeNumbers(arg3).." "..format(ABSORB_TRAILER, arg4);
 		end
-	elseif ( messageType == "ENERGIZE" or messageType == "PERIODIC_ENERGIZE") then
+	elseif ( messageType == "ENERGIZE") then
 		local count =  tonumber(data);
 		if (count > 0 ) then
 			data = "+"..BreakUpLargeNumbers(data);
@@ -347,7 +361,7 @@ local powerEnumFromEnergizeStringLookup =
 	RAGE = Enum.PowerType.Rage,
 	FOCUS = Enum.PowerType.Focus,
 	ENERGY = Enum.PowerType.Energy,
-	COMBO_POINTS = Enum.PowerType.ComboPoints,
+	HAPPINESS = Enum.PowerType.Happiness,
 	RUNES = Enum.PowerType.Runes,
 	RUNIC_POWER = Enum.PowerType.RunicPower,
 	SOUL_SHARDS = Enum.PowerType.SoulShards,
@@ -360,6 +374,7 @@ local powerEnumFromEnergizeStringLookup =
 	FURY = Enum.PowerType.Fury,
 	PAIN = Enum.PowerType.Pain,
 	INSANITY = Enum.PowerType.Insanity,
+	COMBO_POINTS = Enum.PowerType.ComboPoints,
 }
 
 function GetPowerEnumFromEnergizeString(power)
@@ -548,19 +563,15 @@ function CombatText_UpdateDisplayedMessages()
 		CombatText:UnregisterEvent("UNIT_POWER_UPDATE");
 		CombatText:UnregisterEvent("PLAYER_REGEN_DISABLED");
 		CombatText:UnregisterEvent("PLAYER_REGEN_ENABLED");
-		CombatText:UnregisterEvent("RUNE_POWER_UPDATE");
-		CombatText:UnregisterEvent("UNIT_ENTERED_VEHICLE");
-		CombatText:UnregisterEvent("UNIT_EXITING_VEHICLE");
+		--CombatText:UnregisterEvent("RUNE_POWER_UPDATE");
+		--CombatText:UnregisterEvent("UNIT_ENTERED_VEHICLE");
+		--CombatText:UnregisterEvent("UNIT_EXITING_VEHICLE");
 		return;
 	end
 
 	-- set the unit to track
-	if ( UnitHasVehicleUI("player") ) then
-		CombatText.unit = "vehicle";
-	else
-		CombatText.unit = "player";
-	end
-	CombatTextSetActiveUnit(CombatText.unit);
+	CombatText.unit = "player";
+	CombatTextSetActiveUnit("player")
 
 	-- register events
 	CombatText:RegisterEvent("COMBAT_TEXT_UPDATE");
@@ -568,9 +579,9 @@ function CombatText_UpdateDisplayedMessages()
 	CombatText:RegisterEvent("UNIT_POWER_UPDATE");
 	CombatText:RegisterEvent("PLAYER_REGEN_DISABLED");
 	CombatText:RegisterEvent("PLAYER_REGEN_ENABLED");
-	CombatText:RegisterEvent("RUNE_POWER_UPDATE");
-	CombatText:RegisterEvent("UNIT_ENTERED_VEHICLE");
-	CombatText:RegisterEvent("UNIT_EXITING_VEHICLE");
+	--CombatText:RegisterEvent("RUNE_POWER_UPDATE");
+	--CombatText:RegisterEvent("UNIT_ENTERED_VEHICLE");
+	--CombatText:RegisterEvent("UNIT_EXITING_VEHICLE");
 
 	-- Get scale
 	COMBAT_TEXT_Y_SCALE = WorldFrame:GetHeight() / 768;

@@ -1,8 +1,8 @@
 UNIT_POSITION_FRAME_DEFAULT_PIN_SIZE = 40;
 UNIT_POSITION_FRAME_DEFAULT_SUBLEVEL = 7;
-UNIT_POSITION_FRAME_DEFAULT_TEXTURE = "WhiteCircle-RaidBlips";
+UNIT_POSITION_FRAME_DEFAULT_TEXTURE = "Interface\\WorldMap\\WorldMapPartyIcon";
 UNIT_POSITION_FRAME_DEFAULT_SHOULD_SHOW_UNITS = true;
-UNIT_POSITION_FRAME_DEFAULT_USE_CLASS_COLOR = true;
+UNIT_POSITION_FRAME_DEFAULT_USE_CLASS_COLOR = false;
 
 -- NOTE: This is only using a single set of PVPQuery timers.  There's no reason to have a different set per-instance.
 PVPAFK_QUERY_DELAY_SECONDS = 5;
@@ -70,8 +70,8 @@ function UnitPositionFrameMixin:OnEvent(event, ...)
 end
 
 function UnitPositionFrameMixin:UpdateAppearanceData()
-	self:SetPinTexture("raid", "WhiteCircle-RaidBlips");
-	self:SetPinTexture("party", IsInRaid() and "WhiteDotCircle-RaidBlips" or "WhiteCircle-RaidBlips");
+	self:SetPinTexture("raid", "Interface\\WorldMap\\WorldMapPartyIcon");
+	self:SetPinTexture("party", "Interface\\WorldMap\\WorldMapPartyIcon");
 end
 
 function UnitPositionFrameMixin:ResetCurrentMouseOverUnits()
@@ -162,19 +162,11 @@ function UnitPositionFrameMixin:UpdateUnitTooltips(tooltipFrame)
 	end
 
 	if tooltipText ~= "" then
-		self.previousOwner = tooltipFrame:GetOwner();
 		tooltipFrame:SetOwner(self, "ANCHOR_CURSOR_RIGHT");
 		tooltipFrame:SetText(tooltipText);
 	elseif tooltipFrame:GetOwner() == self then
 		tooltipFrame:ClearLines();
 		tooltipFrame:Hide();
-		if self.previousOwner and self.previousOwner ~= self and self.previousOwner:IsVisible() and self.previousOwner:IsMouseOver() then
-			local func = self.previousOwner:HasScript("OnEnter") and self.previousOwner:GetScript("OnEnter");
-			if func then
-				func(self.previousOwner);
-			end
-		end
-		self.previousOwner = nil;
 	end
 end
 
@@ -233,7 +225,7 @@ function UnitPositionFrameMixin:UpdateFull(timeNow)
 	self:AddUnitInternal(timeNow, "player", self:GetOrCreateUnitAppearanceData("player"));
 
 	local memberCount, unitBase = self:GetMemberCountAndUnitTokenPrefix();
-	local overridePartyType = (C_PvP.IsActiveBattlefield() and IsInRaid() and IsInGroup(LE_PARTY_CATEGORY_HOME)) and LE_PARTY_CATEGORY_HOME or nil;
+	local overridePartyType = (InActiveBattlefield() and IsInRaid() and IsInGroup(LE_PARTY_CATEGORY_HOME)) and LE_PARTY_CATEGORY_HOME or nil;
 	local partyAppearance = self:GetOrCreateUnitAppearanceData("party");
 	local raidAppearance = self:GetOrCreateUnitAppearanceData("raid");
 
@@ -241,7 +233,7 @@ function UnitPositionFrameMixin:UpdateFull(timeNow)
 		local unit = unitBase..i;
 		if UnitExists(unit) and not UnitIsUnit(unit, "player") then
 			local appearance = UnitInSubgroup(unit, overridePartyType) and partyAppearance or raidAppearance;
-			self:AddUnitInternal(timeNow, unit, appearance, true);
+			self:AddUnitInternal(timeNow, unit, appearance);
 		end
 	end
 
@@ -253,7 +245,7 @@ function UnitPositionFrameMixin:UpdatePeriodic(timeNow)
 	self:SetUnitAppearanceInternal(timeNow, "player", self:GetOrCreateUnitAppearanceData("player"));
 
 	local memberCount, unitBase = self:GetMemberCountAndUnitTokenPrefix();
-	local overridePartyType = (C_PvP.IsActiveBattlefield() and IsInRaid() and IsInGroup(LE_PARTY_CATEGORY_HOME)) and LE_PARTY_CATEGORY_HOME or nil;
+	local overridePartyType = (InActiveBattlefield() and IsInRaid() and IsInGroup(LE_PARTY_CATEGORY_HOME)) and LE_PARTY_CATEGORY_HOME or nil;
 	local partyAppearance = self:GetOrCreateUnitAppearanceData("party");
 	local raidAppearance = self:GetOrCreateUnitAppearanceData("raid");
 
@@ -304,7 +296,7 @@ function UnitPositionFrameUpdateSecureMixin:GetOrCreateUnitAppearanceData(unitTy
 			sublevel = UNIT_POSITION_FRAME_DEFAULT_SUBLEVEL,
 			texture = UNIT_POSITION_FRAME_DEFAULT_TEXTURE,
 			shouldShow = UNIT_POSITION_FRAME_DEFAULT_SHOULD_SHOW_UNITS,
-			useClassColor = unitType ~= "player", -- UNIT_POSITION_FRAME_DEFAULT_USE_CLASS_COLOR
+			useClassColor = UNIT_POSITION_FRAME_DEFAULT_USE_CLASS_COLOR,
 			showRotation = unitType == "player"; -- There's no point in trying to show rotation for anything except the local player.
 
 		};

@@ -17,6 +17,10 @@ BNET_CLIENT_SC = "S1";
 BNET_CLIENT_DESTINY2 = "DST2";
 BNET_CLIENT_COD = "VIPR";
 
+WOW_PROJECT_MAINLINE = 1;
+WOW_PROJECT_CLASSIC = 2;
+WOW_PROJECT_ID = WOW_PROJECT_CLASSIC;
+
 --Name can be a realID or plain battletag with no 4 digit number (e.g. Murky McGrill or LichKing).
 function BNet_GetBNetIDAccount(name)
 	return GetAutoCompletePresenceID(name);
@@ -271,11 +275,7 @@ function BNToastMixin:ShowToast()
 		self.IconTexture:SetTexCoord(0.5, 0.75, 0, 0.5);
 		doubleLine:Show();
 		local clubName = "";
-		if toastData.club.clubType == Enum.ClubType.BattleNet then
-			clubName = BATTLENET_FONT_COLOR:WrapTextInColorCode(toastData.club.name);
-		else
-			clubName = NORMAL_FONT_COLOR:WrapTextInColorCode(toastData.club.name);
-		end
+		clubName = BATTLENET_FONT_COLOR:WrapTextInColorCode(toastData.club.name);
 		doubleLine:SetText(BN_TOAST_NEW_CLUB_INVITATION:format(clubName));
 		doubleLine:SetMaxLines(2);
 	end

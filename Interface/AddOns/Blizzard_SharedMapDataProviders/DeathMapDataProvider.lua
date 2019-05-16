@@ -41,16 +41,16 @@ function CorpsePinMixin:OnMouseEnter()
 	local x, y = self:GetCenter();
 	local parentX, parentY = self:GetParent():GetCenter();
 	if ( x > parentX ) then
-		GameTooltip:SetOwner(self, "ANCHOR_LEFT");
+		WorldMapTooltip:SetOwner(self, "ANCHOR_LEFT");
 	else
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+		WorldMapTooltip:SetOwner(self, "ANCHOR_RIGHT");
 	end
-	GameTooltip:SetText(CORPSE_RED);
-	GameTooltip:Show();
+	WorldMapTooltip:SetText(CORPSE_RED);
+	WorldMapTooltip:Show();
 end
 
 function CorpsePinMixin:OnMouseLeave()
-	GameTooltip:Hide();
+	WorldMapTooltip:Hide();
 end
 
 DeathReleasePinMixin = CreateFromMixins(CorpsePinMixin);
@@ -59,11 +59,11 @@ function DeathReleasePinMixin:OnMouseEnter()
 	local x, y = self:GetCenter();
 	local parentX, parentY = self:GetParent():GetCenter();
 	if ( x > parentX ) then
-		GameTooltip:SetOwner(self, "ANCHOR_LEFT");
+		WorldMapTooltip:SetOwner(self, "ANCHOR_LEFT");
 	else
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+		WorldMapTooltip:SetOwner(self, "ANCHOR_RIGHT");
 	end
-	GameTooltip:SetText(SPIRIT_HEALER_RELEASE_RED);
-	GameTooltip:Show();
+	WorldMapTooltip:SetText(SPIRIT_HEALER_RELEASE_RED);
+	WorldMapTooltip:Show();
 end
 

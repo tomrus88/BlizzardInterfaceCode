@@ -615,7 +615,6 @@ function ScrollingMessageFrameMixin:AcquireFontString()
 
 	local fontString = self.fontStringPool:Acquire();
 	fontString:SetFontObject(self:GetFontObject());
-	fontString:SetNonSpaceWrap(true);
 	return fontString;
 end
 

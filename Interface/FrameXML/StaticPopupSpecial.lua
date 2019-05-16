@@ -12,7 +12,6 @@ end
 
 function PlayerReportFrameMixin:OnHide()
 	PlaySound(SOUNDKIT.IG_MAINMENU_CLOSE);
-	self.CommentBox:SetText("");
 end
 
 function PlayerReportFrameMixin:InitiateReport(reportType, playerName, playerLocation)
@@ -41,7 +40,8 @@ function PlayerReportFrameMixin:InitiateReport(reportType, playerName, playerLoc
 		return;
 	end
 
-	self.reportToken = C_ReportSystem.InitiateReportPlayer(reportType, playerLocation);
+	self.reportType = reportType;
+	self.playerLocation = playerLocation;
 
 	self.Title:SetText(REPORT_PLAYER_LABEL:format(reportReason));
 	self.Name:SetText(playerName);
@@ -51,7 +51,11 @@ end
 
 function PlayerReportFrameMixin:ConfirmReport()
 	local comments = self.CommentBox:GetText();
-	C_ReportSystem.SendReportPlayer(self.reportToken, comments);
+	if self.playerLocation and self.playerLocation:IsValid() then 
+		C_ChatInfo.ReportPlayer(self.reportType, self.playerLocation, comments);
+	else
+		C_ChatInfo.ReportPlayer(self.reportType, nil, comments);
+	end
 	StaticPopupSpecial_Hide(self);
 end
 

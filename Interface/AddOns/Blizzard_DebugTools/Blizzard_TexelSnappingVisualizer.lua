@@ -2,15 +2,9 @@ if not IsGMClient() then
 	return; -- This tool only functions in GM builds
 end
 
-if IsOnGlueScreen() then
-	return;
-end
-
 TexelSnappingVisualizerMixin = {};
 
 function TexelSnappingVisualizerMixin:OnCreated()
-	self:Hide();
-
 	self:SetScript("OnShow", self.OnShow);
 	self:SetScript("OnMouseDown", self.StartMoving);
 	self:SetScript("OnMouseUp", self.StopMovingOrSizing);
@@ -102,12 +96,6 @@ function TexelSnappingVisualizerMixin:OnCreated()
 			forceOffTick:SetSize(2, 16);
 			forceOffTick:SetPoint("CENTER", texelSnappingSlider, "CENTER", texelSnappingSlider:GetWidth() * MIN_VALUE, 0);
 		end
-	end
-
-	do
-		local closeButton = CreateFrame("BUTTON", nil, self, "UIPanelCloseButton");
-		closeButton:SetPoint("TOPRIGHT", -5, -5);
-		closeButton:SetScript("OnClick", function() self:Hide() end);
 	end
 end
 

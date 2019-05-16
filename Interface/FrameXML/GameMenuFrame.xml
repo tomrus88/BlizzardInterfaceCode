@@ -7,9 +7,15 @@
 			<Anchor point="CENTER"/>
 		</Anchors>
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-			<BackgroundInsets left="9" right="9" top="9" bottom="9"/>
-			<TileSize val="32"/>
-			<EdgeSize val="32"/>
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11"/>
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32"/>
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32"/>
+			</EdgeSize>
 		</Backdrop>
 		<Layers>
 			<Layer level="ARTWORK">
@@ -68,24 +74,9 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="GameMenuButtonWhatsNew" inherits="GameMenuButtonTemplate" text="GAMEMENU_NEW_BUTTON" motionScriptsWhileDisabled="true">
-				<Anchors>
-					<Anchor point="TOP" relativeTo="GameMenuButtonStore" relativePoint="BOTTOM" x="0" y="-1"/>
-				</Anchors>
-				<Scripts>
-					<OnShow>
-						self:SetEnabled(not IsKioskModeEnabled());
-					</OnShow>
-					<OnClick>
-						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION);
-						HideUIPanel(GameMenuFrame);
-						SplashFrame_ShowCurrent();
-					</OnClick>
-				</Scripts>
-			</Button>
 			<Button name="GameMenuButtonOptions" inherits="GameMenuButtonTemplate" text="SYSTEMOPTIONS_MENU">
 				<Anchors>
-					<Anchor point="TOP" relativeTo="GameMenuButtonWhatsNew" relativePoint="BOTTOM" x="0" y="-16"/>
+					<Anchor point="TOP" relativeTo="GameMenuButtonStore" relativePoint="BOTTOM" x="0" y="-16"/>
 				</Anchors>
 				<Scripts>
 					<OnShow>

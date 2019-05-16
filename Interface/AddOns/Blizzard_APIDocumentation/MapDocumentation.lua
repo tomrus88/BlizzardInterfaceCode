@@ -36,17 +36,17 @@ local Map =
 			},
 		},
 		{
-			Name = "GetBountySetMaps",
+			Name = "GetBountySetIDForMap",
 			Type = "Function",
 
 			Arguments =
 			{
-				{ Name = "bountySetID", Type = "number", Nilable = false },
+				{ Name = "uiMapID", Type = "number", Nilable = false },
 			},
 
 			Returns =
 			{
-				{ Name = "mapIDs", Type = "table", InnerType = "number", Nilable = false },
+				{ Name = "bountySetID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -470,7 +470,6 @@ local Map =
 				{ Name = "areaPoiID", Type = "number", Nilable = false },
 				{ Name = "name", Type = "string", Nilable = false },
 				{ Name = "atlasName", Type = "string", Nilable = false },
-				{ Name = "uiTextureKit", Type = "string", Nilable = true },
 			},
 		},
 		{

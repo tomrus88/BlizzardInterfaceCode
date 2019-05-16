@@ -7,20 +7,6 @@ local PlayerLocation =
 	Functions =
 	{
 		{
-			Name = "GUIDIsPlayer",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "guid", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "isPlayer", Type = "bool", Nilable = false },
-			},
-		},
-		{
 			Name = "GetClass",
 			Type = "Function",
 
@@ -90,20 +76,6 @@ local PlayerLocation =
 			Returns =
 			{
 				{ Name = "isConnected", Type = "bool", Nilable = true },
-			},
-		},
-		{
-			Name = "UnitIsSameServer",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "playerLocation", Type = "table", Mixin = "PlayerLocationMixin", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "unitIsSameServer", Type = "bool", Nilable = false },
 			},
 		},
 	},

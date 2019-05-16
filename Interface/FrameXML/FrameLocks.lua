@@ -25,7 +25,6 @@ local HIDE_MOST = {
 	TemporaryEnchantFrame = "hidden",
 	ZoneAbilityFrame	= "hidden",
 	OrderHallCommandBar	= "hidden",
-	TalentMicroButtonAlert	="hidden";
 	WorldStateScoreFrame = "hidden";
 	UIWidgetTopCenterContainerFrame = "hidden",
 }
@@ -33,13 +32,12 @@ local HIDE_MOST = {
 --------Data on what locks exist and what frames are ruled by them--------
 FRAMELOCK_STATES = {
 	COMMENTATOR_SPECTATING_MODE = Mixin({
-		GeneralDockManager					= "hidden",
-		QuickJoinToastButton				= "hidden",
-		ChatFrameMenuButton					= "hidden",
-		CombatLogQuickButtonFrame 			= "hidden",
-		ArenaEnemyFrames 					= "hidden",
-		ChatFrame1							= "hidden",
-		ChatFrameChannelButton				= "hidden",
+		GeneralDockManager	= "hidden",
+		QuickJoinToastButton	= "hidden",
+		ChatFrameMenuButton	= "hidden",
+		CombatLogQuickButtonFrame = "hidden",
+		ArenaEnemyFrames = "hidden",
+		ChatFrame1			= "hidden",
 		--Additional chat frames are added to this list as they are created.
 	}, HIDE_MOST),
 	PETBATTLES = HIDE_MOST,

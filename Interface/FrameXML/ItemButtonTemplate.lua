@@ -13,7 +13,7 @@ function SetItemButtonCount(button, count, abbreviate)
 	if ( count > 1 or (button.isBag and count > 0) ) then
 		if ( abbreviate ) then
 			count = AbbreviateNumbers(count);
-		elseif ( count > (button.maxDisplayCount or 9999) ) then
+		elseif ( count > (button.maxDisplayCount or 999) ) then
 			count = "*";
 		end
 		countString:SetText(count);
@@ -46,7 +46,6 @@ function SetItemButtonTexture(button, texture)
 	if ( not button ) then
 		return;
 	end
-	
 	local icon = button.Icon or button.icon or _G[button:GetName().."IconTexture"];
 	if ( texture ) then
 		icon:Show();
@@ -104,24 +103,13 @@ end
 
 function SetItemButtonQuality(button, quality, itemIDOrLink, suppressOverlays)
 	if itemIDOrLink then
-		if IsArtifactRelicItem(itemIDOrLink) then
-			button.IconBorder:SetTexture([[Interface\Artifacts\RelicIconFrame]]);
-		else
-			button.IconBorder:SetTexture([[Interface\Common\WhiteIconFrame]]);
-		end
-		
-		if not suppressOverlays and C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(itemIDOrLink) then
-			button.IconOverlay:SetAtlas([[AzeriteIconFrame]]);
-			button.IconOverlay:Show();
-		else
-			button.IconOverlay:Hide();
-		end
+		button.IconBorder:SetTexture([[Interface\Common\WhiteIconFrame]]);
 	else
 		button.IconBorder:SetTexture([[Interface\Common\WhiteIconFrame]]);
-		button.IconOverlay:Hide();
 	end
+	button.IconOverlay:Hide();
 
-	if quality then
+	--[[if quality then
 		if quality >= LE_ITEM_QUALITY_COMMON and BAG_ITEM_QUALITY_COLORS[quality] then
 			button.IconBorder:Show();
 			button.IconBorder:SetVertexColor(BAG_ITEM_QUALITY_COLORS[quality].r, BAG_ITEM_QUALITY_COLORS[quality].g, BAG_ITEM_QUALITY_COLORS[quality].b);
@@ -130,7 +118,8 @@ function SetItemButtonQuality(button, quality, itemIDOrLink, suppressOverlays)
 		end
 	else
 		button.IconBorder:Hide();
-	end
+	end]]
+	button.IconBorder:Hide();
 end
 
 function HandleModifiedItemClick(link)
@@ -147,80 +136,12 @@ function HandleModifiedItemClick(link)
 		end
 		if ( ChatEdit_InsertLink(link) ) then
 			return true;
-		elseif ( SocialPostFrame and Social_IsShown() ) then
-			Social_InsertLink(link);
+		elseif ( SocialPostFrame and Social_IsShown() and Social_InsertLink(link) ) then
 			return true;
 		end
 	end
 	if ( IsModifiedClick("DRESSUP") ) then
 		return DressUpItemLink(link) or DressUpBattlePetLink(link) or DressUpMountLink(link)
 	end
-	if ( IsModifiedClick("EXPANDITEM") ) then
-		if C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(link) then
-			OpenAzeriteEmpoweredItemUIFromLink(link);
-			return true;
-		end
-	end
 	return false;
-end
-
-ItemButtonMixin = {};
-
-function ItemButtonMixin:PostOnLoad()
-	self.itemContextChangedCallback = function()
-		self:UpdateItemContextMatching();
-	end
-end
-
-function ItemButtonMixin:RegisterCallback()
-	if not self.itemContextChangedCallbackIsSet then
-		ItemButtonUtil.RegisterCallback(ItemButtonUtil.Event.ItemContextChanged, self.itemContextChangedCallback);
-		self.itemContextChangedCallbackIsSet = true;
-	end
-end
-
-function ItemButtonMixin:UnregisterCallback()
-	if self.itemContextChangedCallbackIsSet then
-		ItemButtonUtil.UnregisterCallback(ItemButtonUtil.Event.ItemContextChanged, self.itemContextChangedCallback);
-		self.itemContextChangedCallbackIsSet = false;
-	end
-end
-
-function ItemButtonMixin:PostOnShow()
-	self:UpdateItemContextMatching();
-	
-	local hasFunctionSet = self.GetItemContextMatchResult ~= nil;
-	if hasFunctionSet then
-		self:RegisterCallback();
-	end
-end
-
-function ItemButtonMixin:PostOnHide()
-	self:UnregisterCallback();
-end
-
-function ItemButtonMixin:SetMatchesSearch(matchesSearch)
-	self.matchesSearch = matchesSearch;
-	self:UpdateItemContextOverlay(self);
-end
-
-function ItemButtonMixin:GetMatchesSearch()
-	return self.matchesSearch;
-end
-
-function ItemButtonMixin:UpdateItemContextMatching()
-	local hasFunctionSet = self.GetItemContextMatchResult ~= nil;
-	if hasFunctionSet then
-		self.itemContextMatchResult = self:GetItemContextMatchResult();
-	else
-		self.itemContextMatchResult = ItemButtonUtil.ItemContextMatchResult.DoesNotApply;
-	end
-	
-	self:UpdateItemContextOverlay(self);
-end
-
-function ItemButtonMixin:UpdateItemContextOverlay()
-	local matchesSearch = self.matchesSearch == nil or self.matchesSearch;
-	local matchesContext = self.itemContextMatchResult == ItemButtonUtil.ItemContextMatchResult.DoesNotApply or self.itemContextMatchResult == ItemButtonUtil.ItemContextMatchResult.Match;
-	self.ItemContextOverlay:SetShown(not matchesSearch or not matchesContext);
 end

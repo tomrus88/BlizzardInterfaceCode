@@ -17,6 +17,7 @@ function GetTextureInfo(obj)
 			assetType = "FileID";
 		end
 
+
 		if not assetName then
 			assetName = "UnknownAsset";
 			assetType = "Unknown";
@@ -213,45 +214,13 @@ function ExtractHyperlinkString(linkString)
 	return preString ~= nil, preString, hyperlinkString, postString;
 end
 
-function SplitTextIntoLines(text, delimiter)
-	local lines = {};
-	local startIndex = 1;
-	local foundIndex = string.find(text, delimiter);
-	while foundIndex do
-		table.insert(lines, text:sub(startIndex, foundIndex - 1));
-		startIndex = foundIndex + 2;
-		foundIndex = string.find(text, delimiter, startIndex);
-	end
-	if startIndex <= #text then
-		table.insert(lines, text:sub(startIndex));
-	end
-	return lines;
-end
-
-function SplitTextIntoHeaderAndNonHeader(text)
-	local foundIndex = string.find(text, "|n");
-	if not foundIndex then
-		-- There was no newline...the whole thing is a header
-		return text;
-	elseif #text == 2 then
-		-- There was a newline, but that was all that was in the string.
-		return nil;
-	elseif foundIndex == 1 then
-		-- There was a newline at the very beginning...the whole rest of the string is a header
-		return text:sub(3);
-	elseif foundIndex == #text - 1 then
-		-- There was a newline at the very end...the whole rest of the string is a header
-		return text:sub(1, foundIndex - 1);
-	else
-		-- There was a newline somewhere in the middle...everything before it is the header and everything after it is the non-header
-		return text:sub(1, foundIndex - 1), text:sub(foundIndex + 2);
-	end
-end
-
 function GetItemInfoFromHyperlink(link)
-	local strippedItemLink, itemID = link:match("|Hitem:((%d+).-)|h");
-	if itemID then
-		return tonumber(itemID), strippedItemLink;
+	local hyperlink = link:match("|Hitem:.-|h");
+	if (hyperlink) then
+		local itemID, creationContext = GetItemCreationContext(hyperlink);
+		return tonumber(itemID), creationContext;
+	else
+		return nil;
 	end
 end
 
@@ -637,23 +606,6 @@ function CreateColor(r, g, b, a)
 	return color;
 end
 
-local function ExtractHexByte(str, index)
-	return tonumber(str:sub(index, index + 1), 16);
-end
-
-function CreateColorFromHexString(hexColor)
-	if #hexColor == 8 then
-		local a, r, g, b = ExtractHexByte(hexColor, 1), ExtractHexByte(hexColor, 3), ExtractHexByte(hexColor, 5), ExtractHexByte(hexColor, 7);
-		return CreateColor(r, g, b, a);
-	else
-		GMError("CreateColorFromHexString input must be hexadecimal digits in this format: AARRGGBB.");
-	end
-end
-
-function CreateColorFromBytes(r, g, b, a)
-	return CreateColor(r / 255, g / 255, b / 255, a / 255);
-end
-
 function AreColorsEqual(left, right)
 	if left and right then
 		return left:IsEqualTo(right);
@@ -711,14 +663,20 @@ function ColorMixin:WrapTextInColorCode(text)
 	return WrapTextInColorCode(text, self:GenerateHexColor());
 end
 
-RAID_CLASS_COLORS = {};
-do
-	local classes = {"HUNTER", "WARLOCK", "PRIEST", "PALADIN", "MAGE", "ROGUE", "DRUID", "SHAMAN", "WARRIOR", "DEATHKNIGHT", "MONK", "DEMONHUNTER"};
-	
-	for i, className in ipairs(classes) do
-		RAID_CLASS_COLORS[className] = C_ClassColor.GetClassColor(className);
-	end
-end
+RAID_CLASS_COLORS = {
+	["HUNTER"] = CreateColor(0.67, 0.83, 0.45),
+	["WARLOCK"] = CreateColor(0.53, 0.53, 0.93),
+	["PRIEST"] = CreateColor(1.0, 1.0, 1.0),
+	["PALADIN"] = CreateColor(0.96, 0.55, 0.73),
+	["MAGE"] = CreateColor(0.25, 0.78, 0.92),
+	["ROGUE"] = CreateColor(1.0, 0.96, 0.41),
+	["DRUID"] = CreateColor(1.0, 0.49, 0.04),
+	["SHAMAN"] = CreateColor(0.0, 0.44, 0.87),
+	["WARRIOR"] = CreateColor(0.78, 0.61, 0.43),
+	["DEATHKNIGHT"] = CreateColor(0.77, 0.12 , 0.23),
+	["MONK"] = CreateColor(0.0, 1.00 , 0.59),
+	["DEMONHUNTER"] = CreateColor(0.64, 0.19, 0.79),
+};
 
 for k, v in pairs(RAID_CLASS_COLORS) do
 	v.colorStr = v:GenerateHexColor();
@@ -908,10 +866,6 @@ function FormatPercentage(percentage, roundToNearestInteger)
 	return PERCENTAGE_STRING:format(percentage);
 end
 
-function FormatFraction(numerator, denominator)
-	return GENERIC_FRACTION_STRING:format(numerator, denominator);
-end
-
 function CreateTextureMarkup(file, fileWidth, fileHeight, width, height, left, right, top, bottom, xOffset, yOffset)
 	return ("|T%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d|t"):format(
 		  file
@@ -950,10 +904,6 @@ function SetupAtlasesOnRegions(frame, regionsToAtlases, useAtlasSize)
 	end
 end
 
-function GetFinalNameFromTextureKit(fmt, textureKit)
-	return fmt:format(textureKit);
-end
-
 function SetupTextureKitOnFrameByID(textureKitID, frame, fmt, setVisibilityOfRegions, useAtlasSize)
 	local textureKit = GetUITextureKitInfo(textureKitID);
 	SetupTextureKitOnFrame(textureKit, frame, fmt, setVisibilityOfRegions, useAtlasSize);
@@ -964,18 +914,16 @@ function SetupTextureKitOnFrame(textureKit, frame, fmt, setVisibility, useAtlasS
 		return;
 	end
 
-	local success = false;
+	if setVisibility then
+		frame:SetShown(textureKit ~= nil);
+	end
 
 	if textureKit then
 		if frame:GetObjectType() == "StatusBar" then
-			success = frame:SetStatusBarAtlas(GetFinalNameFromTextureKit(fmt, textureKit));
+			frame:SetStatusBarAtlas(fmt:format(textureKit));
 		elseif frame.SetAtlas then
-			success = frame:SetAtlas(GetFinalNameFromTextureKit(fmt, textureKit), useAtlasSize);
+			frame:SetAtlas(fmt:format(textureKit), useAtlasSize);
 		end
-	end
-
-	if setVisibility then
-		frame:SetShown(success);
 	end
 end
 
@@ -1424,87 +1372,14 @@ function CallMethodOnNearestAncestor(self, methodName, ...)
 	return false;
 end
 
+function FormateFullDateWithoutYear(messageDate)
+	return FULLDATE_NO_YEAR:format(CALENDAR_WEEKDAY_NAMES[messageDate.weekDay], CALENDAR_FULLDATE_MONTH_NAMES[messageDate.month], messageDate.day);
+end
+
+function AreFullDatesEqual(firstDate, secondDate)
+	return firstDate.month == secondDate.month and firstDate.day == secondDate.day and firstDate.year == secondDate.year;
+end
+
 function GetClampedCurrentExpansionLevel()
 	return math.min(GetClientDisplayExpansionLevel(), math.max(GetAccountExpansionLevel(), GetExpansionLevel()));
-end
-
-function GetHighlightedNumberDifferenceString(baseString, newString)
-	local outputString = "";
-	-- output string is being built from the new string
-	local newStringIndex = 1;
-	-- find a stretch of digits (including . and , because of different locales) - but has to end in a digit
-	local PATTERN = "([,%.%d]*%d+)";
-	local start1, end1, baseNumberString = string.find(baseString, PATTERN);
-	local start2, end2, newNumberString = string.find(newString, PATTERN);
-	while start1 and start2 do
-		-- add from the new string until the matched spot
-		outputString = outputString .. string.sub(newString, newStringIndex, start2 - 1);
-		newStringIndex = end2 + 1;
-
-		if baseNumberString ~= newNumberString then
-			-- need to remove , and . before comparing numbers because of locales
-			local scrubbedBaseNumberString = gsub(baseNumberString, "[,%.]", "");
-			local scrubbedNewNumberString = gsub(newNumberString, "[,%.]", "");
-			local baseNumber = tonumber(scrubbedBaseNumberString);
-			local newNumber = tonumber(scrubbedNewNumberString);
-			if baseNumber and newNumber then
-				local delta = newNumber - baseNumber;
-				if delta > 0 then
-					newNumberString = GREEN_FONT_COLOR_CODE..string.format(newNumberString)..FONT_COLOR_CODE_CLOSE;
-				elseif delta < 0 then
-					newNumberString = RED_FONT_COLOR_CODE..string.format(newNumberString)..FONT_COLOR_CODE_CLOSE;
-				end
-			end
-		end
-
-		outputString = outputString..newNumberString;
-
-		start1, end1, baseNumberString = string.find(baseString, PATTERN, end1 + 1);
-		start2, end2, newNumberString = string.find(newString, PATTERN, end2 + 1);
-	end
-
-	outputString = outputString .. string.sub(newString, newStringIndex, string.len(newString));
-	return outputString;
-end
-
-function GetUnscaledFrameRect(frame, scale)
-	local frameLeft, frameBottom, frameWidth, frameHeight = frame:GetScaledRect();
-	return frameLeft / scale, frameBottom / scale, frameWidth / scale, frameHeight / scale;
-end
-
--- CVar script wrappers
-function RegisterCVar(name, value)
-	C_CVar.RegisterCVar(name, value);
-end
-
-function ResetTestCvars()
-	C_CVar.ResetTestCVars();
-end
-
-function SetCVar(name, value, eventName)
-	if type(value) == "boolean" then
-		return C_CVar.SetCVar(name, value and "1" or "0", eventName);
-	else
-		return C_CVar.SetCVar(name, value and tostring(value) or nil, eventName);
-	end
-end
-
-function GetCVar(name)
-	return C_CVar.GetCVar(name);
-end
-
-function SetCVarBitfield(name, index, value, scriptCVar)
-	return C_CVar.SetCVarBitfield(name, index, value, scriptCVar);
-end
-
-function GetCVarBitfield(name, index)
-	return C_CVar.GetCVarBitfield(name, index);
-end
-
-function GetCVarBool(name)
-	return C_CVar.GetCVarBool(name);
-end
-
-function GetCVarDefault(name)
-	return C_CVar.GetCVarDefault(name);
 end

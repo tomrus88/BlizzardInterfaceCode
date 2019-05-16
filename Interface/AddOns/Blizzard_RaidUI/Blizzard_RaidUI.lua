@@ -147,9 +147,10 @@ function RaidGroupFrame_OnLoad()
 	RaidFrame:RegisterEvent("UNIT_NAME_UPDATE");
 	RaidFrame:RegisterEvent("UNIT_LEVEL");
 	RaidFrame:RegisterEvent("UNIT_HEALTH");
+	RaidFrame:RegisterEvent("UNIT_CONNECTION");
 	RaidFrame:RegisterEvent("PLAYER_ENTERING_WORLD");
 	RaidFrame:RegisterEvent("VARIABLES_LOADED");
-	RaidFrame:RegisterEvent("RAID_ROSTER_UPDATE");
+	RaidFrame:RegisterEvent("GROUP_ROSTER_UPDATE");
 	RaidFrame:SetScript("OnHide", RaidGroupFrame_OnHide);
 	RaidFrame:SetScript("OnEvent", RaidGroupFrame_OnEvent);
 	RaidFrame:SetScript("OnUpdate", RaidGroupFrame_OnUpdate);
@@ -178,13 +179,15 @@ function RaidGroupFrame_OnEvent(self, event, ...)
 		if ( found == 1 ) then
 			RaidGroupFrame_UpdateHealth(id);
 		end
-	elseif ( event == "UNIT_PET" or event == "UNIT_NAME_UPDATE" ) then
+	elseif ( event == "UNIT_PET" or event == "UNIT_NAME_UPDATE" or event == "UNIT_CONNECTION" ) then
+		RaidGroupFrame_Update();
 		RaidClassButton_Update();
+		RaidPullout_RenewFrames();
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
 		RaidPullout_RenewFrames();
 	elseif ( event == "VARIABLES_LOADED" ) then
 		RaidFrame.showRange = GetCVarBool("showRaidRange");
-	elseif ( event == "RAID_ROSTER_UPDATE" ) then
+	elseif ( event == "GROUP_ROSTER_UPDATE" ) then
 		RaidGroupFrame_Update();
 	end
 end
@@ -364,19 +367,19 @@ function RaidGroupFrame_Update()
 				if ( online ) then
 					if ( isDead ) then
 						subframes.name:SetTextColor(RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b);
-						subframes.class:SetTextColor(RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b);
+						subframes.class.text:SetTextColor(RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b);
 						subframes.level:SetTextColor(RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b);
 					else
 						color = RAID_CLASS_COLORS[fileName];
 						if ( color ) then
 							subframes.name:SetTextColor(color.r, color.g, color.b);
-							subframes.class:SetTextColor(color.r, color.g, color.b);
+							subframes.class.text:SetTextColor(color.r, color.g, color.b);
 							subframes.level:SetTextColor(color.r, color.g, color.b);
 						end
 					end
 				else
 					subframes.name:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
-					subframes.class:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
+					subframes.class.text:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
 					subframes.level:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
 				end
 
@@ -500,7 +503,7 @@ function RaidGroupFrame_UpdateLevel(id)
 	local unit = "raid"..id;
 	local buttonLevel = _G["RaidGroupButton"..id.."Level"];
 
-	buttonLevel:SetText(UnitEffectiveLevel(unit));
+	buttonLevel:SetText(UnitLevel(unit));
 end
 
 function RaidGroupFrame_UpdateHealth(id)
@@ -514,19 +517,19 @@ function RaidGroupFrame_UpdateHealth(id)
 	if ( online ) then
 		if ( isDead ) then
 			buttonName:SetTextColor(RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b);
-			buttonClass:SetTextColor(RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b);
+			buttonClass.text:SetTextColor(RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b);
 			buttonLevel:SetTextColor(RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b);
 		else
 			color = RAID_CLASS_COLORS[fileName];
 			if ( color ) then
 				buttonName:SetTextColor(color.r, color.g, color.b);
-				buttonClass:SetTextColor(color.r, color.g, color.b);
+				buttonClass.text:SetTextColor(color.r, color.g, color.b);
 				buttonLevel:SetTextColor(color.r, color.g, color.b);
 			end
 		end
 	else
 		buttonName:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
-		buttonClass:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
+		buttonClass.text:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
 		buttonLevel:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
 	end
 end
@@ -637,7 +640,7 @@ end
 function RaidPullout_OnEvent(self, event, ...)
 	if ( self:IsShown() ) then
 		if ( event == "GROUP_ROSTER_UPDATE" or event == "UNIT_PET" or event == "UNIT_NAME_UPDATE" or
-			 event == "READY_CHECK" or event == "READY_CHECK_CONFIRM" ) then
+			 event == "READY_CHECK" or event == "READY_CHECK_CONFIRM" or event == "UNIT_CONNECTION" ) then
 			RaidPullout_Update(self);
 		elseif ( event == "READY_CHECK_FINISHED" ) then
 			RaidPullout_ReadyCheckFinished(self);
@@ -740,6 +743,15 @@ function RaidPullout_UpdateTarget(pullOutFrame, pullOutButton, unit, which)
 			statusBar:SetStatusBarColor(UnitSelectionColor(unit));
 			name:Show();
 
+			if ( which == "TargetTarget" ) then
+				local clearButton = _G[pullOutButton..which.."ClearButton"];
+				if (clearButton) then
+					SecureUnitButton_OnLoad(clearButton, unit);
+					clearButton.unit = unit;
+				end
+			else
+				SecureUnitButton_OnLoad(statusBar, unit, RaidPulloutButton_ShowMenu);
+			end
 		else
 			statusBar:SetMinMaxValues(0,1);
 			statusBar:SetValue(1);
@@ -829,7 +841,7 @@ function RaidPullout_Update(pullOutFrame)
 		for i=index, numPulloutEntries do
 			pulloutButton = CreateFrame("Frame", pullOutFrame:GetName().."Button"..i, pullOutFrame, "RaidPulloutButtonTemplate");
 			if ( i == 1 ) then
-				pulloutButton:SetPoint("TOP", pullOutFrame, "TOP", 1, -10);
+				pulloutButton:SetPoint("TOP", pullOutFrame, "TOP", 1, -11);
 			else
 				pulloutButton:SetPoint("TOP", pullOutFrame:GetName().."Button"..(i-1), "BOTTOM", 0, -8);
 			end
@@ -936,26 +948,18 @@ function RaidPullout_Update(pullOutFrame)
 			end
 
 			--Handle vehicle indicator
-			if ( UnitHasVehicleUI(unit) ) then
-				pulloutButton.vehicleIndicator:Show();
-			else
-				pulloutButton.vehicleIndicator:Hide();
-			end
+			pulloutButton.vehicleIndicator:Hide();
 
 			pulloutButton:RegisterEvent("PLAYER_ENTERING_WORLD");
 			pulloutButton:RegisterEvent("UNIT_HEALTH");
 			pulloutButton:RegisterEvent("UNIT_AURA");
 			pulloutButton:RegisterEvent("UNIT_NAME_UPDATE");
-			pulloutButton:RegisterEvent("UNIT_ENTERED_VEHICLE");
-			pulloutButton:RegisterEvent("UNIT_EXITED_VEHICLE");
 			pulloutButton:Show();
 		else
 			pulloutButton:UnregisterEvent("PLAYER_ENTERING_WORLD");
 			pulloutButton:UnregisterEvent("UNIT_HEALTH");
 			pulloutButton:UnregisterEvent("UNIT_AURA");
 			pulloutButton:UnregisterEvent("UNIT_NAME_UPDATE");
-			pulloutButton:UnregisterEvent("UNIT_ENTERED_VEHICLE");
-			pulloutButton:UnregisterEvent("UNIT_EXITED_VEHICLE");
 			pulloutButton:Hide();
 		end
 	end
@@ -1007,23 +1011,17 @@ function RaidPulloutButton_OnEvent(self, event, ...)
 end
 
 function RaidPulloutButton_UpdateSwapFrames(self, unit)
-	if ( UnitTargetsVehicleInRaidUI(unit) ) then
-		local prefix, id = unit:match("([^%d]+)([%d]+)");
-		self.secondaryUnit = unit;
-		unit = prefix.."pet"..id;
-		self.unit = unit;
-		_G[self:GetName().."ClearButton"]:SetAttribute("unit", unit)
-	elseif ( self.secondaryUnit ) then
+	if ( self.secondaryUnit ) then
 		self.unit = self.secondaryUnit;
 		_G[self:GetName().."ClearButton"]:SetAttribute("unit", self.secondaryUnit);
 		self.secondaryUnit = nil;
 	end
 	securecall("UnitFrameHealthBar_Initialize", unit, self.healthbar, nil, true);
 	securecall("UnitFrameManaBar_Initialize", unit, self.manabar, nil);
-	securecall("UnitFrameThreatIndicator_Initialize", unit, self);
+	--securecall("UnitFrameThreatIndicator_Initialize", unit, self);
 	securecall("UnitFrameHealthBar_Update", self.healthbar, unit);
 	securecall("UnitFrameManaBar_Update", self.manabar, unit);
-	securecall("UnitFrame_UpdateThreatIndicator", self.threatIndicator, nil, unit);
+	--securecall("UnitFrame_UpdateThreatIndicator", self.threatIndicator, nil, unit);
 end
 
 function RaidPulloutButton_UpdateDead(button, isDead, class)
@@ -1252,6 +1250,7 @@ function RaidPulloutDropDown_Initialize()
 	info.isTitle = nil;
 	info.disabled = nil;
 	info.notCheckable = nil;
+	info.classicChecks = true;
 	UIDropDownMenu_AddButton(info);
 
 	if ( currentPullout.showTarget == 1 ) then
@@ -1269,6 +1268,7 @@ function RaidPulloutDropDown_Initialize()
 		info.isTitle = nil;
 		info.disabled = nil;
 		info.notCheckable = nil;
+		info.classicChecks = true;
 		UIDropDownMenu_AddButton(info);
 	end
 
@@ -1280,6 +1280,7 @@ function RaidPulloutDropDown_Initialize()
 		RaidPullout_SaveFrames(currentPullout);
 	end;
 	info.checked = currentPullout.showBuffs;
+	info.classicChecks = true;
 	UIDropDownMenu_AddButton(info);
 
 	info.text = SHOW_DEBUFFS;
@@ -1292,6 +1293,7 @@ function RaidPulloutDropDown_Initialize()
 	info.isTitle = nil;
 	info.disabled = nil;
 	info.notCheckable = nil;
+	info.classicChecks = true;
 	UIDropDownMenu_AddButton(info);
 
 	-- Hide background option
@@ -1310,6 +1312,7 @@ function RaidPulloutDropDown_Initialize()
 	info.isTitle = nil;
 	info.disabled = nil;
 	info.notCheckable = nil;
+	info.classicChecks = true;
 	UIDropDownMenu_AddButton(info);
 
 	-- Close option

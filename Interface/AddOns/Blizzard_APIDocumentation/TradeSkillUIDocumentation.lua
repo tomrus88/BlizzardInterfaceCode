@@ -6,76 +6,6 @@ local TradeSkillUI =
 
 	Functions =
 	{
-		{
-			Name = "GetAllProfessionTradeSkillLines",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "skillLineID", Type = "table", InnerType = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "GetTradeSkillDisplayName",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "skillLineID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "professionDisplayName", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "GetTradeSkillLine",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "skillLineID", Type = "number", Nilable = false },
-				{ Name = "skillLineDisplayName", Type = "string", Nilable = false },
-				{ Name = "skillLineRank", Type = "number", Nilable = false },
-				{ Name = "skillLineMaxRank", Type = "number", Nilable = false },
-				{ Name = "skillLineModifier", Type = "number", Nilable = false },
-				{ Name = "parentSkillLineID", Type = "number", Nilable = true },
-				{ Name = "parentSkillLineDisplayName", Type = "string", Nilable = true },
-			},
-		},
-		{
-			Name = "GetTradeSkillLineInfoByID",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "skillLineID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "skillLineDisplayName", Type = "string", Nilable = false },
-				{ Name = "skillLineRank", Type = "number", Nilable = false },
-				{ Name = "skillLineMaxRank", Type = "number", Nilable = false },
-				{ Name = "skillLineModifier", Type = "number", Nilable = false },
-				{ Name = "parentSkillLineID", Type = "number", Nilable = true },
-			},
-		},
-		{
-			Name = "IsEmptySkillLineCategory",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "categoryID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "effectivelyKnown", Type = "bool", Nilable = false },
-			},
-		},
 	},
 
 	Events =
@@ -88,21 +18,6 @@ local TradeSkillUI =
 			{
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
-		},
-		{
-			Name = "ObliterumForgeClose",
-			Type = "Event",
-			LiteralName = "OBLITERUM_FORGE_CLOSE",
-		},
-		{
-			Name = "ObliterumForgePendingItemChanged",
-			Type = "Event",
-			LiteralName = "OBLITERUM_FORGE_PENDING_ITEM_CHANGED",
-		},
-		{
-			Name = "ObliterumForgeShow",
-			Type = "Event",
-			LiteralName = "OBLITERUM_FORGE_SHOW",
 		},
 		{
 			Name = "TradeSkillClose",
@@ -138,6 +53,11 @@ local TradeSkillUI =
 			Name = "TradeSkillShow",
 			Type = "Event",
 			LiteralName = "TRADE_SKILL_SHOW",
+		},
+		{
+			Name = "TradeSkillUpdate",
+			Type = "Event",
+			LiteralName = "TRADE_SKILL_UPDATE",
 		},
 		{
 			Name = "UpdateTradeskillRecast",

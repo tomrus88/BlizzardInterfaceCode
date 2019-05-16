@@ -26,7 +26,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<ItemButton parentKey="ItemButton" name="$parentItemButton">
+			<Button parentKey="ItemButton" name="$parentItemButton" inherits="ItemButtonTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parent"/>
 				</Anchors>
@@ -58,7 +58,7 @@
 						end
 					</OnHide>
 				</Scripts>
-			</ItemButton>
+			</Button>
 			<Frame name="$parentMoneyFrame" inherits="SmallMoneyFrameTemplate">
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativeTo="$parentNameFrame" relativePoint="BOTTOMLEFT">
@@ -370,7 +370,7 @@
 					</Layer>
 				</Layers>
 				<Frames>
-					<ItemButton parentKey="ItemButton" name="$parentItemButton">
+					<Button parentKey="ItemButton" name="$parentItemButton" inherits="ItemButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parent"/>
 						</Anchors>
@@ -398,7 +398,7 @@
 							</OnEnter>
 							<OnLeave function="GameTooltip_HideResetCursor"/>
 						</Scripts>
-					</ItemButton>
+					</Button>
 					<Frame name="$parentMoneyFrame" inherits="SmallMoneyFrameTemplate">
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" relativeTo="$parentNameFrame" relativePoint="BOTTOMLEFT" x="0" y="25"/>
@@ -411,19 +411,6 @@
 						</Scripts>
 					</Frame>
 				</Frames>
-			</Frame>
-			<Frame name="MerchantExtraCurrencyInset" inherits="InsetFrameTemplate" useParentLevel="true">
-				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="4" y="4"/>
-					<Anchor point="TOPRIGHT" relativePoint="BOTTOMLEFT" x="169" y="27"/>
-				</Anchors>
-			</Frame>
-			<Frame name="MerchantExtraCurrencyBg" inherits="ThinGoldEdgeTemplate" >
-				<Size x="120" y="30"/>
-				<Anchors>
-					<Anchor point="TOPRIGHT" relativePoint="BOTTOMLEFT" x="166" y="25"/>
-					<Anchor point="BOTTOMLEFT" x="7" y="6"/>
-				</Anchors>
 			</Frame>
 			<Frame name="MerchantMoneyInset" inherits="InsetFrameTemplate" useParentLevel="true">
 				<Anchors>
@@ -440,7 +427,7 @@
 			</Frame>
 			<Frame name="MerchantMoneyFrame" inherits="SmallMoneyFrameTemplate">
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativeTo="MerchantFrame" relativePoint="BOTTOMRIGHT" x="-6" y="10"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="MerchantFrame" relativePoint="BOTTOMRIGHT" x="-4" y="7"/>
 				</Anchors>
 			</Frame>
 			<Button name="MerchantPrevPageButton">
@@ -532,11 +519,7 @@
 					</OnClick>
                 </Scripts>
             </Button>
-			<Frame name="$parentLootFilter" inherits="UIDropDownMenuTemplate" enableMouse="true" parentKey="lootFilter">
-				<Anchors>
-					<Anchor point="TOPRIGHT" x="0" y="-28"/>
-				</Anchors>
-			</Frame>
+
 		</Frames>
 		<Scripts>
 			<OnHide function="MerchantFrame_OnHide"/>

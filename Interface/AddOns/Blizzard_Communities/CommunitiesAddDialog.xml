@@ -4,7 +4,7 @@
 	
 	<ScopedModifier forbidden="true" scriptsUseGivenEnv="true">
 		<Frame name="CommunitiesAddDialog" parent="UIParent" enableMouse="true" frameStrata="DIALOG" mixin="CommunitiesAddDialogMixin" hidden="true">
-			<Size x="514" y="426"/>
+			<Size x="514" y="326"/>
 			<Anchors>
 				<Anchor point="TOP" relativeTo="UIParent" x="0" y="-142"/>
 			</Anchors>
@@ -21,22 +21,10 @@
 							<Anchor point="TOP" x="0" y="-18"/>
 						</Anchors>
 					</FontString>
-					<FontString parentKey="CreateWoWCommunityLabel" text="COMMUNITIES_ADD_DIALOG_CREATE_WOW_LABEL" justifyH="LEFT" inherits="GameFontHighlightMedium">
-						<Size x="280" y="0"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" x="36" y="-80"/>
-						</Anchors>
-					</FontString>
-					<FontString parentKey="CreateWoWCommunityDescription" text="COMMUNITIES_ADD_DIALOG_CREATE_WOW_DESCRIPTION" justifyH="LEFT" inherits="GameFontNormal">
-						<Size x="280" y="0"/>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeKey="$parent.CreateWoWCommunityLabel" relativePoint="BOTTOMLEFT" x="0" y="-4"/>
-						</Anchors>
-					</FontString>
 					<FontString parentKey="CreateBattleNetGroupLabel" text="COMMUNITIES_ADD_DIALOG_CREATE_BNET_LABEL" justifyH="LEFT" inherits="GameFontHighlightMedium">
 						<Size x="280" y="0"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeKey="$parent.CreateWoWCommunityDescription" relativePoint="BOTTOMLEFT" x="0" y="-30"/>
+							<Anchor point="TOPLEFT" x="36" y="-80"/>
 						</Anchors>
 					</FontString>
 					<FontString parentKey="CreateBattleNetGroupDescription" text="COMMUNITIES_ADD_DIALOG_CREATE_BNET_DESCRIPTION" justifyH="LEFT" inherits="GameFontNormal">
@@ -49,7 +37,7 @@
 						<Size x="438" y="1"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.CreateBattleNetGroupDescription" relativePoint="LEFT" x="0" y="0"/>
-							<Anchor point="TOP" x="0" y="-290"/>
+							<Anchor point="TOP" x="0" y="-190"/>
 						</Anchors>
 						<Color r="1" g="1" b="1" a="0.2"/>
 					</Texture>
@@ -68,7 +56,7 @@
 				</Layer>
 			</Layers>
 			<Frames>
-				<EditBox parentKey="InviteLinkBox" autoFocus="false" inherits="InputBoxTemplate" letters="120">
+				<EditBox parentKey="InviteLinkBox" autoFocus="false" inherits="InputBoxTemplate">
 					<Size x="288" y="22"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeKey="$parent.InviteLinkDescription" relativePoint="BOTTOMLEFT" x="6" y="-13"/>
@@ -113,30 +101,6 @@
 					<Scripts>
 						<OnClick function="CommunitiesAddDialogJoinButton_OnClick"/>
 					</Scripts>
-				</Button>
-				<Button parentKey="CreateWoWCommunityButton" motionScriptsWhileDisabled="true">
-					<Size x="132" y="70"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.CreateWoWCommunityLabel" relativePoint="TOPRIGHT" x="20" y="0"/>
-					</Anchors>
-					<Layers>
-						<Layer level="OVERLAY">
-							<Texture parentKey="FactionIcon" atlas="communities-create-button-wow-horde" useAtlasSize="true">
-								<Anchors>
-									<Anchor point="RIGHT" x="-30" y="0"/>
-								</Anchors>
-							</Texture>
-						</Layer>
-					</Layers>
-					<Scripts>
-						<OnEnter function="CommunitiesAddDialogWoWButton_OnEnter"/>
-						<OnLeave function="CommunitiesAddDialogWoWButton_OnLeave"/>
-						<OnClick function="CommunitiesAddDialogWoWButton_OnClick"/>
-					</Scripts>
-					<NormalTexture atlas="communities-create-button-wow-up"/>
-					<PushedTexture atlas="communities-create-button-wow-down"/>
-					<HighlightTexture atlas="communities-create-button-highlight"/>
-					<DisabledTexture atlas="communities-create-button-wow-up" desaturated="true"/>
 				</Button>
 				<Button parentKey="CreateBattleNetGroupButton" motionScriptsWhileDisabled="true">
 					<Size x="116" y="67"/>

@@ -2,7 +2,9 @@
 ..\FrameXML\UI.xsd">
 	<Script file="GlueTemplates.lua"/>
 	<Button name="GlueCloseButton" virtual="true">
-		<Size x="32" y="32"/>
+		<Size>
+			<AbsDimension x="32" y="32"/>
+		</Size>
 		<Scripts>
 			<OnClick>
 				self:GetParent():Hide();

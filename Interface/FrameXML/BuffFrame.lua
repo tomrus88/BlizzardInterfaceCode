@@ -37,7 +37,6 @@ function BuffFrame_OnLoad(self)
 	self.BuffAlphaValue = 1;
 	self:RegisterUnitEvent("UNIT_AURA", "player", "vehicle");
 	self:RegisterEvent("GROUP_ROSTER_UPDATE");
-	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED");
 	self.numEnchants = 0;
 	self.bottomEdgeExtent = 0;
 end
@@ -299,7 +298,7 @@ function BuffFrame_UpdateAllBuffAnchors()
 		if ( (index > 1) and (mod(index, BUFFS_PER_ROW) == 1) ) then
 			-- New row
 			numAuraRows = numAuraRows + 1;
-			buff:SetPoint("TOPRIGHT", aboveBuff, "BOTTOMRIGHT", 0, -BUFF_ROW_SPACING);
+			buff:SetPoint("TOP", aboveBuff, "BOTTOM", 0, -BUFF_ROW_SPACING);
 			aboveBuff = buff;
 		elseif ( index == 1 ) then
 			numAuraRows = 1;
@@ -309,7 +308,6 @@ function BuffFrame_UpdateAllBuffAnchors()
 			if ( numBuffs == 1 ) then
 				if ( BuffFrame.numEnchants > 0 ) then
 					buff:SetPoint("TOPRIGHT", "TemporaryEnchantFrame", "TOPLEFT", BUFF_HORIZ_SPACING, 0);
-					aboveBuff = TemporaryEnchantFrame;
 				else
 					buff:SetPoint("TOPRIGHT", BuffFrame, "TOPRIGHT", 0, 0);
 				end

@@ -30,11 +30,6 @@ function UIWidgetTemplateTextWithStateMixin:Setup(widgetInfo)
 	self:SetHeight(self.Text:GetStringHeight());
 end
 
-function UIWidgetTemplateTextWithStateMixin:OnReset()
-	UIWidgetBaseTemplateMixin.OnReset(self);
-	self.fontColor = nil;
-end
-
 function UIWidgetTemplateTextWithStateMixin:SetFontStringColor(fontColor)
 	self.fontColor = fontColor;
 end

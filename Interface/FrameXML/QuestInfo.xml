@@ -577,14 +577,17 @@
 				<FontString name="QuestInfoTitleHeader" inherits="QuestTitleFont" justifyH="LEFT">
 					<Size x="285" y="0"/>
 				</FontString>
+				<FontString name="QuestInfoDescriptionText" inherits="QuestFont" justifyH="LEFT">
+					<Size x="270" y="0"/>
+				</FontString>
 				<FontString name="QuestInfoQuestType" inherits="QuestFont" justifyH="LEFT">
 					<Size x="285" y="0"/>
 				</FontString>
 				<FontString name="QuestInfoObjectivesText" inherits="QuestFont" justifyH="LEFT">
-					<Size x="285" y="0"/>
+					<Size x="270" y="0"/>
 				</FontString>
 				<FontString name="QuestInfoRewardText" inherits="QuestFont" justifyH="LEFT">
-					<Size x="285" y="0"/>
+					<Size x="275" y="0"/>
 				</FontString>
 				<FontString name="QuestInfoRequiredMoneyText" inherits="QuestFontNormalSmall" text="REQUIRED_MONEY" />
 				<FontString name="QuestInfoGroupSize" inherits="QuestFont" />
@@ -593,9 +596,6 @@
 					<Size x="285" y="0"/>
 				</FontString>
 				<FontString name="QuestInfoObjectivesHeader" inherits="QuestTitleFont" text="QUEST_OBJECTIVES"  justifyH="LEFT">
-					<Size x="285" y="0"/>
-				</FontString>
-				<FontString name="QuestInfoDescriptionText" inherits="QuestFont" justifyH="LEFT">
 					<Size x="285" y="0"/>
 				</FontString>
 			</Layer>

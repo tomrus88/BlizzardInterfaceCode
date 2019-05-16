@@ -102,16 +102,8 @@ end
 
 function GetCommunitiesErrorString(action, error, clubType)
 	local actionCodeString, errorCodeString;
-	if clubType ~= Enum.ClubType.BattleNet then
-		actionCodeString = GetActionString(action, true);
-		errorCodeString = GetErrorString(error, true);
-	end
-	if not actionCodeString then
-		actionCodeString = GetActionString(action, false);
-	end
-	if not errorCodeString then
-		errorCodeString = GetErrorString(error, false);
-	end
+	actionCodeString = GetActionString(action, false);
+	errorCodeString = GetErrorString(error, false);
 	if actionCodeString then
 		return actionCodeString:format(errorCodeString or "");
 	end

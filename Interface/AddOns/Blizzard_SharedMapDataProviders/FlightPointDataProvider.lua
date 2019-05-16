@@ -8,10 +8,6 @@ function FlightPointDataProviderMixin:RefreshAllData(fromOnShow)
 	self:RemoveAllData();
 
 	local mapID = self:GetMap():GetMapID();
-	if not C_TaxiMap.ShouldMapShowTaxiNodes(mapID) then
-		return;
-	end
-
 	local taxiNodes = C_TaxiMap.GetTaxiNodesForMap(mapID);
 
 	local factionGroup = UnitFactionGroup("player");

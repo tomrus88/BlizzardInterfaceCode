@@ -342,7 +342,7 @@ function RefreshPlayerSpellIconInfo()
 	-- We need to avoid adding duplicate spellIDs from the spellbook tabs for your other specs.
 	local activeIcons = {};
 	
-	for i = 1, GetNumSpellTabs() do
+	--[[for i = 1, GetNumSpellTabs() do
 		local tab, tabTex, offset, numSpells, _ = GetSpellTabInfo(i);
 		offset = offset + 1;
 		local tabEnd = offset + numSpells;
@@ -370,7 +370,7 @@ function RefreshPlayerSpellIconInfo()
 				end
 			end
 		end
-	end
+	end]]
 
 	MACRO_ICON_FILENAMES = { "INV_MISC_QUESTIONMARK" };
 	for fileDataID in pairs(activeIcons) do
@@ -378,9 +378,9 @@ function RefreshPlayerSpellIconInfo()
 	end
 
 	GetLooseMacroIcons( MACRO_ICON_FILENAMES );
-	GetLooseMacroItemIcons( MACRO_ICON_FILENAMES );
+	-- GetLooseMacroItemIcons( MACRO_ICON_FILENAMES );
 	GetMacroIcons( MACRO_ICON_FILENAMES );
-	GetMacroItemIcons( MACRO_ICON_FILENAMES );
+	-- GetMacroItemIcons( MACRO_ICON_FILENAMES );
 end
 
 function GetSpellorMacroIconInfo(index)

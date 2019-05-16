@@ -36,9 +36,8 @@ local AreaPoiInfo =
 			},
 		},
 		{
-			Name = "GetAreaPOISecondsLeft",
+			Name = "GetAreaPOITimeLeft",
 			Type = "Function",
-			Documentation = { "Returns the number of seconds until the POI expires." },
 
 			Arguments =
 			{
@@ -47,7 +46,7 @@ local AreaPoiInfo =
 
 			Returns =
 			{
-				{ Name = "secondsLeft", Type = "number", Nilable = false },
+				{ Name = "minutesLeft", Type = "number", Nilable = false },
 			},
 		},
 		{

@@ -417,30 +417,7 @@ AlertFrameMixin = {};
 function AlertFrameMixin:OnLoad()
 	AlertContainerMixin.OnLoad(self);
 
-	self:RegisterEvent("ACHIEVEMENT_EARNED");
-	self:RegisterEvent("CRITERIA_EARNED");
-	self:RegisterEvent("LFG_COMPLETION_REWARD");
-	self:RegisterEvent("SCENARIO_COMPLETED");
-	self:RegisterEvent("LOOT_ITEM_ROLL_WON");
-	self:RegisterEvent("SHOW_LOOT_TOAST");
-	self:RegisterEvent("SHOW_LOOT_TOAST_UPGRADE");
-	self:RegisterEvent("SHOW_PVP_FACTION_LOOT_TOAST");
-	self:RegisterEvent("SHOW_RATED_PVP_REWARD_TOAST");
-	self:RegisterEvent("PET_BATTLE_CLOSE");
 	self:RegisterEvent("STORE_PRODUCT_DELIVERED");
-	self:RegisterEvent("GARRISON_BUILDING_ACTIVATABLE");
-    self:RegisterEvent("GARRISON_TALENT_COMPLETE");
-	self:RegisterEvent("GARRISON_MISSION_FINISHED");
-	self:RegisterEvent("GARRISON_FOLLOWER_ADDED");
-	self:RegisterEvent("GARRISON_RANDOM_MISSION_ADDED");
-	self:RegisterEvent("NEW_RECIPE_LEARNED");
-	self:RegisterEvent("SHOW_LOOT_TOAST_LEGENDARY_LOOTED");
-	self:RegisterEvent("AZERITE_EMPOWERED_ITEM_LOOTED");
-	self:RegisterEvent("QUEST_TURNED_IN");
-	self:RegisterEvent("QUEST_LOOT_RECEIVED");
-	self:RegisterEvent("NEW_PET_ADDED");
-	self:RegisterEvent("NEW_MOUNT_ADDED");
-	self:RegisterEvent("NEW_TOY_ADDED");
 end
 
 function AlertFrameMixin:OnEvent(event, ...)
@@ -606,9 +583,6 @@ function AlertFrameMixin:OnEvent(event, ...)
 			-- May be invasion reward
 			InvasionAlertSystem:AddCoalesceData(questID, rewardItemLink, texture);
 		end
-	elseif ( event == "NEW_TOY_ADDED") then
-		local toyID = ...;
-		NewToyAlertSystem:AddAlert(toyID);
 	end
 end
 

@@ -20,13 +20,12 @@ local function WidgetsLayout(widgetContainer, sortedWidgets)
 		end
 	end
 
-	widgetContainer:SetHeight(math.max(widgetsHeight, 1));
-	widgetContainer:SetWidth(math.max(maxWidgetWidth, 1));
+	widgetContainer:SetHeight(widgetsHeight);
+	widgetContainer:SetWidth(maxWidgetWidth);
 	UIParent_ManageFramePositions();
 end
 
 function UIWidgetBelowMinimapContainerMixin:OnLoad()
-	UIWidgetContainerMixin.OnLoad(self);
 	local setID = C_UIWidgetManager.GetBelowMinimapWidgetSetID();
-	self:RegisterForWidgetSet(setID, WidgetsLayout);
+	UIWidgetManager:RegisterWidgetSetContainer(setID, self, WidgetsLayout);
 end

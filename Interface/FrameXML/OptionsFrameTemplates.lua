@@ -16,6 +16,7 @@ function OptionsList_OnLoad (self, buttonTemplate)
 	--Setup random things!
 	self.scrollFrame = _G[name .. "List"];
 	self:SetBackdropBorderColor(.6, .6, .6, 1);
+	_G[name.."Bottom"]:SetVertexColor(.66, .66, .66);
 
 	--Create buttons for scrolling
 	local buttons = {};
@@ -66,7 +67,7 @@ function OptionsList_DisplayButton (button, element)
 	-- Do display things
 	button:Show();
 	button.element = element;
-
+	
 	if (element.parent) then
 		button:SetNormalFontObject(GameFontHighlightSmall);
 		button:SetHighlightFontObject(GameFontHighlightSmall);
@@ -77,14 +78,14 @@ function OptionsList_DisplayButton (button, element)
 		button.text:SetPoint("LEFT", 8, 2);
 	end
 	button.text:SetText(element.name);
-
+	
 	if (element.hasChildren) then
 		if (element.collapsed) then
 			button.toggle:SetNormalTexture("Interface\\Buttons\\UI-PlusButton-UP");
 			button.toggle:SetPushedTexture("Interface\\Buttons\\UI-PlusButton-DOWN");
 		else
 			button.toggle:SetNormalTexture("Interface\\Buttons\\UI-MinusButton-UP");
-			button.toggle:SetPushedTexture("Interface\\Buttons\\UI-MinusButton-DOWN");
+			button.toggle:SetPushedTexture("Interface\\Buttons\\UI-MinusButton-DOWN");		
 		end
 		button.toggle:Show();
 	else
@@ -244,8 +245,8 @@ local function OptionsFrame_RunCancelForCategory (category)
 	pcall(category.cancel, category);
 end
 
-local function OptionsFrame_RunDefaultForCategory (category)
-	pcall(category.default, category);
+local function OptionsFrame_RunDefaultForCategory (category, classicDefaults)
+	pcall(category.default, category, nil, classicDefaults);
 end
 
 local function OptionsFrame_RunRefreshForCategory (category)
@@ -273,23 +274,23 @@ function OptionsFrameDefault_OnClick (self)
 	-- NOTE: defer setting defaults until a popup dialog button is clicked
 end
 
-function OptionsFrame_SetAllToDefaults (self)
+function OptionsFrame_SetAllToDefaults (self, classicDefaults)
 	--Iterate through registered panels and run their default methods in a taint-safe fashion
 	for _, category in SecureNext, self.categoryList do
-		securecall(OptionsFrame_RunDefaultForCategory, category);
+		securecall(OptionsFrame_RunDefaultForCategory, category, classicDefaults);
 	end
 
 	--Refresh the categories to pick up changes made.
 	OptionsFrame_RefreshCategories(self);
 end
 
-function OptionsFrame_SetCurrentToDefaults (self)
+function OptionsFrame_SetCurrentToDefaults (self, classicDefaults)
 	local displayedPanel = self.panelContainer.displayedPanel;
 	if ( not displayedPanel or not displayedPanel.default ) then
 		return;
 	end
 
-	displayedPanel.default(displayedPanel);
+	displayedPanel.default(displayedPanel, nil, classicDefaults);
 	--Run the refresh method to refresh any values that were changed.
 	displayedPanel.refresh(displayedPanel);
 end

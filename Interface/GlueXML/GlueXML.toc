@@ -1,11 +1,6 @@
-
-## first
-..\SharedXML\SharedConstants.lua
-
 ##DebugHook.lua
 ..\SharedXML\C_TimerAugment.lua
 ..\SharedXML\Util.lua
-..\SharedXML\TimeUtil.lua
 ..\SharedXML\AnchorUtil.xml
 ..\SharedXML\BindingUtil.lua
 ..\SharedXML\FrameUtil.lua
@@ -20,7 +15,6 @@ GlueFonts.xml
 GlueFontStyles.xml
 GlueLocalization.xml
 ..\SharedXML\LayoutFrame.xml
-..\SharedXML\PanelThemes.lua
 ..\SharedXML\SecureUIPanelTemplates.xml
 ..\SharedXML\SharedUIPanelTemplates.xml
 ..\SharedXML\SharedBasicControls.xml

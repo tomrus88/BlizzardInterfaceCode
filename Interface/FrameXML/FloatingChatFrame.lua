@@ -5,18 +5,18 @@ DOCK_COPY = {};
 
 MOVING_CHATFRAME = nil;
 
-CHAT_TAB_SHOW_DELAY = 0.2;
+CHAT_TAB_SHOW_DELAY = 0;
 CHAT_TAB_HIDE_DELAY = 1;
 CHAT_FRAME_FADE_TIME = 0.15;
 CHAT_FRAME_FADE_OUT_TIME = 2.0;
 CHAT_FRAME_BUTTON_FRAME_MIN_ALPHA = 0.2;
 
 CHAT_FRAME_TAB_SELECTED_MOUSEOVER_ALPHA = 1.0;
-CHAT_FRAME_TAB_SELECTED_NOMOUSE_ALPHA = 0.4;
+CHAT_FRAME_TAB_SELECTED_NOMOUSE_ALPHA = 0;
 CHAT_FRAME_TAB_ALERTING_MOUSEOVER_ALPHA = 1.0;
 CHAT_FRAME_TAB_ALERTING_NOMOUSE_ALPHA = 1.0;
 CHAT_FRAME_TAB_NORMAL_MOUSEOVER_ALPHA = 0.6;
-CHAT_FRAME_TAB_NORMAL_NOMOUSE_ALPHA = 0.2;
+CHAT_FRAME_TAB_NORMAL_NOMOUSE_ALPHA = 0;
 
 DEFAULT_CHATFRAME_ALPHA = 0.25;
 DEFAULT_CHATFRAME_COLOR = {r = 0, g = 0, b = 0};
@@ -39,7 +39,7 @@ CHAT_FRAME_TEXTURES = {
 	"TopTexture",
 	--"ResizeButton",
 
-	"ButtonFrameBackground",
+	--[["ButtonFrameBackground",
 	"ButtonFrameTopLeftTexture",
 	"ButtonFrameBottomLeftTexture",
 	"ButtonFrameTopRightTexture",
@@ -47,7 +47,7 @@ CHAT_FRAME_TEXTURES = {
 	"ButtonFrameLeftTexture",
 	"ButtonFrameRightTexture",
 	"ButtonFrameBottomTexture",
-	"ButtonFrameTopTexture",
+	"ButtonFrameTopTexture",]]
 }
 
 CHAT_FRAMES = {};
@@ -97,9 +97,9 @@ end
 function FloatingChatFrame_SetupScrolling(self)
 	FloatingChatFrame_UpdateBackgroundAnchors(self);
 
-	self:SetOnScrollChangedCallback(function(messageFrame, offset)
+	--[[self:SetOnScrollChangedCallback(function(messageFrame, offset)
 		messageFrame.ScrollBar:SetValue(messageFrame:GetNumMessages() - offset);
-	end);
+	end);]]
 
 	self:SetOnDisplayRefreshedCallback(FloatingChatFrame_UpdateScroll);
 	FloatingChatFrame_UpdateScroll(self);
@@ -122,13 +122,14 @@ end
 function FloatingChatFrame_OnMouseScroll(self, delta)
 	if ( delta > 0 ) then
 		self:ScrollUp();
+
 	else
 		self:ScrollDown();
 	end
 end
 
 function FloatingChatFrame_UpdateScroll(self)
-	local numMessages = self:GetNumMessages();
+	--[[local numMessages = self:GetNumMessages();
 	local isShown = numMessages > 1;
 	self.ScrollBar:SetShown(isShown);
 	if isShown then
@@ -140,7 +141,7 @@ function FloatingChatFrame_UpdateScroll(self)
 		if (self.hasBeenFaded) then
 			FCF_FadeInScrollbar(self);
 		end
-	end
+	end]]
 end
 
 function FCF_GetChatWindowInfo(id)
@@ -1190,7 +1191,7 @@ function FCF_OnUpdate(elapsed)
 				end
 			--Things that will cause the frame to fade in if the mouse is stationary.
 			elseif (chatFrame:IsMouseOver(topOffset, -2, -2, 2) or	--This should be slightly larger than the hit rect insets to give us some wiggle room.
-				(chatFrame.isDocked and QuickJoinToastButton:IsMouseOver()) or
+				--[[(chatFrame.isDocked and QuickJoinToastButton:IsMouseOver()) or]]
 				(chatFrame.ScrollBar and (chatFrame.ScrollBar:IsDraggingThumb() or chatFrame.ScrollBar:IsMouseOver())) or
 				(chatFrame.ScrollToBottomButton and chatFrame.ScrollToBottomButton:IsMouseOver()) or
 				(chatFrame.buttonFrame:IsMouseOver())) then
@@ -1438,9 +1439,9 @@ function FCF_SetButtonSide(chatFrame, buttonSide, forceUpdate)
 
 		ChatAlertFrame:SetChatButtonSide(buttonSide);
 
-		if ( QuickJoinToastButton ) then
+		--[[if ( QuickJoinToastButton ) then
 			QuickJoinToastButton:SetToastDirection(buttonSide == "right");
-		end
+		end]]
 	end
 end
 

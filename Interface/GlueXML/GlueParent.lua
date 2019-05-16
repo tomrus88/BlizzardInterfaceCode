@@ -18,6 +18,10 @@ GLUE_SECONDARY_SCREENS = {
 
 ACCOUNT_SUSPENDED_ERROR_CODE = 53;
 
+-- Mirror of the same variables in Blizzard_StoreUISecure.lua and UIParent.lua
+local WOW_GAMES_CATEGORY_ID = 33; 
+WOW_GAME_TIME_CATEGORY_ID = 37;
+
 local function OnDisplaySizeChanged(self)
 	local width = GetScreenWidth();
 	local height = GetScreenHeight();
@@ -69,7 +73,7 @@ function GlueParent_OnEvent(self, event, ...)
 		GlueParent_UpdateDialogs();
 		GlueParent_CheckCinematic();
 		if ( AccountLogin:IsVisible() ) then
-			SetExpansionLogo(AccountLogin.UI.GameLogo, GetClientDisplayExpansionLevel());
+			SetClassicLogo(AccountLogin.UI.GameLogo, GetClientDisplayExpansionLevel());
 		end
 	elseif ( event == "LOGIN_STATE_CHANGED" ) then
 		GlueParent_EnsureValidScreen();
@@ -425,6 +429,7 @@ local glueScreenTags =
 		["PANDAREN"] = "PANDARENCHARACTERSELECT",
 	},
 
+--[[
 	["charcreate"] =
 	{
 		-- Classes
@@ -439,6 +444,7 @@ local glueScreenTags =
 		["ALLIANCE"] = true,
 		["NEUTRAL"] = true,
 	},
+--]]
 
 	["default"] =
 	{
@@ -465,8 +471,6 @@ local glueScreenTags =
 		["HIGHMOUNTAINTAUREN"] = true,
 		["DARKIRONDWARF"] = true,
 		["MAGHARORC"] = true,
-		["ZANDALARITROLL"] = true,
-		["KULTIRAN"] = true,
 	},
 };
 
@@ -511,7 +515,7 @@ local function UpdateGlueTag()
 			class = classInfo.fileName;
 		end
 		local raceID = C_CharacterCreation.GetSelectedRace();
-		race = C_CharacterCreation.GetNameForRace(raceID);
+		race = select(2, C_CharacterCreation.GetNameForRace(raceID));
 		faction = C_CharacterCreation.GetFactionForRace(raceID);
 	end
 
@@ -616,6 +620,13 @@ function SetBackgroundModel(model, path)
 
 	ResetLighting(model);
 	UpdateLighting(model);
+
+	-- In 1.12, the Character Create screen shows fog but the Character Select screen doesn't.
+	-- (CCharacterSelection::SetBackgroundModel() sets the lighing back to GenericLightingCallback)
+	-- Showing fog on Character Select looks bad when the character is a ghost.
+	if ( model ~= CharacterCreate ) then
+		model:ClearFog();
+	end
 end
 
 -- =============================================================
@@ -672,8 +683,19 @@ function GetDisplayedExpansionLogo(expansionLevel)
 	return nil;
 end
 
+-- For Classic, most places should call "SetClassicLogo" instead.
 function SetExpansionLogo(texture, expansionLevel)
 	local logo = GetDisplayedExpansionLogo(expansionLevel);
+	if logo then
+		texture:SetTexture(logo);
+		texture:Show();
+	else
+		texture:Hide();
+	end
+end
+
+function SetClassicLogo(texture)
+	local logo = 'Interface\\Glues\\Common\\WOW_Classic-LogoHR';
 	if logo then
 		texture:SetTexture(logo);
 		texture:Show();

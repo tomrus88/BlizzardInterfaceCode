@@ -2,9 +2,7 @@ function CompactUnitFrameProfiles_OnLoad(self)
 	self:RegisterEvent("VARIABLES_LOADED");
 	self:RegisterEvent("COMPACT_UNIT_FRAME_PROFILES_LOADED");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
-	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED");
 	self:RegisterEvent("GROUP_JOINED");
-	self:RegisterEvent("GROUP_ROSTER_UPDATE");
 	
 	--Get this working with the InterfaceOptions panel.
 	self.name = COMPACT_UNIT_FRAME_PROFILES_LABEL;
@@ -30,10 +28,11 @@ function CompactUnitFrameProfiles_OnEvent(self, event, ...)
 		CompactUnitFrameProfiles_ValidateProfilesLoaded(self);
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then	--Check for zoning
 		CompactUnitFrameProfiles_CheckAutoActivation();
-	elseif ( event == "PLAYER_SPECIALIZATION_CHANGED" ) then	--Check for changing specs
-		CompactUnitFrameProfiles_CheckAutoActivation();
-	elseif ( event == "GROUP_JOINED" or event == "GROUP_ROSTER_UPDATE" ) then
-		CompactUnitFrameProfiles_CheckAutoActivation();
+	elseif ( event == "GROUP_JOINED" ) then
+		local partyCategory = ...;
+		if ( partyCategory == LE_PARTY_CATEGORY_INSTANCE ) then
+			CompactUnitFrameProfiles_CheckAutoActivation();
+		end
 	end
 end
 
@@ -266,14 +265,12 @@ function GetActiveRaidProfile()
 	return GetCVar("activeCUFProfile");
 end
 
-local autoActivateGroupSizes = { 2, 3, 5, 10, 15, 25, 40 };
-local countMap = {};	--Maps number of players to the category. (For example, so that AQ20 counts as a 25-man.)
-for i, autoActivateGroupSize in ipairs(autoActivateGroupSizes) do
-	local groupSizeStart = i > 1 and (autoActivateGroupSizes[i - 1] + 1) or 1;
-	for groupSize = groupSizeStart, autoActivateGroupSize do
-		countMap[groupSize] = autoActivateGroupSize;
-	end
-end
+local autoActivateGroupSizes = { 2, 3, 5, 10, 15, 20, 40 };
+local countMap = {};	--Maps number of players to the category.
+for i=1, 10 do countMap[i] = 10 end;
+for i=11, 15 do countMap[i] = 15 end;
+for i=16, 20 do countMap[i] = 20 end;
+for i=21, 40 do countMap[i] = 40 end;
 
 function CompactUnitFrameProfiles_GetAutoActivationState()
 	local name, instanceType, difficultyIndex, difficultyName, maxPlayers, dynamicDifficulty, isDynamic = GetInstanceInfo();
@@ -284,26 +281,30 @@ function CompactUnitFrameProfiles_GetAutoActivationState()
 	local numPlayers, profileType, enemyType;
 	
 	if ( instanceType == "party" or instanceType == "raid" ) then
-		numPlayers = maxPlayers > 0 and countMap[maxPlayers] or 5;
-		profileType = instanceType;
-		enemyType = "PvE";
-	elseif ( instanceType == "arena" ) then
-		numPlayers = countMap[GetNumGroupMembers()];
-		profileType = instanceType;
-		enemyType = "PvP";
-	elseif ( instanceType == "pvp" ) then
-		if ( IsRatedBattleground() ) then
-			numPlayers = 10;
+		if ( maxPlayers <= 5 ) then
+			numPlayers = 5;	--For 5-man dungeons.
 		else
 			numPlayers = countMap[maxPlayers];
 		end
-		
-		profileType = instanceType;
-		enemyType = "PvP";
+		profileType, enemyType = instanceType, "PvE";
+	elseif ( instanceType == "arena" ) then
+		local groupSize = GetNumGroupMembers(LE_PARTY_CATEGORY_HOME);
+		--TODO - Get the actual arena size, not just the # in party.
+		if ( groupSize <= 2 ) then
+			numPlayers, profileType, enemyType = 2, instanceType, "PvP";
+		elseif ( groupSize <= 3 ) then
+			numPlayers, profileType, enemyType = 3, instanceType, "PvP";
+		else
+			numPlayers, profileType, enemyType = 5, instanceType, "PvP";
+		end
+	elseif ( instanceType == "pvp" ) then
+		numPlayers, profileType, enemyType = countMap[maxPlayers], instanceType, "PvP";
 	else
-		numPlayers = countMap[GetNumGroupMembers()];
-		profileType = "world";
-		enemyType = "PvE";
+		if ( IsInRaid() ) then
+			numPlayers, profileType, enemyType = countMap[GetNumGroupMembers()], "world", "PvE";
+		else
+			numPlayers, profileType, enemyType = 5, "world", "PvE";
+		end
 	end
 	
 	if ( not numPlayers ) then
@@ -315,7 +316,7 @@ end
 
 local checkAutoActivationTimer;
 function CompactUnitFrameProfiles_CheckAutoActivation()
-	--We only want to adjust the profile when you 1) Zone or 2) change specs. We don't want to automatically
+	--We only want to adjust the profile when you zone. We don't want to automatically
 	--change the profile when you are in the uninstanced world.
 	if ( not IsInGroup() ) then
 		CompactUnitFrameProfiles_SetLastActivationType(nil, nil, nil, nil);
@@ -338,66 +339,45 @@ function CompactUnitFrameProfiles_CheckAutoActivation()
 		end
 	end
 		
-	local spec = GetSpecialization(false, false, 1);
-	local lastActivationType, lastNumPlayers, lastSpec, lastEnemyType = CompactUnitFrameProfiles_GetLastActivationType();
+	local lastActivationType, lastNumPlayers, lastEnemyType = CompactUnitFrameProfiles_GetLastActivationType();
+	if ( activationType == "world" ) then	--We don't adjust due to just the number of players in the raid.
+		return;
+	end
 	
-	if ( lastActivationType == activationType and lastNumPlayers == numPlayers and lastSpec == spec and lastEnemyType == enemyType ) then
+	if ( lastActivationType == activationType and lastNumPlayers == numPlayers and lastEnemyType == enemyType ) then
 		--If we last auto-adjusted for this same thing, we don't change. (In case they manually changed the profile.)
 		return;
 	end
 	
-	if ( CompactUnitFrameProfiles_ProfileMatchesAutoActivation(GetActiveRaidProfile(), numPlayers, spec, enemyType) ) then
-		CompactUnitFrameProfiles_SetLastActivationType(activationType, numPlayers, spec, enemyType);
+	if ( CompactUnitFrameProfiles_ProfileMatchesAutoActivation(GetActiveRaidProfile(), numPlayers, enemyType) ) then
+		CompactUnitFrameProfiles_SetLastActivationType(activationType, numPlayers, enemyType);
 	else
 		for i=1, GetNumRaidProfiles() do
 			local profile = GetRaidProfileName(i);
-			if ( CompactUnitFrameProfiles_ProfileMatchesAutoActivation(profile, numPlayers, spec, enemyType) ) then
+			if ( CompactUnitFrameProfiles_ProfileMatchesAutoActivation(profile, numPlayers, enemyType) ) then
 				CompactUnitFrameProfiles_ActivateRaidProfile(profile);
-				CompactUnitFrameProfiles_SetLastActivationType(activationType, numPlayers, spec, enemyType);
+				CompactUnitFrameProfiles_SetLastActivationType(activationType, numPlayers, enemyType);
 			end
 		end
 	end
 end
 
-function CompactUnitFrameProfiles_SetLastActivationType(activationType, numPlayers, spec, enemyType)
+function CompactUnitFrameProfiles_SetLastActivationType(activationType, numPlayers, enemyType)
 	CompactUnitFrameProfiles.lastActivationType = activationType;
 	CompactUnitFrameProfiles.lastNumPlayers = numPlayers;
-	CompactUnitFrameProfiles.lastSpec = spec;
 	CompactUnitFrameProfiles.lastEnemyType = enemyType;
 end
 
 function CompactUnitFrameProfiles_GetLastActivationType()
-	return CompactUnitFrameProfiles.lastActivationType, CompactUnitFrameProfiles.lastNumPlayers, 
-		CompactUnitFrameProfiles.lastSpec, CompactUnitFrameProfiles.lastEnemyType;
+	return CompactUnitFrameProfiles.lastActivationType, CompactUnitFrameProfiles.lastNumPlayers, CompactUnitFrameProfiles.lastEnemyType;
 end
 
-function CompactUnitFrameProfiles_ProfileMatchesAutoActivation(profile, numPlayers, spec, enemyType)
-	return GetRaidProfileOption(profile, "autoActivate"..numPlayers.."Players") and GetRaidProfileOption(profile, "autoActivateSpec"..spec) and
-		GetRaidProfileOption(profile, "autoActivate"..enemyType);
-end
-
-function CompactUnitFrameAutoActivateSpec_OnLoad(self)
-	CompactUnitFrameProfilesCheckButton_InitializeWidget(self, "autoActivateSpec"..self:GetID());
+function CompactUnitFrameProfiles_ProfileMatchesAutoActivation(profile, numPlayers, enemyType)
+	return GetRaidProfileOption(profile, "autoActivate"..numPlayers.."Players") and GetRaidProfileOption(profile, "autoActivate"..enemyType);
 end
 
 function CompactUnitFrameProfilesGeneralOptionsFrame_OnShow(self)
 	local height = 293;
-	local numSpecializations = GetNumSpecializations();
-	for i, option in ipairs(self.AutoActivateSpecs) do
-		if ( option:GetID() <= numSpecializations ) then
-			local specID, specName = GetSpecializationInfo(option:GetID());
-			option.label:SetText(specName);
-			option:Show();
-			height = height + 26;
-			if ( option:GetID() == numSpecializations ) then
-				self.AutoActivatePvP:ClearAllPoints();
-				self.AutoActivatePvP:SetPoint("TOPLEFT", option, "BOTTOMLEFT", 0, -15);
-			end
-		else
-			option:Hide();
-		end
-	end
-	
 	self.autoActivateBG:SetHeight(height);
 end
 
@@ -412,24 +392,15 @@ function CompactUnitFrameProfile_UpdateAutoActivationDisabledLabel()
 		end
 	end
 	
-	local hasTalentSpec = false;
-	if ( GetRaidProfileOption(profile, "autoActivateSpec1") or GetRaidProfileOption(profile, "autoActivateSpec2") or
-			GetRaidProfileOption(profile, "autoActivateSpec3") or GetRaidProfileOption(profile, "autoActivateSpec4") ) then
-		hasTalentSpec = true;
-	end
-	
 	local hasEnemyType = false;
 	if ( GetRaidProfileOption(profile, "autoActivatePvP") or GetRaidProfileOption(profile, "autoActivatePvE") ) then
 		hasEnemyType = true;
 	end
 	
-	if ( hasGroupSize == hasTalentSpec and hasTalentSpec == hasEnemyType ) then
+	if ( hasGroupSize == hasEnemyType ) then
 		CompactUnitFrameProfiles.optionsFrame.autoActivateDisabledLabel:Hide();
 	elseif ( not hasGroupSize ) then
 		CompactUnitFrameProfiles.optionsFrame.autoActivateDisabledLabel:SetText(AUTO_ACTIVATE_PROFILE_NO_SIZE);
-		CompactUnitFrameProfiles.optionsFrame.autoActivateDisabledLabel:Show();
-	elseif ( not hasTalentSpec ) then
-		CompactUnitFrameProfiles.optionsFrame.autoActivateDisabledLabel:SetText(AUTO_ACTIVATE_PROFILE_NO_TALENT);
 		CompactUnitFrameProfiles.optionsFrame.autoActivateDisabledLabel:Show();
 	elseif ( not hasEnemyType ) then
 		CompactUnitFrameProfiles.optionsFrame.autoActivateDisabledLabel:SetText(AUTO_ACTIVATE_PROFILE_NO_ENEMYTYPE);

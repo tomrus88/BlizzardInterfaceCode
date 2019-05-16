@@ -6,20 +6,6 @@ local PetInfo =
 
 	Functions =
 	{
-		{
-			Name = "GetPetTamersForMap",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "petTamers", Type = "table", InnerType = "PetTamerMapInfo", Nilable = false },
-			},
-		},
 	},
 
 	Events =
@@ -77,37 +63,10 @@ local PetInfo =
 			Type = "Event",
 			LiteralName = "PET_UI_CLOSE",
 		},
-		{
-			Name = "RaisedAsGhoul",
-			Type = "Event",
-			LiteralName = "RAISED_AS_GHOUL",
-		},
-		{
-			Name = "UpdatePossessBar",
-			Type = "Event",
-			LiteralName = "UPDATE_POSSESS_BAR",
-		},
-		{
-			Name = "UpdateVehicleActionbar",
-			Type = "Event",
-			LiteralName = "UPDATE_VEHICLE_ACTIONBAR",
-		},
 	},
 
 	Tables =
 	{
-		{
-			Name = "PetTamerMapInfo",
-			Type = "Structure",
-			Fields =
-			{
-				{ Name = "areaPoiID", Type = "number", Nilable = false },
-				{ Name = "position", Type = "table", Mixin = "Vector2DMixin", Nilable = false },
-				{ Name = "name", Type = "string", Nilable = false },
-				{ Name = "atlasName", Type = "string", Nilable = true },
-				{ Name = "textureIndex", Type = "number", Nilable = true },
-			},
-		},
 	},
 };
 

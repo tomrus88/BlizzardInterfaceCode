@@ -7,20 +7,6 @@ local ActionBarFrame =
 	Functions =
 	{
 		{
-			Name = "FindFlyoutActionButtons",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "flyoutID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "slots", Type = "table", InnerType = "number", Nilable = false },
-			},
-		},
-		{
 			Name = "FindPetActionButtons",
 			Type = "Function",
 
@@ -60,20 +46,6 @@ local ActionBarFrame =
 			Returns =
 			{
 				{ Name = "slots", Type = "table", InnerType = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "HasFlyoutActionButtons",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "flyoutID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "hasFlyoutActionButtons", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -161,24 +133,6 @@ local ActionBarFrame =
 			},
 		},
 		{
-			Name = "ShouldOverrideBarShowHealthBar",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "showHealthBar", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "ShouldOverrideBarShowManaBar",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "showManaBar", Type = "bool", Nilable = false },
-			},
-		},
-		{
 			Name = "ToggleAutoCastPetAction",
 			Type = "Function",
 
@@ -244,21 +198,6 @@ local ActionBarFrame =
 			Name = "UpdateBonusActionbar",
 			Type = "Event",
 			LiteralName = "UPDATE_BONUS_ACTIONBAR",
-		},
-		{
-			Name = "UpdateExtraActionbar",
-			Type = "Event",
-			LiteralName = "UPDATE_EXTRA_ACTIONBAR",
-		},
-		{
-			Name = "UpdateMultiCastActionbar",
-			Type = "Event",
-			LiteralName = "UPDATE_MULTI_CAST_ACTIONBAR",
-		},
-		{
-			Name = "UpdateOverrideActionbar",
-			Type = "Event",
-			LiteralName = "UPDATE_OVERRIDE_ACTIONBAR",
 		},
 	},
 

@@ -6,15 +6,6 @@ local Unit =
 	Functions =
 	{
 		{
-			Name = "PlayerVehicleHasComboPoints",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "vehicleHasComboPoints", Type = "bool", Nilable = false },
-			},
-		},
-		{
 			Name = "SetPortraitTexture",
 			Type = "Function",
 
@@ -32,21 +23,6 @@ local Unit =
 			{
 				{ Name = "textureObject", Type = "table", Nilable = false },
 				{ Name = "creatureDisplayID", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "UnitAlliedRaceInfo",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "unit", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "isAlliedRace", Type = "bool", Nilable = false },
-				{ Name = "hasHeritageArmorUnlocked", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -110,48 +86,6 @@ local Unit =
 			},
 		},
 		{
-			Name = "UnitIsWarModeActive",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "unit", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "warModeActive", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "UnitIsWarModeDesired",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "unit", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "warModeDesired", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "UnitIsWarModePhased",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "unit", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "warModePhased", Type = "bool", Nilable = false },
-			},
-		},
-		{
 			Name = "UnitPower",
 			Type = "Function",
 
@@ -198,20 +132,6 @@ local Unit =
 			},
 		},
 		{
-			Name = "UnitPvpClassification",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "unit", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "classification", Type = "PvpUnitClassification", Nilable = true },
-			},
-		},
-		{
 			Name = "UnitSex",
 			Type = "Function",
 
@@ -225,57 +145,10 @@ local Unit =
 				{ Name = "sex", Type = "number", Nilable = true },
 			},
 		},
-		{
-			Name = "UnitTreatAsPlayerForDisplay",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "unit", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "treatAsPlayer", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "UnitWidgetSet",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "unit", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "uiWidgetSet", Type = "number", Nilable = false },
-			},
-		},
 	},
 
 	Events =
 	{
-		{
-			Name = "ArenaCooldownsUpdate",
-			Type = "Event",
-			LiteralName = "ARENA_COOLDOWNS_UPDATE",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "ArenaCrowdControlSpellUpdate",
-			Type = "Event",
-			LiteralName = "ARENA_CROWD_CONTROL_SPELL_UPDATE",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-				{ Name = "spellID", Type = "number", Nilable = false },
-			},
-		},
 		{
 			Name = "AutofollowBegin",
 			Type = "Event",
@@ -320,36 +193,9 @@ local Unit =
 			LiteralName = "HEARTHSTONE_BOUND",
 		},
 		{
-			Name = "HonorXpUpdate",
-			Type = "Event",
-			LiteralName = "HONOR_XP_UPDATE",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
 			Name = "IncomingResurrectChanged",
 			Type = "Event",
 			LiteralName = "INCOMING_RESURRECT_CHANGED",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "IncomingSummonChanged",
-			Type = "Event",
-			LiteralName = "INCOMING_SUMMON_CHANGED",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "KnownTitlesUpdate",
-			Type = "Event",
-			LiteralName = "KNOWN_TITLES_UPDATE",
 			Payload =
 			{
 				{ Name = "unitTarget", Type = "string", Nilable = false },
@@ -391,15 +237,6 @@ local Unit =
 			Payload =
 			{
 				{ Name = "timerName", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "NeutralFactionSelectResult",
-			Type = "Event",
-			LiteralName = "NEUTRAL_FACTION_SELECT_RESULT",
-			Payload =
-			{
-				{ Name = "success", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -459,11 +296,6 @@ local Unit =
 			},
 		},
 		{
-			Name = "PlayerFocusChanged",
-			Type = "Event",
-			LiteralName = "PLAYER_FOCUS_CHANGED",
-		},
-		{
 			Name = "PlayerLeaveCombat",
 			Type = "Event",
 			LiteralName = "PLAYER_LEAVE_COMBAT",
@@ -493,6 +325,7 @@ local Unit =
 				{ Name = "agilityDelta", Type = "number", Nilable = false },
 				{ Name = "staminaDelta", Type = "number", Nilable = false },
 				{ Name = "intellectDelta", Type = "number", Nilable = false },
+				{ Name = "spiritDelta", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -529,15 +362,6 @@ local Unit =
 			LiteralName = "PLAYER_REGEN_ENABLED",
 		},
 		{
-			Name = "PlayerSpecializationChanged",
-			Type = "Event",
-			LiteralName = "PLAYER_SPECIALIZATION_CHANGED",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
 			Name = "PlayerStartedMoving",
 			Type = "Event",
 			LiteralName = "PLAYER_STARTED_MOVING",
@@ -551,6 +375,15 @@ local Unit =
 			Name = "PlayerTargetChanged",
 			Type = "Event",
 			LiteralName = "PLAYER_TARGET_CHANGED",
+		},
+		{
+			Name = "PlayerTargetSetAttacking",
+			Type = "Event",
+			LiteralName = "PLAYER_TARGET_SET_ATTACKING",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "PlayerTrialXpUpdate",
@@ -581,15 +414,6 @@ local Unit =
 			LiteralName = "PORTRAITS_UPDATED",
 		},
 		{
-			Name = "ProvingGroundsScoreUpdate",
-			Type = "Event",
-			LiteralName = "PROVING_GROUNDS_SCORE_UPDATE",
-			Payload =
-			{
-				{ Name = "points", Type = "number", Nilable = false },
-			},
-		},
-		{
 			Name = "PvpTimerUpdate",
 			Type = "Event",
 			LiteralName = "PVP_TIMER_UPDATE",
@@ -597,21 +421,6 @@ local Unit =
 			{
 				{ Name = "unitTarget", Type = "string", Nilable = false },
 			},
-		},
-		{
-			Name = "RunePowerUpdate",
-			Type = "Event",
-			LiteralName = "RUNE_POWER_UPDATE",
-			Payload =
-			{
-				{ Name = "runeIndex", Type = "number", Nilable = false },
-				{ Name = "added", Type = "bool", Nilable = true },
-			},
-		},
-		{
-			Name = "ShowFactionSelectUi",
-			Type = "Event",
-			LiteralName = "SHOW_FACTION_SELECT_UI",
 		},
 		{
 			Name = "SpellConfirmationPrompt",
@@ -636,15 +445,6 @@ local Unit =
 			{
 				{ Name = "spellID", Type = "number", Nilable = false },
 				{ Name = "effectValue", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "UnitAbsorbAmountChanged",
-			Type = "Event",
-			LiteralName = "UNIT_ABSORB_AMOUNT_CHANGED",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
 			},
 		},
 		{
@@ -766,18 +566,9 @@ local Unit =
 			},
 		},
 		{
-			Name = "UnitHealAbsorbAmountChanged",
+			Name = "UnitHappiness",
 			Type = "Event",
-			LiteralName = "UNIT_HEAL_ABSORB_AMOUNT_CHANGED",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "UnitHealPrediction",
-			Type = "Event",
-			LiteralName = "UNIT_HEAL_PREDICTION",
+			LiteralName = "UNIT_HAPPINESS",
 			Payload =
 			{
 				{ Name = "unitTarget", Type = "string", Nilable = false },
@@ -887,6 +678,15 @@ local Unit =
 			Name = "UnitPetExperience",
 			Type = "Event",
 			LiteralName = "UNIT_PET_EXPERIENCE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
+		},
+		{
+			Name = "UnitPetTrainingPoints",
+			Type = "Event",
+			LiteralName = "UNIT_PET_TRAINING_POINTS",
 			Payload =
 			{
 				{ Name = "unitTarget", Type = "string", Nilable = false },
@@ -1080,24 +880,6 @@ local Unit =
 			},
 		},
 		{
-			Name = "UnitSpellcastInterruptible",
-			Type = "Event",
-			LiteralName = "UNIT_SPELLCAST_INTERRUPTIBLE",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "UnitSpellcastNotInterruptible",
-			Type = "Event",
-			LiteralName = "UNIT_SPELLCAST_NOT_INTERRUPTIBLE",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
 			Name = "UnitSpellcastStart",
 			Type = "Event",
 			LiteralName = "UNIT_SPELLCAST_START",
@@ -1158,24 +940,6 @@ local Unit =
 			},
 		},
 		{
-			Name = "UnitThreatListUpdate",
-			Type = "Event",
-			LiteralName = "UNIT_THREAT_LIST_UPDATE",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "UnitThreatSituationUpdate",
-			Type = "Event",
-			LiteralName = "UNIT_THREAT_SITUATION_UPDATE",
-			Payload =
-			{
-				{ Name = "unitTarget", Type = "string", Nilable = false },
-			},
-		},
-		{
 			Name = "UpdateExhaustion",
 			Type = "Event",
 			LiteralName = "UPDATE_EXHAUSTION",
@@ -1189,16 +953,6 @@ local Unit =
 			Name = "UpdateStealth",
 			Type = "Event",
 			LiteralName = "UPDATE_STEALTH",
-		},
-		{
-			Name = "VehicleAngleUpdate",
-			Type = "Event",
-			LiteralName = "VEHICLE_ANGLE_UPDATE",
-			Payload =
-			{
-				{ Name = "normalizedPitch", Type = "number", Nilable = false },
-				{ Name = "radians", Type = "number", Nilable = false },
-			},
 		},
 	},
 
@@ -1218,7 +972,7 @@ local Unit =
 				{ Name = "Rage", Type = "PowerType", EnumValue = 1 },
 				{ Name = "Focus", Type = "PowerType", EnumValue = 2 },
 				{ Name = "Energy", Type = "PowerType", EnumValue = 3 },
-				{ Name = "ComboPoints", Type = "PowerType", EnumValue = 4 },
+				{ Name = "Happiness", Type = "PowerType", EnumValue = 4 },
 				{ Name = "Runes", Type = "PowerType", EnumValue = 5 },
 				{ Name = "RunicPower", Type = "PowerType", EnumValue = 6 },
 				{ Name = "SoulShards", Type = "PowerType", EnumValue = 7 },
@@ -1228,33 +982,12 @@ local Unit =
 				{ Name = "Maelstrom", Type = "PowerType", EnumValue = 11 },
 				{ Name = "Chi", Type = "PowerType", EnumValue = 12 },
 				{ Name = "Insanity", Type = "PowerType", EnumValue = 13 },
-				{ Name = "Obsolete", Type = "PowerType", EnumValue = 14 },
+				{ Name = "ComboPoints", Type = "PowerType", EnumValue = 14 },
 				{ Name = "Obsolete2", Type = "PowerType", EnumValue = 15 },
 				{ Name = "ArcaneCharges", Type = "PowerType", EnumValue = 16 },
 				{ Name = "Fury", Type = "PowerType", EnumValue = 17 },
 				{ Name = "Pain", Type = "PowerType", EnumValue = 18 },
 				{ Name = "NumPowerTypes", Type = "PowerType", EnumValue = 19 },
-			},
-		},
-		{
-			Name = "PvpUnitClassification",
-			Type = "Enumeration",
-			NumValues = 11,
-			MinValue = 0,
-			MaxValue = 10,
-			Fields =
-			{
-				{ Name = "FlagCarrierHorde", Type = "PvpUnitClassification", EnumValue = 0 },
-				{ Name = "FlagCarrierAlliance", Type = "PvpUnitClassification", EnumValue = 1 },
-				{ Name = "FlagCarrierNeutral", Type = "PvpUnitClassification", EnumValue = 2 },
-				{ Name = "CartRunnerHorde", Type = "PvpUnitClassification", EnumValue = 3 },
-				{ Name = "CartRunnerAlliance", Type = "PvpUnitClassification", EnumValue = 4 },
-				{ Name = "AssassinHorde", Type = "PvpUnitClassification", EnumValue = 5 },
-				{ Name = "AssassinAlliance", Type = "PvpUnitClassification", EnumValue = 6 },
-				{ Name = "OrbCarrierBlue", Type = "PvpUnitClassification", EnumValue = 7 },
-				{ Name = "OrbCarrierGreen", Type = "PvpUnitClassification", EnumValue = 8 },
-				{ Name = "OrbCarrierOrange", Type = "PvpUnitClassification", EnumValue = 9 },
-				{ Name = "OrbCarrierPurple", Type = "PvpUnitClassification", EnumValue = 10 },
 			},
 		},
 	},

@@ -236,7 +236,9 @@
 				<xs:element name="Offset" type="Dimension"/>
 			</xs:choice>
 		</xs:sequence>
-	</xs:complexType>
+    <xs:attribute name="x" type="xs:float"/>
+    <xs:attribute name="y" type="xs:float"/>
+  </xs:complexType>
 
 	<xs:complexType name="GradientType">
 		<xs:sequence>
@@ -1061,16 +1063,6 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:element name="Cooldown" type="CooldownType" substitutionGroup="ui:Frame"/>
-
-	<xs:complexType name="QuestPOIFrameType">
-		<xs:complexContent>
-			<xs:extension base="FrameType">
-				<xs:attribute name="filltexture" type="xs:string"/>
-				<xs:attribute name="bordertexture" type="xs:string"/>
-			</xs:extension>
-		</xs:complexContent>
-	</xs:complexType>
-	<xs:element name="QuestPOIFrame" type="QuestPOIFrameType" substitutionGroup="ui:Frame"/>
 
 	<xs:complexType name="ArchaeologyDigSiteFrameType">
 		<xs:complexContent>

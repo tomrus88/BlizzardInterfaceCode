@@ -43,25 +43,6 @@ local Bank =
 				{ Name = "slot", Type = "number", Nilable = false },
 			},
 		},
-		{
-			Name = "PlayerreagentbankslotsChanged",
-			Type = "Event",
-			LiteralName = "PLAYERREAGENTBANKSLOTS_CHANGED",
-			Payload =
-			{
-				{ Name = "slot", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "ReagentbankPurchased",
-			Type = "Event",
-			LiteralName = "REAGENTBANK_PURCHASED",
-		},
-		{
-			Name = "ReagentbankUpdate",
-			Type = "Event",
-			LiteralName = "REAGENTBANK_UPDATE",
-		},
 	},
 
 	Tables =

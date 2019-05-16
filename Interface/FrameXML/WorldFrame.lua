@@ -115,7 +115,7 @@ function ActionStatus_OnEvent(self, event, ...)
 end
 
 function ActionStatus_DisplayMessage(text, ignoreNewbieTooltipSetting)
-	if ( ignoreNewbieTooltipSetting or SHOW_NEWBIE_TIPS == "1" ) then
+	if ( ignoreNewbieTooltipSetting or GetCVar("showNewbieTips") == "1" ) then
 		local self = ActionStatus;
 		self.startTime = GetTime();
 		self:SetAlpha(1.0);

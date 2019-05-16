@@ -92,7 +92,7 @@ function WorldMapTrackingOptionsButtonMixin:OnSelection(value, checked)
 		SetCVar(value, checked and "1" or "0");
 	elseif (value == "worldQuestFilterResources" or value == "worldQuestFilterArtifactPower" or
 			value == "worldQuestFilterProfessionMaterials" or value == "worldQuestFilterGold" or
-			value == "worldQuestFilterEquipment" or value == "worldQuestFilterReputation") then
+			value == "worldQuestFilterEquipment") then
 		-- World quest reward filter cvars
 		SetCVar(value, checked and "1" or "0");
 	end
@@ -123,20 +123,20 @@ function WorldMapTrackingOptionsButtonMixin:InitializeDropDown()
 	info.checked = GetCVarBool("questPOI");
 	UIDropDownMenu_AddButton(info);
 
-	local prof1, prof2, arch, fish, cook, firstAid = GetProfessions();
+	--[[local prof1, prof2, arch, fish, cook, firstAid = GetProfessions();
 	if arch then
 		info.text = ARCHAEOLOGY_SHOW_DIG_SITES;
 		info.value = "digsites";
 		info.checked = GetCVarBool("digSites");
 		UIDropDownMenu_AddButton(info);
-	end
+	end]]
 
-	if CanTrackBattlePets() then
+	--[[if CanTrackBattlePets() then
 		info.text = SHOW_PET_BATTLES_ON_MAP_TEXT;
 		info.value = "tamers";
 		info.checked = GetCVarBool("showTamers");
 		UIDropDownMenu_AddButton(info);
-	end
+	end]]
 
 	-- If we aren't on a map which has emissaries don't show the world quest reward filter options.
 	local mapID = self:GetParent():GetMapID();
@@ -197,11 +197,6 @@ function WorldMapTrackingOptionsButtonMixin:InitializeDropDown()
 	info.text = WORLD_QUEST_REWARD_FILTERS_EQUIPMENT;
 	info.value = "worldQuestFilterEquipment";
 	info.checked = GetCVarBool("worldQuestFilterEquipment");
-	UIDropDownMenu_AddButton(info);
-	
-	info.text = WORLD_QUEST_REWARD_FILTERS_REPUTATION;
-	info.value = "worldQuestFilterReputation";
-	info.checked = GetCVarBool("worldQuestFilterReputation");
 	UIDropDownMenu_AddButton(info);
 end
 
@@ -283,19 +278,19 @@ function WorldMapSidePanelToggleMixin:OnClick()
 end
 
 function WorldMapSidePanelToggleMixin:Refresh()
-	if self:GetParent():IsSidePanelShown() then
+	--[[if self:GetParent():IsSidePanelShown() then
 		self.OpenButton:Hide();
 		self.CloseButton:Show();
-	else
+	else]]
 		self.OpenButton:Show();
 		self.CloseButton:Hide();
-	end
+	--end
 end
 
 WorldMapZoneTimerMixin = {};
 
 function WorldMapZoneTimerMixin:OnUpdate(elapsed)
-	local nextBattleTime = C_PvP.GetOutdoorPvPWaitTime(self:GetParent():GetMapID());
+	--[[local nextBattleTime = C_PvP.GetOutdoorPvPWaitTime(self:GetParent():GetMapID());
 	if nextBattleTime and not IsInInstance() then
 		local battleSec = nextBattleTime % 60;
 		local battleMin = math.floor(nextBattleTime / 60) % 60;
@@ -304,7 +299,7 @@ function WorldMapZoneTimerMixin:OnUpdate(elapsed)
 		self.TimeLabel:Show();
 	else
 		self.TimeLabel:Hide();
-	end
+	end]]
 end
 
 function WorldMapZoneTimerMixin:Refresh()

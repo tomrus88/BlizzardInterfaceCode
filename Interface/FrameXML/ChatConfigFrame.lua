@@ -654,6 +654,13 @@ COMBAT_CONFIG_MESSAGETYPES_MISC = {
 		func = function (self, checked) ToggleMessageType(checked, "UNIT_DIED", "UNIT_DESTROYED", "UNIT_DISSIPATES"); end;
 		tooltip = DEATHS_COMBATLOG_TOOLTIP,
 	},
+	[5] = {
+		text = PET_LOYALTY,
+		type = {"UNIT_LOYALTY"};
+		checked = function () return HasMessageType("UNIT_LOYALTY"); end;
+		func = function (self, checked) ToggleMessageType(checked, "UNIT_LOYALTY"); end;
+		tooltip = UNIT_LOYALTY_COMBATLOG_TOOLTIP,
+	},
 };
 COMBAT_CONFIG_UNIT_COLORS = {
 	[1] = {
@@ -719,7 +726,6 @@ function ChatConfigFrame_OnEvent(self, event, ...)
 		ChatConfig_UpdateCombatTabs(1);
 	elseif ( event == "CHANNEL_UI_UPDATE" ) then
 		ChatConfigCategory_UpdateEnabled();
-		ChatConfig_UpdateChatSettings();
 	end
 end
 
@@ -1625,11 +1631,6 @@ function ChatConfigCombat_OnShow()
 	UpdateDefaultButtons(true);
 end
 
-function ChatConfigCombat_OnHide()
-	ChatConfigBackgroundFrame:SetPoint("TOPLEFT", ChatConfigCategoryFrame, "TOPRIGHT", 1, 0);
-	ChatConfig_HideCombatTabs();
-end
-
 function ChatConfig_UpdateFilterList()
 	local index;
 	local offset = FauxScrollFrame_GetOffset(ChatConfigCombatSettingsFiltersScrollFrame);
@@ -1717,13 +1718,6 @@ function ChatConfig_UpdateChatSettings()
 	ChatConfig_UpdateCheckboxes(ChatConfigOtherSettingsPVP);
 	ChatConfig_UpdateCheckboxes(ChatConfigOtherSettingsSystem);
 	ChatConfig_UpdateCheckboxes(ChatConfigOtherSettingsCreature);
-	
-	ChatConfigFrame.ChatTabManager:UpdateTabDisplay();
-end
-
-function ChatConfig_ResetChatSettings()
-	C_ChatInfo.ResetDefaultZoneChannels();
-	ChatConfig_UpdateChatSettings();
 end
 
 function UsesGUID(direction)
@@ -1958,8 +1952,7 @@ function ChatConfigFrame_PlayCheckboxSound (checked)
 end
 
 function ChatConfigCategoryFrame_Refresh(preserveCategorySelection)
-	local currentChatFrame = FCF_GetCurrentChatFrame();
-	if ( currentChatFrame ~= nil and IsCombatLog(currentChatFrame) ) then
+	if ( IsCombatLog(FCF_GetCurrentChatFrame()) ) then
 		ChatConfigCategoryFrameButton2:Show();
 		ChatConfigCategoryFrameButton3:SetPoint("TOPLEFT", ChatConfigCategoryFrameButton2, "BOTTOMLEFT", 0, -1);
 		ChatConfigCategoryFrameButton3:SetPoint("TOPRIGHT", ChatConfigCategoryFrameButton2, "BOTTOMRIGHT", 0, -1);
@@ -1972,43 +1965,35 @@ function ChatConfigCategoryFrame_Refresh(preserveCategorySelection)
 			ChatConfigCategory_OnClick(ChatConfigCategoryFrameButton1);
 		end
 	end
-	ChatConfigFrameHeaderText:SetText(currentChatFrame ~= nil and CHATCONFIG_HEADER:format(currentChatFrame.name) or "");
+	ChatConfigFrameHeaderText:SetText(format(CHATCONFIG_HEADER, FCF_GetCurrentChatFrame().name));
 	ChatConfigFrameHeader:SetWidth(ChatConfigFrameHeaderText:GetWidth()+200);
 	ChatConfigCategory_UpdateEnabled();
 end
 
 function ChatConfig_RefreshCurrentChatCategory(preserveCategorySelection)
 	if _G[CHAT_CONFIG_CATEGORIES[1]]:IsShown() then
-		ChatConfigChatSettings_UpdateCheckboxes();
-	-- The combat category is only in 1 chat frame so we don't need to update its checkboxes on a refresh.
-	--elseif _G[CHAT_CONFIG_CATEGORIES[2]]:IsShown() then
+		ChatConfigChatSettings_OnShow();
+	elseif _G[CHAT_CONFIG_CATEGORIES[2]]:IsShown() then
+		ChatConfigCombat_OnShow();
 	elseif _G[CHAT_CONFIG_CATEGORIES[3]]:IsShown() then
-		ChatConfigChannelSettings_UpdateCheckboxes();
+		ChatConfigChannelSettings_OnShow();
 	elseif _G[CHAT_CONFIG_CATEGORIES[4]]:IsShown() then
-		ChatConfigOtherSettings_UpdateCheckboxes();
+		ChatConfigOtherSettings_OnShow();
 	end
 	
 	ChatConfigCategoryFrame_Refresh(preserveCategorySelection);
 end
 
-function ChatConfigChatSettings_UpdateCheckboxes()
-	ChatConfig_UpdateCheckboxes(ChatConfigChatSettingsLeft);
-end
-
 function ChatConfigChatSettings_OnShow()
-	ChatConfigChatSettings_UpdateCheckboxes();
+	ChatConfig_UpdateCheckboxes(ChatConfigChatSettingsLeft);
 	UpdateDefaultButtons(false);
-end
-
-function ChatConfigChannelSettings_UpdateCheckboxes()
-	ChatConfig_UpdateCheckboxes(ChatConfigChannelSettingsLeft);
 end
 
 function ChatConfigChannelSettings_OnShow()
 	-- Have to build it here since the channel list doesn't exist on load
 	CreateChatChannelList(ChatConfigChannelSettings, GetChannelList());
 	ChatConfig_CreateCheckboxes(ChatConfigChannelSettingsLeft, CHAT_CONFIG_CHANNEL_LIST, "MovableChatConfigWideCheckBoxWithSwatchTemplate", CHAT_CONFIG_CHANNEL_SETTINGS_TITLE_WITH_DRAG_INSTRUCTIONS);
-	ChatConfigChannelSettings_UpdateCheckboxes();
+	ChatConfig_UpdateCheckboxes(ChatConfigChannelSettingsLeft);
 	UpdateDefaultButtons(false);
 end
 
@@ -2017,7 +2002,7 @@ function ChatConfigChannelSettings_MoveChannelDown(channelIndex)
 		return;
 	end
 	
-	C_ChatInfo.SwapChatChannelsByChannelIndex(channelIndex, channelIndex + 1);
+	SwapChatChannelByLocalID(CHAT_CONFIG_CHANNEL_LIST[channelIndex].channelID, CHAT_CONFIG_CHANNEL_LIST[channelIndex + 1].channelID);
 	CreateChatChannelList(ChatConfigChannelSettings, GetChannelList());
 	ChatConfig_CreateCheckboxes(ChatConfigChannelSettingsLeft, CHAT_CONFIG_CHANNEL_LIST, "ChatConfigWideCheckBoxWithSwatchTemplate", CHAT_CONFIG_CHANNEL_SETTINGS_TITLE_WITH_DRAG_INSTRUCTIONS);
 	ChatConfig_UpdateCheckboxes(ChatConfigChannelSettingsLeft);
@@ -2028,21 +2013,17 @@ function ChatConfigChannelSettings_MoveChannelUp(channelIndex)
 		return;
 	end
 	
-	C_ChatInfo.SwapChatChannelsByChannelIndex(channelIndex, channelIndex - 1);
+	SwapChatChannelByLocalID(CHAT_CONFIG_CHANNEL_LIST[channelIndex].channelID, CHAT_CONFIG_CHANNEL_LIST[channelIndex - 1].channelID);
 	CreateChatChannelList(ChatConfigChannelSettings, GetChannelList());
 	ChatConfig_CreateCheckboxes(ChatConfigChannelSettingsLeft, CHAT_CONFIG_CHANNEL_LIST, "ChatConfigWideCheckBoxWithSwatchTemplate", CHAT_CONFIG_CHANNEL_SETTINGS_TITLE_WITH_DRAG_INSTRUCTIONS);
 	ChatConfig_UpdateCheckboxes(ChatConfigChannelSettingsLeft);
 end
 
-function ChatConfigOtherSettings_UpdateCheckboxes()
+function ChatConfigOtherSettings_OnShow()
 	ChatConfig_UpdateCheckboxes(ChatConfigOtherSettingsCombat);
 	ChatConfig_UpdateCheckboxes(ChatConfigOtherSettingsPVP);
 	ChatConfig_UpdateCheckboxes(ChatConfigOtherSettingsSystem);
 	ChatConfig_UpdateCheckboxes(ChatConfigOtherSettingsCreature);
-end
-
-function ChatConfigOtherSettings_OnShow()
-	ChatConfigOtherSettings_UpdateCheckboxes();
 	UpdateDefaultButtons(false);
 end
 
@@ -2085,10 +2066,6 @@ function ChatConfigFrameTabManagerMixin:OnLoad()
 end
 
 function ChatConfigFrameTabManagerMixin:OnShow()
-	self:UpdateTabDisplay();
-end
-
-function ChatConfigFrameTabManagerMixin:UpdateTabDisplay()
 	self.tabPool:ReleaseAll();
 	
 	local lastTab = nil;
@@ -2266,7 +2243,7 @@ function ChatConfigWideCheckBoxMixin:LeaveChannel()
 	local channelIndex = self:GetID();
 	if CHAT_CONFIG_CHANNEL_LIST[channelIndex].isBlank then
 		for i = channelIndex, #CHAT_CONFIG_CHANNEL_LIST - 1 do
-			C_ChatInfo.SwapChatChannelsByChannelIndex(i, i + 1);
+			SwapChatChannelByLocalID(CHAT_CONFIG_CHANNEL_LIST[i].channelID, CHAT_CONFIG_CHANNEL_LIST[i + 1].channelID);
 		end
 		
 		CreateChatChannelList(ChatConfigChannelSettings, GetChannelList());

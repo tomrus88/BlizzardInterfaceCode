@@ -118,11 +118,11 @@ function WorldQuestDataProviderMixin:OnAdded(mapCanvas)
 end
 
 function WorldQuestDataProviderMixin:OnRemoved(mapCanvas)
+	MapCanvasDataProviderMixin.OnRemoved(self, mapCanvas);
+
 	self:GetMap():UnregisterCallback("SetFocusedQuestID", self.setFocusedQuestIDCallback);
 	self:GetMap():UnregisterCallback("ClearFocusedQuestID", self.clearFocusedQuestIDCallback);
 	self:GetMap():UnregisterCallback("SetBountyQuestID", self.setBountyQuestIDCallback);
-
-	MapCanvasDataProviderMixin.OnRemoved(self, mapCanvas);
 end
 
 function WorldQuestDataProviderMixin:SetFocusedQuestID(questID)
@@ -196,6 +196,7 @@ function WorldQuestDataProviderMixin:RefreshAllData(fromOnShow)
 		pinsToRemove[questId] = true;
 	end
 
+	--[[
 	local taskInfo;
 	local mapCanvas = self:GetMap();
 	
@@ -214,7 +215,6 @@ function WorldQuestDataProviderMixin:RefreshAllData(fromOnShow)
 						local pin = self.activePins[info.questId];
 						if pin then
 							pin:RefreshVisuals();
-							pin.numObjectives = info.numObjectives;	-- Fix for quests with sequenced objectives
 							pin:SetPosition(info.x, info.y); -- Fix for WOW8-48605 - WQ starting location may move based on player location and viewed map
 
 							if self.pingPin and self.pingPin:IsAttachedToQuest(info.questId) then
@@ -228,6 +228,7 @@ function WorldQuestDataProviderMixin:RefreshAllData(fromOnShow)
 			end
 		end
 	end
+	--]]
 
 	for questId in pairs(pinsToRemove) do
 		if self.pingPin and self.pingPin:IsAttachedToQuest(questId) then
@@ -249,21 +250,6 @@ function WorldQuestDataProviderMixin:GetPinTemplate()
 	return "WorldQuestPinTemplate";
 end
 
-function WorldQuestDataProviderMixin:ShouldShowExpirationIcon(questID, worldQuestType)
-	if QuestUtils_ShouldDisplayExpirationWarning(questID) then
-		if worldQuestType == LE_QUEST_TAG_TYPE_FACTION_ASSAULT or worldQuestType == LE_QUEST_TAG_TYPE_INVASION then
-			if QuestUtils_IsQuestWithinCriticalTimeThreshold(questID) then
-				return true;
-			end
-		else
-			if QuestUtils_IsQuestWithinLowTimeThreshold(questID) then
-				return true;
-			end
-		end
-	end
-	return false;
-end
-
 function WorldQuestDataProviderMixin:AddWorldQuest(info)
 	local pin = self:GetMap():AcquirePin(self:GetPinTemplate());
 	pin.questID = info.questId;
@@ -273,7 +259,7 @@ function WorldQuestDataProviderMixin:AddWorldQuest(info)
 	pin.numObjectives = info.numObjectives;
 	pin:UseFrameLevelType("PIN_FRAME_LEVEL_WORLD_QUEST", self:GetMap():GetNumActivePinsByTemplate(self:GetPinTemplate()));
 
-	local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(info.questId);
+	local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex, displayTimeLeft = GetQuestTagInfo(info.questId);
 	local tradeskillLineID = tradeskillLineIndex and select(7, GetProfessionInfo(tradeskillLineIndex));
 
 	pin.worldQuestType = worldQuestType;
@@ -322,8 +308,13 @@ function WorldQuestDataProviderMixin:AddWorldQuest(info)
 		pin.Underlay:Hide();
 	end
 
-	pin.TimeLowFrame:SetShown(self:ShouldShowExpirationIcon(info.questId, worldQuestType));
-	
+	local timeLeftMinutes = C_TaskQuest.GetQuestTimeLeftMinutes(info.questId);
+	if timeLeftMinutes and timeLeftMinutes <= WORLD_QUESTS_TIME_LOW_MINUTES then
+		pin.TimeLowFrame:Show();
+	else
+		pin.TimeLowFrame:Hide();
+	end
+
 	pin:SetPosition(info.x, info.y);
 
 	C_TaskQuest.RequestPreloadRewardData(info.questId);
@@ -357,7 +348,8 @@ function WorldQuestPinMixin:OnLoad()
 end
 
 function WorldQuestPinMixin:RefreshVisuals()
-	local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(self.questID);
+	local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex, displayTimeLeft = GetQuestTagInfo(self.questID);
+	local tradeskillLineID = tradeskillLineIndex and select(7, GetProfessionInfo(tradeskillLineIndex));
 	local selected = self.questID == GetSuperTrackedQuestID();
 	self.Glow:SetShown(selected);
 	self.SelectedGlow:SetShown(rarity ~= LE_WORLD_QUEST_QUALITY_COMMON and selected);
@@ -375,14 +367,36 @@ function WorldQuestPinMixin:RefreshVisuals()
 	local bountyQuestID = self.dataProvider:GetBountyQuestID();
 	self.BountyRing:SetShown(bountyQuestID and IsQuestCriteriaForBounty(self.questID, bountyQuestID));
 
-	local inProgress = self.dataProvider:IsMarkingActiveQuests() and C_QuestLog.IsOnQuest(self.questID);
-	local atlas, width, height = QuestUtil.GetWorldQuestAtlasInfo(worldQuestType, inProgress, tradeskillLineIndex);
-	self.Texture:SetAtlas(atlas);
-	if self.worldQuestType == LE_QUEST_TAG_TYPE_PET_BATTLE then
-		self.Texture:SetSize(26, 22);
-	else
+	if self.dataProvider:IsMarkingActiveQuests() and C_QuestLog.IsOnQuest(self.questID) then
+		self.Texture:SetAtlas("worldquest-questmarker-questionmark");
+		self.Texture:SetSize(20, 30);
+	elseif self.worldQuestType == LE_QUEST_TAG_TYPE_PVP then
+		local _, width, height = GetAtlasInfo("worldquest-icon-pvp-ffa");
+		self.Texture:SetAtlas("worldquest-icon-pvp-ffa");
 		self.Texture:SetSize(width * 2, height * 2);
-	end
+	elseif self.worldQuestType == LE_QUEST_TAG_TYPE_PET_BATTLE then
+		self.Texture:SetAtlas("worldquest-icon-petbattle");
+		self.Texture:SetSize(26, 22);
+	elseif self.worldQuestType == LE_QUEST_TAG_TYPE_PROFESSION and WORLD_QUEST_ICONS_BY_PROFESSION[tradeskillLineID] then
+		local _, width, height = GetAtlasInfo(WORLD_QUEST_ICONS_BY_PROFESSION[tradeskillLineID]);
+		self.Texture:SetAtlas(WORLD_QUEST_ICONS_BY_PROFESSION[tradeskillLineID]);
+		self.Texture:SetSize(width * 2, height * 2);
+	elseif self.worldQuestType == LE_QUEST_TAG_TYPE_DUNGEON then
+		local _, width, height = GetAtlasInfo("worldquest-icon-dungeon");
+		self.Texture:SetAtlas("worldquest-icon-dungeon");
+		self.Texture:SetSize(width * 2, height * 2);
+	elseif self.worldQuestType == LE_QUEST_TAG_TYPE_RAID then
+		local _, width, height = GetAtlasInfo("worldquest-icon-raid");
+		self.Texture:SetAtlas("worldquest-icon-raid");
+		self.Texture:SetSize(width * 2, height * 2);
+	elseif self.worldQuestType == LE_QUEST_TAG_TYPE_INVASION then
+		local _, width, height = GetAtlasInfo("worldquest-icon-burninglegion");
+		self.Texture:SetAtlas("worldquest-icon-burninglegion");
+		self.Texture:SetSize(width * 2, height * 2);
+	else
+		self.Texture:SetAtlas("worldquest-questmarker-questbang");
+		self.Texture:SetSize(12, 30);
+	end	
 end
 
 function WorldQuestPinMixin:OnMouseEnter()
@@ -468,7 +482,7 @@ end
 WorldQuestPingPinMixin = CreateFromMixins(MapCanvasPinMixin);
 
 function WorldQuestPingPinMixin:OnLoad()
-	self:SetScalingLimits(1, 0.65, 0.65);
+	self:SetScalingLimits(1, 0.5, 0.5);
 	self:UseFrameLevelType("PIN_FRAME_LEVEL_WORLD_QUEST_PING");
 end
 

@@ -45,24 +45,26 @@ local function UpdateMultiActionBar(frame, var, pageVar, cb)
 	end
 end
 
-local function UpdateMainMenuBar(rightBarShowing)
-	MainMenuBar:ChangeMenuBarSizeAndPosition(rightBarShowing);
-	StatusTrackingBarManager:UpdateBarsShown();
-end
-
 function MultiActionBar_Update ()
 	local showLeft = false;
 	local showRight = false;
 	
 	UpdateMultiActionBar(MultiBarBottomLeft, SHOW_MULTI_ACTIONBAR_1, BOTTOMLEFT_ACTIONBAR_PAGE);
-	UpdateMultiActionBar(MultiBarBottomRight, SHOW_MULTI_ACTIONBAR_2, BOTTOMRIGHT_ACTIONBAR_PAGE, UpdateMainMenuBar);
+	UpdateMultiActionBar(MultiBarBottomRight, SHOW_MULTI_ACTIONBAR_2, BOTTOMRIGHT_ACTIONBAR_PAGE);
 	UpdateMultiActionBar(MultiBarRight, SHOW_MULTI_ACTIONBAR_3, RIGHT_ACTIONBAR_PAGE, function(var) showRight = var; end);
 	UpdateMultiActionBar(MultiBarLeft, SHOW_MULTI_ACTIONBAR_3 and SHOW_MULTI_ACTIONBAR_4, LEFT_ACTIONBAR_PAGE, function(var) showLeft = var; end);
 
 	if ( showRight ) then
-		local topLimit = MinimapCluster:GetBottom() - 10;	-- increasing by 14 here because we can overlap since the cluster is bigger than the elements it contains
-		local bottomLimit = MicroButtonAndBagsBar:GetTop() + 24;
+		local maxWidth = VERTICAL_MULTI_BAR_WIDTH * 2 + VERTICAL_MULTI_BAR_HORIZONTAL_SPACING;
 
+		local topLimit = MinimapCluster:GetBottom() + 20;
+		local bottomLimit = UIParent:GetBottom() + 8;
+			if (MultiBarBottomRight:IsShown() and MultiBarBottomRight:GetRight() >= UIParent:GetRight() - maxWidth - 16) then
+				bottomLimit = MultiBarBottomRight:GetTop() + 8;
+			else
+				bottomLimit = MainMenuBarArtFrame:GetTop() + 24;
+			end
+		
 		local availableSpace = topLimit - bottomLimit;
 		local contentWidth = VERTICAL_MULTI_BAR_WIDTH;
 		local contentHeight = VERTICAL_MULTI_BAR_HEIGHT;
@@ -105,36 +107,36 @@ function MultiActionBar_Update ()
 	UIParent_ManageFramePositions();
 end
 
-function MultiActionBar_ShowAllGrids (reason)
-	MultiActionBar_UpdateGrid("MultiBarBottomLeft", true, reason);
-	MultiActionBar_UpdateGrid("MultiBarBottomRight", true, reason);
-	MultiActionBar_UpdateGrid("MultiBarRight", true, reason);
-	MultiActionBar_UpdateGrid("MultiBarLeft", true, reason);
+function MultiActionBar_ShowAllGrids ()
+	MultiActionBar_UpdateGrid("MultiBarBottomLeft", true);
+	MultiActionBar_UpdateGrid("MultiBarBottomRight", true);
+	MultiActionBar_UpdateGrid("MultiBarRight", true);
+	MultiActionBar_UpdateGrid("MultiBarLeft", true);
 end
 
-function MultiActionBar_HideAllGrids (reason)
-	MultiActionBar_UpdateGrid("MultiBarBottomLeft", false, reason);
-	MultiActionBar_UpdateGrid("MultiBarBottomRight", false, reason);
-	MultiActionBar_UpdateGrid("MultiBarRight", false, reason);
-	MultiActionBar_UpdateGrid("MultiBarLeft", false, reason);
+function MultiActionBar_HideAllGrids ()
+	MultiActionBar_UpdateGrid("MultiBarBottomLeft", false);
+	MultiActionBar_UpdateGrid("MultiBarBottomRight", false);
+	MultiActionBar_UpdateGrid("MultiBarRight", false);
+	MultiActionBar_UpdateGrid("MultiBarLeft", false);
 end
 
-function MultiActionBar_UpdateGrid (barName, show, reason)
+function MultiActionBar_UpdateGrid (barName, show)
 	for i = 1, NUM_MULTIBAR_BUTTONS do
 		local button = _G[barName.."Button"..i];
 		if ( show and not button.noGrid) then
-			ActionButton_ShowGrid(button, reason);
+			ActionButton_ShowGrid(button);
 		else
-			ActionButton_HideGrid(button, reason);
+			ActionButton_HideGrid(button);
 		end
 	end
 end
 
 function MultiActionBar_UpdateGridVisibility ()
 	if ( ALWAYS_SHOW_MULTIBARS == "1" or ALWAYS_SHOW_MULTIBARS == 1 ) then
-		MultiActionBar_ShowAllGrids(ACTION_BUTTON_SHOW_GRID_REASON_CVAR);
+		MultiActionBar_ShowAllGrids();
 	else
-		MultiActionBar_HideAllGrids(ACTION_BUTTON_SHOW_GRID_REASON_CVAR);
+		MultiActionBar_HideAllGrids();
 	end
 end
 

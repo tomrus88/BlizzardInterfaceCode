@@ -181,22 +181,31 @@ function CommunitiesListMixin:Update()
 	local selectedClubId = self:GetCommunitiesFrame():GetSelectedClubId();
 		
 	local clubs = self:GetCommunitiesList();
+	if selectedClubId == nil and self.mostRecentAcceptedInviteOrTicket then
+		for i, clubInfo in ipairs(clubs) do
+			if clubInfo.clubId == self.mostRecentAcceptedInviteOrTicket then
+				self:GetCommunitiesFrame():SelectClub(self.mostRecentAcceptedInviteOrTicket);
+				self.mostRecentAcceptedInviteOrTicket = nil;
+				self:ScrollToClub(self:GetCommunitiesFrame():GetSelectedClubId());
+
+				-- Selecting a club already triggered a second update.
+				return;
+			end
+		end
+	end
+	
 	self:ValidateTickets();
 
-	local isInGuild = IsInGuild();
 	local invitations = self:GetInvitations();
 	local tickets = self:GetTickets();
 	local totalNumClubs = #invitations + #tickets + #clubs;
-	if not isInGuild then
-		totalNumClubs = totalNumClubs + 1;
-	end
 
 	local height = buttons[1]:GetHeight();
 	
 	-- TODO:: Determine if this player is at the maximum number of allowed clubs or not.
 	-- We probably need to change the create flow as well, since it's possible you are
 	-- allowed to create more bnet groups, but not more wow communities or vice versa.
-	local shouldAddJoinCommunityEntry = C_Club.ShouldAllowClubType(Enum.ClubType.Character) or C_Club.ShouldAllowClubType(Enum.ClubType.BattleNet); 
+	local shouldAddJoinCommunityEntry = C_Club.ShouldAllowClubType(Enum.ClubType.BattleNet); 
 	
 	-- We need 1 for the blank entry at the top of the list.
 	local clubsHeight = height * (totalNumClubs + 1);
@@ -226,21 +235,13 @@ function CommunitiesListMixin:Update()
 				clubInfo = invitations[displayIndex].club;
 			else
 				displayIndex = displayIndex - #tickets - #invitations;
-				if not isInGuild then
-					displayIndex = displayIndex - 1;
-				end
 				
 				if displayIndex > 0 and displayIndex <= #clubs then
 					clubInfo = clubs[displayIndex];
 				end
 			end
 			
-			if not isInGuild and displayIndex == 0 then
-				button:SetGuildFinder();
-				button:SetFocused(self:GetCommunitiesFrame():GetDisplayMode() == COMMUNITIES_FRAME_DISPLAY_MODES.GUILD_FINDER);
-				button:Show();
-				usedHeight = usedHeight + height;
-			elseif clubInfo then
+			if clubInfo then
 				button:SetClubInfo(clubInfo, isInvitation, isTicket);
 				button:SetFocused(isInvitation or clubInfo.clubId == selectedClubId);
 				button:Show();
@@ -301,16 +302,29 @@ function CommunitiesListMixin:OnLoad()
 end
 
 function CommunitiesListMixin:RegisterEventCallbacks()
+	local function CommunityInviteAcceptedCallback(event, invitationId, clubId)
+		self.mostRecentAcceptedInviteOrTicket = clubId;
+	end
+
 	local function CommunityInviteDeclinedCallback(event, invitationId, clubId)
 		self.declinedInvitationIds[#self.declinedInvitationIds + 1] = invitationId;
 		self:GetCommunitiesFrame():UpdateClubSelection();
 		self:UpdateInvitations();
 		self:Update();
 	end
+
+	local function CommunityTicketAcceptedCallback(event, ticketId, clubId)
+		self.mostRecentAcceptedInviteOrTicket = clubId;
+	end
+
+	self.inviteAcceptedCallback = CommunityInviteAcceptedCallback;
+	self:GetCommunitiesFrame():RegisterCallback(CommunitiesFrameMixin.Event.InviteAccepted, self.inviteAcceptedCallback);
 	
 	self.inviteDeclinedCallback = CommunityInviteDeclinedCallback;
 	self:GetCommunitiesFrame():RegisterCallback(CommunitiesFrameMixin.Event.InviteDeclined, self.inviteDeclinedCallback);
 
+	self.ticketAcceptedCallback = CommunityTicketAcceptedCallback;
+	self:GetCommunitiesFrame():RegisterCallback(CommunitiesFrameMixin.Event.TicketAccepted, self.ticketAcceptedCallback);
 end
 
 function CommunitiesListMixin:OnShow()
@@ -326,7 +340,9 @@ function CommunitiesListMixin:OnShow()
 end
 
 function CommunitiesListMixin:OnHide()
+	self:GetCommunitiesFrame():UnregisterCallback(CommunitiesFrameMixin.Event.InviteAccepted, self.inviteAcceptedCallback);
 	self:GetCommunitiesFrame():UnregisterCallback(CommunitiesFrameMixin.Event.InviteDeclined, self.inviteDeclinedCallback);
+	self:GetCommunitiesFrame():UnregisterCallback(CommunitiesFrameMixin.Event.TicketAccpted, self.ticketAcceptedCallback);
 	FrameUtil.UnregisterFrameForEvents(self, COMMUNITIES_LIST_EVENTS);
 end
 
@@ -353,11 +369,6 @@ function CommunitiesListMixin:ScrollToClub(clubId)
 			
 			-- Count the blank entry at the top of the scroll frame.
 			clubIndex = clubIndex + 1;
-			
-			-- Count the guild finder.
-			if not IsInGuild() then
-				clubIndex = clubIndex + 1;
-			end
 			
 			local buttons = self.ListScrollFrame.buttons;
 			local buttonHeight = buttons[1]:GetHeight();
@@ -420,7 +431,6 @@ end
 
 local COMMUNITIES_LIST_ENTRY_EVENTS = {
 	"STREAM_VIEW_MARKER_UPDATED",
-	"PLAYER_GUILD_UPDATE",
 }
 
 CommunitiesListEntryMixin = {};
@@ -446,26 +456,12 @@ function CommunitiesListEntryMixin:SetClubInfo(clubInfo, isInvitation, isTicket)
 		end
 		
 		local fontColor = NORMAL_FONT_COLOR;
-		local isGuild = clubInfo.clubType == Enum.ClubType.Guild;
-		if clubInfo.clubType == Enum.ClubType.BattleNet then
-			fontColor = BATTLENET_FONT_COLOR;
-		elseif isGuild then
-			fontColor = GREEN_FONT_COLOR;
-		elseif isInvitation then
-			fontColor = HIGHLIGHT_FONT_COLOR;
-		end
+		fontColor = BATTLENET_FONT_COLOR;
 		
-		if isGuild then
-			self.Background:SetAtlas("communities-nav-button-green-normal");
-			self.Background:SetTexCoord(0, 1, 0, 1);
-			self.Selection:SetAtlas("communities-nav-button-green-pressed");
-			self.Selection:SetTexCoord(0, 1, 0, 1);
-		else
-			self.Background:SetTexture("Interface\\Common\\bluemenu-main");
-			self.Background:SetTexCoord(0.00390625, 0.87890625, 0.75195313, 0.83007813);
-			self.Selection:SetTexture("Interface\\Common\\bluemenu-main");
-			self.Selection:SetTexCoord(0.00390625, 0.87890625, 0.59179688, 0.66992188);
-		end
+		self.Background:SetTexture("Interface\\Common\\bluemenu-main");
+		self.Background:SetTexCoord(0.00390625, 0.87890625, 0.75195313, 0.83007813);
+		self.Selection:SetTexture("Interface\\Common\\bluemenu-main");
+		self.Selection:SetTexCoord(0.00390625, 0.87890625, 0.59179688, 0.66992188);
 		
 		self.Name:SetTextColor(fontColor:GetRGB());
 		self.Name:SetPoint("LEFT", self.Icon, "RIGHT", 11, 0);
@@ -475,16 +471,12 @@ function CommunitiesListEntryMixin:SetClubInfo(clubInfo, isInvitation, isTicket)
 		self.Selection:SetShown(clubInfo.clubId == self:GetCommunitiesFrame():GetSelectedClubId());
 		self.FavoriteIcon:SetShown(self:GetCommunitiesFrame().CommunitiesList:IsClubFavorite(clubInfo));
 		self.InvitationIcon:SetShown(isInvitation or isTicket);
-		SetLargeGuildTabardTextures("player", self.GuildTabardEmblem, self.GuildTabardBackground, self.GuildTabardBorder);
-		self.GuildTabardEmblem:SetShown(isGuild);
-		self.GuildTabardBackground:SetShown(isGuild);
-		self.GuildTabardBorder:SetShown(isGuild);
-		self.Icon:SetShown(not isInvitation and not isGuild and not isTicket);
+		self.Icon:SetShown(not isInvitation and not isTicket);
 		self.Icon:SetSize(38, 38);
 		self.Icon:SetPoint("TOPLEFT", 11, -15);
-		self.CircleMask:SetShown(not isInvitation and not isGuild);
-		self.IconRing:SetShown(not isInvitation and not isGuild and not isTicket);
-		self.IconRing:SetAtlas(clubInfo.clubType == Enum.ClubType.BattleNet and "communities-ring-blue" or "communities-ring-gold");
+		self.CircleMask:SetShown(not isInvitation);
+		self.IconRing:SetShown(not isInvitation and not isTicket);
+		self.IconRing:SetAtlas("communities-ring-blue");
 		C_Club.SetAvatarTexture(self.Icon, clubInfo.avatarId, clubInfo.clubType);
 		self:UpdateUnreadNotification();
 	else
@@ -528,9 +520,6 @@ function CommunitiesListEntryMixin:SetAddCommunity()
 	self.Icon:Show();
 	self.CircleMask:Hide();
 	self.IconRing:Hide();
-	self.GuildTabardEmblem:Hide();
-	self.GuildTabardBackground:Hide();
-	self.GuildTabardBorder:Hide();
 	self.UnreadNotificationIcon:Hide();
 
 	self.Icon:SetAtlas("communities-icon-addgroupplus");
@@ -538,45 +527,6 @@ function CommunitiesListEntryMixin:SetAddCommunity()
 	self.Icon:SetPoint("TOPLEFT", 17, -18);
 	
 	self:SetFocused(true);
-end
-
-function CommunitiesListEntryMixin:SetGuildFinder()
-	self.overrideOnClick = function ()
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-		self:GetCommunitiesFrame():SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.GUILD_FINDER);
-		self:GetCommunitiesFrame():SelectClub(nil);
-	end;
-	
-	self.clubId = nil;
-	self.Name:SetText(COMMUNITIES_GUILD_FINDER);
-	self.Name:SetTextColor(GREEN_FONT_COLOR:GetRGB());
-	self.Name:SetPoint("LEFT", self.Icon, "RIGHT", 10, 0);
-	self.Selection:SetShown(self:GetCommunitiesFrame():GetDisplayMode() == COMMUNITIES_FRAME_DISPLAY_MODES.GUILD_FINDER);
-
-	self.Background:SetAtlas("communities-nav-button-green-normal");
-	self.Background:SetTexCoord(0, 1, 0, 1);
-	self.Selection:SetAtlas("communities-nav-button-green-pressed");
-	self.Selection:SetTexCoord(0, 1, 0, 1);
-	self.FavoriteIcon:Hide();
-	self.InvitationIcon:Hide();
-	self.Icon:Show();
-	self.Icon:SetSize(35, 35);
-	self.Icon:SetPoint("TOPLEFT", 15, -15);
-	self.CircleMask:Show();
-	self.IconRing:Hide();
-	self.GuildTabardEmblem:Hide();
-	self.GuildTabardBackground:Show();
-	self.GuildTabardBackground:SetVertexColor(0.7, 0.7, 0.7);
-	self.GuildTabardBorder:Show();
-	self.GuildTabardBorder:SetVertexColor(0.7, 0.7, 0.7);
-	self.UnreadNotificationIcon:Hide();
-
-	local factionGroup = UnitFactionGroup("player");
-	if factionGroup == "Alliance" then
-		self.Icon:SetTexture("Interface\\FriendsFrame\\PlusManz-Alliance");
-	else
-		self.Icon:SetTexture("Interface\\FriendsFrame\\PlusManz-Horde");
-	end
 end
 
 function CommunitiesListEntryMixin:SetFocused(isFocused)
@@ -619,8 +569,6 @@ function CommunitiesListEntryMixin:OnEvent(event, ...)
 		if clubId == self.clubId then
 			self:UpdateUnreadNotification();
 		end
-	elseif event == "PLAYER_GUILD_UPDATE" then
-		SetLargeGuildTabardTextures("player", self.GuildTabardEmblem, self.GuildTabardBackground, self.GuildTabardBorder);
 	end
 end
 
@@ -643,7 +591,7 @@ function CommunitiesListEntryMixin:OnClick(button)
 		self:GetCommunitiesFrame():SelectClub(self.clubId);
 	elseif button == "RightButton" then
 		local clubInfo = C_Club.GetClubInfo(self:GetClubId());
-		if not clubInfo or clubInfo.clubType == Enum.ClubType.Guild then
+		if not clubInfo then
 			return;
 		end
 

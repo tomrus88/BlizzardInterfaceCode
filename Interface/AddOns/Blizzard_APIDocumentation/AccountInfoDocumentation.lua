@@ -7,20 +7,6 @@ local AccountInfo =
 	Functions =
 	{
 		{
-			Name = "GetIDFromBattleNetAccountGUID",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "battleNetAccountGUID", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "battleNetAccountID", Type = "number", Nilable = false },
-			},
-		},
-		{
 			Name = "IsGUIDBattleNetAccountType",
 			Type = "Function",
 

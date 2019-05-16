@@ -1,11 +1,8 @@
 ChannelFrameButtonMixin = {};
 
 function ToggleChannelFrame()
-	local wasShown = ChannelFrame:IsShown();
+	PlaySound(SOUNDKIT.IG_CHAT_EMOTE_BUTTON);
 	ChannelFrame:Toggle();
-	if ChannelFrame:IsShown() ~= wasShown then
-		PlaySound(SOUNDKIT.IG_CHAT_EMOTE_BUTTON);
-	end
 end
 
 function ChannelFrameButtonMixin:OnLoad()
@@ -20,9 +17,9 @@ function ChannelFrameButtonMixin:OnLoad()
 	self:AddStateAtlas(false, "chatframe-button-icon-voicechat");
 	self:AddStateAtlas(true, "chatframe-button-icon-headset");
 
-	self:SetTooltipFunction(function(state)
+	--[[self:SetTooltipFunction(function(state)
 		return MicroButtonTooltipText(CHAT_CHANNELS, "TOGGLECHATTAB");
-	end);
+	end);]]
 
 	self:RegisterStateUpdateEvent("VOICE_CHAT_CHANNEL_ACTIVATED");
 	self:RegisterStateUpdateEvent("VOICE_CHAT_CHANNEL_DEACTIVATED");

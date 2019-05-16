@@ -37,18 +37,33 @@
 			<OnEvent function="ItemAnim_OnEvent"/>
 		</Scripts>
 	</Frame>
-	<ItemButton name="BagSlotButtonTemplate" mixin="BagSlotMixin" inherits="ItemAnimTemplate" virtual="true">
-		<Size x="30" y="30"/>
-		<Layers>
-			<Layer level="OVERLAY">
-				<Texture parentKey="SlotHighlightTexture" alphaMode="ADD" file="Interface\Buttons\CheckButtonHilight" setAllPoints="true" hidden="true"/>
-			</Layer>
-		</Layers>
+	<CheckButton name="BagSlotButtonTemplate" inherits="ItemButtonTemplate, ItemAnimTemplate" virtual="true">
+		<Size x="37" y="37"/>
 		<Scripts>
 			<OnLoad>
-                BagSlotButton_OnLoad(self);
-            </OnLoad>
-			<OnEvent function="BagSlotButton_OnEvent" />
+				ItemAnim_OnLoad(self)
+				PaperDollItemSlotButton_OnLoad(self);
+				self:RegisterEvent("BAG_UPDATE_DELAYED");
+				self:RegisterEvent("INVENTORY_SEARCH_UPDATE");
+				self.isBag = 1;
+				self.UpdateTooltip = BagSlotButton_OnEnter;
+				_G[self:GetName().."Count"]:SetPoint("BOTTOMRIGHT", -2, 2);
+				self.maxDisplayCount = 999;
+			</OnLoad>
+			<OnEvent>
+				ItemAnim_OnEvent(self, event, ...);
+				if ( event == "BAG_UPDATE_DELAYED" ) then
+				PaperDollItemSlotButton_Update(self);
+				elseif ( event == "INVENTORY_SEARCH_UPDATE" ) then
+				if ( IsContainerFiltered(self:GetID() - CharacterBag0Slot:GetID() + 1) ) then
+				self.searchOverlay:Show();
+				else
+				self.searchOverlay:Hide();
+				end
+				else
+				PaperDollItemSlotButton_OnEvent(self, event, ...);
+				end
+			</OnEvent>
 			<OnShow>
 				PaperDollItemSlotButton_OnShow(self, true);
 			</OnShow>
@@ -57,9 +72,9 @@
 			</OnHide>
 			<OnClick>
 				if ( IsModifiedClick() ) then
-					BagSlotButton_OnModifiedClick(self, button);
+				BagSlotButton_OnModifiedClick(self, button);
 				else
-					BagSlotButton_OnClick(self, button);
+				BagSlotButton_OnClick(self, button);
 				end
 			</OnClick>
 			<OnDragStart>
@@ -76,90 +91,90 @@
 				ResetCursor();
 			</OnLeave>
 		</Scripts>
-	</ItemButton>
-	<ItemButton name="MainMenuBarBackpackButton" mixin="BagSlotMixin" inherits="ItemAnimTemplate" parent="MicroButtonAndBagsBar" id="0">
-		<Size x="40" y="40"/>
+		<CheckedTexture alphaMode="ADD" file="Interface\Buttons\CheckButtonHilight"/>
+	</CheckButton>
+	<CheckButton name="MainMenuBarBackpackButton" inherits="ItemButtonTemplate, ItemAnimTemplate" parent="MainMenuBarArtFrame" id="0">
+		<Size>
+			<AbsDimension x="37" y="37"/>
+		</Size>
 		<Anchors>
-			<Anchor point="TOPRIGHT" x="-4" y="-4"/>
+			<Anchor point="BOTTOMRIGHT">
+				<Offset>
+					<AbsDimension x="-6" y="2"/>
+				</Offset>
+			</Anchor>
 		</Anchors>
-		<Layers>
-			<Layer level="OVERLAY">
-				<Texture parentKey="SlotHighlightTexture" alphaMode="ADD" file="Interface\Buttons\CheckButtonHilight" setAllPoints="true" hidden="true"/>
-			</Layer>
-		</Layers>
 		<Scripts>
-			<OnLoad function="MainMenuBarBackpackButton_OnLoad" />
-			<OnClick function="MainMenuBarBackpackButton_OnClick" />
-			<OnReceiveDrag function="BackpackButton_OnClick" />
-			<OnEnter function="MainMenuBarBackpackButton_OnEnter" />
+			<OnLoad>
+				ItemAnim_OnLoad(self)
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+				MainMenuBarBackpackButtonIconTexture:SetTexture("Interface\\Buttons\\Button-Backpack-Up");
+				self:RegisterEvent("PLAYER_ENTERING_WORLD");
+				self:RegisterEvent("CVAR_UPDATE");
+				self:RegisterEvent("BAG_UPDATE");
+				self:RegisterEvent("INVENTORY_SEARCH_UPDATE");
+				_G[self:GetName().."Count"]:ClearAllPoints();
+				_G[self:GetName().."Count"]:SetPoint("CENTER", 1, -7);
+			</OnLoad>
+			<OnClick>
+				if ( IsModifiedClick() ) then
+				BackpackButton_OnModifiedClick(self, button);
+				else
+				BackpackButton_OnClick(self, button);
+				end
+			</OnClick>
+			<OnReceiveDrag function="BackpackButton_OnClick"/>
+			<OnEnter>
+				GameTooltip:SetOwner(self, "ANCHOR_LEFT");
+				GameTooltip:SetText(BACKPACK_TOOLTIP, 1.0, 1.0, 1.0);
+				local keyBinding = GetBindingKey("TOGGLEBACKPACK");
+				if ( keyBinding ) then
+				GameTooltip:AppendText(" "..NORMAL_FONT_COLOR_CODE.."("..keyBinding..")"..FONT_COLOR_CODE_CLOSE);
+				end
+				GameTooltip:Show();
+			</OnEnter>
 			<OnLeave function="GameTooltip_Hide"/>
 			<OnEvent>
 				ItemAnim_OnEvent(self, event, ...);
 				MainMenuBarBackpackButton_OnEvent(self, event, ...);
 			</OnEvent>
 		</Scripts>
-	</ItemButton>
-	<ItemButton name="CharacterBag0Slot" inherits="BagSlotButtonTemplate" parent="MicroButtonAndBagsBar">
+		<CheckedTexture alphaMode="ADD" file="Interface\Buttons\CheckButtonHilight"/>
+	</CheckButton>
+	<CheckButton name="CharacterBag0Slot" inherits="BagSlotButtonTemplate" parent="MainMenuBarArtFrame">
 		<Anchors>
 			<Anchor point="RIGHT" relativeTo="MainMenuBarBackpackButton" relativePoint="LEFT">
 				<Offset>
-					<AbsDimension x="-4" y="-4"/>
+					<AbsDimension x="-5" y="0"/>
 				</Offset>
 			</Anchor>
 		</Anchors>
-	</ItemButton>
-	<ItemButton name="CharacterBag1Slot" inherits="BagSlotButtonTemplate" parent="MicroButtonAndBagsBar">
+	</CheckButton>
+	<CheckButton name="CharacterBag1Slot" inherits="BagSlotButtonTemplate" parent="MainMenuBarArtFrame">
 		<Anchors>
 			<Anchor point="RIGHT" relativeTo="CharacterBag0Slot" relativePoint="LEFT">
 				<Offset>
-					<AbsDimension x="-2" y="0"/>
+					<AbsDimension x="-5" y="0"/>
 				</Offset>
 			</Anchor>
 		</Anchors>
-	</ItemButton>
-	<ItemButton name="CharacterBag2Slot" inherits="BagSlotButtonTemplate" parent="MicroButtonAndBagsBar">
+	</CheckButton>
+	<CheckButton name="CharacterBag2Slot" inherits="BagSlotButtonTemplate" parent="MainMenuBarArtFrame">
 		<Anchors>
 			<Anchor point="RIGHT" relativeTo="CharacterBag1Slot" relativePoint="LEFT">
 				<Offset>
-					<AbsDimension x="-2" y="0"/>
+					<AbsDimension x="-5" y="0"/>
 				</Offset>
 			</Anchor>
 		</Anchors>
-	</ItemButton>
-	<ItemButton name="CharacterBag3Slot" inherits="BagSlotButtonTemplate" parent="MicroButtonAndBagsBar">
+	</CheckButton>
+	<CheckButton name="CharacterBag3Slot" inherits="BagSlotButtonTemplate" parent="MainMenuBarArtFrame">
 		<Anchors>
 			<Anchor point="RIGHT" relativeTo="CharacterBag2Slot" relativePoint="LEFT">
 				<Offset>
-					<AbsDimension x="-2" y="0"/>
+					<AbsDimension x="-5" y="0"/>
 				</Offset>
 			</Anchor>
 		</Anchors>
-	</ItemButton>
-
-    <Frame name="AzeriteInBagsHelpBox" inherits="GlowBoxTemplate" parent="UIParent" enableMouse="true" hidden="true" frameStrata="DIALOG" toplevel="true" clampedToScreen="true">
-        <Size x="220" y="100"/>
-        <Layers>
-            <Layer level="OVERLAY">
-                <FontString parentKey="Text" inherits="GameFontHighlightLeft" justifyV="TOP" text="AZERITE_TUTORIAL_ITEM_IN_BAG">
-                    <Size x="188" y="0"/>
-                    <Anchors>
-                        <Anchor point="TOPLEFT" x="16" y="-24"/>
-                    </Anchors>
-                </FontString>
-            </Layer>
-        </Layers>
-        <Frames>
-            <Button parentKey="CloseButton" inherits="UIPanelCloseButton">
-                <Anchors>
-                    <Anchor point="TOPRIGHT" x="6" y="6"/>
-                </Anchors>
-            </Button>
-            <Frame parentKey="Arrow" inherits="GlowBoxArrowTemplate" clampedToScreen="true" />
-        </Frames>
-        <Scripts>
-            <OnLoad function="AzeriteInBagsHelpBox_OnLoad"/>
-            <OnShow function="AzeriteInBagsHelpBox_OnShow"/>
-            <OnHide function="AzeriteInBagsHelpBox_OnHide"/>
-        </Scripts>
-    </Frame>
+	</CheckButton>
 </Ui>

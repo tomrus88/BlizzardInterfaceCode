@@ -187,13 +187,6 @@ function Graphics_Refresh(self)
 	VideoOptionsPanel_Refresh( Advanced_);
 end
 
-function Advanced_Refresh(self)
-	for i, control in ipairs(self.controls) do
-		control.selectedID = nil;
-	end
-	VideoOptionsPanel_Refresh(self);
-end
-
 function VideoOptionsPanel_Refresh (self)
 	inrefresh = true;
 	BlizzardOptionsPanel_Refresh(self);
@@ -340,18 +333,18 @@ function VideoOptionsPanel_Default (self)
 	end
 end
 
-function Graphics_Default (self)
-	SetDefaultVideoOptions(0);
+function Graphics_Default (self, perControlCallback, classicDefaults)
+	SetDefaultVideoOptions(0, classicDefaults);
 	VideoOptionsPanel_Default( Display_);
 	VideoOptionsPanel_Default( Graphics_);
 	VideoOptionsPanel_Default( RaidGraphics_);
 	FinishChanges(self);
 end
 
-function Advanced_Default (self)
-	SetDefaultVideoOptions(1);
+function Advanced_Default (self, perControlCallback, classicDefaults)
+	SetDefaultVideoOptions(1, classicDefaults);
 	if(not InGlue()) then
-		SetDefaultVideoOptions(2);
+		SetDefaultVideoOptions(2, classicDefaults);
 	end
 	for _, control in next, self.controls do
 		if(string.find(control:GetName(), "Advanced_")) then
@@ -550,16 +543,15 @@ function VideoOptions_OnClick(self, value)
 	self.newValue = value;
 	if(self.dependent ~= nil) then
 		for i, key in ipairs(self.dependent) do
-			local keyObject = _G[key];
-			keyObject.isdependtarget = true;
-			if(keyObject.onrefresh) then
-				keyObject:onrefresh();
+			_G[key].isdependtarget = true;
+			if(_G[key].onrefresh) then
+				_G[key]:onrefresh();
 			end
-			local func = keyObject.dependtarget;
+			local func = _G[key].dependtarget;
 			if(func ~= nil) then
-				func(keyObject);
+				func(_G[key]);
 			end
-			keyObject.isdependtarget = false;
+			_G[key].isdependtarget = false;
 		end
 	end
 	if ( self.capTargets ) then
@@ -889,34 +881,6 @@ function VideoOptionsSlider_OnLoad(self)
 	BlizzardOptionsPanel_RegisterControl(self, self:GetParent());
 end
 
-function VideoOptionsControl_OnEnter(self)
-	if(self.tooltip ~= nil) then
-		VideoOptionsTooltip:SetOwner(self);
-		if(self.name == nil) then
-			self.name = " ";
-		end
-		VideoOptionsTooltip:SetText(self.name .. ":", nil, nil, nil, nil, 1);
-		VideoOptionsTooltip:AddLine(self.tooltip, 1.0, 1.0, 1.0, 1.0, 1);
-		VideoOptionsTooltip:Show();
-	end
-end
-
-function VideoOptionsControl_OnLeave(self)
-	VideoOptionsTooltip:Hide();
-end
-
-function VideoOptionsWarning_OnEnter(self)
-	if ( self.tooltip ) then
-		VideoOptionsTooltip:SetOwner(self, "ANCHOR_LEFT");
-		VideoOptionsTooltip:SetText(self.tooltip, 1.0, 1.0, 1.0, 1, 1);
-	end
-end
-
-function VideoOptionsWarning_OnLeave(self)
-	VideoOptionsTooltip:Hide();
-end
-
-
 -------------------------------------------------------------------------------------------------------
 
 function VideoOptionsPanel_OnLoad (self, okay, cancel, default, refresh)
@@ -962,7 +926,7 @@ function Advanced_OnLoad (self)
 	self.hasApply = true;
 
 	VideoOptionsPanel_OnLoad(self);
-	BlizzardOptionsPanel_OnLoad(self, VideoOptionsPanel_Okay, VideoOptionsPanel_Cancel, Advanced_Default, Advanced_Refresh);
+	BlizzardOptionsPanel_OnLoad(self, VideoOptionsPanel_Okay, VideoOptionsPanel_Cancel, Advanced_Default, VideoOptionsPanel_Refresh);
 	OptionsFrame_AddCategory(VideoOptionsFrame, self);
 
 	if(true) then
@@ -1048,14 +1012,7 @@ function InterfaceOptionsLanguagesPanel_UpdateRestartTexture()
 	end
 end
 
-function InterfaceOptionsLanguagePanelLocalDropDown_OnEnter(self)
-	VideoOptionsTooltip:SetOwner(self, "ANCHOR_TOPRIGHT");
-	VideoOptionsTooltip:SetText(self.tooltip, nil, nil, nil, nil, 1);
-end
 
-function InterfaceOptionsLanguagePanelLocalDropDown_OnLeave(self)
-	VideoOptionsTooltip:Hide();
-end
 
 function InterfaceOptionsLanguagesPanelLocaleDropDown_OnLoad (self)
 	self.type = CONTROLTYPE_DROPDOWN;
@@ -1193,7 +1150,7 @@ LanguageRegions["esMX"] = 10;
 LanguageRegions["ruRU"] = 11;
 LanguageRegions["ptBR"] = 12;
 LanguageRegions["ptPT"] = 13;
-LanguageRegions["itIT"] = 14;
+LanguageRegions["itIT"] = 14; -- For 1.12: These indices map to UV coordiantes in textures that we don't need to update, so don't remove itIT
 
 LANGUAGE_TEXT_HEIGHT = 22/512;
 
@@ -1297,10 +1254,7 @@ function Graphics_SliderOnValueChanged(self, value, userInput)
 		self.newValue = value;
 		VideoOptions_OnClick(self, value);
 	end
-
-	if not self.preventValueChangeHandlerFromSettingLabel then
-		self.Label:SetText(value);
-	end
+	self.Label:SetText(value);
 end
 
 function Graphics_SliderOnShow(self)

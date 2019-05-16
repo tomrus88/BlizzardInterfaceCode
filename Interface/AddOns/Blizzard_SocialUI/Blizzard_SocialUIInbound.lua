@@ -46,9 +46,10 @@ function Social_ShowAchievement(achievementID, earned)
 	SocialPostFrame:SetAttribute("achievementview", achievementID);
 end
 
-function Social_ShowItem(itemLink, earned)
+function Social_ShowItem(itemID, creationContext, earned)
+	SocialPostFrame:SetAttribute("creationcontext", creationContext);
 	SocialPostFrame:SetAttribute("earned", earned);
-	SocialPostFrame:SetAttribute("itemview", itemLink);
+	SocialPostFrame:SetAttribute("itemview", itemID);
 end
 
 function Social_InsertLink(link)

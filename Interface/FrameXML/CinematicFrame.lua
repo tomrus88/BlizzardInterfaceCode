@@ -47,13 +47,9 @@ function CinematicFrame_OnEvent(self, event, ...)
 		self.closeDialog:Hide();
 		ShowUIPanel(self, 1);
 		RaidNotice_Clear(self.raidBossEmoteFrame);
-		
-		LowHealthFrame:EvaluateVisibleState();
 	elseif ( event == "CINEMATIC_STOP" ) then
 		HideUIPanel(self);
 		RaidNotice_Clear(RaidBossEmoteFrame);	--Clear the normal boss emote frame. If there are any messages left over from the cinematic, we don't want to show them.
-		
-		LowHealthFrame:EvaluateVisibleState();
 
 		MovieFrame_OnCinematicStopped();
 	elseif ( event == "CHAT_MSG_SAY" or event == "CHAT_MSG_MONSTER_SAY" or

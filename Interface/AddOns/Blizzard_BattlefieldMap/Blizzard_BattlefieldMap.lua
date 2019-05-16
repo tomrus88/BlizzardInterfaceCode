@@ -97,7 +97,7 @@ function BattlefieldMapTabMixin:InitializeOptionsDropDown()
 		BattlefieldMapFrame:UpdateUnitsVisibility();
 	end;
 	info.checked = BattlefieldMapOptions.showPlayers;
-	info.isNotRadio = true;
+	info.classicChecks = true;
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL);
 
 	-- Battlefield minimap lock
@@ -106,7 +106,7 @@ function BattlefieldMapTabMixin:InitializeOptionsDropDown()
 		BattlefieldMapOptions.locked = not BattlefieldMapOptions.locked;
 	end;
 	info.checked = BattlefieldMapOptions.locked;
-	info.isNotRadio = true;
+	info.classicChecks = true;
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL);
 
 	-- Opacity
@@ -115,6 +115,7 @@ function BattlefieldMapTabMixin:InitializeOptionsDropDown()
 		self:ShowOpacity();
 	end;
 	info.notCheckable = true;
+	info.leftPadding = 24;
 	UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL);
 end
 
@@ -207,19 +208,19 @@ function BattlefieldMapMixin:AddStandardDataProviders()
 	self:AddDataProvider(CreateFromMixins(MapExplorationDataProviderMixin));
 	self:AddDataProvider(CreateFromMixins(MapHighlightDataProviderMixin));
 	self:AddDataProvider(CreateFromMixins(BattlefieldFlagDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(VehicleDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(EncounterJournalDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(FogOfWarDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(VehicleDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(EncounterJournalDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(FogOfWarDataProviderMixin));
 	self:AddDataProvider(CreateFromMixins(DeathMapDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(ScenarioDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(VignetteDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(ScenarioDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(VignetteDataProviderMixin));
 	self:AddDataProvider(CreateFromMixins(GossipDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(FlightPointDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(PetTamerDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(DigSiteDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(DungeonEntranceDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(MapLinkDataProviderMixin));
-	self:AddDataProvider(CreateFromMixins(SelectableGraveyardDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(FlightPointDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(PetTamerDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(DigSiteDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(DungeonEntranceDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(MapLinkDataProviderMixin));
+	--self:AddDataProvider(CreateFromMixins(SelectableGraveyardDataProviderMixin));
 	self:AddDataProvider(CreateFromMixins(AreaPOIDataProviderMixin));
 	
 	self.groupMembersDataProvider = CreateFromMixins(GroupMembersDataProviderMixin);
@@ -266,17 +267,9 @@ function BattlefieldMapMixin:UpdateUnitsVisibility()
 	if BattlefieldMapOptions.showPlayers then
 		self.groupMembersDataProvider:SetUnitPinSize("party", BATTLEFIELD_MAP_PARTY_MEMBER_SIZE);
 		self.groupMembersDataProvider:SetUnitPinSize("raid", BATTLEFIELD_MAP_RAID_MEMBER_SIZE);
-		if not self.vehicleDataProvider then
-			self.vehicleDataProvider = CreateFromMixins(VehicleDataProviderMixin);
-			self:AddDataProvider(self.vehicleDataProvider);
-		end
 	else
 		self.groupMembersDataProvider:SetUnitPinSize("party", 0);
 		self.groupMembersDataProvider:SetUnitPinSize("raid", 0);
-		if self.vehicleDataProvider then
-			self:RemoveDataProvider(self.vehicleDataProvider);
-			self.vehicleDataProvider = nil;
-		end
 	end
 end
 

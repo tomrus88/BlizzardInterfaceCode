@@ -11,11 +11,6 @@ local TradeInfo =
 	Events =
 	{
 		{
-			Name = "PlayerTradeCurrency",
-			Type = "Event",
-			LiteralName = "PLAYER_TRADE_CURRENCY",
-		},
-		{
 			Name = "PlayerTradeMoney",
 			Type = "Event",
 			LiteralName = "PLAYER_TRADE_MONEY",
@@ -34,11 +29,6 @@ local TradeInfo =
 			Name = "TradeClosed",
 			Type = "Event",
 			LiteralName = "TRADE_CLOSED",
-		},
-		{
-			Name = "TradeCurrencyChanged",
-			Type = "Event",
-			LiteralName = "TRADE_CURRENCY_CHANGED",
 		},
 		{
 			Name = "TradeMoneyChanged",
@@ -61,16 +51,6 @@ local TradeInfo =
 			Payload =
 			{
 				{ Name = "canBecomeBoundForTrade", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "TradePotentialRemoveTransmog",
-			Type = "Event",
-			LiteralName = "TRADE_POTENTIAL_REMOVE_TRANSMOG",
-			Payload =
-			{
-				{ Name = "itemLink", Type = "string", Nilable = false },
-				{ Name = "tradeSlotIndex", Type = "number", Nilable = false },
 			},
 		},
 		{

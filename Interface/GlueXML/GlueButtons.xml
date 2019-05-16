@@ -56,10 +56,16 @@
 
 
 	<Button name="GlueButtonTemplate" virtual="true">
-		<Size x="170" y="45"/>
+		<Size>
+			<AbsDimension x="170" y="45"/>
+		</Size>
 		<ButtonText>
 			<Anchors>
-				<Anchor point="CENTER" x="0" y="3"/>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="3"/>
+					</Offset>
+				</Anchor>
 			</Anchors>
 		</ButtonText>
 		<NormalFont style="GlueFontNormal"/>
@@ -71,7 +77,9 @@
 		<HighlightTexture inherits="GluePanelButtonHighlightTexture" alphaMode="ADD"/>
 	</Button>
 	<Button name="GlueButtonTemplateBlue" virtual="true">
-		<Size x="170" y="45"/>
+		<Size>
+			<AbsDimension x="170" y="45"/>
+		</Size>
 		<Scripts>
 			<OnShow>
 				if (WOW_GLUE_MODEL) then
@@ -83,7 +91,11 @@
 		</Scripts>
 		<ButtonText>
 			<Anchors>
-				<Anchor point="CENTER" x="0" y="3"/>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="3"/>
+					</Offset>
+				</Anchor>
 			</Anchors>
 		</ButtonText>
 		<NormalFont style="GlueFontNormal"/>
@@ -95,10 +107,16 @@
 		<HighlightTexture inherits="GluePanelButtonHighlightTextureBlue" alphaMode="ADD"/>
 	</Button>
 	<Button name="GlueButtonSmallTemplate" virtual="true">
-		<Size x="150" y="38"/>
+		<Size>
+			<AbsDimension x="150" y="38"/>
+		</Size>
 		<ButtonText>
 			<Anchors>
-				<Anchor point="CENTER" x="0" y="3"/>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="3"/>
+					</Offset>
+				</Anchor>
 			</Anchors>
 		</ButtonText>
 		<NormalFont style="GlueFontNormalSmall"/>
@@ -110,7 +128,9 @@
 		<HighlightTexture inherits="GluePanelButtonHighlightTexture" alphaMode="ADD"/>
 	</Button>
 	<Button name="GlueButtonSmallTemplateBlue" virtual="true">
-		<Size x="150" y="38"/>
+		<Size>
+			<AbsDimension x="150" y="38"/>
+		</Size>
 		<Scripts>
 			<OnLoad>
 				if (WOW_GLUE_MODEL) then
@@ -122,7 +142,11 @@
 		</Scripts>
 		<ButtonText>
 			<Anchors>
-				<Anchor point="CENTER" x="0" y="3"/>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="3"/>
+					</Offset>
+				</Anchor>
 			</Anchors>
 		</ButtonText>
 		<NormalFont style="GlueFontNormalSmall"/>

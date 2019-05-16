@@ -8,19 +8,12 @@ MINIMAP_EXPANDER_MAXSIZE = 28;
 HUNTER_TRACKING = 1;
 TOWNSFOLK = 2;
 
-GARRISON_ALERT_CONTEXT_BUILDING = 1;
-GARRISON_ALERT_CONTEXT_MISSION = {
-	[LE_FOLLOWER_TYPE_GARRISON_6_0] = 2,
-	[LE_FOLLOWER_TYPE_SHIPYARD_6_2] = 4,
-	[LE_FOLLOWER_TYPE_GARRISON_7_0] = 5,
-	[LE_FOLLOWER_TYPE_GARRISON_8_0] = 6,
-};
-GARRISON_ALERT_CONTEXT_INVASION = 3;
-
 LFG_EYE_TEXTURES = { };
 LFG_EYE_TEXTURES["default"] = { file = "Interface\\LFGFrame\\LFG-Eye", width = 512, height = 256, frames = 29, iconSize = 64, delay = 0.1 };
 LFG_EYE_TEXTURES["raid"] = { file = "Interface\\LFGFrame\\LFR-Anim", width = 256, height = 256, frames = 16, iconSize = 64, delay = 0.05 };
 LFG_EYE_TEXTURES["unknown"] = { file = "Interface\\LFGFrame\\WaitAnim", width = 128, height = 128, frames = 4, iconSize = 64, delay = 0.25 };
+
+MAX_BATTLEFIELD_QUEUES = 3;
 
 function Minimap_OnLoad(self)
 	self.fadeOut = nil;
@@ -365,337 +358,182 @@ function MiniMapTrackingShineFadeOut()
 	UIFrameFadeOut(MiniMapTrackingButtonShine, 0.5);
 end
 
---
--- Dungeon Difficulty
---
-
-local IS_GUILD_GROUP;
-
-function MiniMapInstanceDifficulty_OnEvent(self, event, ...)
-	if ( event == "GUILD_PARTY_STATE_UPDATED" ) then
-		local isGuildGroup = ...;
-		if ( isGuildGroup ~= IS_GUILD_GROUP ) then
-			IS_GUILD_GROUP = isGuildGroup;
-			MiniMapInstanceDifficulty_Update();
-		end
-	elseif ( event == "PLAYER_DIFFICULTY_CHANGED") then
-		MiniMapInstanceDifficulty_Update();
-	elseif ( event == "UPDATE_INSTANCE_INFO" or event == "INSTANCE_GROUP_SIZE_CHANGED" ) then
-		RequestGuildPartyState();
-		MiniMapInstanceDifficulty_Update();
-	elseif ( event == "PLAYER_GUILD_UPDATE" ) then
-		local tabard = GuildInstanceDifficulty;
-		SetSmallGuildTabardTextures("player", tabard.emblem, tabard.background, tabard.border);
-		if ( IsInGuild() ) then
-			RequestGuildPartyState();
-		else
-			IS_GUILD_GROUP = nil;
-			MiniMapInstanceDifficulty_Update();
-		end
-	else
-		RequestGuildPartyState();
+-- ============================================ BATTLEFIELDS ===============================================================================
+local wrappedFuncs = {};
+local function wrapFunc(func) --Lets us directly set .func = on dropdown entries.
+	if ( not wrappedFuncs[func] ) then
+		wrappedFuncs[func] = function(button, ...) func(...) end;
 	end
+	return wrappedFuncs[func];
 end
 
-function MiniMapInstanceDifficulty_Update()
-	local _, instanceType, difficulty, _, maxPlayers, playerDifficulty, isDynamicInstance, _, instanceGroupSize = GetInstanceInfo();
-	local _, _, isHeroic, isChallengeMode, displayHeroic, displayMythic = GetDifficultyInfo(difficulty);
 
-	if ( IS_GUILD_GROUP ) then
-		if ( instanceGroupSize == 0 ) then
-			GuildInstanceDifficultyText:SetText("");
-			GuildInstanceDifficultyDarkBackground:SetAlpha(0);
-			GuildInstanceDifficulty.emblem:SetPoint("TOPLEFT", 12, -16);
-		else
-			GuildInstanceDifficultyText:SetText(instanceGroupSize);
-			GuildInstanceDifficultyDarkBackground:SetAlpha(0.7);
-			GuildInstanceDifficulty.emblem:SetPoint("TOPLEFT", 12, -10);
-		end
-		GuildInstanceDifficultyText:ClearAllPoints();
-		if ( isHeroic or isChallengeMode or displayMythic or displayHeroic ) then
-			local symbolTexture;
-			if ( isChallengeMode ) then
-				symbolTexture = GuildInstanceDifficultyChallengeModeTexture;
-				GuildInstanceDifficultyHeroicTexture:Hide();
-				GuildInstanceDifficultyMythicTexture:Hide();
-			elseif ( displayMythic ) then
-				symbolTexture = GuildInstanceDifficultyMythicTexture;
-				GuildInstanceDifficultyHeroicTexture:Hide();
-				GuildInstanceDifficultyChallengeModeTexture:Hide();
-			else
-				symbolTexture = GuildInstanceDifficultyHeroicTexture;
-				GuildInstanceDifficultyChallengeModeTexture:Hide();
-				GuildInstanceDifficultyMythicTexture:Hide();
+function MiniMapBattlefieldDropDown_OnLoad(self)
+	UIDropDownMenu_Initialize(self, MiniMapBattlefieldDropDown_Initialize, "MENU");
+end
+
+function MiniMapBattlefieldDropDown_Initialize()
+	local info;
+	local status, mapName, instanceID;
+	local numQueued = 0;
+	for i=1, MAX_BATTLEFIELD_QUEUES do
+		status, mapName, instanceID = GetBattlefieldStatus(i);
+		if ( status == "queued" or status == "confirm" ) then
+			numQueued = numQueued+1;
+			-- Add a spacer if there were dropdown items before this
+			if ( numQueued > 1 ) then
+				info = {};
+				info.text = "";
+				info.isTitle = 1;
+				info.notCheckable = 1;
+				UIDropDownMenu_AddButton(info);
 			end
-			-- the 1 looks a little off when text is centered
-			if ( instanceGroupSize < 10 ) then
-				symbolTexture:SetPoint("BOTTOMLEFT", 11, 7);
-				GuildInstanceDifficultyText:SetPoint("BOTTOMLEFT", 23, 8);
-			elseif ( instanceGroupSize > 19 ) then
-				symbolTexture:SetPoint("BOTTOMLEFT", 8, 7);
-				GuildInstanceDifficultyText:SetPoint("BOTTOMLEFT", 20, 8);
-			else
-				symbolTexture:SetPoint("BOTTOMLEFT", 8, 7);
-				GuildInstanceDifficultyText:SetPoint("BOTTOMLEFT", 19, 8);
+			
+			info = {};
+			info.text = mapName;
+			info.isTitle = 1;
+			info.notCheckable = 1;
+			UIDropDownMenu_AddButton(info);
+			if ( status == "queued" ) then
+				info = {};
+				info.text = CHANGE_INSTANCE;
+				info.func = ShowBattlefieldList;
+				info.arg1 = i;
+				info.notCheckable = 1;
+				UIDropDownMenu_AddButton(info);
+				info = {};
+				info.text = LEAVE_QUEUE;
+				info.func = wrapFunc(AcceptBattlefieldPort);
+				info.arg1 = i;
+				info.arg2 = nil;
+				info.notCheckable = 1;
+				UIDropDownMenu_AddButton(info);
+			elseif ( status == "confirm" ) then
+				info = {};
+				info.text = ENTER_BATTLE;
+				info.func = wrapFunc(AcceptBattlefieldPort);
+				info.arg1 = i;
+				info.arg2 = 1;
+				info.notCheckable = 1;
+				UIDropDownMenu_AddButton(info);
+				info = {};
+				info.text = LEAVE_QUEUE;
+				info.func = wrapFunc(AcceptBattlefieldPort);
+				info.arg1 = i;
+				info.arg2 = nil;
+				info.notCheckable = 1;
+				UIDropDownMenu_AddButton(info);
+			end			
+		end
+	end
+end
+
+function BattlefieldFrame_UpdateStatus(tooltipOnly)
+	local status, mapName, instanceID;
+	local numberQueues = 0;
+	local waitTime, timeInQueue;
+	local tooltip;
+	local showRightClickText;
+	BATTLEFIELD_SHUTDOWN_TIMER = 0;
+
+	-- Reset tooltip
+	MiniMapBattlefieldFrame.tooltip = nil;
+	MiniMapBattlefieldFrame.waitTime = {};
+	MiniMapBattlefieldFrame.status = nil;
+	
+	-- Copy current queues into previous queues
+	if ( not tooltipOnly ) then
+		PREVIOUS_BATTLEFIELD_QUEUES = {};
+		for index, value in ipairs(CURRENT_BATTLEFIELD_QUEUES) do
+			tinsert(PREVIOUS_BATTLEFIELD_QUEUES, value);
+		end
+		CURRENT_BATTLEFIELD_QUEUES = {};
+	end
+
+	for i=1, MAX_BATTLEFIELD_QUEUES do
+		status, mapName, instanceID = GetBattlefieldStatus(i);
+		if ( instanceID ~= 0 ) then
+			mapName = mapName.." "..instanceID;
+		end
+		tooltip = nil;
+
+		if ( not tooltipOnly and (status ~= "confirm") ) then
+			StaticPopup_Hide("CONFIRM_BATTLEFIELD_ENTRY", i);
+		end
+
+		if ( status ~= "none" ) then
+			numberQueues = numberQueues+1;
+			if ( status == "queued" ) then
+				-- Update queue info show button on minimap
+				waitTime = GetBattlefieldEstimatedWaitTime(i);
+				timeInQueue = GetBattlefieldTimeWaited(i)/1000;
+				if ( waitTime == 0 ) then
+					waitTime = QUEUE_TIME_UNAVAILABLE;
+				elseif ( waitTime < 60000 ) then 
+					waitTime = LESS_THAN_ONE_MINUTE;
+				else
+					waitTime = SecondsToTime(waitTime/1000, 1);
+				end
+				MiniMapBattlefieldFrame.waitTime[i] = waitTime;
+				tooltip = format(BATTLEFIELD_IN_QUEUE, mapName, waitTime, SecondsToTime(timeInQueue));
+				
+				if ( not tooltipOnly ) then
+					if ( not IsAlreadyInQueue(mapName) ) then
+						PlaySound(SOUNDKIT.PVP_ENTER_QUEUE);
+						UIFrameFadeIn(MiniMapBattlefieldFrame, CHAT_FRAME_FADE_TIME);
+						BattlegroundShineFadeIn();
+					end
+					tinsert(CURRENT_BATTLEFIELD_QUEUES, mapName);
+				end
+				showRightClickText = 1;
+			elseif ( status == "confirm" ) then
+				-- Have been accepted show enter battleground dialog
+				tooltip = format(BATTLEFIELD_QUEUE_CONFIRM, mapName, SecondsToTime(GetBattlefieldPortExpiration(i)));
+				if ( not tooltipOnly ) then
+					local dialog = StaticPopup_Show("CONFIRM_BATTLEFIELD_ENTRY", mapName, nil, i);
+					if ( dialog ) then
+						dialog.data = i;
+					end
+					PlaySound(SOUNDKIT.PVP_THROUGH_QUEUE);
+					MiniMapBattlefieldFrame:Show();
+				end
+				showRightClickText = 1;
+			elseif ( status == "active" ) then
+				-- In the battleground
+				tooltip = format(BATTLEFIELD_IN_BATTLEFIELD, mapName);
+				
+				BATTLEFIELD_SHUTDOWN_TIMER = GetBattlefieldInstanceExpiration()/1000;
+				BATTLEFIELD_TIMER_THRESHOLD_INDEX = 1;
+				PREVIOUS_BATTLEFIELD_MOD = 0;
+				MiniMapBattlefieldFrame.status = status;
+			elseif ( status == "error" ) then
+				-- Should never happen haha
 			end
-			symbolTexture:Show();
+			if ( tooltip ) then
+				if ( MiniMapBattlefieldFrame.tooltip ) then
+					MiniMapBattlefieldFrame.tooltip = MiniMapBattlefieldFrame.tooltip.."\n\n"..tooltip;
+				else
+					MiniMapBattlefieldFrame.tooltip = tooltip;
+				end
+			end
+		end
+	end
+	-- See if should add right click message
+	if ( MiniMapBattlefieldFrame.tooltip and showRightClickText ) then
+		MiniMapBattlefieldFrame.tooltip = MiniMapBattlefieldFrame.tooltip.."\n"..RIGHT_CLICK_MESSAGE;
+	end
+	
+	if ( not tooltipOnly ) then
+		if ( numberQueues == 0 ) then
+			-- Clear everything out
+			MiniMapBattlefieldFrame:Hide();
 		else
-			GuildInstanceDifficultyHeroicTexture:Hide();
-			GuildInstanceDifficultyChallengeModeTexture:Hide();
-			GuildInstanceDifficultyMythicTexture:Hide();
-			GuildInstanceDifficultyText:SetPoint("BOTTOM", 2, 8);
+			MiniMapBattlefieldFrame:Show();
 		end
-		MiniMapInstanceDifficulty:Hide();
-		SetSmallGuildTabardTextures("player", GuildInstanceDifficulty.emblem, GuildInstanceDifficulty.background, GuildInstanceDifficulty.border);
-		GuildInstanceDifficulty:Show();
-		MiniMapChallengeMode:Hide();
-	elseif ( isChallengeMode ) then
-		MiniMapChallengeMode:Show();
-		MiniMapInstanceDifficulty:Hide();
-		GuildInstanceDifficulty:Hide();
-	elseif ( instanceType == "raid" or isHeroic or displayMythic or displayHeroic ) then
-		MiniMapInstanceDifficultyText:SetText(instanceGroupSize);
-		-- the 1 looks a little off when text is centered
-		local xOffset = 0;
-		if ( instanceGroupSize >= 10 and instanceGroupSize <= 19 ) then
-			xOffset = -1;
-		end
-		if ( displayMythic ) then
-			MiniMapInstanceDifficultyTexture:SetTexCoord(0.25, 0.5, 0.0703125, 0.4296875);
-			MiniMapInstanceDifficultyText:SetPoint("CENTER", xOffset, -9);
-		elseif ( isHeroic or displayHeroic ) then
-			MiniMapInstanceDifficultyTexture:SetTexCoord(0, 0.25, 0.0703125, 0.4296875);
-			MiniMapInstanceDifficultyText:SetPoint("CENTER", xOffset, -9);
-		else
-			MiniMapInstanceDifficultyTexture:SetTexCoord(0, 0.25, 0.5703125, 0.9296875);
-			MiniMapInstanceDifficultyText:SetPoint("CENTER", xOffset, 5);
-		end
-		MiniMapInstanceDifficulty:Show();
-		GuildInstanceDifficulty:Hide();
-		MiniMapChallengeMode:Hide();
-	else
-		MiniMapInstanceDifficulty:Hide();
-		GuildInstanceDifficulty:Hide();
-		MiniMapChallengeMode:Hide();
-	end
-end
-
-function MiniMapInstanceDifficulty_OnEnter(self)
-	local _, instanceType, difficulty, _, maxPlayers, playerDifficulty, isDynamicInstance, _, instanceGroupSize, lfgID = GetInstanceInfo();
-	local isLFR = select(8, GetDifficultyInfo(difficulty))
-	if (isLFR and lfgID) then
-		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT", 8, 8);
-		local name = GetLFGDungeonInfo(lfgID);
-		GameTooltip:SetText(RAID_FINDER, 1, 1, 1);
-		GameTooltip:AddLine(name);
-		GameTooltip:Show();
-	end
-end
-
-function GuildInstanceDifficulty_OnEnter(self)
-	local guildName = GetGuildInfo("player");
-	local _, instanceType, _, _, maxPlayers = GetInstanceInfo();
-	local _, numGuildPresent, numGuildRequired, xpMultiplier = InGuildParty();
-	-- hack alert
-	if ( instanceType == "arena" ) then
-		maxPlayers = numGuildRequired;
-	end
-	GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT", 8, 8);
-	GameTooltip:SetText(GUILD_GROUP, 1, 1, 1);
-	if ( xpMultiplier < 1 ) then
-		GameTooltip:AddLine(string.format(GUILD_ACHIEVEMENTS_ELIGIBLE_MINXP, numGuildRequired, maxPlayers, guildName, xpMultiplier * 100), nil, nil, nil, true);
-	elseif ( xpMultiplier > 1 ) then
-		GameTooltip:AddLine(string.format(GUILD_ACHIEVEMENTS_ELIGIBLE_MAXXP, guildName, xpMultiplier * 100), nil, nil, nil, true);
-	else
-		if ( instanceType == "party" and maxPlayers == 5 ) then
-			numGuildRequired = 4;
-		end
-		GameTooltip:AddLine(string.format(GUILD_ACHIEVEMENTS_ELIGIBLE, numGuildRequired, maxPlayers, guildName), nil, nil, nil, true);
-	end
-	GameTooltip:Show();
-end
-
-
-function GarrisonLandingPageMinimapButton_OnLoad(self)
-	self.pulseLocks = {};
-	self:RegisterEvent("GARRISON_SHOW_LANDING_PAGE");
-	self:RegisterEvent("GARRISON_HIDE_LANDING_PAGE");
-	self:RegisterEvent("GARRISON_BUILDING_ACTIVATABLE");
-	self:RegisterEvent("GARRISON_BUILDING_ACTIVATED");
-	self:RegisterEvent("GARRISON_ARCHITECT_OPENED");
-	self:RegisterEvent("GARRISON_MISSION_FINISHED");
-	self:RegisterEvent("GARRISON_MISSION_NPC_OPENED");
-	self:RegisterEvent("GARRISON_SHIPYARD_NPC_OPENED");
-	self:RegisterEvent("GARRISON_INVASION_AVAILABLE");
-	self:RegisterEvent("GARRISON_INVASION_UNAVAILABLE");
-	self:RegisterEvent("SHIPMENT_UPDATE");
-	self:RegisterEvent("ZONE_CHANGED_NEW_AREA");
-	self:RegisterEvent("ZONE_CHANGED");
-	self:RegisterEvent("ZONE_CHANGED_INDOORS");
-end
-
-function GarrisonLandingPageMinimapButton_OnEvent(self, event, ...)
-	if (event == "GARRISON_HIDE_LANDING_PAGE") then
-		self:Hide();
-	elseif (event == "GARRISON_SHOW_LANDING_PAGE") then
-		GarrisonLandingPageMinimapButton_UpdateIcon(self);
-		self:Show();
-	elseif ( event == "GARRISON_BUILDING_ACTIVATABLE" ) then
-		local buildingName, garrisonType = ...;
-		if ( garrisonType == C_Garrison.GetLandingPageGarrisonType() ) then
-			GarrisonMinimapBuilding_ShowPulse(self);
-		end
-	elseif ( event == "GARRISON_BUILDING_ACTIVATED" or event == "GARRISON_ARCHITECT_OPENED") then
-		GarrisonMinimap_HidePulse(self, GARRISON_ALERT_CONTEXT_BUILDING);
-	elseif ( event == "GARRISON_MISSION_FINISHED" ) then
-		local followerType = ...;
-		if ( DoesFollowerMatchCurrentGarrisonType(followerType) ) then
-			GarrisonMinimapMission_ShowPulse(self, followerType);
-		end
-	elseif ( event == "GARRISON_MISSION_NPC_OPENED" ) then
-		local followerType = ...;
-		GarrisonMinimap_HidePulse(self, GARRISON_ALERT_CONTEXT_MISSION[followerType]);
-	elseif ( event == "GARRISON_SHIPYARD_NPC_OPENED" ) then
-		GarrisonMinimap_HidePulse(self, GARRISON_ALERT_CONTEXT_MISSION[LE_FOLLOWER_TYPE_SHIPYARD_6_2]);
-	elseif (event == "GARRISON_INVASION_AVAILABLE") then
-		if ( C_Garrison.GetLandingPageGarrisonType() == LE_GARRISON_TYPE_6_0 ) then
-			GarrisonMinimapInvasion_ShowPulse(self);
-		end
-	elseif (event == "GARRISON_INVASION_UNAVAILABLE") then
-		GarrisonMinimap_HidePulse(self, GARRISON_ALERT_CONTEXT_INVASION);
-	elseif (event == "SHIPMENT_UPDATE") then
-		local shipmentStarted, isTroop = ...;
-		if (shipmentStarted) then
-			GarrisonMinimapShipmentCreated_ShowPulse(self, isTroop);
+		
+		-- Set minimap icon here since it bugs out on login
+		if ( UnitFactionGroup("player") ) then
+			MiniMapBattlefieldIcon:SetTexture("Interface\\BattlefieldFrame\\Battleground-"..UnitFactionGroup("player"));
 		end
 	end
-end
-
-local function GetMinimapAtlases_GarrisonType8_0(faction)
-	if faction == "Horde" then
-		return "bfa-landingbutton-horde-up", "bfa-landingbutton-horde-down", "bfa-landingbutton-horde-diamondhighlight", "bfa-landingbutton-horde-diamondglow";
-	else
-		return "bfa-landingbutton-alliance-up", "bfa-landingbutton-alliance-down", "bfa-landingbutton-alliance-shieldhighlight", "bfa-landingbutton-alliance-shieldglow";
-	end
-end
-
-function GarrisonLandingPageMinimapButton_UpdateIcon(self)
-	local garrisonType = C_Garrison.GetLandingPageGarrisonType();
-	if (garrisonType == LE_GARRISON_TYPE_6_0) then
-		self.faction = UnitFactionGroup("player");
-		if ( self.faction == "Horde" ) then
-			self:GetNormalTexture():SetAtlas("GarrLanding-MinimapIcon-Horde-Up", true);
-			self:GetPushedTexture():SetAtlas("GarrLanding-MinimapIcon-Horde-Down", true);
-		else
-			self:GetNormalTexture():SetAtlas("GarrLanding-MinimapIcon-Alliance-Up", true);
-			self:GetPushedTexture():SetAtlas("GarrLanding-MinimapIcon-Alliance-Down", true);
-		end
-		self.title = GARRISON_LANDING_PAGE_TITLE;
-		self.description = MINIMAP_GARRISON_LANDING_PAGE_TOOLTIP;
-	elseif (garrisonType == LE_GARRISON_TYPE_7_0) then
-		local _, className = UnitClass("player");
-		self:GetNormalTexture():SetAtlas("legionmission-landingbutton-"..className.."-up", true);
-		self:GetPushedTexture():SetAtlas("legionmission-landingbutton-"..className.."-down", true);
-		self.title = ORDER_HALL_LANDING_PAGE_TITLE;
-		self.description = MINIMAP_ORDER_HALL_LANDING_PAGE_TOOLTIP;
-	elseif (garrisonType == LE_GARRISON_TYPE_8_0) then
-		self.faction = UnitFactionGroup("player");
-		local atlasUp, atlasDown, atlasHighlight, atlasGlow = GetMinimapAtlases_GarrisonType8_0(self.faction);
-		local info = C_Texture.GetAtlasInfo(atlasUp);
-		self:SetSize(info and info.width or 0, info and info.height or 0);
-		self:GetNormalTexture():SetAtlas(atlasUp, true);
-		self:GetPushedTexture():SetAtlas(atlasDown, true);
-		self:GetHighlightTexture():SetAtlas(atlasHighlight, true);
-		self.LoopingGlow:SetAtlas(atlasGlow, true);
-
-		self.title = GARRISON_TYPE_8_0_LANDING_PAGE_TITLE;
-		self.description = GARRISON_TYPE_8_0_LANDING_PAGE_TOOLTIP;
-	end
-end
-
-function GarrisonLandingPageMinimapButton_OnClick()
-	GarrisonLandingPage_Toggle();
-end
-
-function GarrisonLandingPage_Toggle()
-	if (GarrisonLandingPage and GarrisonLandingPage:IsShown()) then
-		HideUIPanel(GarrisonLandingPage);
-	else
-		ShowGarrisonLandingPage(C_Garrison.GetLandingPageGarrisonType());
-	end
-end
-
-function GarrisonMinimap_SetPulseLock(self, lock, enabled)
-	self.pulseLocks[lock] = enabled;
-end
-
--- We play an animation on the garrison minimap icon for a number of reasons, but only want to turn the
--- animation off if the user handles all actions related to that alert. For example if we play the animation
--- because a building can be activated and then another because a garrison invasion has occurred,  we want to
--- turn off the animation after they handle both the building and invasion, but not if they handle only one.
--- We always stop the pulse when they click on the landing page icon.
-
-function GarrisonMinimap_HidePulse(self, lock)
-	GarrisonMinimap_SetPulseLock(self, lock, false);
-	local enabled = false;
-	for k, v in pairs(self.pulseLocks) do
-		if ( v ) then
-			enabled = true;
-			break;
-		end
-	end
-
-	-- If there are no other reasons to show the pulse, hide it
-	if (not enabled) then
-		GarrisonLandingPageMinimapButton.MinimapLoopPulseAnim:Stop();
-	end
-end
-
-function GarrisonMinimap_ClearPulse()
-	local self = GarrisonLandingPageMinimapButton;
-	for k, v in pairs(self.pulseLocks) do
-		self.pulseLocks[k] = false;
-	end
-	self.MinimapLoopPulseAnim:Stop();
-end
-
-function GarrisonMinimapBuilding_ShowPulse(self)
-	GarrisonMinimap_SetPulseLock(self, GARRISON_ALERT_CONTEXT_BUILDING, true);
-	self.MinimapLoopPulseAnim:Play();
-end
-
-function GarrisonMinimapMission_ShowPulse(self, followerType)
-	GarrisonMinimap_SetPulseLock(self, GARRISON_ALERT_CONTEXT_MISSION[followerType], true);
-	self.MinimapLoopPulseAnim:Play();
-end
-
-function GarrisonMinimap_Justify(text)
-	--Center justify if we're on more than one line
-	if ( text:GetNumLines() > 1 ) then
-		text:SetJustifyH("CENTER");
-	else
-		text:SetJustifyH("RIGHT");
-	end
-end
-
-function GarrisonMinimapInvasion_ShowPulse(self)
-	PlaySound(SOUNDKIT.UI_GARRISON_TOAST_INVASION_ALERT);
-	self.AlertText:SetText(GARRISON_LANDING_INVASION_ALERT);
-	GarrisonMinimap_Justify(self.AlertText);
-	GarrisonMinimap_SetPulseLock(self, GARRISON_ALERT_CONTEXT_INVASION, true);
-	self.MinimapAlertAnim:Play();
-	self.MinimapLoopPulseAnim:Play();
-end
-
-function GarrisonMinimapShipmentCreated_ShowPulse(self, isTroop)
-    local text;
-    if (isTroop) then
-        text = GARRISON_LANDING_RECRUITMENT_STARTED_ALERT;
-    else
-        text = GARRISON_LANDING_SHIPMENT_STARTED_ALERT;
-    end
-
-	self.AlertText:SetText(text);
-	GarrisonMinimap_Justify(self.AlertText);
-	self.MinimapAlertAnim:Play();
 end

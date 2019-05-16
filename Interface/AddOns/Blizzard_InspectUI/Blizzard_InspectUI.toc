@@ -1,10 +1,6 @@
-## Interface: 80100
 ## Title: Blizzard Inspect UI
-## Secure: 1
 ## LoadOnDemand: 1
 Blizzard_InspectUI.xml
 InspectPaperDollFrame.xml
-InspectPVPFrame.xml
-InspectTalentFrame.xml
-InspectGuildFrame.xml
+InspectHonorFrame.xml
 Localization.lua

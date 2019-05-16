@@ -20,12 +20,7 @@ end
 
 function PartyMemberFrame_UpdateArt(self)
 	local unit = "party"..self:GetID();
-	if ( UnitHasVehicleUI(unit) and UnitIsConnected(unit) ) then
-		local vehicleType = UnitVehicleSkin(unit);
-		PartyMemberFrame_ToVehicleArt(self, vehicleType);
-	else
-		PartyMemberFrame_ToPlayerArt(self);
-	end
+	PartyMemberFrame_ToPlayerArt(self);
 end
 
 function PartyMemberFrame_ToPlayerArt(self)
@@ -85,10 +80,10 @@ function PartyMemberFrame_OnLoad (self)
 	UnitFrame_Initialize(self, "party"..id,  _G[prefix.."Name"], _G[prefix.."Portrait"],
 		   _G[prefix.."HealthBar"], _G[prefix.."HealthBarText"],
 		   _G[prefix.."ManaBar"], _G[prefix.."ManaBarText"],
-		   _G[prefix.."Flash"], nil, nil, _G[prefix.."MyHealPredictionBar"], _G[prefix.."OtherHealPredictionBar"],
-		   _G[prefix.."TotalAbsorbBar"], _G[prefix.."TotalAbsorbBarOverlay"], _G[prefix.."OverAbsorbGlow"],
-		   _G[prefix.."OverHealAbsorbGlow"], _G[prefix.."HealAbsorbBar"], _G[prefix.."HealAbsorbBarLeftShadow"],
-		   _G[prefix.."HealAbsorbBarRightShadow"]);
+		   _G[prefix.."Flash"], nil, nil, nil, nil, 
+		   nil, nil, nil,
+		   nil, nil, nil,
+		   nil);
 	SetTextStatusBarTextZeroText(_G[prefix.."HealthBar"], DEAD);
 
 	self.statusCounter = 0;
@@ -108,15 +103,12 @@ function PartyMemberFrame_OnLoad (self)
 	self:RegisterEvent("READY_CHECK");
 	self:RegisterEvent("READY_CHECK_CONFIRM");
 	self:RegisterEvent("READY_CHECK_FINISHED");
-	self:RegisterEvent("UNIT_ENTERED_VEHICLE");
-	self:RegisterEvent("UNIT_EXITED_VEHICLE");
 	self:RegisterEvent("UNIT_CONNECTION");
 	self:RegisterEvent("PARTY_MEMBER_ENABLE");
 	self:RegisterEvent("PARTY_MEMBER_DISABLE");
 	self:RegisterEvent("UNIT_PHASE");
 	self:RegisterEvent("UNIT_FLAGS");
 	self:RegisterEvent("UNIT_OTHER_PARTY_CHANGED");
-	self:RegisterEvent("INCOMING_SUMMON_CHANGED");
 	local id = self:GetID();
 	self:RegisterUnitEvent("UNIT_AURA", "party"..id, "partypet"..id);
 	self:RegisterUnitEvent("UNIT_PET",  "party"..id, "partypet"..id);
@@ -163,7 +155,7 @@ function PartyMemberFrame_UpdateMember (self)
 		end
 
 		UnitFrame_Update(self, true);
-	else
+		else
 		if VoiceActivityManager then
 			VoiceActivityManager:UnregisterFrameForVoiceActivityNotifications(self);
 			self.voiceNotification = nil;
@@ -228,13 +220,8 @@ function PartyMemberFrame_UpdateLeader (self)
 	local guideIcon = _G["PartyMemberFrame"..id.."GuideIcon"];
 
 	if( UnitIsGroupLeader("party"..id) ) then
-		if ( HasLFGRestrictions() ) then
-			guideIcon:Show();
-			leaderIcon:Hide();
-		else
-			leaderIcon:Show();
-			guideIcon:Hide();
-		end
+		leaderIcon:Show();
+		guideIcon:Hide();
 	else
 		guideIcon:Hide();
 		leaderIcon:Hide();
@@ -251,20 +238,6 @@ function PartyMemberFrame_UpdatePvPStatus (self)
 		icon:Show();
 	elseif ( factionGroup and factionGroup ~= "Neutral" and UnitIsPVP(unit) ) then
 		icon:SetTexture("Interface\\GroupFrame\\UI-Group-PVP-"..factionGroup);
-		icon:Show();
-	else
-		icon:Hide();
-	end
-end
-
-function PartyMemberFrame_UpdateAssignedRoles (self)
-	local id = self:GetID();
-	local unit = "party"..id;
-	local icon = _G["PartyMemberFrame"..id.."RoleIcon"];
-	local role = UnitGroupRolesAssigned(unit);
-
-	if ( role == "TANK" or role == "HEALER" or role == "DAMAGER") then
-		icon:SetTexCoord(GetTexCoordsForRoleSmallCircle(role));
 		icon:Show();
 	else
 		icon:Hide();
@@ -314,7 +287,6 @@ function PartyMemberFrame_UpdateNotPresentIcon(self)
 	local partyID = "party"..id;
 
 	local inPhase = UnitInPhase(partyID);
-	local notInSameWarMode = UnitIsWarModePhased(partyID);
 
 	if ( UnitInOtherParty(partyID) ) then
 		self:SetAlpha(0.6);
@@ -323,40 +295,12 @@ function PartyMemberFrame_UpdateNotPresentIcon(self)
 		self.notPresentIcon.Border:Show();
 		self.notPresentIcon.tooltip = PARTY_IN_PUBLIC_GROUP_MESSAGE;
 		self.notPresentIcon:Show();
-	elseif ( C_IncomingSummon.HasIncomingSummon(self.unit) ) then
-		local status = C_IncomingSummon.IncomingSummonStatus(self.unit);
-		if(status == Enum.SummonStatus.Pending) then
-			self.notPresentIcon.texture:SetAtlas("Raid-Icon-SummonPending");
-			self.notPresentIcon.texture:SetTexCoord(0, 1, 0, 1);
-			self.notPresentIcon.tooltip = INCOMING_SUMMON_TOOLTIP_SUMMON_PENDING;
-			self.notPresentIcon.Border:Hide();
-			self.notPresentIcon:Show();
-		elseif( status == Enum.SummonStatus.Accepted ) then
-			self.notPresentIcon.texture:SetAtlas("Raid-Icon-SummonAccepted");
-			self.notPresentIcon.texture:SetTexCoord(0, 1, 0, 1);
-			self.notPresentIcon.tooltip = INCOMING_SUMMON_TOOLTIP_SUMMON_ACCEPTED;
-			self.notPresentIcon.Border:Hide();
-			self.notPresentIcon:Show();
-		elseif( status == Enum.SummonStatus.Declined ) then
-			self.notPresentIcon.texture:SetAtlas("Raid-Icon-SummonDeclined");
-			self.notPresentIcon.texture:SetTexCoord(0, 1, 0, 1);
-			self.notPresentIcon.tooltip = INCOMING_SUMMON_TOOLTIP_SUMMON_DECLINED;
-			self.notPresentIcon.Border:Hide();
-			self.notPresentIcon:Show();
-		end
-	elseif ( (notInSameWarMode or not inPhase) and UnitIsConnected(partyID) ) then
+	elseif ( (not inPhase) and UnitIsConnected(partyID) ) then
 		self:SetAlpha(0.6);
 		self.notPresentIcon.texture:SetTexture("Interface\\TargetingFrame\\UI-PhasingIcon");
 		self.notPresentIcon.texture:SetTexCoord(0.15625, 0.84375, 0.15625, 0.84375);
 		self.notPresentIcon.Border:Hide();
 		self.notPresentIcon.tooltip = PARTY_PHASED_MESSAGE;
-		if ( notInSameWarMode ) then
-			if C_PvP.IsWarModeDesired() then
-				self.notPresentIcon.tooltip = PARTY_PLAYER_WARMODE_DISABLED;
-			else
-				self.notPresentIcon.tooltip = PARTY_PLAYER_WARMODE_ENABLED;
-			end
-		end
 		self.notPresentIcon:Show();
 	else
 		self:SetAlpha(1);
@@ -384,7 +328,6 @@ function PartyMemberFrame_OnEvent(self, event, ...)
 	elseif ( event == "GROUP_ROSTER_UPDATE" or event == "UPDATE_ACTIVE_BATTLEFIELD" ) then
 		PartyMemberFrame_UpdateMember(self);
 		PartyMemberFrame_UpdateArt(self);
-		PartyMemberFrame_UpdateAssignedRoles(self);
 		return;
 	elseif ( event == "PARTY_LEADER_CHANGED" ) then
 		PartyMemberFrame_UpdateLeader(self);
@@ -409,9 +352,6 @@ function PartyMemberFrame_OnEvent(self, event, ...)
 	elseif ( event =="UNIT_PET" ) then
 		if ( arg1 == unit ) then
 			PartyMemberFrame_UpdatePet(self);
-		end
-		if ( UnitHasVehicleUI("party"..selfID) and UnitIsConnected("party"..selfID)) then
-			PartyMemberFrame_ToVehicleArt(self, UnitVehicleSkin("party"..selfID));
 		end
 	elseif ( event == "READY_CHECK" or
 		 event == "READY_CHECK_CONFIRM" ) then
@@ -440,13 +380,12 @@ function PartyMemberFrame_OnEvent(self, event, ...)
 		end
 	elseif ( event == "UNIT_CONNECTION" ) and ( arg1 == "party"..selfID ) then
 		PartyMemberFrame_UpdateArt(self);
+		PartyMemberFrame_UpdateOnlineStatus(self);
 	elseif ( event == "UNIT_PHASE" or event == "PARTY_MEMBER_ENABLE" or event == "PARTY_MEMBER_DISABLE" or event == "UNIT_FLAGS") then
 		if ( event ~= "UNIT_PHASE" or arg1 == unit ) then
 			PartyMemberFrame_UpdateNotPresentIcon(self);
 		end
 	elseif ( event == "UNIT_OTHER_PARTY_CHANGED" and arg1 == unit ) then
-		PartyMemberFrame_UpdateNotPresentIcon(self);
-	elseif ( event == "INCOMING_SUMMON_CHANGED" ) then
 		PartyMemberFrame_UpdateNotPresentIcon(self);
 	end
 end
@@ -479,15 +418,10 @@ function PartyMemberBuffTooltip_Update (self)
 	local numBuffs = 0;
 	local numDebuffs = 0;
 	local index = 1;
-	local filter;
+	local filter = nil;
 
 	PartyMemberBuffTooltip:SetID(self:GetID());
 
-	if ( SHOW_CASTABLE_BUFFS == "1" ) then
-		filter = "RAID";
-	else
-		filter = nil;
-	end
 	for i=1, MAX_PARTY_TOOLTIP_BUFFS do
 		name, icon = UnitBuff(self.unit, i, filter);
 		if ( icon ) then
@@ -512,11 +446,6 @@ function PartyMemberBuffTooltip_Update (self)
 	index = 1;
 
 	local debuffButton, debuffStack, debuffType, color, countdown;
-	if ( SHOW_DISPELLABLE_DEBUFFS == "1" ) then
-		filter = "RAID";
-	else
-		filter = nil;
-	end
 	for i=1, MAX_PARTY_TOOLTIP_DEBUFFS do
 		local debuffBorder = _G["PartyMemberBuffTooltipDebuff"..index.."Border"]
 		local partyDebuff = _G["PartyMemberBuffTooltipDebuff"..index.."Icon"];

@@ -19,10 +19,6 @@ VIEWABLE_ACTION_BAR_PAGES = {1, 1, 1, 1, 1, 1};
 ACTION_HIGHLIGHT_MARKS = { };
 ON_BAR_HIGHLIGHT_MARKS = { };
 
-ACTION_BUTTON_SHOW_GRID_REASON_CVAR = 1;
-ACTION_BUTTON_SHOW_GRID_REASON_EVENT = 2;
-ACTION_BUTTON_SHOW_GRID_REASON_SPELLBOOK = 4;
-
 function MarkNewActionHighlight(action)
 	ACTION_HIGHLIGHT_MARKS[action] = true;
 end
@@ -112,16 +108,16 @@ local function CheckUseActionButton(button, checkingFromDown)
 	end
 end
 
-local isInPetBattle = C_PetBattles.IsInBattle;
+local isInPetBattle = false;
 local function CheckPetActionButtonEvent(id, isDown)
-	if isInPetBattle() and PetBattleFrame then
+	--[[if isInPetBattle() and PetBattleFrame then
 		if isDown then
 			PetBattleFrame_ButtonDown(id);
 		else
 			PetBattleFrame_ButtonUp(id);
 		end
 		return true;
-	end
+	end]]
 
 	return false;
 end
@@ -226,21 +222,14 @@ function ActionBarActionEventsFrame_OnLoad(self)
 	self:RegisterEvent("PLAYER_TARGET_CHANGED");
 	self:RegisterEvent("TRADE_SKILL_SHOW");
 	self:RegisterEvent("TRADE_SKILL_CLOSE");
-	self:RegisterEvent("ARCHAEOLOGY_CLOSED");
 	self:RegisterEvent("PLAYER_ENTER_COMBAT");
 	self:RegisterEvent("PLAYER_LEAVE_COMBAT");
 	self:RegisterEvent("START_AUTOREPEAT_SPELL");
 	self:RegisterEvent("STOP_AUTOREPEAT_SPELL");
-	self:RegisterEvent("UNIT_ENTERED_VEHICLE");
-	self:RegisterEvent("UNIT_EXITED_VEHICLE");
-	self:RegisterEvent("COMPANION_UPDATE");
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED");
 	self:RegisterEvent("LEARNED_SPELL_IN_TAB");
 	self:RegisterEvent("PET_STABLE_UPDATE");
 	self:RegisterEvent("PET_STABLE_SHOW");
-	self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW");
-	self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE");
-	self:RegisterEvent("UPDATE_SUMMONPETS_ACTION");
 	self:RegisterEvent("LOSS_OF_CONTROL_ADDED");
 	self:RegisterEvent("LOSS_OF_CONTROL_UPDATE");
 	self:RegisterEvent("SPELL_UPDATE_ICON");
@@ -467,29 +456,30 @@ function ActionButton_UpdateSpellHighlightMark(self)
 	end
 end
 
-function ActionButton_ShowGrid(button, reason)
-	assert(button and reason);
+function ActionButton_ShowGrid(button)
+	assert(button);
+
 	if ( issecure() ) then
-		button:SetAttribute("showgrid", bit.bor(button:GetAttribute("showgrid"), reason));
+		button:SetAttribute("showgrid", button:GetAttribute("showgrid") + 1);
 	end
 
 	if ( button.NormalTexture ) then
 		button.NormalTexture:SetVertexColor(1.0, 1.0, 1.0, 0.5);
 	end
 
-	if ( button:GetAttribute("showgrid") > 0 and not button:GetAttribute("statehidden") ) then
+	if ( button:GetAttribute("showgrid") >= 1 and not button:GetAttribute("statehidden") ) then
 		button:Show();
 	end
 end
 
-function ActionButton_HideGrid(button, reason)
-	assert(button and reason);
+function ActionButton_HideGrid(button)
+	assert(button);
 
 	local showgrid = button:GetAttribute("showgrid");
 
 	if ( issecure() ) then
 		if ( showgrid > 0 ) then
-			button:SetAttribute("showgrid", bit.band(showgrid, bit.bnot(reason)));
+			button:SetAttribute("showgrid", showgrid - 1);
 		end
 	end
 
@@ -529,7 +519,8 @@ end
 function ActionButton_UpdateCount(self)
 	local text = self.Count;
 	local action = self.action;
-	if ( IsConsumableAction(action) or IsStackableAction(action) or (not IsItemAction(action) and GetActionCount(action) > 0) ) then
+	-- In Classic, we only want to show usage counts for item actions.
+	if ( IsItemAction(action) and (IsConsumableAction(action) or IsStackableAction(action)) ) then
 		local count = GetActionCount(action);
 		if ( count > (self.maxDisplayCount or 9999 ) ) then
 			text:SetText("*");
@@ -547,50 +538,31 @@ function ActionButton_UpdateCount(self)
 end
 
 function ActionButton_UpdateCooldown(self)
-	local locStart, locDuration;
 	local start, duration, enable, charges, maxCharges, chargeStart, chargeDuration;
 	local modRate = 1.0;
 	local chargeModRate = 1.0;
 	if ( self.spellID ) then
-		locStart, locDuration = GetSpellLossOfControlCooldown(self.spellID);
 		start, duration, enable, modRate = GetSpellCooldown(self.spellID);
 		charges, maxCharges, chargeStart, chargeDuration, chargeModRate = GetSpellCharges(self.spellID);
 	else
-		locStart, locDuration = GetActionLossOfControlCooldown(self.action);
 		start, duration, enable, modRate = GetActionCooldown(self.action);
 		charges, maxCharges, chargeStart, chargeDuration, chargeModRate = GetActionCharges(self.action);
 	end
 
-	if ( (locStart + locDuration) > (start + duration) ) then
-		if ( self.cooldown.currentCooldownType ~= COOLDOWN_TYPE_LOSS_OF_CONTROL ) then
-			self.cooldown:SetEdgeTexture("Interface\\Cooldown\\edge-LoC");
-			self.cooldown:SetSwipeColor(0.17, 0, 0);
-			self.cooldown:SetHideCountdownNumbers(true);
-			self.cooldown.currentCooldownType = COOLDOWN_TYPE_LOSS_OF_CONTROL;
-		end
-
-		CooldownFrame_Set(self.cooldown, locStart, locDuration, true, true, modRate);
-		ClearChargeCooldown(self);
-	else
-		if ( self.cooldown.currentCooldownType ~= COOLDOWN_TYPE_NORMAL ) then
-			self.cooldown:SetEdgeTexture("Interface\\Cooldown\\edge");
-			self.cooldown:SetSwipeColor(0, 0, 0);
-			self.cooldown:SetHideCountdownNumbers(false);
-			self.cooldown.currentCooldownType = COOLDOWN_TYPE_NORMAL;
-		end
-
-		if( locStart > 0 ) then
-			self.cooldown:SetScript("OnCooldownDone", ActionButton_OnCooldownDone );
-		end
-
-		if ( charges and maxCharges and maxCharges > 1 and charges < maxCharges ) then
-			StartChargeCooldown(self, chargeStart, chargeDuration, chargeModRate);
-		else
-			ClearChargeCooldown(self);
-		end
-
-		CooldownFrame_Set(self.cooldown, start, duration, enable, false, modRate);
+	if ( self.cooldown.currentCooldownType ~= COOLDOWN_TYPE_NORMAL ) then
+		self.cooldown:SetEdgeTexture("Interface\\Cooldown\\edge");
+		self.cooldown:SetSwipeColor(0, 0, 0);
+		self.cooldown:SetHideCountdownNumbers(false);
+		self.cooldown.currentCooldownType = COOLDOWN_TYPE_NORMAL;
 	end
+
+	if ( charges and maxCharges and maxCharges > 1 and charges < maxCharges ) then
+		StartChargeCooldown(self, chargeStart, chargeDuration, chargeModRate);
+	else
+		ClearChargeCooldown(self);
+	end
+
+	CooldownFrame_Set(self.cooldown, start, duration, enable, false, modRate);
 end
 
 function ActionButton_OnCooldownDone(self)
@@ -644,7 +616,7 @@ function ActionButton_GetOverlayGlow()
 end
 
 function ActionButton_UpdateOverlayGlow(self)
-	local spellType, id, subType  = GetActionInfo(self.action);
+	--[[local spellType, id, subType  = GetActionInfo(self.action);
 	if ( spellType == "spell" and IsSpellOverlayed(id) ) then
 		ActionButton_ShowOverlayGlow(self);
 	elseif ( spellType == "macro" ) then
@@ -656,7 +628,7 @@ function ActionButton_UpdateOverlayGlow(self)
 		end
 	else
 		ActionButton_HideOverlayGlow(self);
-	end
+	end]]
 end
 
 function ActionButton_ShowOverlayGlow(self)
@@ -732,9 +704,9 @@ function ActionButton_OnEvent(self, event, ...)
 			self.icon:SetTexture(texture);
 		end
 	elseif ( event == "ACTIONBAR_SHOWGRID" ) then
-		ActionButton_ShowGrid(self, ACTION_BUTTON_SHOW_GRID_REASON_EVENT);
+		ActionButton_ShowGrid(self);
 	elseif ( event == "ACTIONBAR_HIDEGRID" ) then
-		ActionButton_HideGrid(self, ACTION_BUTTON_SHOW_GRID_REASON_EVENT);
+		ActionButton_HideGrid(self);
 	elseif ( event == "UPDATE_BINDINGS" ) then
 		ActionButton_UpdateHotkeys(self, self.buttonType);
 	elseif ( event == "PLAYER_TARGET_CHANGED" ) then	-- All event handlers below this line are only set when the button has an action

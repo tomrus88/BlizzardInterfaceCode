@@ -1,11 +1,11 @@
 BattlefieldFlagDataProviderMixin = CreateFromMixins(MapCanvasDataProviderMixin);
 
 function BattlefieldFlagDataProviderMixin:OnShow()
-	self:RegisterEvent("ARENA_OPPONENT_UPDATE");
+	--self:RegisterEvent("ARENA_OPPONENT_UPDATE");
 end
 
 function BattlefieldFlagDataProviderMixin:OnHide()
-	self:UnregisterEvent("ARENA_OPPONENT_UPDATE");
+	--self:UnregisterEvent("ARENA_OPPONENT_UPDATE");
 end
 
 function BattlefieldFlagDataProviderMixin:OnEvent(event, ...)

@@ -40,7 +40,7 @@
 					</Anchors>
 				</Texture>
 			</Layer>
-			<Layer level="BORDER">
+			<!--<Layer level="BORDER">
 				<Texture name="$parentFocusLeft" file="Interface\ChatFrame\UI-ChatInputBorderFocus-Left" hidden="true" parentKey="focusLeft">
 					<Size x="32" y="32"/>
 					<Anchors>
@@ -60,7 +60,7 @@
 						<Anchor point="TOPRIGHT" relativeTo="$parentFocusRight" relativePoint="TOPLEFT" x="0" y="0"/>
 					</Anchors>
 				</Texture>
-			</Layer>
+			</Layer>-->
 			<Layer level="ARTWORK">
 				<FontString name="$parentHeader" inherits="ChatFontNormal" parentKey="header">
 					<Size x="0" y="14"/>

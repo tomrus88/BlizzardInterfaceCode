@@ -16,16 +16,17 @@ local textureKitRegions = {
 }
 
 function UIWidgetTemplateIconAndTextMixin:OnAcquired(widgetInfo)
-	local widgetWidth = self.Text:GetStringWidth();
+	self.Text:ClearAllPoints();
 
 	if self.Icon:IsShown() then
-		widgetWidth = widgetWidth + self.Icon:GetWidth()- 12;
+		self.alignWidth = self.Icon:GetWidth()- 12 + self.Text:GetStringWidth();
 		self.Text:SetPoint("TOPLEFT", self.Icon, "TOPRIGHT", -12, -6);
 	else
+		self.alignWidth = self.Text:GetStringWidth();
 		self.Text:SetPoint("TOPLEFT", self.Icon, "TOPLEFT", 0, -6);
 	end
 
-	self:SetWidth(widgetWidth);
+	self:SetWidth(self.alignWidth);
 end
 
 function UIWidgetTemplateIconAndTextMixin:Setup(widgetInfo)

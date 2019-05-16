@@ -1,41 +1,4 @@
-local function FormatLink(linkType, linkDisplayText, ...)
-	local linkFormatTable = { ("|H%s"):format(linkType), ... };
-	local returnLink = table.concat(linkFormatTable, ":");
-	if linkDisplayText then
-		return returnLink .. ("|h%s|h"):format(linkDisplayText);
-	else
-		return returnLink .. "|h";
-	end
-end
-
 function SetItemRef(link, text, button, chatFrame)
-	
-	-- Going forward, use linkType and linkData instead of strsub and strsplit everywhere
-	local linkType, linkData = string.match(link, '(.-):(.*)');
-
-	-- Internal only links
-	if (IsGMClient()) then
-
-		-- Allow a link to arbitrary execute a string as code when a link is clicked - Debug:<luaTextHere>
-		if (linkType == "DebugExecute") then
-			assert(loadstring(linkData))();
-			return;
-		end
-
-		-- Allow a link to launch a record in WowEdit - WowEdit:<Table>:<ID>
-		if (linkType == "WowEdit") then
-			local table, id = strsplit(":", linkData);
-			if (table and id) then
-				WowEditLaunchEditor(table, id);
-				print(("Opening |cFF00FFFF%s|r record |cFF00FFFF%s|r"):format(table, id));
-			else
-				print(("ERROR - WowEdit link invalid parameters | Table:%s ID:%s"):format(tostring(table), tostring(id)));
-			end
-			return;
-		end
-
-	end
-	
 	if ( strsub(link, 1, 6) == "player" ) then
 		local namelink, isGMLink, isCommunityLink;
 		if ( strsub(link, 7, 8) == "GM" ) then
@@ -298,10 +261,9 @@ function SetItemRef(link, text, button, chatFrame)
 		Social_ShowAchievement(tonumber(achievementID), StringToBoolean(earned));
 		return;
 	elseif ( strsub(link, 1, 9) == "shareitem" ) then
-		local strippedItemLink, earned = link:match("^shareitem:(.-):(%d+)$");
-		local itemLink = FormatLink("item", nil, strippedItemLink);
+		local itemID, earned, creationContext = link:match("shareitem:(%d+):(%d+):(.*)");
 		SocialFrame_LoadUI();
-		Social_ShowItem(itemLink, earned);
+		Social_ShowItem(itemID, creationContext, StringToBoolean(earned));
 		return;
 	elseif ( strsub(link, 1, 16) == "transmogillusion" ) then
 		local fixedLink = GetFixedLink(text);
@@ -373,43 +335,17 @@ function SetItemRef(link, text, button, chatFrame)
 			CommunitiesHyperlink.OnClickLink(ticketId);
 		end
 		return;
-	elseif ( strsub(link, 1, 13) == "calendarEvent" ) then
-		local _, monthOffset, monthDay, index = strsplit(":", link);
-		local dayEvent = C_Calendar.GetDayEvent(monthOffset, monthDay, index);
-		if dayEvent then
-			Calendar_LoadUI();
-			
-			if not CalendarFrame:IsShown() then
-				Calendar_Toggle();
-			end
-			
-			C_Calendar.OpenEvent(monthOffset, monthDay, index);
-		end
-		return;
-	elseif ( strsub(link, 1, 9) == "community" ) then
-		if ( CommunitiesFrame_IsEnabled() ) then
-			local _, clubId = strsplit(":", link);
-			clubId = tonumber(clubId);
-			Communities_LoadUI();
-			CommunitiesHyperlink.OnClickReference(clubId);
-		end
-		return;
 	end
 
 	if ( IsModifiedClick() ) then
 		local fixedLink = GetFixedLink(text);
 		HandleModifiedItemClick(fixedLink);
 	else
-		local itemName, itemLink = ItemRefTooltip:GetItem();
-		if itemLink == GetFixedLink(text) then
-			HideUIPanel(ItemRefTooltip);
-		else
-			ShowUIPanel(ItemRefTooltip);
-			if ( not ItemRefTooltip:IsShown() ) then
-				ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE");
-			end
-			ItemRefTooltip:SetHyperlink(link);
+		ShowUIPanel(ItemRefTooltip);
+		if ( not ItemRefTooltip:IsShown() ) then
+			ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE");
 		end
+		ItemRefTooltip:SetHyperlink(link);
 	end
 end
 
@@ -449,6 +385,11 @@ function GetFixedLink(text, quality)
 	end
 	--Nothing to change.
 	return text;
+end
+
+local function FormatLink(linkType, linkDisplayText, ...)
+	local linkFormatTable = { ("|H%s"):format(linkType), ... };
+	return table.concat(linkFormatTable, ":") .. ("|h%s|h"):format(linkDisplayText);
 end
 
 function GetBattlePetAbilityHyperlink(abilityID, maxHealth, power, speed)
@@ -512,29 +453,6 @@ function GetClubTicketLink(ticketId, clubName, clubType)
 	else 
 		return NORMAL_FONT_COLOR:WrapTextInColorCode(link);
 	end
-end
-
-function GetCalendarEventLink(monthOffset, monthDay, index)
-	local dayEvent = C_Calendar.GetDayEvent(monthOffset, monthDay, index);
-	if dayEvent then
-		return FormatLink("calendarEvent", dayEvent.title, monthOffset, monthDay, index);
-	end
-	
-	return nil;
-end
-
-function GetCommunityLink(clubId)
-	local clubInfo = C_Club.GetClubInfo(clubId);
-	if clubInfo then
-		local link = FormatLink("community", COMMUNITY_REFERENCE_FORMAT:format(clubInfo.name), clubId);
-		if clubInfo.clubType == Enum.ClubType.BattleNet then
-			return BATTLENET_FONT_COLOR:WrapTextInColorCode(link);
-		else 
-			return NORMAL_FONT_COLOR:WrapTextInColorCode(link);
-		end
-	end
-	
-	return nil;
 end
 
 function SplitLink(link)

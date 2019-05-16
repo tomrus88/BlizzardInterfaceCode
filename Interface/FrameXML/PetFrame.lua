@@ -25,37 +25,17 @@ function PetFrame_OnLoad (self)
 	CombatFeedback_Initialize(self, PetHitIndicator, 30);
 	PetFrame_Update(self);
 	self:RegisterUnitEvent("UNIT_PET", "player");
-	self:RegisterUnitEvent("UNIT_EXITED_VEHICLE", "player");
 	self:RegisterEvent("PET_ATTACK_START");
 	self:RegisterEvent("PET_ATTACK_STOP");
 	self:RegisterEvent("PET_UI_UPDATE");
+	self:RegisterEvent("UNIT_HAPPINESS");
+	self:RegisterEvent("UNIT_MAXPOWER");
 	self:RegisterUnitEvent("UNIT_COMBAT", "pet", "player");
 	self:RegisterUnitEvent("UNIT_AURA", "pet", "player");
 	local showmenu = function()
 		ToggleDropDownMenu(1, nil, PetFrameDropDown, "PetFrame", 44, 8);
 	end
 	SecureUnitButton_OnLoad(self, "pet", showmenu);
-end
-
-function PetFrame_UpdateAnchoring(self)
-	if self.unit == "player" and PlayerVehicleHasComboPoints() then
-		self:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 60, -75);
-	else
-		local _, class = UnitClass("player");
-		if ( class == "DEATHKNIGHT" or class == "ROGUE") then
-			self:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 60, -75);
-		elseif ( class == "SHAMAN" or class == "DRUID" ) then
-			self:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 60, -100);
-		elseif ( class == "WARLOCK" ) then
-			self:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 60, -90);
-		elseif ( class == "PALADIN" ) then
-			self:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 60, -90);
-		elseif ( class == "PRIEST" ) then
-			self:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 60, -90);
-		elseif ( class == "MONK" ) then
-			self:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 90, -100);
-		end
-	end
 end
 
 function PetFrame_Update (self, override)
@@ -76,30 +56,19 @@ function PetFrame_Update (self, override)
 			end
 			PetAttackModeTexture:Hide();
 
-			RefreshDebuffs(self, self.unit, nil, nil, true);
+			PetFrame_SetHappiness();
+			RefreshBuffs(self, self.unit, nil, nil, true);
 		else
 			self:Hide();
 		end
 	end
-	
-	PetFrame_UpdateAnchoring(self)
 end
 
 function PetFrame_OnEvent (self, event, ...)
 	UnitFrame_OnEvent(self, event, ...);
 	local arg1, arg2, arg3, arg4, arg5 = ...;
 	if ( event == "UNIT_PET" or event == "UNIT_EXITED_VEHICLE" or event == "PET_UI_UPDATE" ) then
-		local unit
-		if ( UnitInVehicle("player") ) then
-			if ( UnitHasVehiclePlayerFrameUI("player") ) then
-				unit = "player";
-			else
-				return;
-			end
-		else
-			unit = "pet";
-		end
-		UnitFrame_SetUnit(self, unit, PetFrameHealthBar, PetFrameManaBar);
+		UnitFrame_SetUnit(self, "pet", PetFrameHealthBar, PetFrameManaBar);
 		PetFrame_Update(self);
 	elseif ( event == "UNIT_COMBAT" ) then
 		if ( arg1 == self.unit ) then
@@ -107,13 +76,17 @@ function PetFrame_OnEvent (self, event, ...)
 		end
 	elseif ( event == "UNIT_AURA" ) then
 		if ( arg1 == self.unit ) then
-			RefreshDebuffs(self, self.unit, nil, nil, true);
+			RefreshBuffs(self, self.unit, nil, nil, true);
 		end
 	elseif ( event == "PET_ATTACK_START" ) then
 		PetAttackModeTexture:SetVertexColor(1.0, 1.0, 1.0, 1.0);
 		PetAttackModeTexture:Show();
 	elseif ( event == "PET_ATTACK_STOP" ) then
 		PetAttackModeTexture:Hide();
+	elseif (event == "UNIT_HAPPINESS" ) then
+		PetFrame_SetHappiness();
+	elseif (event == "UNIT_MAXPOWER" ) then
+		PetFrame_Update(self);
 	end
 end
 
@@ -161,6 +134,32 @@ function PetFrame_OnUpdate (self, elapsed)
 	--	end
 	--end
 	
+end
+
+function PetFrame_SetHappiness()
+	local happiness, damagePercentage, loyaltyRate = GetPetHappiness();
+	local hasPetUI, isHunterPet = HasPetUI();
+	if ( not happiness or not isHunterPet ) then
+		PetFrameHappiness:Hide();
+		return;	
+	end
+	PetFrameHappiness:Show();
+	if ( happiness == 1 ) then
+		PetFrameHappinessTexture:SetTexCoord(0.375, 0.5625, 0, 0.359375);
+	elseif ( happiness == 2 ) then
+		PetFrameHappinessTexture:SetTexCoord(0.1875, 0.375, 0, 0.359375);
+	elseif ( happiness == 3 ) then
+		PetFrameHappinessTexture:SetTexCoord(0, 0.1875, 0, 0.359375);
+	end
+	PetFrameHappiness.tooltip = _G["PET_HAPPINESS"..happiness];
+	PetFrameHappiness.tooltipDamage = format(PET_DAMAGE_PERCENTAGE, damagePercentage);
+	if ( loyaltyRate < 0 ) then
+		PetFrameHappiness.tooltipLoyalty = _G["LOSING_LOYALTY"];
+	elseif ( loyaltyRate > 0 ) then
+		PetFrameHappiness.tooltipLoyalty = _G["GAINING_LOYALTY"];
+	else
+		PetFrameHappiness.tooltipLoyalty = nil;
+	end
 end
 
 function PetFrameDropDown_OnLoad (self)
