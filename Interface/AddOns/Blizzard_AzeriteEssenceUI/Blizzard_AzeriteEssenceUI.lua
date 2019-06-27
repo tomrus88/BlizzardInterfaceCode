@@ -736,7 +736,7 @@ function AzeriteEssenceListMixin:CleanUpLearnEssence()
 	self.learnEssenceButton = nil;
 
 	self.LearnEssenceModelScene:Hide();
-	ScrollBar_Enable(self.scrollBar);
+	self:Refresh();
 end
 
 function AzeriteEssenceListMixin:CalculateScrollOffset(offset)
@@ -838,12 +838,15 @@ function AzeriteEssenceListMixin:Refresh()
 	HybridScrollFrame_Update(self, totalHeight, self:GetHeight());
 	self:UpdateMouseOverTooltip();
 
-	if hasUnlockedEssence and parent:ShouldPlayReveal() and not parent:IsRevealInProgress() then
+	if parent:ShouldPlayReveal() and not parent:IsRevealInProgress() then
 		ScrollBar_Disable(self.scrollBar);
-		self.Tutorial:Show();
-		self.Tutorial:SetPoint("BOTTOM", self.buttons[1].Icon, "TOP", 0, 12);
+		if hasUnlockedEssence then
+			self.Tutorial:Show();
+			self.Tutorial:SetPoint("BOTTOM", self.buttons[1].Icon, "TOP", 0, 12);
+		else
+			self.Tutorial:Hide();
+		end
 	else
-		ScrollBar_Enable(self.scrollBar);
 		self.Tutorial:Hide();
 	end
 end
