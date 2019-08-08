@@ -502,10 +502,18 @@ function ToggleTalentFrame()
 	end
 end
 
+function BattlefieldMapAllowed()
+	return UIWidgetManager.widgetPools:GetNumActive() > 0 or (MiniMapBattlefieldFrame and MiniMapBattlefieldFrame.status == "active");
+end
+
 function ToggleBattlefieldMap()
 	BattlefieldMap_LoadUI();
 	if ( BattlefieldMapFrame ) then
-		BattlefieldMapFrame:Toggle();
+		if (BattlefieldMapAllowed()) then
+			BattlefieldMapFrame:Toggle();
+		else
+			BattlefieldMapFrame:Hide();
+		end
 	end
 end
 
@@ -617,10 +625,10 @@ function SetStoreUIShown(shown)
 end
 
 function OpenDeathRecapUI(id)
-	if (not DeathRecapFrame) then
+	--[[if (not DeathRecapFrame) then
 		DeathRecap_LoadUI();
 	end
-	DeathRecapFrame_OpenRecap(id);
+	DeathRecapFrame_OpenRecap(id);]]
 end
 
 function InspectUnit(unit)
@@ -1231,7 +1239,7 @@ function UIParent_OnEvent(self, event, ...)
 			if ( lockExpireTime == 0 ) then
 				message = format(RAID_INSTANCE_WELCOME_EXTENDED, dungeonName);
 			else
-				message = format(RAID_INSTANCE_WELCOME_LOCKED, dungeonName, daysLeft, hoursLeft, minutesLeft);
+				message = format(RAID_INSTANCE_WELCOME, dungeonName, daysLeft, hoursLeft, minutesLeft);
 
 			end
 		end
