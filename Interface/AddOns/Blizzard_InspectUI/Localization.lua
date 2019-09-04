@@ -1,1 +1,3 @@
--- This file is executed at the end of addon load
+
+--Adjust spec font so it doesn't overflow the window
+SpecializationSpecName:SetFontObject(GameFontNormalHuge);
