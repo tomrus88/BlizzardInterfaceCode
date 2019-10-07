@@ -46,6 +46,7 @@ function DressUpVisual(...)
 	if ( result ~= Enum.ItemTryOnReason.Success ) then
 		UIErrorsFrame:AddExternalErrorMessage(ERR_NOT_EQUIPPABLE);
 	end
+	DressUpFrame_OnDressModel(frame);
 	return true;
 end
 
@@ -68,8 +69,9 @@ function DressUpBattlePetLink(link)
 			local speciesID, _, _, _, _, displayID, _, _, _, _, creatureID = C_PetJournal.GetPetInfoByPetID(battlePetID);
 			if ( speciesID == tonumber(linkID)) then
 				return DressUpBattlePet(creatureID, displayID, speciesID);
-			else				
-				local _, _, _, creatureID, _, _, _, _, _, _, _, displayID = C_PetJournal.GetPetInfoBySpeciesID(tonumber(linkID));
+			else
+				speciesID = tonumber(linkID);
+				local _, _, _, creatureID, _, _, _, _, _, _, _, displayID = C_PetJournal.GetPetInfoBySpeciesID(speciesID);
 				return DressUpBattlePet(creatureID, displayID, speciesID);
 			end
 		end
