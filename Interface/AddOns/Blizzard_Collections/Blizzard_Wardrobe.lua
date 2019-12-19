@@ -228,11 +228,15 @@ function WardrobeTransmogFrame_UpdateSlotButton(slotButton)
 		local correspondingWeaponButton = WardrobeTransmogFrame_GetSlotButton(slotButton.slotID, LE_TRANSMOG_TYPE_APPEARANCE);
 		local sourceID = WardrobeTransmogFrame_GetDisplayedSource(correspondingWeaponButton);
 		if ( sourceID ~= NO_TRANSMOG_SOURCE_ID and not WardrobeCollectionFrame_CanEnchantSource(sourceID) ) then
-			if ( hasPending or hasUndo ) then
-				-- clear anything in the enchant slot, otherwise cost and Apply button state will still reflect anything pending
-				C_Transmog.ClearPending(slotButton.slotID, slotButton.transmogType);
+			local illusionSourceID = WardrobeTransmogFrame_GetDisplayedSource(slotButton);
+			if( illusionSourceID ~= REMOVE_TRANSMOG_ID ) then 
+				if ( hasPending or hasUndo ) then
+					-- clear anything in the enchant slot, otherwise cost and Apply button state will still reflect anything pending
+					C_Transmog.ClearPending(slotButton.slotID, slotButton.transmogType);
+				else
+					C_Transmog.SetPending(slotButton.slotID, slotButton.transmogType, REMOVE_TRANSMOG_ID);
+				end
 			end
-			C_Transmog.SetPending(slotButton.slotID, slotButton.transmogType, 0);
 			isTransmogrified = false;	-- handle legacy, this weapon could have had an illusion applied previously
 			canTransmogrify = false;
 			slotButton.invalidWeapon = true;
@@ -1040,6 +1044,7 @@ function WardrobeItemsCollectionMixin:OnShow()
 	WardrobeCollectionFrame.progressBar:SetShown(not WardrobeUtils_IsCategoryLegionArtifact(self:GetActiveCategory()));
 
 	if ( needsUpdate ) then
+		WardrobeCollectionFrame_UpdateUsableAppearances();
 		self:RefreshVisualsList();
 		self:UpdateItems();
 		self:UpdateWeaponDropDown();
@@ -1084,8 +1089,6 @@ function WardrobeCollectionFrame_OnShow(self)
 
 	local hasAlternateForm, inAlternateForm = HasAlternateForm();
 	self.inAlternateForm = inAlternateForm;
-
-	WardrobeCollectionFrame_UpdateUsableAppearances();
 
 	if ( WardrobeFrame_IsAtTransmogrifier() ) then
 		WardrobeCollectionFrame_SetTab(self.selectedTransmogTab);

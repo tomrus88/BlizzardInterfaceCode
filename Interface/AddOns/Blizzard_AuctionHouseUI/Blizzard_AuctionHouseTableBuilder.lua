@@ -23,7 +23,7 @@ end
 AuctionHouseTableCellItemKeyMixin = CreateFromMixins(AuctionHouseTableCellMixin);
 
 function AuctionHouseTableCellItemKeyMixin:Init(owner, restrictQualityToFilter)
-	AuctionHouseTableCellMixin.Init(owner, restrictQualityToFilter)
+	AuctionHouseTableCellMixin.Init(owner, restrictQualityToFilter);
 	self.restrictQualityToFilter = restrictQualityToFilter;
 end
 
@@ -161,8 +161,11 @@ end
 
 AuctionHouseTableCellCommoditiesQuantityMixin = CreateFromMixins(AuctionHouseTableCellMixin);
 
-function AuctionHouseTableCellCommoditiesQuantityMixin:Init()
+function AuctionHouseTableCellCommoditiesQuantityMixin:Init(...)
+	AuctionHouseTableCellMixin.Init(self, ...);
+
 	self.Text:SetJustifyH("RIGHT");
+	self.Text:SetFontObject(PriceFontWhite);
 end
 
 function AuctionHouseTableCellCommoditiesQuantityMixin:Populate(rowData, dataIndex)
@@ -200,19 +203,21 @@ end
 AuctionHouseTableCellFavoriteButtonMixin = CreateFromMixins(AuctionHouseTableCellMixin);
 
 function AuctionHouseTableCellFavoriteButtonMixin:OnClick()
-	if not C_AuctionHouse.CanSetFavorite() then
+	if not self:IsInteractionAvailable() then
 		return;
 	end
 	
-	local setToFavorite = not C_AuctionHouse.IsFavoriteItem(self.itemKey);
-	
+	local setToFavorite = not self:IsFavorite();
 	C_AuctionHouse.SetFavoriteItem(self.itemKey, setToFavorite);
+	self:UpdateFavoriteState();
+end
 
-	self:SetFavoriteState(setToFavorite);
+function AuctionHouseTableCellFavoriteButtonMixin:IsInteractionAvailable()
+	return C_AuctionHouse.FavoritesAreAvailable() and (self:IsFavorite() or not C_AuctionHouse.HasMaxFavorites());
 end
 
 function AuctionHouseTableCellFavoriteButtonMixin:OnEnter()
-	if not C_AuctionHouse.CanSetFavorite() then
+	if not self:IsInteractionAvailable() then
 		self:LockTexture();
 
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
@@ -234,14 +239,11 @@ end
 
 function AuctionHouseTableCellFavoriteButtonMixin:SetItemKey(itemKey)
 	self.itemKey = itemKey;
-
-	local isFavorite = C_AuctionHouse.IsFavoriteItem(itemKey);
-	self:SetFavoriteState(isFavorite);
+	self:UpdateFavoriteState();
 end
 
-function AuctionHouseTableCellFavoriteButtonMixin:SetFavoriteState(isFavorite)
-	self.isFavorite = isFavorite;
-
+function AuctionHouseTableCellFavoriteButtonMixin:UpdateFavoriteState()
+	local isFavorite = self:IsFavorite();
 	local defaultTexture = self.textureLocked and "auctionhouse-icon-favorite-off" or nil;
 	self.NormalTexture:SetAtlas(isFavorite and "auctionhouse-icon-favorite" or defaultTexture);
 	self.HighlightTexture:SetAtlas(isFavorite and "auctionhouse-icon-favorite" or "auctionhouse-icon-favorite-off");
@@ -265,13 +267,11 @@ function AuctionHouseTableCellFavoriteButtonMixin:UnlockTexture()
 end
 
 function AuctionHouseTableCellFavoriteButtonMixin:IsFavorite()
-	return self.isFavorite;
+	return self.itemKey and C_AuctionHouse.IsFavoriteItem(self.itemKey);
 end
 
 function AuctionHouseTableCellFavoriteButtonMixin:UpdateState()
-	local isFavorite = C_AuctionHouse.IsFavoriteItem(self.itemKey);
-	self.isFavorite = isFavorite;
-	self:SetFavoriteState(isFavorite);
+	self:UpdateFavoriteState();
 end
 
 
@@ -389,22 +389,53 @@ function AuctionHouseTableCellTimeLeftMixin:Init(owner)
 end
 
 function AuctionHouseTableCellTimeLeftMixin:Populate(rowData, dataIndex)
-	local hasExplicitTimeLeft = rowData.timeLeftSeconds ~= nil;
+	local timeLeftSeconds = self:GetTimeLeftSeconds();
+	local hasExplicitTimeLeft = timeLeftSeconds ~= nil;
 	self.Text:SetShown(hasExplicitTimeLeft);
 
 	if hasExplicitTimeLeft then
-		self:UpdateText(AuctionHouseUtil.FormatTimeLeft(rowData.timeLeftSeconds, rowData.status));
+		self:UpdateText(AuctionHouseUtil.FormatTimeLeft(timeLeftSeconds, rowData));
 	end
 end
 
-function AuctionHouseTableCellTimeLeftMixin:ShowTooltip(tooltip)
+function AuctionHouseTableCellTimeLeftMixin:GetTimeLeftSeconds()
+	if not self.rowData then
+		return nil;
+	end
+
+	if self.rowData.timeLeftSeconds then
+		return self.rowData.timeLeftSeconds;
+	elseif self.rowData.timeLeft then
+		local timeLeftMin, timeLeftMax = C_AuctionHouse.GetTimeLeftBandInfo(self.rowData.timeLeft);
+		return timeLeftMax;
+	end
+
+	return nil;
+end
+
+function AuctionHouseTableCellTimeLeftMixin:GetTooltipText()
 	local timeLeftSeconds = self.rowData.timeLeftSeconds;
-	local hasExplicitTimeLeft = timeLeftSeconds ~= nil;
-	if hasExplicitTimeLeft then
-		tooltip:SetOwner(self:GetParent(), "ANCHOR_RIGHT");
+	if timeLeftSeconds ~= nil then
+		return AuctionHouseUtil.FormatTimeLeftTooltip(timeLeftSeconds, self.rowData);
+	else
+		local timeLeft = self.rowData.timeLeft;
+		if timeLeft ~= nil then
+			return AuctionHouseUtil.GetTooltipTimeLeftBandText(self.rowData);
+		end
+	end
+
+	return nil;
+end
+
+function AuctionHouseTableCellTimeLeftMixin:ShowTooltip(tooltip)
+	local tooltipText = self:GetTooltipText();
+	if tooltipText then
+		local owner = self:GetParent();
+		owner.UpdateTooltip = nil;
+		tooltip:SetOwner(owner, "ANCHOR_RIGHT");
 
 		local wrap = true;
-		GameTooltip_AddNormalLine(tooltip, AuctionHouseUtil.FormatTimeLeftTooltip(timeLeftSeconds, self.rowData.status), wrap);
+		GameTooltip_AddNormalLine(tooltip, tooltipText, wrap);
 
 		tooltip:Show();
 	end
@@ -531,7 +562,7 @@ function AuctionHouseTableCellAuctionsCommoditiesQuantityMixin:Populate(rowData,
 	AuctionHouseTableCellCommoditiesQuantityMixin.Populate(self, rowData, dataIndex);
 	AuctionHouseTableCellAuctionsTextMixin.Populate(self, rowData, dataIndex);
 	self.Text:SetJustifyH("RIGHT");
-	self.Text:SetFontObject(Number14FontWhite);
+	self.Text:SetFontObject(PriceFontWhite);
 end
 
 
@@ -554,13 +585,19 @@ end
 
 AuctionHouseTableCellItemDisplayMixin = CreateFromMixins(AuctionHouseTableCellItemKeyMixin);
 
+function AuctionHouseTableCellItemDisplayMixin:Init(owner, restrictQualityToFilter, hideItemLevel)
+	AuctionHouseTableCellItemKeyMixin.Init(self, owner, restrictQualityToFilter);
+
+	self.hideItemLevel = hideItemLevel;
+end
+
 function AuctionHouseTableCellItemDisplayMixin:ClearDisplay()
 	self.Text:SetText("");
 	self.Icon:Hide();
 end
 
 function AuctionHouseTableCellItemDisplayMixin:UpdateDisplay(itemKey, itemKeyInfo)
-	self.Text:SetText(AuctionHouseUtil.GetItemDisplayTextFromItemKey(itemKey, itemKeyInfo));
+	self.Text:SetText(AuctionHouseUtil.GetItemDisplayTextFromItemKey(itemKey, itemKeyInfo, self.hideItemLevel));
 	
 	self.Icon:SetTexture(itemKeyInfo.iconFileID);
 	self.Icon:Show();
@@ -627,7 +664,7 @@ AuctionHouseTableCellQuantityMixin = CreateFromMixins(AuctionHouseTableCellMixin
 
 function AuctionHouseTableCellQuantityMixin:Populate(rowData, dataIndex)
 	local noneAvailable = self.rowData.totalQuantity == 0;
-	self.Text:SetFontObject(noneAvailable and Number14FontGray or Number14FontWhite);
+	self.Text:SetFontObject(noneAvailable and PriceFontGray or PriceFontWhite);
 	self.Text:SetText(rowData.totalQuantity);
 end
 
@@ -686,7 +723,7 @@ function AuctionHouseTableCellItemQuantityMixin:Populate(rowData, dataIndex)
 		self.Text:SetFontObject(Number13FontGray);
 	else
 		self.Text:SetText(rowData.quantity);
-		self.Text:SetFontObject(Number14FontWhite);
+		self.Text:SetFontObject(PriceFontWhite);
 	end
 end
 
@@ -852,7 +889,8 @@ function AuctionHouseTableBuilder.GetBrowseListLayout(owner, itemList, extraInfo
 		tableBuilder:AddFixedWidthColumn(owner, PRICE_DISPLAY_PADDING, 146, 0, 14, Enum.AuctionHouseSortOrder.Price, "AuctionHouseTableCellMinPriceTemplate");
 
 		local restrictQualityToFilter = true;
-		local nameColumn = tableBuilder:AddFillColumn(owner, 0, 1.0, STANDARD_PADDING, 0, Enum.AuctionHouseSortOrder.Name, "AuctionHouseTableCellItemDisplayTemplate", restrictQualityToFilter);
+		local hideItemLevel = extraInfoColumnText ~= nil;
+		local nameColumn = tableBuilder:AddFillColumn(owner, 0, 1.0, STANDARD_PADDING, 0, Enum.AuctionHouseSortOrder.Name, "AuctionHouseTableCellItemDisplayTemplate", restrictQualityToFilter, hideItemLevel);
 		nameColumn:GetHeaderFrame():SetText(AUCTION_HOUSE_BROWSE_HEADER_NAME);
 
 		if extraInfoColumnText then

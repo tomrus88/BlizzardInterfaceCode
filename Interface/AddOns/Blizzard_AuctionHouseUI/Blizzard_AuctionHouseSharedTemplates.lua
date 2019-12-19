@@ -35,7 +35,13 @@ end
 
 function AuctionHouseItemDisplayMixin:OnEvent(event, ...)
 	if event == "GET_ITEM_INFO_RECEIVED" then
-		self:SetItem(self.pendingItem);
+		if self.pendingInfo.itemKey then
+			self:SetItemKey(self.pendingInfo.itemKey);
+		elseif self.pendingInfo.itemLocation then
+			self:SetItemLocation(self.pendingInfo.itemLocation);
+		else
+			self:SetItemInternal(self.pendingInfo.item);
+		end
 	elseif event == "ITEM_KEY_ITEM_INFO_RECEIVED" then
 		local itemID = ...;
 		if self.pendingItemKey and self.pendingItemKey.itemID == itemID then
@@ -86,17 +92,24 @@ function AuctionHouseItemDisplayMixin:OnEnter()
 	else
 		BattlePetTooltip:Hide();
 
-		local itemKey = self:GetItemKey();
-		if itemKey then
+		local itemLocation = self:GetItemLocation();
+		if itemLocation then
 			GameTooltip:SetOwner(self.ItemButton, "ANCHOR_RIGHT");
-			GameTooltip:SetItemKey(itemKey.itemID, itemKey.itemLevel, itemKey.itemSuffix);
+			GameTooltip:SetHyperlink(C_Item.GetItemLink(itemLocation));
 			GameTooltip:Show();
 		else
-			local itemLink = self:GetItemLink();
-			if itemLink then
+			local itemKey = self:GetItemKey();
+			if itemKey then
 				GameTooltip:SetOwner(self.ItemButton, "ANCHOR_RIGHT");
-				GameTooltip:SetHyperlink(itemLink);
+				GameTooltip:SetItemKey(itemKey.itemID, itemKey.itemLevel, itemKey.itemSuffix);
 				GameTooltip:Show();
+			else
+				local itemLink = self:GetItemLink();
+				if itemLink then
+					GameTooltip:SetOwner(self.ItemButton, "ANCHOR_RIGHT");
+					GameTooltip:SetHyperlink(itemLink);
+					GameTooltip:Show();
+				end
 			end
 		end
 
@@ -118,12 +131,21 @@ function AuctionHouseItemDisplayMixin:OnClick(button)
 		if button == "RightButton" then
 			local favoriteDropDown = self.auctionHouseFrame:GetFavoriteDropDown();
 			AuctionHouseFavoriteDropDownCallback(favoriteDropDown, itemKey, C_AuctionHouse.IsFavoriteItem(itemKey));
-		elseif button == "LeftButton" and IsModifiedClick("DRESSUP") then
-			local itemKeyInfo = C_AuctionHouse.GetItemKeyInfo(itemKey);
-			if itemKeyInfo and itemKeyInfo.battlePetLink then
-				DressUpBattlePetLink(itemKeyInfo.battlePetLink);
-			else
-				DressUpLink(self:GetItemLink());
+		elseif button == "LeftButton" then
+			if IsModifiedClick("DRESSUP") then
+				local itemKeyInfo = C_AuctionHouse.GetItemKeyInfo(itemKey);
+				if itemKeyInfo and itemKeyInfo.battlePetLink then
+					DressUpBattlePetLink(itemKeyInfo.battlePetLink);
+				else
+					DressUpLink(self:GetItemLink());
+				end
+			elseif IsModifiedClick("CHATLINK") then
+				local itemKeyInfo = C_AuctionHouse.GetItemKeyInfo(itemKey);
+				if itemKeyInfo and itemKeyInfo.battlePetLink then
+					ChatEdit_InsertLink(itemKeyInfo.battlePetLink);
+				else
+					ChatEdit_InsertLink(self:GetItemLink());
+				end
 			end
 		end
 	end
@@ -218,7 +240,7 @@ function AuctionHouseItemDisplayMixin:SetItemInternal(item)
 
 	self.itemLink = itemLink;
 	if self.itemLink == nil then
-		self.pendingItem = item;
+		self.pendingInfo = {item = self.item, itemKey = self.itemKey, itemLocation = self.itemLocation};
 		self:RegisterEvent("GET_ITEM_INFO_RECEIVED");
 		self:Reset();
 		return true;
@@ -494,6 +516,10 @@ end
 
 AuctionHouseQuantityInputBoxMixin = {};
 
+function AuctionHouseQuantityInputBoxMixin:OnLoad()
+	self:SetFontObject("PriceFont");
+end
+
 function AuctionHouseQuantityInputBoxMixin:SetInputChangedCallback(callback)
 	self.inputChangedCallback = callback;
 end
@@ -570,9 +596,14 @@ local function AuctionHouseFavoriteDropDown_Initialize(self)
 	local info = UIDropDownMenu_CreateInfo();
 	info.notCheckable = 1;
 	info.text = isFavorite and AUCTION_HOUSE_DROPDOWN_REMOVE_FAVORITE or AUCTION_HOUSE_DROPDOWN_SET_FAVORITE;
-	info.disabled = not C_AuctionHouse.CanSetFavorite();
+	
+	local function CanChangeFavoriteState()
+		return C_AuctionHouse.FavoritesAreAvailable() and (isFavorite or not C_AuctionHouse.HasMaxFavorites());
+	end
+
+	info.disabled = not CanChangeFavoriteState();
 	info.func = function()
-		if C_AuctionHouse.CanSetFavorite() then
+		if CanChangeFavoriteState() then
 			C_AuctionHouse.SetFavoriteItem(itemKey, not isFavorite);
 		end
 	end;
@@ -664,6 +695,8 @@ function AuctionHouseBuyoutFrameMixin:SetPrice(price, isOwnerItem)
 		self.BuyoutButton:SetDisableTooltip(AUCTION_HOUSE_TOOLTIP_TITLE_OWN_AUCTION);
 	elseif price > GetMoney() then
 		self.BuyoutButton:SetDisableTooltip(AUCTION_HOUSE_TOOLTIP_TITLE_NOT_ENOUGH_MONEY);
+	elseif price <= 0 then
+		self.BuyoutButton:SetDisableTooltip("");
 	else
 		self.BuyoutButton:SetDisableTooltip(nil);
 	end
