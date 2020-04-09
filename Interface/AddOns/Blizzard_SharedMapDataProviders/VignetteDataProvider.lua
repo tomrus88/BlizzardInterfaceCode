@@ -132,6 +132,7 @@ function VignettePinMixin:OnAcquired(vignetteGUID, vignetteInfo)
 	self.hasTooltip = vignetteInfo.hasTooltip or vignetteInfo.type == Enum.VignetteType.PvpBounty;
 	self.isUnique = vignetteInfo.isUnique;
 	self.vignetteID = vignetteInfo.vignetteID;
+	self.widgetSetID = vignetteInfo.widgetSetID;
 
 	self:EnableMouse(self.hasTooltip);
 
@@ -221,7 +222,9 @@ function VignettePinMixin:OnMouseEnter()
 			hasValidTooltip = self:DisplayPvpBountyTooltip();
 		end
 
-		if not hasValidTooltip then
+		if hasValidTooltip and self.widgetSetID then
+			GameTooltip_AddWidgetSet(GameTooltip, self.widgetSetID);
+		elseif not hasValidTooltip then
 			GameTooltip_SetTitle(GameTooltip, RETRIEVING_DATA);
 		end
 
