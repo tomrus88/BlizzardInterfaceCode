@@ -2224,6 +2224,11 @@ if IsGMClient() then
 	end
 end
 
+SLASH_PERFREPORT1 = "/perfreport";
+SlashCmdList["PERFREPORT"] = function(msg) 
+	C_ChatInfo.ReportServerLag();
+end
+
 SlashCmdList["TABLEINSPECT"] = function(msg)
 	if ( Kiosk.IsEnabled() or ScriptsDisallowedForBeta() ) then
 		return;
@@ -2267,6 +2272,30 @@ end
 
 SlashCmdList["RELOAD"] = function(msg)
 	ReloadUI();
+end
+
+SlashCmdList["WARGAME"] = function(msg)
+	-- Parameters are (playername, area, isTournamentMode). Since the player name can be multiple words,
+	-- we pass in theses parameters as a whitespace delimited string and let the C side tokenize it
+	StartWarGameByName(msg);
+end
+
+SlashCmdList["SPECTATOR_WARGAME"] = function(msg)
+	local target1, target2, size, area, isTournamentMode = strmatch(msg, "^([^%s]+)%s+([^%s]+)%s+([^%s]+)%s*([^%s]*)%s*([^%s]*)")
+	if (not target1 or not target2 or not size) then
+		return;
+	end
+
+	local bnetIDGameAccount1 = BNet_GetBNetIDAccountFromCharacterName(target1) or BNet_GetBNetIDAccount(target1);
+	if not bnetIDGameAccount1 then
+		ConsolePrint("Failed to find StartSpectatorWarGame target1:", target1);
+	end
+	local bnetIDGameAccount2 = BNet_GetBNetIDAccountFromCharacterName(target2) or BNet_GetBNetIDAccount(target2);
+	if not bnetIDGameAccount2 then
+		ConsolePrint("Failed to find StartSpectatorWarGame target2:", target2);
+	end
+	if (area == "" or area == "nil" or area == "0") then area = nil end
+	StartSpectatorWarGame(bnetIDGameAccount1 or target1, bnetIDGameAccount2 or target2, size, area, ValueToBoolean(isTournamentMode));
 end
 
 SlashCmdList["TARGET_MARKER"] = function(msg)

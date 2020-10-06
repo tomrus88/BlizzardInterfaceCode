@@ -10,8 +10,6 @@ CHARACTER_LIST_OFFSET = 0;
 
 CHARACTER_SELECT_BACK_FROM_CREATE = false;
 
-CHARACTER_SELECT_KICKED_FROM_CONVERT = false;
-
 MOVING_TEXT_OFFSET = 12;
 DEFAULT_TEXT_OFFSET = 0;
 CHARACTER_BUTTON_HEIGHT = 57;
@@ -30,6 +28,14 @@ TOKEN_COUNT_UPDATED = false;
 REALM_CHANGE_IS_AUTO = false;
 
 CharacterSelectLockedButtonMixin = {};
+
+local characterCopyRegions = {
+	[41] = NORTH_AMERICA,
+	[42] = KOREA,
+	[43] = EUROPE,
+	[44] = TAIWAN,
+	[45] = CHINA,
+};
 
 function GenerateBuildString(buildNumber)
 	if buildNumber == 0 then
@@ -136,8 +142,6 @@ function CharacterSelect_OnLoad(self)
     self:RegisterEvent("CHARACTER_LIST_RETRIEVAL_RESULT");
     self:RegisterEvent("DELETED_CHARACTER_LIST_RETRIEVING");
     self:RegisterEvent("DELETED_CHARACTER_LIST_RETRIEVAL_RESULT");
-    self:RegisterEvent("SHOULD_CONVERT");
-    self:RegisterEvent("CONVERT_RESULT");
     self:RegisterEvent("VAS_CHARACTER_QUEUE_STATUS_UPDATE");
     self:RegisterEvent("LOGIN_STATE_CHANGED");
 	self:RegisterEvent("UPDATE_EXPANSION_LEVEL");
@@ -164,7 +168,6 @@ function CharacterSelect_OnShow(self)
     InitializeCharacterScreenData();
     SetInCharacterSelect(true);
     CHARACTER_LIST_OFFSET = 0;
-    CHARACTER_SELECT_KICKED_FROM_CONVERT = false;
     CharacterSelect_ResetVeteranStatus();
 
     if ( #translationTable == 0 ) then
@@ -185,7 +188,6 @@ function CharacterSelect_OnShow(self)
 
     -- Gameroom billing stuff (For Korea and China only)
     if ( SHOW_GAMEROOM_BILLING_FRAME ) then
-        RequestConsumptionConversionInfo();
         local paymentPlan, hasFallBackBillingMethod, isGameRoom = GetBillingPlan();
         if ( paymentPlan == 0 or ( ( paymentPlan == 1 or paymentPlan == 3 ) and ONLY_SHOW_GAMEROOM_BILLING_FRAME_ON_PERSONAL_TIME ) ) then
             -- No payment plan or should only show when using consumption time
@@ -306,10 +308,6 @@ function CharacterSelect_OnHide(self)
     CharacterDeleteDialog:Hide();
     CharacterRenameDialog:Hide();
     AccountReactivate_CloseDialogs();
-    GameRoomBillingFrame_HideConversionButton();
-    ConvertConfirmationFrame:Hide();
-    CharacterSelectConvertInterstitial:Hide();
-    ConversionInProgressDialog:Hide();
 
     if ( DeclensionFrame ) then
         DeclensionFrame:Hide();
@@ -636,17 +634,6 @@ function CharacterSelect_OnEvent(self, event, ...)
     elseif ( event == "DELETED_CHARACTER_LIST_RETRIEVAL_RESULT" ) then
         local success = ...;
         CharacterSelect_SetRetrievingCharacters(false, success);
-    elseif ( event == "SHOULD_CONVERT" ) then
-           GameRoomBillingFrame_ShowConversionButton();
-    elseif ( event == "CONVERT_RESULT" ) then
-        local result = ...;
-
-        if (result ~= LE_CONVERT_RESULT_SUCCESS) then
-            ConversionInProgressDialog:Hide();
-            GlueDialog_Show("CONVERT_RESULT_ERROR");
-        else
-            CHARACTER_SELECT_KICKED_FROM_CONVERT = true;
-        end
     elseif ( event == "CHARACTER_UPGRADE_UNREVOKE_RESULT" ) then
         -- TODO: Add specific error messaging, but for now just show dialog that will open the help url
         local errorCode = ...
@@ -2700,7 +2687,11 @@ GlueDialogTypes["UNDELETING_CHARACTER"] = {
 }
 
 function CopyCharacterFromLive()
-    CopyAccountCharacterFromLive(CopyCharacterFrame.SelectedIndex);
+    if ( not IsGMClient() ) then
+		CopyAccountCharacterFromLive(GlueDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID), CopyCharacterFrame.SelectedIndex);
+	else
+		CopyAccountCharacterFromLive(GlueDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
+	end
     GlueDialog_Show("COPY_IN_PROGRESS");
 end
 
@@ -2733,9 +2724,13 @@ function CopyCharacterSearch_OnClick(self)
 end
 
 function CopyCharacterCopy_OnClick(self)
-    if ( CopyCharacterFrame.SelectedIndex and not GlueDialog:IsShown() ) then
-        local name, realm = GetAccountCharacterInfo(CopyCharacterFrame.SelectedIndex);
-        GlueDialog_Show("COPY_CHARACTER", format(COPY_CHARACTER_CONFIRM, name, realm));
+    if ( not GlueDialog:IsShown() ) then
+		if ( CopyCharacterFrame.SelectedIndex ) then
+			local name, realm = GetAccountCharacterInfo(CopyCharacterFrame.SelectedIndex);
+			GlueDialog_Show("COPY_CHARACTER", format(COPY_CHARACTER_CONFIRM, name, realm));
+		elseif ( IsGMClient() ) then
+			GlueDialog_Show("COPY_CHARACTER", format(COPY_CHARACTER_CONFIRM, CopyCharacterFrame.CharacterName:GetText(), CopyCharacterFrame.RealmName:GetText()));
+		end
     end
 end
 
@@ -2810,10 +2805,8 @@ function CopyCharacterFrame_OnShow(self)
     self.CopyButton:SetEnabled(false);
 
     GlueDropDownMenu_SetWidth(self.RegionID, 80);
-    GlueDropDownMenu_SetSelectedValue(self.RegionID, 1);
     GlueDropDownMenu_Initialize(self.RegionID, CopyCharacterFrameRegionIDDropdown_Initialize);
     GlueDropDownMenu_SetAnchor(self.RegionID, 0, 0, "TOPLEFT", self.RegionID, "BOTTOMLEFT");
-    GlueDropDownMenu_Refresh(self.RegionID);
 
     ClearAccountCharacters();
     CopyCharacterFrame_Update(self.scrollFrame);
@@ -2828,6 +2821,8 @@ function CopyCharacterFrame_OnShow(self)
         self.RealmName:SetFocus();
         self.CharacterName:Show();
         self.SearchButton:Show();
+		self.SearchButton:SetEnabled(C_CharacterServices.IsLiveRegionCharacterListEnabled());
+	    self.CopyButton:SetEnabled(C_CharacterServices.IsLiveRegionCharacterCopyEnabled());
     end
 	self.CopyAccountData:SetEnabled(C_CharacterServices.IsLiveRegionAccountCopyEnabled());
 end
@@ -2835,32 +2830,30 @@ end
 function CopyCharacterFrameRegionIDDropdown_Initialize()
     local info = GlueDropDownMenu_CreateInfo();
     local selectedValue = GlueDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID);
+	local newSelectedValue = nil;
     info.func = CopyCharacterFrameRegionIDDropdown_OnClick;
 
-    info.text = NORTH_AMERICA;
-    info.value = 1;
-    info.checked = (info.value == selectedValue);
-    GlueDropDownMenu_AddButton(info);
 
-    info.text = KOREA;
-    info.value = 2;
-    info.checked = (info.value == selectedValue);
-    GlueDropDownMenu_AddButton(info);
+	local regions = C_CharacterServices.GetLiveRegionCharacterCopySourceRegions();
+	for i=1, #regions do
+		local regionID = regions[i];
+		local regionName = characterCopyRegions[regionID];
 
-    info.text = EUROPE;
-    info.value = 3;
-    info.checked = (info.value == selectedValue);
-    GlueDropDownMenu_AddButton(info);
+		if (regionName) then
+			info.text = regionName;
+			info.value = regionID;
+			info.checked = (info.value == selectedValue) or (selectedValue == nil and i == 1);
+			if (not newSelectedValue) then
+				newSelectedValue = info.value;
+			end
+			GlueDropDownMenu_AddButton(info);
+		end
+	end
 
-    info.text = TAIWAN;
-    info.value = 4;
-    info.checked = (info.value == selectedValue);
-    GlueDropDownMenu_AddButton(info);
-
---	info.text = "China";
---	info.value = 5;
---	info.checked = (info.value == selectedValue);
---	GlueDropDownMenu_AddButton(info);
+	if (selectedValue == nil and newSelectedValue ~= nil) then
+		GlueDropDownMenu_SetSelectedValue(CopyCharacterFrame.RegionID, newSelectedValue);
+		GlueDropDownMenu_Refresh(CopyCharacterFrame.RegionID);
+	end
 end
 
 function CopyCharacterFrameRegionIDDropdown_OnClick(button)
@@ -2991,63 +2984,6 @@ function CharacterSelect_ShowBoostUnlockDialog(guid)
     end
 
     return false;
-end
-
--- CONVERSION
-
-GlueDialogTypes["CONVERT_RESULT_ERROR"] = {
-    text = CONVERT_ERROR_OTHER,
-    button1 = OKAY,
-    showAlert = 1,
-}
-
-function GameRoomBillingFrameConvertMe_OnClick(self)
-    local frame = CharacterSelectConvertInterstitial;
-
-    local minutes, days, endTime = GetConsumptionConversionInfo();
-
-    frame.Before:SetText(FormatLargeNumber(minutes));
-    frame.After:SetText(days);
-    frame.Description:SetText(HTML_START_CENTERED..CONVERT_DESCRIPTION..HTML_END);
-    frame.ConvertNowDescription:SetText(CONVERT_NOW_DESCRIPTION:format(days));
-    frame:Show();
-end
-
-function GameRoomBillingFrame_ShowConversionButton()
-    if (not GameRoomBillingFrame:IsShown()) then
-        local minutes = GetConsumptionConversionInfo();
-        GameRoomBillingFrameText:SetFormattedText(CONVERT_LEFTOVER_MINUTES, minutes);
-        GameRoomBillingFrame:SetHeight(GameRoomBillingFrameText:GetHeight() + 26);
-        GameRoomBillingFrame:Show();
-    end
-    GameRoomBillingFrame.ConvertMe:Show();
-    GameRoomBillingFrame:SetHeight(GameRoomBillingFrame:GetHeight() + 26);
-    CharacterSelectServerAlertFrame:SetPoint("BOTTOMRIGHT", CharacterSelectUI, "TOPLEFT", 260, -564);
-end
-
-function GameRoomBillingFrame_HideConversionButton()
-    if (GameRoomBillingFrame.ConvertMe:IsShown()) then
-        GameRoomBillingFrame.ConvertMe:Hide();
-        GameRoomBillingFrame:SetHeight(GameRoomBillingFrame:GetHeight() - 26);
-        CharacterSelectServerAlertFrame:SetPoint("BOTTOMRIGHT", CharacterSelectUI, "TOPLEFT", 260, -570);
-    end
-end
-
-function ConvertInterstitialConvertNow_OnClick(self)
-    self:GetParent():Hide();
-    local frame = ConvertConfirmationFrame;
-
-    local minutes, days, newTime = GetConsumptionConversionInfo();
-    local newDate = date("*t", newTime);
-
-    frame.Text:SetText(CONVERT_CONFIRMATION_DESCRIPTION:format(minutes, days, SHORTDATE:format(newDate.day, newDate.month, newDate.year)));
-    frame:Show();
-end
-
-function ConvertConfirmationConfirmButton_OnClick(self)
-    self:GetParent():Hide();
-    ConvertConsumptionTime();
-    ConversionInProgressDialog:Show();
 end
 
 function CharSelectEnterWorldButton_OnEnter(button)
