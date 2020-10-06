@@ -195,6 +195,7 @@ Import("BLIZZARD_STORE_VAS_ERROR_DUPLICATE_CHARACTER_NAME");
 Import("BLIZZARD_STORE_VAS_ERROR_HAS_MAIL");
 Import("BLIZZARD_STORE_VAS_ERROR_UNDER_MIN_LEVEL_REQ");
 Import("BLIZZARD_STORE_VAS_ERROR_INELIGIBLE_TARGET_REALM");
+Import("BLIZZARD_STORE_VAS_ERROR_PENDING_ITEM_AUDIT");
 Import("BLIZZARD_STORE_VAS_ERROR_TOO_MUCH_MONEY_FOR_LEVEL");
 Import("BLIZZARD_STORE_VAS_ERROR_HAS_AUCTIONS");
 Import("BLIZZARD_STORE_VAS_ERROR_NAME_NOT_AVAILABLE");
@@ -1197,6 +1198,9 @@ local vasErrorData = {
 	[Enum.VasError.RaceClassComboIneligible] = { --We should still handle this one even though we shortcut it in case something slips through
 		msg = BLIZZARD_STORE_VAS_ERROR_RACE_CLASS_COMBO_INELIGIBLE,
 	},
+	[Enum.VasError.PendingItemAudit] = {
+		msg = BLIZZARD_STORE_VAS_ERROR_PENDING_ITEM_AUDIT,
+	},
 	[Enum.VasError.IneligibleMapID] = {
 		msg = BLIZZARD_STORE_VAS_ERROR_INELIGIBLE_MAP_ID,
 	},
@@ -2017,11 +2021,10 @@ local JustFinishedOrdering = false;
 function StoreFrame_GetDefaultCategory()
 	local productGroups = C_StoreSecure.GetProductGroups();
 	local needsNewCategory = not selectedCategoryID or StoreFrame_IsProductGroupDisabled(selectedCategoryID);
-	local isTrial = IsTrialAccount();
 	for i = 1, #productGroups do
 		local groupID = productGroups[i];
 		if not StoreFrame_IsProductGroupDisabled(groupID) then
-			if needsNewCategory or isTrial or groupID == selectedCategoryID then
+			if needsNewCategory or groupID == selectedCategoryID then
 				return groupID;
 			end
 		end
@@ -2332,19 +2335,20 @@ function StoreFrame_OnAttributeChanged(self, name, value)
 		SetStoreCategoryFromAttribute(WOW_GAMES_CATEGORY_ID);
 	elseif ( name == "opengamescategory" ) then
 		if C_StorePublic.DoesGroupHavePurchaseableProducts(WOW_GAMES_CATEGORY_ID) then
-			SetStoreCategoryFromAttribute(WOW_GAMES_CATEGORY_ID);
-
-			if ( not IsOnGlueScreen() and not self:IsShown() ) then
-				--We weren't showing, now we are. We should hide all other panels.
-				Outbound.CloseAllWindows();
-			end
-
 			self:Show();
+			SetStoreCategoryFromAttribute(WOW_GAMES_CATEGORY_ID);
 		else
 			PlaySound(SOUNDKIT.GS_LOGIN_NEW_ACCOUNT);
 			LoadURLIndex(2);
 		end
-
+	elseif ( name == "opengametimecategory" ) then
+		if C_StorePublic.DoesGroupHavePurchaseableProducts(WOW_GAME_TIME_CATEGORY_ID) then
+			self:Show();
+			SetStoreCategoryFromAttribute(WOW_GAME_TIME_CATEGORY_ID);
+		else
+			PlaySound(SOUNDKIT.GS_LOGIN_NEW_ACCOUNT);
+			LoadURLIndex(2);
+		end
 	elseif ( name == "setservicescategory" ) then
 		SetStoreCategoryFromAttribute(WOW_SERVICES_CATEGORY_ID);
 	elseif ( name == "selectboost") then
