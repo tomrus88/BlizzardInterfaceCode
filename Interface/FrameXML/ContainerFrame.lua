@@ -121,6 +121,10 @@ function ToggleBag(id)
 			end
 		end
 		if ( not containerShowing ) then
+			if ( CanAutoSetGamePadCursorControl(true) ) then
+				SetGamePadCursorControl(true);
+			end
+
 			ContainerFrame_GenerateFrame(ContainerFrame_GetOpenFrame(), size, id);
 			-- Stop keyring button pulse
 			if (id == KEYRING_CONTAINER) then 
@@ -1254,6 +1258,15 @@ function ContainerFrameItemButton_OnClick(self, button)
 end
 
 function ContainerFrameItemButton_OnModifiedClick(self, button)
+	if ( IsModifiedClick("EXPANDITEM") ) then
+		local itemLocation = ItemLocation:CreateFromBagAndSlot(self:GetParent():GetID(), self:GetID());
+		if C_Item.DoesItemExist(itemLocation) then
+			if SocketContainerItem(self:GetParent():GetID(), self:GetID()) then
+				return;
+			end
+		end
+	end
+
 	if ( HandleModifiedItemClick(GetContainerItemLink(self:GetParent():GetID(), self:GetID())) ) then
 		return;
 	end

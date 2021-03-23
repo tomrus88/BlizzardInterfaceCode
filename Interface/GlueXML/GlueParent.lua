@@ -102,10 +102,6 @@ function GlueParent_OnEvent(self, event, ...)
 	end
 end
 
-function InGlue()
-	return true;
-end
-
 function SecureCapsuleGet(name)
 	return _G[name];
 end

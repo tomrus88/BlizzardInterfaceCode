@@ -1,4 +1,6 @@
 ##DebugHook.lua
+
+GlueCheck.lua
 ..\SharedXML\C_TimerAugment.lua
 ..\SharedXML\Util.lua
 ..\SharedXML\AnchorUtil.xml
@@ -11,11 +13,14 @@
 ..\SharedXML\LinkUtil.lua
 ## intrinsics
 ..\SharedXML\ScrollingMessageFrame.xml
+..\SharedXML\Constants.lua
 Constants.lua
 GlueFonts.xml
 GlueFontStyles.xml
 GlueLocalization.xml
 ..\SharedXML\SecureCurrencyUtil.lua
+..\SharedXML\TextureUtil.lua
+..\SharedXML\Backdrop.xml
 ..\SharedXML\LayoutFrame.xml
 ..\SharedXML\SecureUIPanelTemplates.xml
 ..\SharedXML\SharedUIPanelTemplates.xml
@@ -37,6 +42,7 @@ GlueContextMenu.xml
 ..\SharedXML\ModelSceneActorMixin.xml
 ..\SharedXML\ManagedLayoutFrame.xml
 ..\SharedXML\BulletPoint.xml
+..\SharedXML\SharedTooltipTemplates.xml
 ..\SharedXML\GameTooltipTemplate.xml
 ..\SharedXML\FrameStack.lua
 

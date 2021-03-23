@@ -36,28 +36,23 @@ if (InGlue()) then
 		button1 = OKAY,
 		escapeHides = true,
 		OnAccept = function()
-			local data = GlueDialog.data;
+			-- For Classic, we don't like how this is behaving with FCM. Disabling for now.
+			--[[local data = GlueDialog.data;
 
-			if (not data.shouldHandle) then				
-				if (data.guid and GetServerName() == data.realmName) then
-					-- We're about to throw out the character list,
-					-- so if we want to try to select a character, it has to be now.
-					CharacterSelect_SelectCharacterByGUID(data.guid);
-				end
+			if (not data.shouldHandle) then
 				VASCharacterGUID = nil;
-				GetCharacterListUpdate(); -- Request a new character list from the server.
+				GetCharacterListUpdate();
 				return;
 			end
 
 			if (GetServerName() ~= data.realmName) then
-				-- For Classic, we don't like how this is behaving with FCM. Disabling for now.
-				-- CharacterSelect_SetAutoSwitchRealm(true);
-				-- C_StoreGlue.ChangeRealmByCharacterGUID(data.guid);
-				VASCharacterGUID = nil;
+				CharacterSelect_SetAutoSwitchRealm(true);
+				C_StoreGlue.ChangeRealmByCharacterGUID(data.guid);
 			else
 				UpdateCharacterList(true);
-				VASCharacterGUID = data.guid;
 			end
+
+			VASCharacterGUID = data.guid;]]
 		end
 	}
 

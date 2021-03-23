@@ -1411,7 +1411,7 @@ SecureCmdList["ASSIST"] = function(msg)
 	end
 end
 
---[[SecureCmdList["FOCUS"] = function(msg)
+SecureCmdList["FOCUS"] = function(msg)
 	if ( msg == "" ) then
 		FocusUnit();
 	else
@@ -1429,7 +1429,7 @@ SecureCmdList["CLEARFOCUS"] = function(msg)
 	if ( SecureCmdOptionParse(msg) ) then
 		ClearFocus();
 	end
-end]]
+end
 
 SecureCmdList["MAINTANKON"] = function(msg)
 	local action, target = SecureCmdOptionParse(msg);
@@ -2427,9 +2427,9 @@ SlashCmdList["VOICECHAT"] = function(msg)
 	local communityID;
 	local streamID;
 	if lowerName == string.lower(PARTY) then
-		channelType = Enum.ChatChannelType.Private_Party;
+		channelType = Enum.ChatChannelType.PrivateParty;
 	elseif lowerName == string.lower(INSTANCE) then
-		channelType = Enum.ChatChannelType.Public_Party;
+		channelType = Enum.ChatChannelType.PublicParty;
 	elseif lowerName == string.lower(GUILD) then
 		communityID, streamID = CommunitiesUtil.FindGuildStreamByType(Enum.ClubStreamType.Guild);
 	elseif lowerName == string.lower(OFFICER) then
@@ -4864,9 +4864,6 @@ function ChatMenu_OnShow(self)
 	EmoteMenu:Hide();
 	LanguageMenu:Hide();
 	VoiceMacroMenu:Hide();
-
-	self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
-	self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
 end
 
 function EmoteMenu_Click(self)

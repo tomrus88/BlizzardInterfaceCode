@@ -373,131 +373,6 @@
 			</Anchors>
 		</HighlightTexture>	
 	</Button>
-
-	<Frame name="ChoiceConfirmationTemplate" inherits="DefaultScaleFrame" frameStrata="DIALOG" hidden="true" virtual="true">
-		<KeyValues>
-			<KeyValue key="maxScale" value="INFO_PANE_MAX_SCALE" type="global"/>
-		</KeyValues>
-		<Size x="700" y="525"/>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-			<BackgroundInsets>
-				<AbsInset left="11" right="12" top="12" bottom="11"/>
-			</BackgroundInsets>
-			<TileSize>
-				<AbsValue val="32"/>
-			</TileSize>
-			<EdgeSize>
-				<AbsValue val="32"/>
-			</EdgeSize>
-		</Backdrop>
-		<Layers>
-			<Layer level="OVERLAY">
-				<Texture parentKey="ConfirmationLogo">
-					<Size x="216" y="148"/>
-					<Anchors>
-						<Anchor point="CENTER" x="0" y="155"/>
-					</Anchors>
-				</Texture>
-				<FontString name="ChoiceConfirmationTitle" parentKey="ChoiceConfirmationTitle" inherits="GameFontWhiteShadowHuge2" justifyH="CENTER">
-					<Size x="540" y="0"/>
-					<Anchors>
-						<Anchor point="CENTER" x="0" y="12"/>
-					</Anchors>
-				</FontString>
-				<FontString name="ChoiceConfirmationInstruction" inherits="GameFontNormalLarge" justifyH="CENTER" text="BURNING_CRUSADE_TRANSITION_CHOICE_CONFIRM_TYPE">
-					<Size x="540" y="0"/>
-					<Anchors>
-						<Anchor point="TOP" relativeTo="ChoiceConfirmationTitle" relativePoint="BOTTOM" x="0" y="-37"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Frames>
-			<Frame name="ChoiceConfirmationBackdrop" enableMouse="true">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GlueParent" relativePoint="TOPLEFT"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="GlueParent" relativePoint="BOTTOMRIGHT"/>
-				</Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<Texture setAllPoints="true">
-							<Color r="0" g="0" b="0" a=".75"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnLoad>
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1);
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Frame name="ChoiceConfirmationBackplateDarkener" enableMouse="true">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT" x="10" y="-10"/>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT" x="-10" y="10"/>
-				</Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<Texture setAllPoints="true">
-							<Color r="0" g="0" b="0" a=".75"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnLoad>
-						self:SetFrameLevel(self:GetParent():GetFrameLevel() - 1);
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Button parentKey="ChoiceConfirmationConfirmButton" inherits="GlueButtonTemplateLarge" text="ACCEPT_GLUE">
-				<Size x="306" y="63"/>
-				<Anchors>
-					<Anchor point="CENTER" x="-165" y="-215"/>
-				</Anchors>
-			</Button>
-			<Button parentKey="ChoiceConfirmationCancelButton" inherits="GlueButtonTemplateLarge" text="CANCEL">
-				<Size x="306" y="63"/>
-				<Anchors>
-					<Anchor point="CENTER" x="165" y="-215"/>
-				</Anchors>
-			</Button>
-			<EditBox parentKey="ChoiceConfirmationEditBox" letters="12">
-				<Size x="185" y="47"/>
-				<Anchors>
-					<Anchor point="TOP" relativeTo="ChoiceConfirmationInstruction" relativePoint="BOTTOM" x="0" y="-10"/>
-				</Anchors>
-				<Layers>
-					<Layer level="ARTWORK">
-						<Texture file="Interface\ChatFrame\UI-ChatInputBorder-Left">
-							<Size x="108" y="47"/>
-							<Anchors>
-								<Anchor point="LEFT" x="-15" y="0"/>
-							</Anchors>
-							<TexCoords left="0" right="0.29296875" top="0" bottom="1.0"/>
-						</Texture>
-						<Texture file="Interface\ChatFrame\UI-ChatInputBorder-Right">
-							<Size x="108" y="47"/>
-							<Anchors>
-								<Anchor point="RIGHT" x="15" y="0"/>
-							</Anchors>
-							<TexCoords left="0.70703125" right="1.0" top="0" bottom="1.0"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnTextChanged function="ChoiceConfirmationEditBox_OnTextChanged"/>
-					<OnEnterPressed function="ChoiceConfirmationEditBox_OnEnterPressed"/>
-					<OnEscapePressed function="ChoiceConfirmationEditBox_OnEscapePressed"/>
-				</Scripts>
-				<FontString inherits="GlueFontHighlightHuge"/>
-			</EditBox>
-		</Frames>
-		<Scripts>
-			<OnHide>
-				self.ChoiceConfirmationEditBox:SetText("");
-			</OnHide>
-		</Scripts>
-	</Frame>
 	
 	<Button name="CharacterBoostTemplate" parentArray="CharacterBoosts" frameStrata="HIGH" hidden="true" virtual="true">
 		<Size x="59" y="60"/>
@@ -1123,8 +998,14 @@
 							</OnUpdate>
 						</Scripts>
 					</Button>
-					<Frame name="CharacterSelectCharacterFrame">
+					<Frame name="CharacterSelectCharacterFrame" inherits="BackdropTemplate">
 						<Size x="260" y="642"/>
+						<KeyValues>
+							<KeyValue key="backdropInfo" value="BACKDROP_GLUE_TOOLTIP_16_16" type="global"/>
+							<KeyValue key="backdropColor" value="GLUE_BACKDROP_COLOR" type="global"/>
+							<KeyValue key="backdropColorAlpha" value=".85" type="number"/>
+							<KeyValue key="backdropBorderColor" value="GLUE_BACKDROP_BORDER_COLOR" type="global"/>
+						</KeyValues>
 						<Anchors>
 							<Anchor point="TOPRIGHT" x="-5" y="-15"/>
 						</Anchors>
@@ -1146,17 +1027,6 @@
 								</FontString>
 							</Layer>
 						</Layers>
-						<Backdrop bgFile="Interface\Glues\Common\Glue-Tooltip-Background" edgeFile="Interface\Glues\Common\Glue-Tooltip-Border" tile="true">
-							<BackgroundInsets>
-								<AbsInset left="10" right="5" top="4" bottom="9"/>
-							</BackgroundInsets>
-							<TileSize>
-								<AbsValue val="16"/>
-							</TileSize>
-							<EdgeSize>
-								<AbsValue val="16"/>
-							</EdgeSize>
-						</Backdrop>
 						<Frames>
 							<Slider name="$parentScrollBar" parentKey="scrollBar" inherits="GlueScrollBarTemplate" hidden="true">
 								<Anchors>
@@ -1740,22 +1610,14 @@
 									<Anchor point="CENTER" relativeTo="GlueParent" relativePoint="CENTER" x="0" y="0"/>
 								</Anchors>
 								<Frames>
-									<Frame name="CharacterUpgradeSecondChanceWarningBackground">
+									<Frame name="CharacterUpgradeSecondChanceWarningBackground" inherits="BackdropTemplate">
+										<KeyValues>
+											<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+										</KeyValues>
 										<Size x="412" y="146"/>
 										<Anchors>
 											<Anchor point="CENTER" x="0" y="0"/>
 										</Anchors>
-										<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-											<BackgroundInsets>
-												<AbsInset left="11" right="12" top="12" bottom="11"/>
-											</BackgroundInsets>
-											<TileSize>
-												<AbsValue val="32"/>
-											</TileSize>
-											<EdgeSize>
-												<AbsValue val="32"/>
-											</EdgeSize>
-										</Backdrop>
 										<Layers>
 											<Layer level="ARTWORK">
 												<FontString parentKey="Text" inherits="GameFontNormalMed2" text="CHARACTER_UPGRADE_KRW_FINISH_BUTTON_POPUP_TEXT">
@@ -1792,7 +1654,7 @@
 											</Button>
 										</Frames>
 										<Scripts>
-											<OnLoad>
+											<OnLoad inherit="prepend">
 												self.Text:SetSpacing(4);
 											</OnLoad>
 										</Scripts>
@@ -1834,22 +1696,14 @@
 							</OnUpdate>
 						</Scripts>
 					</Button>
-					<Frame name="CharacterTemplatesFrame" hidden="true">
+					<Frame name="CharacterTemplatesFrame" hidden="true" inherits="BackdropTemplate">
+						<KeyValues>
+							<KeyValue key="backdropInfo" value="BACKDROP_GLUE_TOOLTIP_16_16" type="global"/>
+						</KeyValues>
 						<Size x="220" y="150"/>
 						<Anchors>
 							<Anchor point="BOTTOMRIGHT" relativeTo="CharSelectEnterWorldButton" relativePoint="BOTTOMLEFT" x="-5" y="-4"/>
 						</Anchors>
-						<Backdrop bgFile="Interface\Glues\Common\Glue-Tooltip-Background" edgeFile="Interface\Glues\Common\Glue-Tooltip-Border" tile="true">
-							<BackgroundInsets>
-								<AbsInset left="10" right="5" top="4" bottom="9"/>
-							</BackgroundInsets>
-							<TileSize>
-								<AbsValue val="16"/>
-							</TileSize>
-							<EdgeSize>
-								<AbsValue val="16"/>
-							</EdgeSize>
-						</Backdrop>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString inherits="GlueFontNormal" text="TEMPLATE_CHARACTER">
@@ -1888,22 +1742,14 @@
 							</Button>
 						</Frames>
 					</Frame>
-					<Frame name="PlayersOnServer" hidden="true">
+					<Frame name="PlayersOnServer" hidden="true" inherits="BackdropTemplate">
+						<KeyValues>
+							<KeyValue key="backdropInfo" value="BACKDROP_GLUE_TOOLTIP_16_16" type="global"/>
+						</KeyValues>
 						<Size x="220" y="88"/>
 						<Anchors>
 							<Anchor point="BOTTOM" relativeTo="CharacterTemplatesFrame" relativePoint="TOP" x="0" y="0"/>
 						</Anchors>
-						<Backdrop bgFile="Interface\Glues\Common\Glue-Tooltip-Background" edgeFile="Interface\Glues\Common\Glue-Tooltip-Border" tile="true">
-							<BackgroundInsets>
-								<AbsInset left="10" right="5" top="4" bottom="9"/>
-							</BackgroundInsets>
-							<TileSize>
-								<AbsValue val="16"/>
-							</TileSize>
-							<EdgeSize>
-								<AbsValue val="16"/>
-							</EdgeSize>
-						</Backdrop>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString inherits="GlueFontNormal" text="PLAYERS_ON_SERVER">
@@ -2062,7 +1908,10 @@
 					</Button>
 				</Frames>
 			</Frame>
-			<Frame name="GameRoomBillingFrame" hidden="true">
+			<Frame name="GameRoomBillingFrame" hidden="true" inherits="BackdropTemplate">
+				<KeyValues>
+					<KeyValue key="backdropInfo" value="BACKDROP_GLUE_TOOLTIP_16_16" type="global"/>
+				</KeyValues>
 				<Size x="255" y="60"/>
 				<Anchors>
 					<Anchor point="TOP" relativeTo="CharacterSelectServerAlertFrame" relativePoint="BOTTOM" x="0" y="0"/>
@@ -2077,17 +1926,6 @@
 						</FontString>
 					</Layer>
 				</Layers>
-				<Backdrop bgFile="Interface\Glues\Common\Glue-Tooltip-Background" edgeFile="Interface\Glues\Common\Glue-Tooltip-Border" tile="true">
-					<BackgroundInsets>
-						<AbsInset left="10" right="5" top="4" bottom="9"/>
-					</BackgroundInsets>
-					<TileSize>
-						<AbsValue val="16"/>
-					</TileSize>
-					<EdgeSize>
-						<AbsValue val="16"/>
-					</EdgeSize>
-				</Backdrop>
 			</Frame>
 			<Frame name ="TBCInfoPane" inherits="DefaultScaleFrame" frameStrata="DIALOG" hidden ="true">
 				<KeyValues>
@@ -2099,7 +1937,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level ="OVERLAY">
-						<Texture name="TBCInfoPaneBG" atlas="classic-announcementpopup-frame">
+						<Texture name="TBCInfoPaneBG">
 							<Size x="586" y ="819"/>
 						</Texture>
 						<FontString name="TBCInfoPaneTitle" inherits="GameFontOffBlack30" justifyH="CENTER" text="BURNING_CRUSADE_PREVIEW_TITLE">
@@ -2108,7 +1946,7 @@
 								<Anchor point="TOP" x="0" y="-77"/>
 							</Anchors>
 						</FontString>
-						<Texture name="TBCInfoPaneSeparator" atlas="classic-announcementpopup-line">
+						<Texture name="TBCInfoPaneSeparator">
 							<Size x="411" y ="2"/>
 							<Anchors>
 								<Anchor point="TOP" relativeTo="TBCInfoPaneTitle" relativePoint="BOTTOM" x="0" y="-12"/>
@@ -2160,27 +1998,9 @@
 					<OnShow function ="TBCInfoPane_OnShow"/>
 				</Scripts>
 			</Frame>
-			<Frame name="ChoiceConfirmation" inherits="ChoiceConfirmationTemplate">
-				<Anchors>
-					<Anchor point="CENTER" relativeTo="CharacterSelectUI" relativePoint="CENTER" x="0" y="146"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad function ="ChoiceConfirmation_OnLoad"/>
-					<OnShow function ="ChoiceConfirmation_OnShow"/>
-				</Scripts>
-			</Frame>
-			<Frame name="CloneConfirmation" inherits="ChoiceConfirmationTemplate">
-				<Anchors>
-					<Anchor point="CENTER" relativeTo="CharacterSelectUI" relativePoint="CENTER" x="0" y="146"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad function ="CloneConfirmation_OnLoad"/>
-					<OnShow function ="CloneConfirmation_OnShow"/>
-				</Scripts>
-			</Frame>
 		</Frames>
 		<Scripts>
-			<OnLoad function="CharacterSelect_OnLoad"/>
+			<OnLoad inherit="prepend" function="CharacterSelect_OnLoad"/>
 			<OnShow function="CharacterSelect_OnShow"/>
 			<OnHide function="CharacterSelect_OnHide"/>
 			<OnUpdate function="CharacterSelect_OnUpdate"/>
@@ -2192,24 +2012,16 @@
 			</OnEvent>
 		</Scripts>
 	</Frame>
-	<Frame name="CharacterDeleteDialog" toplevel="true" parent="GlueParent" setAllPoints="true" enableMouse="true" enableKeyboard="true" frameStrata="DIALOG" hidden="true">
+	<Frame name="CharacterDeleteDialog" toplevel="true" parent="GlueParent" setAllPoints="true" enableMouse="true" enableKeyboard="true" frameStrata="DIALOG" hidden="true" inherits="BackdropTemplate">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+		</KeyValues>
 		<Frames>
 			<Frame name="CharacterDeleteBackground">
 				<Size x="512" y="256"/>
 				<Anchors>
 					<Anchor point="CENTER" x="0" y="0"/>
 				</Anchors>
-				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-					<BackgroundInsets>
-						<AbsInset left="11" right="12" top="12" bottom="11"/>
-					</BackgroundInsets>
-					<TileSize>
-						<AbsValue val="32"/>
-					</TileSize>
-					<EdgeSize>
-						<AbsValue val="32"/>
-					</EdgeSize>
-				</Backdrop>
 				<Layers>
 					<Layer level="ARTWORK">
 						<FontString name="CharacterDeleteText1" inherits="GlueFontNormalLarge">
@@ -2317,24 +2129,16 @@
 			</OnHide>
 		</Scripts>
 	</Frame>
-	<Frame name="CharacterRenameDialog" toplevel="true" parent="GlueParent" setAllPoints="true" enableMouse="true" enableKeyboard="true" frameStrata="DIALOG" hidden="true">
+	<Frame name="CharacterRenameDialog" toplevel="true" parent="GlueParent" setAllPoints="true" enableMouse="true" enableKeyboard="true" frameStrata="DIALOG" hidden="true" inherits="BackdropTemplate">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+		</KeyValues>
 		<Frames>
 			<Frame name="CharacterRenameBackground">
 				<Size x="512" y="256"/>
 				<Anchors>
 					<Anchor point="CENTER" x="0" y="0"/>
 				</Anchors>
-				<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-					<BackgroundInsets>
-						<AbsInset left="11" right="12" top="12" bottom="11"/>
-					</BackgroundInsets>
-					<TileSize>
-						<AbsValue val="32"/>
-					</TileSize>
-					<EdgeSize>
-						<AbsValue val="32"/>
-					</EdgeSize>
-				</Backdrop>
 				<Layers>
 					<Layer level="ARTWORK">
 						<FontString name="CharacterRenameText1" inherits="GlueFontNormalLarge" text="CHAR_RENAME_DESCRIPTION">
