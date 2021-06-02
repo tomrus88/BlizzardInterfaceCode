@@ -24,6 +24,14 @@ local eventToastTextureKitRegions = {
 
 local hideButtonNormalTexture = "%s-hide-button"; 
 local hideButtonHighlightTexture ="%s-hide-buttonhighlight";
+local hideButtonHitRectInsets = {
+	["jailerstower-score"] = {
+		left = 50, 
+		right = 50,
+		top = 40, 
+		bottom = 30, 
+	},
+};
 
 local scenarioTextureKitOffsets = {
 	["jailerstower-score"] = {
@@ -91,7 +99,9 @@ end
 
 function EventToastManagerFrameMixin:OnEvent(event, ...)
 	if(event == "DISPLAY_EVENT_TOASTS") then 
-		self:DisplayToast(true);
+		if (not self:IsCurrentlyToasting()) then 
+			self:DisplayToast(true);
+		end
 	end 
 end
 
@@ -139,6 +149,10 @@ function EventToastManagerFrameMixin:CloseActiveToasts()
 		self.currentDisplayingToast:SetOutStartDelay(0);
 		self.currentDisplayingToast:AnimOut();
 	end 
+end	
+
+function EventToastManagerFrameMixin:IsCurrentlyToasting()
+	return self.currentDisplayingToast;
 end		
 
 function EventToastManagerFrameMixin:OnUpdate()
@@ -187,7 +201,14 @@ function EventToastManagerFrameMixin:SetupButton(uiTextureKit)
 	if (higlightTextureAtlas) then 
 		self.HideButton:SetHighlightAtlas(higlightTextureAtlas, true);
 	end
-end		
+
+	local hitRectInsets = hideButtonHitRectInsets[uiTextureKit];
+	if hitRectInsets then
+		self.HideButton:SetHitRectInsets(hitRectInsets.left, hitRectInsets.right, hitRectInsets.top, hitRectInsets.bottom);
+	else
+		self.HideButton:SetHitRectInsets(0, 0, 0, 0);
+	end
+end
 
 function EventToastManagerFrameMixin:DisplayToast(firstToast) 
 	self:ReleaseToasts();
@@ -198,10 +219,8 @@ function EventToastManagerFrameMixin:DisplayToast(firstToast)
 	end 
 
 	local toastInfo = C_EventToastManager.GetNextToastToDisplay(); 
+	self.currentDisplayingToast = nil;
 	if(toastInfo) then 
-		ZoneTextFrame:Hide();
-		SubZoneTextFrame:Hide();
-
 		local toastTable = eventToastTemplatesByToastType[toastInfo.displayType];
 		if(not toastTable) then 
 			return; 
@@ -338,6 +357,10 @@ function EventToastScenarioBaseToastMixin:Setup(toastInfo)
 		SetupTextureKitOnRegions(toastInfo.uiTextureKit, self, textureKitRegionExpandFormatStrings, TextureKitConstants.SetVisibility, TextureKitConstants.UseAtlasSize);
 		SetupTextureKitOnRegions(toastInfo.uiTextureKit, self, textureKitRegionExpandBackgroundFormatStrings, TextureKitConstants.SetVisibility, false);
 		self:SetupTextureKitOffsets(toastInfo.uiTextureKit);
+	elseif(toastInfo.hideDefaultAtlas) then 
+		self.BG1:SetAlpha(0);
+		self.BG2:SetAlpha(0);
+		self.hideParentAnim = false; 
 	else
 		SetupAtlasesOnRegions(self, defaultAtlases, true);
 	end 
@@ -374,9 +397,9 @@ function EventToastScenarioToastMixin:Setup(toastInfo)
 
 	if(toastInfo.uiWidgetSetID) then 
 		self.WidgetContainer:RegisterForWidgetSet(toastInfo.uiWidgetSetID, DefaultWidgetLayout);
-		self.SubTitle:SetPoint("TOP", self.WidgetContainer, "BOTTOM", 0, -10);
+		self.SubTitle:SetPoint("TOP", self.WidgetContainer, "BOTTOM", 0, -5);
 	else 
-		self.SubTitle:SetPoint("TOP", self.Title, "BOTTOM", 0, -10);
+		self.SubTitle:SetPoint("TOP", self.Title, "BOTTOM", 0, 0);
 	end 
 
 	self:Show(); 
@@ -389,6 +412,10 @@ function EventToastScenarioToastMixin:OnAnimFinished()
 	self.WidgetContainer:UnregisterForWidgetSet();
 end		
 
+local scenarioExpandSoundKitIDs = {
+	["jailerstower-score"] = 183163;
+}
+
 EventToastScenarioExpandToastMixin = { };
 function EventToastScenarioBaseToastMixin:OnLoad()
 	EventToastAnimationsMixin.OnLoad(self);
@@ -397,6 +424,7 @@ end
 
 function EventToastScenarioExpandToastMixin:Setup(toastInfo)
 	EventToastScenarioBaseToastMixin.Setup(self, toastInfo);
+	self.Title:SetFontObject("Fancy24Font");
 	self.Title:ClearAllPoints(); 
 	self.Title:SetPoint("TOP", self.PaddingFrame, "BOTTOM");
 	self.SubTitle:ClearAllPoints();
@@ -456,6 +484,10 @@ function EventToastScenarioExpandToastMixin:OnClick(button, ...)
 	self.ExpandWidgetContainer:SetShown(self.expanded);
 	self:GetParent():Layout();
 	self:SetupTextureKitOffsets(toastInfo.uiTextureKit);
+	local expandClickSoundkit = scenarioExpandSoundKitIDs[toastInfo.uiTextureKit]; 
+	if (expandClickSoundkit) then 
+		PlaySound(expandClickSoundkit);
+	end		
 end
 
 EventToastWithIconBaseMixin = { }; 
@@ -473,6 +505,7 @@ function EventToastWithIconBaseMixin:Setup(toastInfo)
 	end 
 	self.SubIcon:SetShown(toastInfo.subIcon);
 	self.InstructionalText:SetText(toastInfo.instructionText); 
+	self:GetParent():SetAnimationState(self.hideParentAnim);
 	
 	self.WidgetContainer:UnregisterForWidgetSet();
 	self.WidgetContainer:SetShown(toastInfo.uiWidgetSetID);
@@ -547,6 +580,7 @@ function EventToastManagerNormalMixin:Setup(toastInfo)
 	if(toastInfo.uiWidgetSetID) then 
 		self.WidgetContainer:RegisterForWidgetSet(toastInfo.uiWidgetSetID, DefaultWidgetLayout);
 	end 
+	self:Layout();
 end 
 
 function EventToastManagerNormalMixin:OnAnimFinished()
@@ -643,17 +677,32 @@ function EventToastAnimationsMixin:BannerPlay()
 		self.BannerFrame.showAnim:Play();
 	end
 
+	C_Timer.After(self.animInStartDelay and self.animInStartDelay or 0, 
+	function() 
+		if (self.toastInfo and self.toastInfo.showSoundKitID) then
+			PlaySound(self.toastInfo.showSoundKitID);
+		end
+	end);
 	self.showAnim:Play();
 	self:GetParent():PlayAnim();
 end		
 
 function EventToastAnimationsMixin:AnimIn() 
+	ZoneTextFrame:Hide();
+	SubZoneTextFrame:Hide();
 	TopBannerManager_Show(self);
 end	
 
 function EventToastAnimationsMixin:AnimOut()
 	if (not self:GetParent():AreAnimationsPaused() and self.hideAutomatically) then 	
 		self.hideAnim:Play();
+		C_Timer.After(self.hideAnim.anim1:GetStartDelay(), 
+		function() 
+			if (self.toastInfo and self.toastInfo.hideSoundKitID) then
+				PlaySound(self.toastInfo.hideSoundKitID);
+			end
+		end);
+
 		if(self.BannerFrame) then 
 			self.BannerFrame.hideAnim:Play();
 		end

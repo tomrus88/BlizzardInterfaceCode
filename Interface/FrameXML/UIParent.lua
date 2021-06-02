@@ -280,6 +280,7 @@ function UIParent_OnLoad(self)
 	self:RegisterEvent("LOADING_SCREEN_DISABLED");
 	self:RegisterEvent("CVAR_UPDATE");
 	self:RegisterEvent("LEAVING_TUTORIAL_AREA");
+	self:RegisterEvent("UI_ERROR_POPUP");
 
 	-- Events for auction UI handling
 	self:RegisterEvent("AUCTION_HOUSE_SHOW");
@@ -1462,6 +1463,10 @@ function UIParent_OnEvent(self, event, ...)
 		end
 	elseif event == "LEAVING_TUTORIAL_AREA" then
 		StaticPopup_Show("LEAVING_TUTORIAL_AREA");
+	elseif event == "UI_ERROR_POPUP" then
+		local errorType, errorMessage = ...;
+		local systemPrefix = "UI_ERROR_";
+		StaticPopup_ShowNotification(systemPrefix, errorType, errorMessage);
 	elseif ( event == "PARTY_INVITE_REQUEST" ) then
 		FlashClientIcon();
 
@@ -3345,31 +3350,20 @@ function FramePositionDelegate:UIParentManageFramePositions()
 		end
 	end
 
-	-- BelowMinimap Widgets - need to move below buffs/debuffs if at least 1 right action bar is showing
+	-- BelowMinimap Widgets - need to move below buffs/debuffs
 	if UIWidgetBelowMinimapContainerFrame and UIWidgetBelowMinimapContainerFrame:GetNumWidgetsShowing() > 0 then
-		if rightActionBars > 0 then
-			anchorY = min(anchorY, buffsAnchorY);
-		end
+		anchorY = min(anchorY, buffsAnchorY);
 
-		UIWidgetBelowMinimapContainerFrame:ClearAllPoints();
 		UIWidgetBelowMinimapContainerFrame:SetPoint("TOPRIGHT", MinimapCluster, "BOTTOMRIGHT", -CONTAINER_OFFSET_X, anchorY);
 
 		anchorY = anchorY - UIWidgetBelowMinimapContainerFrame:GetHeight() - 4;
 	end
 
-	-- BelowMinimap Widgets - need to move below buffs/debuffs if at least 1 right action bar is showing
+	-- MawBuffsBelowMinimapFrame - need to move below buffs/debuffs
 	if MawBuffsBelowMinimapFrame and MawBuffsBelowMinimapFrame:IsShown() then
-		if rightActionBars > 0 then
-			anchorY = min(anchorY, buffsAnchorY);
-		end
+		anchorY = min(anchorY, buffsAnchorY);
 
-		if(UIWidgetBelowMinimapContainerFrame) then 
-			MawBuffsBelowMinimapFrame:ClearAllPoints();
-			MawBuffsBelowMinimapFrame:SetPoint("TOPRIGHT", UIWidgetBelowMinimapContainerFrame, "BOTTOMRIGHT", -CONTAINER_OFFSET_X, anchorY);
-		else
-			MawBuffsBelowMinimapFrame:ClearAllPoints();
-			MawBuffsBelowMinimapFrame:SetPoint("TOPRIGHT", MinimapCluster, "BOTTOMRIGHT", -CONTAINER_OFFSET_X, anchorY);
-		end 
+		MawBuffsBelowMinimapFrame:SetPoint("TOPRIGHT", MinimapCluster, "BOTTOMRIGHT", -CONTAINER_OFFSET_X, anchorY);
 
 		anchorY = anchorY - MawBuffsBelowMinimapFrame:GetHeight() - 4;
 	end

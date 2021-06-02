@@ -142,33 +142,27 @@ end
 function ChallengesFrame_Update(self)
     local sortedMaps = {};
 
-    local hasWeeklyRun = false;
     for i = 1, #self.maps do
 		local inTimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(self.maps[i]);
-		local level
-        if (not inTimeInfo) then
-			if(overtimeInfo) then
-				level = overtimeInfo.level;
-			else
-				level = 0;
-			end
-			tinsert(sortedMaps, { id = self.maps[i], level = level});
-        else
-			level = inTimeInfo.level;
-            hasWeeklyRun = true;
-			tinsert(sortedMaps, { id = self.maps[i], level = level, inTime = true});
+		local level = 0; 
+		local dungeonScore = 0;
+		if(inTimeInfo and overtimeInfo) then 
+			local inTimeScoreIsBetter = inTimeInfo.dungeonScore > overtimeInfo.dungeonScore; 
+			level = inTimeScoreIsBetter and inTimeInfo.level or overTimeInfo.level; 
+			dungeonScore = inTimeScoreIsBetter and inTimeInfo.dungeonScore or overTimeInfo.dungeonScore; 
+        elseif(inTimeInfo or overtimeInfo) then 
+			level = inTimeInfo and inTimeInfo.level or overtimeInfo.level; 
+			dungeonScore = inTimeInfo and inTimeInfo.dungeonScore or overtimeInfo.dungeonScore;
 		end
-
+		tinsert(sortedMaps, { id = self.maps[i], level = level, dungeonScore = dungeonScore});
     end
 
     table.sort(sortedMaps,
 	function(a, b)
-		if(a.inTime ~= b.inTime) then
-			return a.inTime;
-		end
-		return a.level > b.level;
+		return a.dungeonScore > b.dungeonScore;
 	end);
 
+	 local hasWeeklyRun = false;
 	local weeklySortedMaps = {};
 	 for i = 1, #self.maps do
 		local _, weeklyLevel = C_MythicPlus.GetWeeklyBestForMap(self.maps[i])
@@ -484,7 +478,7 @@ function ChallengesDungeonIconMixin:SetUp(mapInfo, isFirst)
 	local _, overAllScore = C_MythicPlus.GetSeasonBestAffixScoreInfoForMap(mapInfo.id);
 	local color;
 	if(overAllScore) then	
-		color = C_ChallengeMode.GetSpecificDungeonScoreRarityColor(overAllScore);
+		color = C_ChallengeMode.GetSpecificDungeonScoreRarityColor(mapInfo.dungeonScore);
 	end
 	if(not color) then 
 		color = HIGHLIGHT_FONT_COLOR; 
@@ -838,13 +832,16 @@ end
 
 function ChallengeModeCompleteBannerMixin:OnEvent(event, ...)
     if (event == "CHALLENGE_MODE_COMPLETED") then
-        local mapID, level, time, onTime, keystoneUpgradeLevels, practiceRun, oldDungeonScore, newDungeonScore, isAffixRecord, isMapRecord, primaryAffix = C_ChallengeMode.GetCompletionInfo();
+        local mapID, level, time, onTime, keystoneUpgradeLevels, practiceRun, oldDungeonScore, newDungeonScore, isAffixRecord, isMapRecord, primaryAffix, upgradeMembers = C_ChallengeMode.GetCompletionInfo();
 
 		if not practiceRun then
-			TopBannerManager_Show(self, { mapID = mapID, level = level, time = time, onTime = onTime, oldDungeonScore = oldDungeonScore, newDungeonScore = newDungeonScore, keystoneUpgradeLevels = keystoneUpgradeLevels, isMapRecord = isMapRecord, isAffixRecord = isAffixRecord, primaryAffix = primaryAffix });
+			TopBannerManager_Show(self, { mapID = mapID, level = level, time = time, onTime = onTime, oldDungeonScore = oldDungeonScore, newDungeonScore = newDungeonScore, keystoneUpgradeLevels = keystoneUpgradeLevels, isMapRecord = isMapRecord, isAffixRecord = isAffixRecord, primaryAffix = primaryAffix, upgradeMembers = upgradeMembers });
 		end
     end
 end
+
+local timeFormatter = CreateFromMixins(SecondsFormatterMixin);
+timeFormatter:Init(1, SecondsFormatter.Abbreviation.Truncate, false);
 
 function ChallengeModeCompleteBannerMixin:PlayBanner(data)
     local name, _, timeLimit = C_ChallengeMode.GetMapUIInfo(data.mapID);
@@ -860,7 +857,8 @@ function ChallengeModeCompleteBannerMixin:PlayBanner(data)
     end
 
 	self.Level:Show();
-	local timeRemaining = timeLimit - (data.time / 1000);
+	local timeRemaining = math.abs(timeLimit - (data.time / 1000));
+	
     if (data.onTime) then
         self.DescriptionLineOne:SetText(CHALLENGE_MODE_COMPLETE_BEAT_TIMER);
         self.DescriptionLineTwo:SetFormattedText(CHALLENGE_MODE_COMPLETE_KEYSTONE_UPGRADED, data.keystoneUpgradeLevels);
@@ -868,11 +866,11 @@ function ChallengeModeCompleteBannerMixin:PlayBanner(data)
 		local chatPrintText; 
 		if (data.isAffixRecord) then 
 			local affixName = C_ChallengeMode.GetAffixInfo(data.primaryAffix);
-			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK_AFFIX_RECORD:format(name, data.level, SecondsToClock(data.time / 1000, true), SecondsToClock(timeRemaining, true), affixName)
+			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK_AFFIX_RECORD:format(name, data.level, timeFormatter:Format(data.time / 1000), timeFormatter:Format(timeRemaining), affixName)
 		elseif (data.isMapRecord) then 
-			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK_RECORD:format(name, data.level, SecondsToClock(data.time / 1000, true), SecondsToClock(timeRemaining, true))
+			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK_RECORD:format(name, data.level, timeFormatter:Format(data.time / 1000), timeFormatter:Format(timeRemaining))
 		else
-			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK:format(name, data.level, SecondsToClock(data.time / 1000, true), SecondsToClock(timeRemaining, true))
+			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK:format(name, data.level, timeFormatter:Format(data.time / 1000), timeFormatter:Format(timeRemaining))
 		end		
 		local info = ChatTypeInfo["SYSTEM"];
 		DEFAULT_CHAT_FRAME:AddMessage(chatPrintText, info.r, info.g, info.b, info.id);
@@ -884,23 +882,42 @@ function ChallengeModeCompleteBannerMixin:PlayBanner(data)
 		local chatPrintText; 
 		if (data.isAffixRecord) then 
 			local affixName = C_ChallengeMode.GetAffixInfo(data.primaryAffix);
-			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK_OVERTIME_AFFIX_RECORD:format(name, data.level, SecondsToClock(data.time / 1000, true), SecondsToClock(timeRemaining, true), affixName)
+			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK_OVERTIME_AFFIX_RECORD:format(name, data.level, timeFormatter:Format(data.time / 1000), timeFormatter:Format(timeRemaining), affixName)
 		elseif (data.isMapRecord) then 
-			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK_OVERTIME_RECORD:format(name, data.level, SecondsToClock(data.time / 1000, true), SecondsToClock(timeRemaining, true))
+			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_CHAT_LINK_OVERTIME_RECORD:format(name, data.level, timeFormatter:Format(data.time / 1000), timeFormatter:Format(timeRemaining))
 		else
-			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_OVERTIME_CHAT_LINK:format(name, data.level, SecondsToClock(data.time / 1000, true), SecondsToClock(timeRemaining, true))
+			chatPrintText = CHALLENGE_MODE_TIMED_DUNGEON_OVERTIME_CHAT_LINK:format(name, data.level, timeFormatter:Format(data.time / 1000), timeFormatter:Format(timeRemaining))
 		end	
 		local info = ChatTypeInfo["SYSTEM"];
 		DEFAULT_CHAT_FRAME:AddMessage(chatPrintText, info.r, info.g, info.b, info.id);
     end
+	if(data.upgradeMembers and #data.upgradeMembers >= 1) then 
+		local formatString = nil;
+		for i, member in ipairs(data.upgradeMembers) do 
+			if(member.name) then 
+				local _, classFilename = UnitClass(member.memberGUID);	
+				local classColor = classFilename and RAID_CLASS_COLORS[classFilename] or NORMAL_FONT_COLOR;
+				local playerString = classColor:WrapTextInColorCode(member.name);
+				if(not formatString) then 
+					formatString = playerString
+				else
+					formatString = formatString..PLAYER_LIST_DELIMITER..playerString;
+				end
+			end
+		end
+		if(formatString) then 
+			local chatString = DUNGEON_SCORE_INCREASE_PARTY_MEMBERS:format(formatString);
+			local info = ChatTypeInfo["SYSTEM"];
+			DEFAULT_CHAT_FRAME:AddMessage(chatString, info.r, info.g, info.b, info.id);
+		end
+	end		
 
 	local gainedScore = data.newDungeonScore - data.oldDungeonScore;
 	local color = C_ChallengeMode.GetDungeonScoreRarityColor(data.newDungeonScore);
-	if (color) then 
-		self.DescriptionLineThree:SetText(CHALLENGE_COMPLETE_DUNGEON_SCORE_COLORED:format(color:WrapTextInColorCode(data.newDungeonScore), color:WrapTextInColorCode(gainedScore)));
-    else 
-		self.DescriptionLineThree:SetText(CHALLENGE_COMPLETE_DUNGEON_SCORE:format(data.newDungeonScore, gainedScore));
+	if (not color) then 
+		color = HIGHLIGHT_FONT_COLOR; 
 	end
+	self.DescriptionLineThree:SetText(CHALLENGE_COMPLETE_DUNGEON_SCORE:format(color:WrapTextInColorCode(CHALLENGE_COMPLETE_DUNGEON_SCORE_FORMAT_TEXT:format(data.newDungeonScore, gainedScore))));
 	local sortedUnitTokens = self:GetSortedPartyMembers();
 
     self:Show();

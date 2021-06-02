@@ -45,7 +45,7 @@ ChatTypeInfo["GUILD"]									= { sticky = 1, flashTab = false, flashTabOnGenera
 ChatTypeInfo["OFFICER"]									= { sticky = 1, flashTab = false, flashTabOnGeneral = false };
 ChatTypeInfo["YELL"]									= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
 ChatTypeInfo["WHISPER"]									= { sticky = 1, flashTab = true, flashTabOnGeneral = true };
-ChatTypeInfo["SMART_WHISPER"]							= ChatTypeInfo["WHISPER"];
+ChatTypeInfo["SMART_WHISPER"]							= CopyTable(ChatTypeInfo["WHISPER"]);
 ChatTypeInfo["WHISPER_INFORM"]							= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
 ChatTypeInfo["REPLY"]									= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
 ChatTypeInfo["EMOTE"]									= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
@@ -122,11 +122,9 @@ ChatTypeInfo["BN_INLINE_TOAST_BROADCAST_INFORM"]		= { sticky = 0, flashTab = tru
 ChatTypeInfo["BN_WHISPER_PLAYER_OFFLINE"] 				= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
 ChatTypeInfo["PET_BATTLE_COMBAT_LOG"]					= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
 ChatTypeInfo["PET_BATTLE_INFO"]							= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
-ChatTypeInfo["GUILD_ITEM_LOOTED"]						= ChatTypeInfo["GUILD_ACHIEVEMENT"];
+ChatTypeInfo["GUILD_ITEM_LOOTED"]						= CopyTable(ChatTypeInfo["GUILD_ACHIEVEMENT"]);
 ChatTypeInfo["COMMUNITIES_CHANNEL"]						= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
-ChatTypeInfo["PARTY_VOICE"]								= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
-ChatTypeInfo["GUILD_VOICE"]								= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
-ChatTypeInfo["COMMUNITIES_VOICE"]						= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
+ChatTypeInfo["VOICE_TEXT"]								= { sticky = 0, flashTab = false, flashTabOnGeneral = false };
 
 --NEW_CHAT_TYPE -Add the info here.
 
@@ -293,14 +291,8 @@ ChatTypeGroup["PET_BATTLE_COMBAT_LOG"] = {
 ChatTypeGroup["PET_BATTLE_INFO"] = {
 	"CHAT_MSG_PET_BATTLE_INFO",
 };
-ChatTypeGroup["PARTY_VOICE"] = {
-	"CHAT_MSG_PARTY_VOICE",
-};
-ChatTypeGroup["GUILD_VOICE"] = {
-	"CHAT_MSG_GUILD_VOICE",
-};
-ChatTypeGroup["COMMUNITIES_VOICE"] = {
-	"CHAT_MSG_COMMUNITIES_VOICE",
+ChatTypeGroup["VOICE_TEXT"] = {
+	"CHAT_MSG_VOICE_TEXT",
 };
 
 --NEW_CHAT_TYPE - Add the chat type above.
@@ -345,7 +337,7 @@ function Chat_GetCommunitiesChannelName(clubId, streamId)
 	return ("Community:%s:%s"):format(tostring(clubId), tostring(streamId));
 end
 
-local function Chat_GetCommunitiesChannel(clubId, streamId)
+function Chat_GetCommunitiesChannel(clubId, streamId)
 	local communitiesChannelName = Chat_GetCommunitiesChannelName(clubId, streamId);
 	for i = 1, MAX_WOW_CHAT_CHANNELS do
 		local channelID, channelName = GetChannelName(i);
@@ -897,10 +889,10 @@ local function CastSequenceManager_OnEvent(self, event, ...)
 
 	-- Increment sequences for spells which succeed.
 	if ( event == "UNIT_SPELLCAST_SENT" or
-	     event == "UNIT_SPELLCAST_SUCCEEDED" or
-	     event == "UNIT_SPELLCAST_INTERRUPTED" or
-	     event == "UNIT_SPELLCAST_FAILED" or
-	     event == "UNIT_SPELLCAST_FAILED_QUIET" ) then
+		 event == "UNIT_SPELLCAST_SUCCEEDED" or
+		 event == "UNIT_SPELLCAST_INTERRUPTED" or
+		 event == "UNIT_SPELLCAST_FAILED" or
+		 event == "UNIT_SPELLCAST_FAILED_QUIET" ) then
 		local unit, castID, spellID;
 
 		if event == "UNIT_SPELLCAST_SENT" then
@@ -1001,7 +993,7 @@ local function ExecuteCastSequence(sequence, target)
 
 	-- See if modified click restarts the sequence
 	if ( (IsShiftKeyDown() and strfind(entry.reset, "shift", 1, true)) or
-	     (IsControlKeyDown() and strfind(entry.reset, "ctrl", 1, true)) or
+		 (IsControlKeyDown() and strfind(entry.reset, "ctrl", 1, true)) or
 		 (IsAltKeyDown() and strfind(entry.reset, "alt", 1, true)) ) then
 		SetCastSequenceIndex(entry, 1);
 	end
@@ -1228,32 +1220,32 @@ end
 
 -- We want to prefer spells for /cast and items for /use but we can use either
 SecureCmdList["CAST"] = function(msg)
-    local action, target = SecureCmdOptionParse(msg);
-    if ( action ) then
-    	local spellExists = DoesSpellExist(action)
+	local action, target = SecureCmdOptionParse(msg);
+	if ( action ) then
+		local spellExists = DoesSpellExist(action)
 		local name, bag, slot = SecureCmdItemParse(action);
 		if ( spellExists ) then
 			CastSpellByName(action, target);
 		elseif ( slot or GetItemInfo(name) ) then
 			SecureCmdUseItem(name, bag, slot, target);
 		end
-    end
+	end
 end
 
 SecureCmdList["USE"] = function(msg)
-    local action, target = SecureCmdOptionParse(msg);
-    if ( action ) then
+	local action, target = SecureCmdOptionParse(msg);
+	if ( action ) then
 		local name, bag, slot = SecureCmdItemParse(action);
 		if ( slot or GetItemInfo(name) ) then
 			SecureCmdUseItem(name, bag, slot, target);
 		else
 			CastSpellByName(action, target);
 		end
-    end
+	end
 end
 
 SecureCmdList["CASTRANDOM"] = function(msg)
-    local actions, target = SecureCmdOptionParse(msg);
+	local actions, target = SecureCmdOptionParse(msg);
 	if ( actions ) then
 		local action = ExecuteCastRandom(actions);
 		local name, bag, slot = SecureCmdItemParse(action);
@@ -2642,90 +2634,13 @@ SlashCmdList["VOICECHAT"] = function(msg)
 	end
 end
 
-local function AddOptionCommand(table, cmd, option)
-	table[string.lower(cmd)] = option;
-end
-
-local ttsConfigCommands = { }
-
-AddOptionCommand(ttsConfigCommands, SLASH_TEXTTOSPEECH_PLAYENTER,		"playSoundWhenEnteringChatWindow");
-AddOptionCommand(ttsConfigCommands, SLASH_TEXTTOSPEECH_PLAYLINE,		"playSoundSeparatingChatLineBreaks");
-AddOptionCommand(ttsConfigCommands, SLASH_TEXTTOSPEECH_PLAYACTIVITY,	"playActivitySoundWhenNotFocused");
-AddOptionCommand(ttsConfigCommands, SLASH_TEXTTOSPEECH_SAYNAME,			"addCharacterNameToSpeech");
-AddOptionCommand(ttsConfigCommands, SLASH_TEXTTOSPEECH_ALTVOICE,		"alternateSystemVoice");
-
-local ttsChatCommands = { }
-
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_NPC,				"CHAT_MSG_MONSTER_SAY");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_SYSTEM,			"CHAT_MSG_SYSTEM");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_EMOTE,			"CHAT_MSG_TEXT_EMOTE");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_WHISPER,			"CHAT_MSG_WHISPER");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_SAY,				"CHAT_MSG_SAY");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_YELL,			"CHAT_MSG_YELL");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_PARTYLEADER,		"CHAT_MSG_PARTY_LEADER");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_PARTY,			"CHAT_MSG_PARTY");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_GUILDLEADER,		"CHAT_MSG_OFFICER");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_GUILD,			"CHAT_MSG_GUILD");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_RAIDLEADER,		"CHAT_MSG_RAID_LEADER");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_RAID,			"CHAT_MSG_RAID");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_INSTANCELEADER,	"CHAT_MSG_INSTANCE_CHAT_LEADER");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_INSTANCE,		"CHAT_MSG_INSTANCE_CHAT");
-AddOptionCommand(ttsChatCommands,	SLASH_TEXTTOSPEECH_BLIZZARD,		"CHAT_MSG_BN_WHISPER");
-
 SlashCmdList["TEXTTOSPEECH"] = function(msg)
-	if msg == "" then
-		ChatFrame_DisplaySystemMessageInPrimary(TEXTTOSPEECH_COMMAND_SYNTAX);
-		C_VoiceChat.SpeakText(
-			TEXTTOSPEECH_CONFIG.ttsVoiceOptionSelected, 
-			TEXTTOSPEECH_COMMAND_SYNTAX, 
-			Enum.VoiceTtsDestination.QueuedLocalPlayback,
-			TEXTTOSPEECH_CONFIG.speechRate,
-			TEXTTOSPEECH_CONFIG.speechVolume
-		);
-		ToggleTextToSpeechFrame();
-		return;
+	if TextToSpeechCommands:EvaluateTextToSpeechCommand(msg) then
+		TextToSpeechFrame_Update(TextToSpeechFrame);
+	else
+		TextToSpeechCommands:SpeakConfirmation(TEXTTOSPEECH_COMMAND_SYNTAX_ERROR);
+		TextToSpeechCommands:ShowHelp(msg)
 	end
-	local name, num1 = msg:match("(%a+)%s?(%d*)");
-	local lowerName = string.lower(name);
-
-	if ( ttsConfigCommands[lowerName] ) then
-		local val = TEXTTOSPEECH_CONFIG[ttsConfigCommands[lowerName]] or false;
-		TEXTTOSPEECH_CONFIG[ttsConfigCommands[lowerName]] = not val;
-	elseif ( ttsChatCommands[lowerName] ) then
-		local val = TEXTTOSPEECH_CONFIG.enabledChatTypes[ttsChatCommands[lowerName]] or false;
-		TEXTTOSPEECH_CONFIG.enabledChatTypes[ttsChatCommands[lowerName]] = not val;
-	elseif lowerName == string.lower(SLASH_TEXTTOSPEECH_SPEED) then
-		TEXTTOSPEECH_CONFIG.speechRate = num1;
-	elseif lowerName == string.lower(SLASH_TEXTTOSPEECH_VOLUME) then
-		TEXTTOSPEECH_CONFIG.speechVolume = num1;
-	elseif lowerName == string.lower(SLASH_TEXTTOSPEECH_VOICE) then
-		local voices = C_VoiceChat.GetTtsVoices() or {};
-		
-		if num1 and num1 ~= "" then
-			local newVoice = tonumber(num1);
-			for index, voice in ipairs(voices) do
-				if voice.voiceID == newVoice then
-					TEXTTOSPEECH_CONFIG.ttsVoiceOptionSelected = newVoice;
-					break;
-				end
-			end
-		else
-			local nextVoice = 1;
-			for index, voice in ipairs(voices) do
-				if voice.voiceID == TEXTTOSPEECH_CONFIG.ttsVoiceOptionSelected and index < #voices then
-					nextVoice = index + 1;
-					break;
-				end
-			end
-			if nextVoice <= #voices then
-				TEXTTOSPEECH_CONFIG.ttsVoiceOptionSelected = voices[nextVoice].voiceID;
-			end
-		end
-	elseif lowerName == string.lower(SLASH_TEXTTOSPEECH_DEFAULT) then
-		TEXTTOSPEECH_CONFIG = CopyTable(TEXTTOSPEECH_CONFIG_DEFAULTS);
-	end
-
-	TextToSpeechFrame_Update(TextToSpeechFrame);
 end
 
 SlashCmdList["COMMUNITY"] = function(msg)
@@ -3017,6 +2932,13 @@ function ChatFrame_AddCommunitiesChannel(chatFrame, channelName, channelColor, s
 	end
 end
 
+function ChatFrame_GetChannelShortcutAndReadableNameFromIdentifier(channelIdentifier)
+	local channelInfo = C_ChatInfo.GetChannelInfoFromIdentifier(channelIdentifier);
+	if channelInfo then
+		return channelInfo.shortcut, ChatFrame_ResolveChannelName(channelInfo.name);
+	end
+end
+
 function ChatFrame_CanAddChannel()
 	return C_ChatInfo.GetNumActiveChannels() < MAX_WOW_CHAT_CHANNELS;
 end
@@ -3037,6 +2959,14 @@ function ChatFrame_AddChannel(chatFrame, channel)
 	end
 
 	return channelIndex;
+end
+
+function ChatFrame_SetChannelEnabled(chatFrame, channel, enabled)
+	if enabled then
+		ChatFrame_AddChannel(chatFrame, channel);
+	else
+		ChatFrame_RemoveChannel(chatFrame, channel);
+	end
 end
 
 local function ChatFrame_CheckAddChannel(chatFrame, eventType, channelID)
@@ -3141,9 +3071,9 @@ do
 		return DEFAULT_CHAT_FRAME.editBox;
 	end
 
-    local editbox = CreateFrame("Editbox", "MacroEditBox");
-    editbox:RegisterEvent("EXECUTE_CHAT_LINE");
-    editbox:SetScript("OnEvent",
+	local editbox = CreateFrame("Editbox", "MacroEditBox");
+	editbox:RegisterEvent("EXECUTE_CHAT_LINE");
+	editbox:SetScript("OnEvent",
 		function(self,event,line)
 			if ( event == "EXECUTE_CHAT_LINE" ) then
 				local defaulteditbox = securecall(GetDefaultChatEditBox);
@@ -3356,7 +3286,7 @@ function ChatFrame_SystemEventHandler(self, event, ...)
 		if real and oldLevel ~= 0 and newLevel ~= 0 then
 			if newLevel > oldLevel then
 				local levelstring = format(LEVEL_UP, newLevel, newLevel);
-				local info = ChatTypeInfo["SYSTEM"];	
+				local info = ChatTypeInfo["SYSTEM"];
 				self:AddMessage(levelstring, info.r, info.g, info.b, info.id);
 			end
 
@@ -3429,7 +3359,7 @@ function ChatFrame_SystemEventHandler(self, event, ...)
 				end
 			end
 		end
-	elseif(event == "DISPLAY_EVENT_TOAST_LINK") then 
+	elseif(event == "DISPLAY_EVENT_TOAST_LINK") then
 		EventToastManagerFrame:DisplayToastLink(self, ...);
 	end
 end
@@ -3511,6 +3441,21 @@ function IsActivePlayerNewcomer()
 	return C_PlayerMentorship.GetMentorshipStatus(PlayerLocation:CreateFromUnit("player")) == Enum.PlayerMentorshipStatus.Newcomer;
 end
 
+function ChatFrame_GetMentorChannelStatus(entityStatus, channelRuleSet)
+	if entityStatus == Enum.PlayerMentorshipStatus.Mentor then
+		local shouldShowGuideStatus = C_PlayerMentorship.IsActivePlayerConsideredNewcomer() or (IsActivePlayerGuide() and channelRuleSet == Enum.ChatChannelRuleset.Mentor);
+		if shouldShowGuideStatus then
+			return Enum.PlayerMentorshipStatus.Mentor;
+		end
+	elseif entityStatus == Enum.PlayerMentorshipStatus.Newcomer then
+		if IsActivePlayerGuide() then
+			return Enum.PlayerMentorshipStatus.Newcomer;
+		end
+	end
+
+	return Enum.PlayerMentorshipStatus.None;
+end
+
 local function GetPFlag(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17)
 	-- Renaming for clarity:
 	local specialFlag = arg6;
@@ -3522,12 +3467,11 @@ local function GetPFlag(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ar
 			-- Add Blizzard Icon if  this was sent by a GM/DEV
 			return "|TInterface\\ChatFrame\\UI-ChatIcon-Blizz:12:20:0:0:32:16:4:28:0:16|t ";
 		elseif specialFlag == "GUIDE" then
-			local shouldShowGuideStatus = C_PlayerMentorship.IsActivePlayerConsideredNewcomer() or (IsActivePlayerGuide() and C_ChatInfo.GetChannelRulesetForChannelID(zoneChannelID) == Enum.ChatChannelRuleset.Mentor);
-			if shouldShowGuideStatus then
+			if ChatFrame_GetMentorChannelStatus(Enum.PlayerMentorshipStatus.Mentor, C_ChatInfo.GetChannelRulesetForChannelID(zoneChannelID)) == Enum.PlayerMentorshipStatus.Mentor then
 				return NPEV2_CHAT_USER_TAG_GUIDE .. " "; -- possibly unable to save global string with trailing whitespace...
 			end
 		elseif specialFlag == "NEWCOMER" then
-			if IsActivePlayerGuide() then
+			if ChatFrame_GetMentorChannelStatus(Enum.PlayerMentorshipStatus.Newcomer, C_ChatInfo.GetChannelRulesetForChannelID(zoneChannelID)) == Enum.PlayerMentorshipStatus.Newcomer then
 				return NPEV2_CHAT_USER_TAG_NEWCOMER;
 			end
 		else
@@ -3599,7 +3543,12 @@ function ChatFrame_MessageEventHandler(self, event, ...)
 
 		local channelLength = strlen(arg4);
 		local infoType = type;
-		if ( (type == "COMMUNITIES_CHANNEL") or ((strsub(type, 1, 7) == "CHANNEL") and (type ~= "CHANNEL_LIST") and ((arg1 ~= "INVITE") or (type ~= "CHANNEL_NOTICE_USER"))) ) then
+
+		if type == "VOICE_TEXT" then
+			infoType, type = VoiceTranscription_DetermineChatType(UnitIsGroupLeader(arg2));
+			info = ChatTypeInfo[infoType];
+
+		elseif ( (type == "COMMUNITIES_CHANNEL") or ((strsub(type, 1, 7) == "CHANNEL") and (type ~= "CHANNEL_LIST") and ((arg1 ~= "INVITE") or (type ~= "CHANNEL_NOTICE_USER"))) ) then
 			if ( arg1 == "WRONG_PASSWORD" ) then
 				local staticPopup = _G[StaticPopup_Visible("CHAT_CHANNEL_PASSWORD") or ""];
 				if ( staticPopup and strupper(staticPopup.data) == strupper(arg9) ) then
@@ -3684,7 +3633,7 @@ function ChatFrame_MessageEventHandler(self, event, ...)
 		end
 
 		if ( type == "SYSTEM" or type == "SKILL" or type == "CURRENCY" or type == "MONEY" or
-		     type == "OPENING" or type == "TRADESKILLS" or type == "PET_INFO" or type == "TARGETICONS" or type == "BN_WHISPER_PLAYER_OFFLINE") then
+			 type == "OPENING" or type == "TRADESKILLS" or type == "PET_INFO" or type == "TARGETICONS" or type == "BN_WHISPER_PLAYER_OFFLINE") then
 			self:AddMessage(arg1, info.r, info.g, info.b, info.id);
 		elseif (type == "LOOT") then
 			-- Append [Share] hyperlink if this is a valid social item and you are the looter.
@@ -4050,11 +3999,11 @@ end
 function ChatFrame_OpenChat(text, chatFrame, desiredCursorPosition)
 	if chatFrame == nil and CHAT_FOCUS_OVERRIDE ~= nil then
 		if CHAT_FOCUS_OVERRIDE.supportsSlashCommands or not text or strsub(text, 0, 1) ~= "/" then
-		    CHAT_FOCUS_OVERRIDE:SetFocus();
+			CHAT_FOCUS_OVERRIDE:SetFocus();
 			if text then
 				CHAT_FOCUS_OVERRIDE:SetText(text);
 			end
-		    return;
+			return;
 		end
 	end
 
@@ -4720,6 +4669,10 @@ function ChatEdit_UpdateHeader(editBox)
 		return;
 	end
 
+	if ( type == "VOICE_TEXT" ) then
+		type = VoiceTranscription_DetermineChatType(false);
+	end
+
 	local info = ChatTypeInfo[type];
 	local header = _G[editBox:GetName().."Header"];
 	local headerSuffix = _G[editBox:GetName().."HeaderSuffix"];
@@ -5211,7 +5164,7 @@ function ChatEdit_ParseText(editBox, send, parseIfNoSpaces)
 		local restricted = DoEmote(hash_EmoteTokenList[command], msg);
 		-- If the emote is restricted, we want to treat it as if the player entered an unrecognized chat command.
 		if ( not restricted ) then
-		    editBox:AddHistoryLine(text);
+			editBox:AddHistoryLine(text);
 			ChatEdit_ClearChat(editBox);
 			return;
 		end

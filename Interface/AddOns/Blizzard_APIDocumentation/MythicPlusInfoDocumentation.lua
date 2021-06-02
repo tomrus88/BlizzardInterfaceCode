@@ -99,6 +99,7 @@ local MythicPlusInfo =
 		{
 			Name = "GetSeasonBestAffixScoreInfoForMap",
 			Type = "Function",
+			Documentation = { "Gets the active players best runs by the seasonal tracked affixes as well as their overall score for the current season." },
 
 			Arguments =
 			{
@@ -142,6 +143,7 @@ local MythicPlusInfo =
 				{ Name = "completionDate", Type = "MythicPlusDate", Nilable = false },
 				{ Name = "affixIDs", Type = "table", InnerType = "number", Nilable = false },
 				{ Name = "members", Type = "table", InnerType = "MythicPlusMember", Nilable = false },
+				{ Name = "dungeonScore", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -220,11 +222,13 @@ local MythicPlusInfo =
 				{ Name = "completionDate", Type = "MythicPlusDate", Nilable = false },
 				{ Name = "affixIDs", Type = "table", InnerType = "number", Nilable = false },
 				{ Name = "members", Type = "table", InnerType = "MythicPlusMember", Nilable = false },
+				{ Name = "dungeonScore", Type = "number", Nilable = false },
 			},
 		},
 		{
 			Name = "MythicPlusAffixScoreInfo",
 			Type = "Structure",
+			Documentation = { "Information about a specific M+ run" },
 			Fields =
 			{
 				{ Name = "name", Type = "string", Nilable = false },
