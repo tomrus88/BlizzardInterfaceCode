@@ -1952,7 +1952,7 @@ function WardrobeItemsCollectionMixin:SetActiveSlot(transmogLocation, category, 
 	-- set only if category is different or slot is different
 	if ( category ~= self.activeCategory or slotChanged ) then
 		CloseDropDownMenus();
-		self:SetActiveCategory(category, slotChanged);
+		self:SetActiveCategory(category);
 	end
 end
 
@@ -1988,20 +1988,18 @@ function WardrobeItemsCollectionMixin:UpdateWeaponDropDown()
 	end
 end
 
-function WardrobeItemsCollectionMixin:SetActiveCategory(category, slotChanged)
+function WardrobeItemsCollectionMixin:SetActiveCategory(category)
 	local previousCategory = self.activeCategory;
 	self.activeCategory = category;
-	if previousCategory ~= category or slotChanged then
-		if ( self.transmogLocation:IsAppearance() ) then
-			C_TransmogCollection.SetSearchAndFilterCategory(category);
-			local name, isWeapon = C_TransmogCollection.GetCategoryInfo(category);
-			if ( isWeapon ) then
-				self.lastWeaponCategory = category;
-			end
+	if previousCategory ~= category and self.transmogLocation:IsAppearance() then
+		C_TransmogCollection.SetSearchAndFilterCategory(category);
+		local name, isWeapon = C_TransmogCollection.GetCategoryInfo(category);
+		if ( isWeapon ) then
+			self.lastWeaponCategory = category;
 		end
-
 		self:RefreshVisualsList();
 	else
+		self:RefreshVisualsList();
 		self:UpdateItems();
 	end
 	self:UpdateWeaponDropDown();
@@ -4208,7 +4206,13 @@ function WardrobeSetsTransmogMixin:OnEvent(event, ...)
 		-- these event can fire multiple times for set interaction, once for each slot in the set
 		if ( not self.pendingRefresh ) then
 			self.pendingRefresh = true;
-			C_Timer.After(0, function() self.pendingRefresh = nil; local resetSelection = (event == "TRANSMOGRIFY_UPDATE"); self:Refresh(resetSelection); end);
+			C_Timer.After(0, function()
+				self.pendingRefresh = nil;
+				if self:IsShown() then
+					local resetSelection = (event == "TRANSMOGRIFY_UPDATE");
+					self:Refresh(resetSelection);
+				end;
+			end);
 		end
 	elseif ( event == "TRANSMOG_COLLECTION_UPDATED" or event == "TRANSMOG_SETS_UPDATE_FAVORITE" ) then
 		SetsDataProvider:ClearSets();
