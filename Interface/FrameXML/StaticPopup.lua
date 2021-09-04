@@ -322,11 +322,10 @@ StaticPopupDialogs["CONFIRM_UPGRADE_ITEM"] = {
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function()
-		UpgradeItem();
-		PlaySound(SOUNDKIT.UI_REFORGING_REFORGE);
+		ItemUpgradeFrame:OnConfirm();
 	end,
 	OnCancel = function()
-		ItemUpgradeFrame_Update();
+		ItemUpgradeFrame:Update();
 	end,
 	OnShow = function()
 
@@ -4225,6 +4224,18 @@ StaticPopupDialogs["CONFIRM_RAF_REMOVE_RECRUIT"] = {
 	EditBoxOnEscapePressed = function(self)
 		self:GetParent():Hide();
 	end
+};
+
+StaticPopupDialogs["AADC_ALERT"] = {
+	text = NORMAL_FONT_COLOR_CODE..UK_AADC_POPUP_TEXT..FONT_COLOR_CODE_CLOSE,
+	button1 = OKAY,
+	OnAccept = function()
+		AcknowledgeAADCAlert();
+	end,
+	timeout = 0,
+	hideOnEscape = 0,
+	exclusive = 1,
+	showAlert = 1,
 };
 
 function StaticPopup_FindVisible(which, data)

@@ -134,7 +134,10 @@ end
 function ScrollBoxBaseMixin:Layout()
 	local view = self:GetView();
 	if view then
-		self:SetFrameExtent(self:GetScrollTarget(), view:Layout());
+		-- Minimum extent of 1 to preserve a valid rect so that so that children of RLF frames 
+		-- can be successfully laid out without an invalid rect error.
+		local extent = view:Layout();
+		self:SetFrameExtent(self:GetScrollTarget(), math.max(1, extent));
 	end
 end
 
@@ -150,9 +153,13 @@ function ScrollBoxBaseMixin:SetScrollTargetOffset(offset)
 			scrollTarget:SetPoint("TOPRIGHT", self, "TOPRIGHT", -self:GetRightPadding(), offset);
 		end
 
-		self:TriggerEvent(BaseScrollBoxEvents.OnScroll, self:GetScrollPercentage(), self:GetVisibleExtentPercentage(), self:GetPanExtentPercentage());
+		local scrollPercentage = self:GetScrollPercentage();
+		self:TriggerEvent(BaseScrollBoxEvents.OnScroll, scrollPercentage, self:GetVisibleExtentPercentage(), self:GetPanExtentPercentage());
 		
-		self:SetShadowsShown(self:HasScrollableExtent(), self:GetDerivedScrollOffset() > 0);
+		local hasScrollableExtent = self:HasScrollableExtent();
+		local showLower = hasScrollableExtent and (scrollPercentage > MathUtil.Epsilon);
+		local showUpper = hasScrollableExtent and self:HasScrollableExtent() and (scrollPercentage < (1 - MathUtil.Epsilon));
+		self:SetShadowsShown(showUpper, showLower);
 	end
 end
 
@@ -526,7 +533,7 @@ function ScrollBoxListMixin:SetDataProvider(dataProvider, retainScrollPosition)
 	if not view then
 		error("A view is required before assigning the data provider.");
 	end
-
+	
 	view:SetDataProvider(dataProvider);
 
 	if not retainScrollPosition then
@@ -657,7 +664,7 @@ function ScrollBoxMixin:OnLoad()
 	ScrollBoxBaseMixin.OnLoad(self);
 
 	if not self.panExtent then
-		-- Intended to function, but be apparent it's untuned.
+		-- Intended to still function but be noticably untuned.
 		self.panExtent = 3;
 	end
 end
@@ -666,6 +673,9 @@ function ScrollBoxMixin:SetView(view)
 	ScrollBoxBaseMixin.SetView(self, view);
 	
 	view:ReparentScrollChildren(self:GetChildren());
+
+	local forceLayout = true;
+	self:Update(forceLayout);
 end
 
 function ScrollBoxMixin:Update(forceLayout)

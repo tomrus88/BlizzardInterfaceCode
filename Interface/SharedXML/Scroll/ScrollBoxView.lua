@@ -130,6 +130,7 @@ end
 
 function ScrollBoxViewMixin:SetScrollTarget(scrollTarget)
 	self.scrollTarget = scrollTarget;
+	scrollTarget:ClearAllPoints();
 	scrollTarget:SetPoint("TOPLEFT");
 	scrollTarget:SetPoint(self:IsHorizontal() and "BOTTOMLEFT" or "TOPRIGHT");
 end
@@ -192,7 +193,7 @@ function ScrollBoxListViewMixin:Init()
 		-- a reference to the consumer.
 		Mixin(frame, ScrollBoxListFrameMixin);
 		frame:SetElementData(self.factoryFrameElementData);
-		
+
 		self.factoryFrame = frame;
 		self.factoryFrameNew = new;
 		return frame, new;
@@ -291,7 +292,7 @@ function ScrollBoxListViewMixin:SetDataProvider(dataProvider, retainScrollPositi
 	if dataProvider then
 		dataProvider:AddListener(self);
 	end
-
+	
 	self:SignalDataChangeEvent(InvalidationReason.DataProviderAssigned);
 end
 
@@ -389,8 +390,7 @@ end
 --[[
 	Use SetElementFactory if using different template types:
 	SetElementFactory(function(factory, elementData)
-		local templateType = elementData.useTypeOne and "TemplateOne" or "TemplateTwo";
-		local button, new = factory("Button", templateType);
+		local button, new = factory("Button", elementData.templateType);
 		button:Init(elementData);
 	end);
 ]]
@@ -509,7 +509,7 @@ function ScrollBoxListViewMixin:CalculateDataIndices(scrollBox, stride, spacing)
 end
 
 function ScrollBoxListViewMixin:GetExtent(recalculate, scrollBox, stride, spacing)
-	if recalculate or not self.virtualExtent then
+	if recalculate or (not self.virtualExtent) or (self.virtualExtent == 0) then
 		local virtualExtent = 0;
 		local size = 0;
 
