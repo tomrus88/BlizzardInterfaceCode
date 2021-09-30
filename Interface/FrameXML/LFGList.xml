@@ -681,7 +681,7 @@
 						InputBoxInstructions_OnTextChanged(self);
 					</OnTextChanged>
 					<OnEditFocusLost>
-						if ( self:GetText() == "" ) then
+						if ( self:GetText() == "" and not self:GetParent().CheckButton:IsMouseOver()) then
 							self:GetParent().CheckButton:SetChecked(false);
 						end
 					</OnEditFocusLost>
@@ -1799,7 +1799,7 @@
 								LFGListEntryCreation_UpdateValidState(self:GetParent());
 							</OnTextChanged>
 							<OnDisable inherit="append">
-								self:SetMaxLetters(0);
+								self:SetMaxLetters(129);
 							</OnDisable>
 							<OnEnable inherit="append">
 								self:SetMaxLetters(31);
@@ -1857,6 +1857,18 @@
 							 <KeyValue key="numeric" value="true" type="boolean"/>
 							 <KeyValue key="instructions" value="LFG_LIST_ITEM_LEVEL_INSTR_SHORT" type="global"/>
 							 <KeyValue key="validateFunc" value="LFGListUtil_ValidateLevelReq" type="global"/>
+							<KeyValue key="tabCategory" value="ENTRY_CREATION" type="string"/>
+						</KeyValues>
+					</Frame>
+					<Frame parentKey="PvpItemLevel" inherits="LFGListRequirementTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeKey="$parent.Inset" relativePoint="TOPLEFT" x="20" y="-258"/>
+						</Anchors>
+						<KeyValues>
+							<KeyValue key="label" value="LFG_LIST_ITEM_LEVEL_PVP" type="global"/>
+							<KeyValue key="numeric" value="true" type="boolean"/>
+							<KeyValue key="instructions" value="LFG_LIST_ITEM_LEVEL_PVP_INSTR_SHORT" type="global"/>
+							<KeyValue key="validateFunc" value="LFGListUtil_ValidatePvPLevelReq" type="global"/>
 							<KeyValue key="tabCategory" value="ENTRY_CREATION" type="string"/>
 						</KeyValues>
 					</Frame>

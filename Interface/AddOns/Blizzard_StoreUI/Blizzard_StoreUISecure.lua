@@ -1540,7 +1540,7 @@ local productCardTemplateData = {
 		padding = {12 , 0 , 9 , 0}, --left, right, top, bottom
 		poolSize = 1,
 		buyButton = true,
-	},	
+	},
 	VerticalFullStoreCardWithBuyButtonTemplate = {
 		cellGridSize = {width = 4, height = 2},
 		cellPixelSize = {width = 576, height = 471},
@@ -1611,7 +1611,7 @@ function StoreFrame_CheckAndUpdateEntryID(isSplash)
 	end
 end
 
-function StoreFrame_GetProductCardTemplate(cardType, flags)	
+function StoreFrame_GetProductCardTemplate(cardType, flags)
 	if cardType == Enum.BattlepayCardType.SmallCard then
 		return "SmallStoreCardTemplate"
 	elseif cardType == Enum.BattlepayCardType.MediumCard then
@@ -1674,6 +1674,20 @@ function StoreFrame_FilterEntries(entries)
 	return filteredEntries;
 end
 
+local function GetProductGroups()
+	local productGroups = C_StoreSecure.GetProductGroups();
+	local filteredProductGroups = {};
+	
+	for _, groupId in ipairs(productGroups) do
+		local products = C_StoreSecure.GetProducts(groupId);
+		if #StoreFrame_FilterEntries(products) ~= 0 then
+			table.insert(filteredProductGroups, groupId);
+		end
+	end
+
+	return filteredProductGroups;
+end
+
 function StoreFrame_SetCategory(forceModelUpdate)
 	if not StoreFrame_CurrencyInfo() then
 		return;
@@ -1693,7 +1707,7 @@ function StoreFrame_SetCategory(forceModelUpdate)
 	end
 end
 
--- builds a table of pages: 
+-- builds a table of pages:
 -- the table contains each page, and a starting entry index
 function StoreFrame_GetPageInfo(entries)
 	local self = StoreFrame;
@@ -2058,7 +2072,7 @@ function StoreCategoryFrame_SetGroupID(self, groupID)
 end
 
 function StoreFrame_UpdateCategories(self)
-	local categories = C_StoreSecure.GetProductGroups();
+	local categories = GetProductGroups();
 
 	for i = 1, #categories do
 		local frame = self.CategoryFrames[i];
@@ -2153,7 +2167,7 @@ function StoreFrame_OnLoad(self)
 
 	self.productCardPoolCollection = CreateFixedSizeFramePoolCollection();
 
-	-- we preallocate all the card pools because if we create frames outside 
+	-- we preallocate all the card pools because if we create frames outside
 	-- of the LoadAddOn call, then the scripts aren't set properly due to scoped modifier issues
 	local forbidden = true;
 	local preallocate = true;
@@ -2177,7 +2191,7 @@ end
 local JustFinishedOrdering = false;
 
 function StoreFrame_GetDefaultCategory()
-	local productGroups = C_StoreSecure.GetProductGroups();
+	local productGroups = GetProductGroups();
 	local needsNewCategory = not StoreFrame_GetSelectedCategoryID() or StoreFrame_IsProductGroupDisabled(StoreFrame_GetSelectedCategoryID());
 	for i = 1, #productGroups do
 		local groupID = productGroups[i];
@@ -2207,11 +2221,11 @@ function StoreFrame_OnEvent(self, event, ...)
 	if ( event == "STORE_PRODUCTS_UPDATED" ) then
 		StoreFrame_UpdateSelectedCategory();
 		StoreFrame_UpdateCategories(self);
-		
+
 		if self:IsShown() then
 			C_StoreSecure.RequestAllDynamicPriceInfo();
 		end
-		
+
 		if StoreFrame_GetSelectedCategoryID() then
 			StoreFrame_SetCategory();
 		end
@@ -2352,7 +2366,7 @@ function StoreFrame_OnHide(self)
 	StoreVASValidationFrame:Hide();
 	SimpleCheckout:Hide();
 	PlaySound(SOUNDKIT.UI_IG_STORE_WINDOW_CLOSE_BUTTON);
-	
+
 	C_StoreSecure.ClearPreGeneratedExternalTransactionID();
 end
 
@@ -2643,7 +2657,7 @@ function StoreFrame_UpdateActivePanel(self)
 		StoreFrame_SetAlert(self, BLIZZARD_STORE_REGION_LOCKED, BLIZZARD_STORE_REGION_LOCKED_SUBTEXT);
 	elseif ( StoreFrame_IsLoading(self) ) then
 		StoreFrame_SetAlert(self, BLIZZARD_STORE_LOADING, BLIZZARD_STORE_PLEASE_WAIT);
-	elseif ( #C_StoreSecure.GetProductGroups() == 0 ) then
+	elseif ( #GetProductGroups() == 0 ) then
 		StoreFrame_SetAlert(self, BLIZZARD_STORE_NO_ITEMS, BLIZZARD_STORE_CHECK_BACK_LATER);
 	elseif ( not IsOnGlueScreen() and not StoreFrame_HasFreeBagSlots() ) then
 		StoreFrame_SetAlert(self, BLIZZARD_STORE_BAG_FULL, BLIZZARD_STORE_BAG_FULL_DESC);
@@ -2923,8 +2937,8 @@ end
 
 local function IsGuildVasServiceType(serviceType)
 	return	serviceType == Enum.VasServiceType.GuildNameChange or
-			serviceType == Enum.VasServiceType.GuildFactionChange or 
-			serviceType == Enum.VasServiceType.GuildTransfer or 
+			serviceType == Enum.VasServiceType.GuildFactionChange or
+			serviceType == Enum.VasServiceType.GuildTransfer or
 			serviceType == Enum.VasServiceType.GuildFactionTransfer;
 end
 
@@ -3567,13 +3581,13 @@ function StoreVASValidationFrame_OnEvent(self, event, ...)
 		self:Hide();
 	elseif ( event == "STORE_GUILD_FOLLOW_INFO_RECEIVED" ) then
 		local characterGuid, guildFollowInfo = ...;
-		if CharacterWaitingOnGuildFollowInfo == characterGuid then 
+		if CharacterWaitingOnGuildFollowInfo == characterGuid then
 			CharacterWaitingOnGuildFollowInfo = nil;
 			VASCharacterSelectionCharacterSelector_Callback(SelectedCharacter, guildFollowInfo);
 		end
 	elseif ( event == "STORE_GUILD_MASTER_INFO_RECEIVED" ) then
 		local realmAddress = ...;
-		if RealmWaitingOnGuildMasterInfo == realmAddress then 
+		if RealmWaitingOnGuildMasterInfo == realmAddress then
 			RealmWaitingOnGuildMasterInfo = nil;
 			RealmWithGuildMasterInfo = realmAddress;
 			VASCharacterSelectionRealmSelector_Callback(SelectedRealm);
@@ -4430,7 +4444,7 @@ function VASRealmList_BuildAutoCompleteLists()
 
 	if not RealmAutoCompleteList and (VASServiceType == Enum.VasServiceType.CharacterTransfer or VASServiceType == Enum.VasServiceType.GuildTransfer) then
 		local realms = C_StoreSecure.GetVASRealmList();
-		
+
 		local infoTable = {};
 		for _, realm in ipairs(realms) do
 			if (realm.virtualRealmAddress ~= character.currentServer) then
@@ -5157,14 +5171,14 @@ end
 
 function VASCharacterSelectionTransferCheckEditBoxes()
 	local frame = StoreVASValidationFrame.CharacterSelectionFrame;
-	
+
 	if not frame.TransferAccountCheckbox:GetChecked() and not(frame.TransferRealmEditbox:GetText() and frame.TransferRealmEditbox:GetText() ~= "") then
 		return false
 	end
 
 	if frame.TransferAccountCheckbox:GetChecked() and SelectedDestinationWowAccount == BLIZZARD_STORE_VAS_DIFFERENT_BNET then
 		local text = frame.TransferBattlenetAccountEditbox:GetText();
-		if not(text and text ~= "" and string.find(text, ".+@.+\...+")) then
+		if not(text and text ~= "" and string.find(text, ".+@.+%...+")) then
 			return false;
 		end
 	end

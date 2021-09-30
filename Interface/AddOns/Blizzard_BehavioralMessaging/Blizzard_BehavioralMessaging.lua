@@ -1,7 +1,7 @@
-local NotificationData = {};
+local DisplayData = {};
 
-local function InsertNotificationData(notificationType, label, icon, title, message)
-	NotificationData[notificationType] = {
+local function InsertDisplayData(notificationType, label, icon, title, message)
+	DisplayData[notificationType] = {
 		notification = {
 			label = label,
 			icon =  icon,
@@ -13,20 +13,84 @@ local function InsertNotificationData(notificationType, label, icon, title, mess
 	};
 end
 
-InsertNotificationData("ComplaintWarning_Social", BEHAVIORAL_NOTIFICATION_WARNING, "gmchat-icon-alert", BEHAVIORAL_DETAILS_LANGUAGE_TITLE, BEHAVIORAL_DETAILS_LANGUAGE_MESSAGE);
-InsertNotificationData("ComplaintThankYou_Social", BEHAVIORAL_NOTIFICATION_RESOLUTION, "gmchat-icon-wow", BEHAVIORAL_DETAILS_RESOLUTION_TITLE, BEHAVIORAL_DETAILS_RESOLUTION_MESSAGE);
+InsertDisplayData("ComplaintWarning_Social", BEHAVIORAL_NOTIFICATION_WARNING, "gmchat-icon-alert", BEHAVIORAL_DETAILS_SOCIAL_TITLE, BEHAVIORAL_DETAILS_SOCIAL_MESSAGE);
+InsertDisplayData("ComplaintThankYou_Social", BEHAVIORAL_NOTIFICATION_TY, "gmchat-icon-wow", BEHAVIORAL_DETAILS_TY_TITLE, BEHAVIORAL_DETAILS_TY_MESSAGE);
 
 BehavioralMessagingNotificationMixin = {}
 
-function BehavioralMessagingNotificationMixin:Init(data, notificationType)
+function BehavioralMessagingNotificationMixin:OnLoad()
+	self.backgroundsPool = CreateFramePool("Frame", self, "BehaviorMessagingBackgroundTemplate");
+end
+
+function BehavioralMessagingNotificationMixin:Init(notificationData, notificationType)
+	self.instances = {};
+	self.notificationData = notificationData;
 	self.notificationType = notificationType;
-	self.TitleText:SetText(data.label);
-	self.Icon:SetAtlas(data.icon, TextureKitConstants.UseAtlasSize);
+
+	self.Icon:SetAtlas(notificationData.icon, TextureKitConstants.UseAtlasSize);
+	self:Update();
+end
+
+function BehavioralMessagingNotificationMixin:UpdateText()
+	local count = self:GetCount();
+	if count > 1 then
+		self.TitleText:SetText(string.format(AUCTION_MAIL_ITEM_STACK, self.notificationData.label, count));
+	else
+		self.TitleText:SetText(self.notificationData.label);
+	end
 	
 	local titleWidth, titleHeight = self.TitleText:GetSize();
 	local subtitleWidth, subtitleHeight = self.SubtitleText:GetSize();
 	self:SetWidth(math.max(titleWidth, subtitleWidth) + 50);
 	self:SetHeight(titleHeight + subtitleHeight + 20);
+end
+
+function BehavioralMessagingNotificationMixin:UpdateBackgrounds()
+	self.backgroundsPool:ReleaseAll();
+
+	local frameLevel = self:GetFrameLevel() - 1;
+	local indent = 0;
+	local minAllowed = 1;
+	local maxAllowed = 2;
+	for index = 1, math.max(minAllowed, math.min(self:GetCount(), maxAllowed)) do
+		local background = self.backgroundsPool:Acquire();
+		background:SetPoint("TOPLEFT", self, "TOPLEFT", indent, indent); 
+		background:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", indent, indent);
+		background:SetFrameLevel(frameLevel);
+		background:Show();
+		frameLevel = frameLevel - 1;
+		indent = indent - 3;
+	end
+end
+
+function BehavioralMessagingNotificationMixin:Update()
+	self:UpdateText();
+	self:UpdateBackgrounds();
+end
+
+function BehavioralMessagingNotificationMixin:GetCount()
+	return #self.instances;
+end
+
+function BehavioralMessagingNotificationMixin:PushInstance(id)
+	local function HasId(tbl)
+		return tbl.id == id;
+	end
+	if not ContainsIf(self.instances, HasId) then
+		local tbl = {id = id, createTimeSeconds = GetTime()};
+		table.insert(self.instances, tbl);
+		self:Update();
+	end
+end
+
+function BehavioralMessagingNotificationMixin:PopInstance()
+	local tbl = table.remove(self.instances);
+	self:Update();
+	return tbl;
+end
+
+function BehavioralMessagingNotificationMixin:PeekInstance()
+	return self.instances[#self.instances];
 end
 
 BehavioralMessagingTrayMixin = {};
@@ -37,21 +101,34 @@ function BehavioralMessagingTrayMixin:OnLoad()
 	self.pool = CreateFramePool("Button", self, "BehaviorMessagingNotificationTemplate");
 end
 
+function BehavioralMessagingTrayMixin:FindNotification(notificationType)
+	for notification in self.pool:EnumerateActive() do
+		if notification.notificationType == notificationType then
+			return notification;
+		end
+	end
+end
+			
 function BehavioralMessagingTrayMixin:OnEvent(event, ...)
 	if event == "BEHAVIORAL_NOTIFICATION" then
-		local notificationType, count = ...;
-		local data = NotificationData[notificationType];
-		if data then
+		local notificationType, id = ...;
+		local displayData = DisplayData[notificationType];
+		if displayData then
 			local function OnClick(button, buttonName, down)
-				BehavioralMessagingDetails:DisplayNotification(data.details, button);
+				PlaySound(SOUNDKIT.IG_MAINMENU_OPEN);
+				BehavioralMessagingDetails:DisplayNotification(displayData.details, button);
 			end
 
-			for index = 1, count do
-				local notification = self.pool:Acquire();
-				notification:Init(data.notification, notificationType);
+			local notification = self:FindNotification(notificationType);
+			if not notification then
+				notification = self.pool:Acquire();
+				notification:SetFrameLevel(10);
+				notification:Init(displayData.notification, notificationType);
 				notification:Show();
 				notification:SetScript("OnClick", OnClick);
 			end
+
+			notification:PushInstance(id);
 		end
 	end
 
@@ -73,10 +150,16 @@ function BehavioralMessagingTrayMixin:EvaluateLayout()
 end
 
 function BehavioralMessagingTrayMixin:OnNotificationAchknowledged(notification)
-	local notificationType = notification.notificationType;
-	self.pool:Release(notification);
+	local instance = notification:PopInstance();
+	local openSeconds = instance.openTimeSeconds - instance.createTimeSeconds;
+	local readSeconds = (GetTime() - instance.createTimeSeconds) - openSeconds;
+	C_BehavioralMessaging.SendNotificationReceipt(instance.id, openSeconds, readSeconds);
 	
-	C_BehavioralMessaging.SendNotificationReceipt(notificationType);
+	if notification:GetCount() == 0 then
+		self.pool:Release(notification);
+	else
+		notification:Update();
+	end
 
 	self:EvaluateLayout();
 end
@@ -98,9 +181,15 @@ function BehavioralMessagingDetailsMixin:DisplayInternal(titleText, bodyText)
 end
 
 function BehavioralMessagingDetailsMixin:DisplayNotification(details, notification)
+	local instance = notification:PeekInstance();
+	if not instance.openTimeSeconds then
+		instance.openTimeSeconds = GetTime();
+	end
+
 	self:DisplayInternal(details.title, details.message);
 	
 	local function OnClick(button, buttonName, down)
+		PlaySound(SOUNDKIT.IG_MAINMENU_CLOSE);
 		HideUIPanel(self);
 
 		BehavioralMessagingTray:OnNotificationAchknowledged(notification);

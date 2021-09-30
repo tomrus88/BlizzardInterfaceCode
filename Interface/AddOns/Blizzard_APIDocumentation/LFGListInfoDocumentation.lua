@@ -247,6 +247,11 @@ local LFGListInfo =
 			Name = "IsPlayerAuthenticatedForLFG",
 			Type = "Function",
 
+			Arguments =
+			{
+				{ Name = "activityID", Type = "number", Nilable = true },
+			},
+
 			Returns =
 			{
 				{ Name = "isAuthenticated", Type = "bool", Nilable = false },
@@ -493,6 +498,7 @@ local LFGListInfo =
 				{ Name = "isMythicPlusActivity", Type = "bool", Nilable = false },
 				{ Name = "isRatedPvpActivity", Type = "bool", Nilable = false },
 				{ Name = "isCurrentRaidActivity", Type = "bool", Nilable = false },
+				{ Name = "isPvpActivity", Type = "bool", Nilable = false },
 			},
 		},
 		{

@@ -5,6 +5,7 @@ local unpack = unpack;
 local error = error;
 local pairs = pairs;
 local rawset = rawset;
+local next = next;
 
 local InsertEventAttribute = "insert-secure-event";
 local AttributeDelegate = CreateFrame("FRAME");
@@ -54,7 +55,8 @@ end
 
 function CallbackRegistryMixin:HasRegistrantsForEvent(event)
 	for callbackType, callbackTable in pairs(self:GetCallbackTables()) do
-		if callbackTable[event] then
+		local callbacks = callbackTable[event];
+		if callbacks and securecallfunction(next, callbacks) then
 			return true;
 		end
 	end
@@ -162,4 +164,8 @@ function CallbackRegistryMixin:GenerateCallbackEvents(events)
 		end
 		self.Event[eventName] = eventName;
 	end
+end
+
+function CallbackRegistryMixin.DoesFrameHaveEvent(frame, event)
+	return frame.Event and frame.Event[event];
 end

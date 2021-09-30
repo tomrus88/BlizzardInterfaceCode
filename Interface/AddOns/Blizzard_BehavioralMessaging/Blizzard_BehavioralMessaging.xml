@@ -1,10 +1,14 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<Script file="Blizzard_BehavioralMessaging.lua"/>
-	<Button name="BehaviorMessagingNotificationTemplate" mixin="BehavioralMessagingNotificationMixin" virtual="true">
+
+	<Frame name="BehaviorMessagingBackgroundTemplate" inherits="NineSlicePanelTemplate" setAllPoints="true" virtual="true">
 		<KeyValues>
 			<KeyValue key="layoutType" value="TooltipDefaultLayout" type="string"/>
 		</KeyValues>
+	</Frame>
+	
+	<Button name="BehaviorMessagingNotificationTemplate" mixin="BehavioralMessagingNotificationMixin" virtual="true">
 		<Size x="180" y="41"/>
 		<Layers>
 			<Layer level="BORDER">
@@ -26,11 +30,11 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<Frames>
-			<Frame parentKey="NineSlice" useParentLevel="true" inherits="NineSlicePanelTemplate" setAllPoints="true"/>
-		</Frames>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
 	</Button>
-	
+
 	<Frame name="BehavioralMessagingTray" inherits="HorizontalLayoutFrame" mixin="BehavioralMessagingTrayMixin" parent="UIParent" hidden="true">
 		<Scripts>
 			<OnLoad method="OnLoad"/>
