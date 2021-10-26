@@ -158,6 +158,20 @@ local LFGListInfo =
 			},
 		},
 		{
+			Name = "GetKeystoneForActivity",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "activityID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "level", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetLfgCategoryInfo",
 			Type = "Function",
 
@@ -172,13 +186,19 @@ local LFGListInfo =
 			},
 		},
 		{
-			Name = "GetOwnedKeystoneActivityAndGroup",
+			Name = "GetOwnedKeystoneActivityAndGroupAndLevel",
 			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "getTimewalking", Type = "bool", Nilable = false, Default = false },
+			},
 
 			Returns =
 			{
 				{ Name = "activityID", Type = "number", Nilable = false },
 				{ Name = "groupID", Type = "number", Nilable = false },
+				{ Name = "keystoneLevel", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -188,7 +208,7 @@ local LFGListInfo =
 			Arguments =
 			{
 				{ Name = "playstyle", Type = "LfgEntryPlaystyle", Nilable = false },
-				{ Name = "isPvpActivity", Type = "bool", Nilable = false },
+				{ Name = "activityInfo", Type = "GroupFinderActivityInfo", Nilable = false },
 			},
 
 			Returns =
@@ -499,6 +519,7 @@ local LFGListInfo =
 				{ Name = "isRatedPvpActivity", Type = "bool", Nilable = false },
 				{ Name = "isCurrentRaidActivity", Type = "bool", Nilable = false },
 				{ Name = "isPvpActivity", Type = "bool", Nilable = false },
+				{ Name = "isMythicActivity", Type = "bool", Nilable = false },
 			},
 		},
 		{
