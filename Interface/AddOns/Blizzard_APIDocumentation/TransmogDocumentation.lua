@@ -85,6 +85,20 @@ local Transmog =
 			Type = "Function",
 		},
 		{
+			Name = "ExtractTransmogIDList",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "input", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "transmogIDList", Type = "table", InnerType = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetApplyCost",
 			Type = "Function",
 
@@ -427,26 +441,6 @@ local Transmog =
 				{ Name = "Revert", Type = "TransmogPendingType", EnumValue = 1 },
 				{ Name = "ToggleOn", Type = "TransmogPendingType", EnumValue = 2 },
 				{ Name = "ToggleOff", Type = "TransmogPendingType", EnumValue = 3 },
-			},
-		},
-		{
-			Name = "TransmogSource",
-			Type = "Enumeration",
-			NumValues = 10,
-			MinValue = 0,
-			MaxValue = 9,
-			Fields =
-			{
-				{ Name = "None", Type = "TransmogSource", EnumValue = 0 },
-				{ Name = "JournalEncounter", Type = "TransmogSource", EnumValue = 1 },
-				{ Name = "Quest", Type = "TransmogSource", EnumValue = 2 },
-				{ Name = "Vendor", Type = "TransmogSource", EnumValue = 3 },
-				{ Name = "WorldDrop", Type = "TransmogSource", EnumValue = 4 },
-				{ Name = "HiddenUntilCollected", Type = "TransmogSource", EnumValue = 5 },
-				{ Name = "CantCollect", Type = "TransmogSource", EnumValue = 6 },
-				{ Name = "Achievement", Type = "TransmogSource", EnumValue = 7 },
-				{ Name = "Profession", Type = "TransmogSource", EnumValue = 8 },
-				{ Name = "NotValidForTransmog", Type = "TransmogSource", EnumValue = 9 },
 			},
 		},
 		{
