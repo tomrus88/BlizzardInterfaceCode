@@ -9,28 +9,25 @@ UIWidgetManager:RegisterWidgetVisTypeTemplate(Enum.UIWidgetVisualizationType.Tex
 
 UIWidgetTemplateTextWithStateMixin = CreateFromMixins(UIWidgetBaseTemplateMixin);
 
-function UIWidgetTemplateTextWithStateMixin:Setup(widgetInfo, widgetContainer)
-	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo, widgetContainer);
-	self:SetTooltip(widgetInfo.tooltip);
+function UIWidgetTemplateTextWithStateMixin:Setup(widgetInfo)
+	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo);
 
-	self.Text:Setup(widgetInfo.text, widgetInfo.fontType, widgetInfo.textSizeType, widgetInfo.enabledState, widgetInfo.hAlign);
+	self.Text:SetText(widgetInfo.text);
+	self.Text:SetEnabledState(widgetInfo.enabledState);
 
 	if self.fontColor then
 		self.Text:SetTextColor(self.fontColor:GetRGB());
 	end
 
-	local width = (widgetInfo.widgetSizeSetting > 0) and widgetInfo.widgetSizeSetting or self.Text:GetStringWidth();
+	local width;
+	if widgetInfo.widgetWidth > 0 then
+		width = widgetInfo.widgetWidth;
+	else
+		width = self.Text:GetStringWidth();
+	end
 
 	self:SetWidth(width);
-
-	local textHeight = self.Text:GetStringHeight();
-	local bottomPadding = Clamp(widgetInfo.bottomPadding, 0, textHeight - 1);	-- don't allow bottomPadding to be less than 0 or greater than or equal to the height of the text (could just add a blank line in that case)
-	self:SetHeight(textHeight + bottomPadding);
-end
-
-function UIWidgetTemplateTextWithStateMixin:OnReset()
-	UIWidgetBaseTemplateMixin.OnReset(self);
-	self.fontColor = nil;
+	self:SetHeight(self.Text:GetStringHeight());
 end
 
 function UIWidgetTemplateTextWithStateMixin:SetFontStringColor(fontColor)

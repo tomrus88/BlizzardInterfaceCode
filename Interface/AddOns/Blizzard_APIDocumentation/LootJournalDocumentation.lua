@@ -6,66 +6,32 @@ local LootJournal =
 
 	Functions =
 	{
-		{
-			Name = "GetItemSetItems",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "setID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "items", Type = "table", InnerType = "LootJournalItemInfo", Nilable = false },
-			},
-		},
-		{
-			Name = "GetItemSets",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "classID", Type = "number", Nilable = true },
-				{ Name = "specID", Type = "number", Nilable = true },
-			},
-
-			Returns =
-			{
-				{ Name = "itemSets", Type = "table", InnerType = "LootJournalItemSetInfo", Nilable = false },
-			},
-		},
 	},
 
 	Events =
 	{
-		{
-			Name = "LootJournalItemUpdate",
-			Type = "Event",
-			LiteralName = "LOOT_JOURNAL_ITEM_UPDATE",
-		},
 	},
 
 	Tables =
 	{
 		{
-			Name = "LootJournalItemInfo",
-			Type = "Structure",
+			Name = "TransmogSource",
+			Type = "Enumeration",
+			NumValues = 10,
+			MinValue = 0,
+			MaxValue = 9,
 			Fields =
 			{
-				{ Name = "itemID", Type = "number", Nilable = false },
-				{ Name = "icon", Type = "number", Nilable = false },
-				{ Name = "invType", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "LootJournalItemSetInfo",
-			Type = "Structure",
-			Fields =
-			{
-				{ Name = "setID", Type = "number", Nilable = false },
-				{ Name = "itemLevel", Type = "number", Nilable = false },
-				{ Name = "name", Type = "string", Nilable = false },
+				{ Name = "None", Type = "TransmogSource", EnumValue = 0 },
+				{ Name = "JournalEncounter", Type = "TransmogSource", EnumValue = 1 },
+				{ Name = "Quest", Type = "TransmogSource", EnumValue = 2 },
+				{ Name = "Vendor", Type = "TransmogSource", EnumValue = 3 },
+				{ Name = "WorldDrop", Type = "TransmogSource", EnumValue = 4 },
+				{ Name = "HiddenUntilCollected", Type = "TransmogSource", EnumValue = 5 },
+				{ Name = "CantCollect", Type = "TransmogSource", EnumValue = 6 },
+				{ Name = "Achievement", Type = "TransmogSource", EnumValue = 7 },
+				{ Name = "Profession", Type = "TransmogSource", EnumValue = 8 },
+				{ Name = "NotValidForTransmog", Type = "TransmogSource", EnumValue = 9 },
 			},
 		},
 	},

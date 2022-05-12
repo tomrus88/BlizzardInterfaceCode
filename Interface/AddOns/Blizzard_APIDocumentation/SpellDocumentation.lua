@@ -21,20 +21,6 @@ local Spell =
 			},
 		},
 		{
-			Name = "GetMawPowerBorderAtlasBySpellID",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "spellID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "rarityBorderAtlas", Type = "string", Nilable = false },
-			},
-		},
-		{
 			Name = "IsSpellDataCached",
 			Type = "Function",
 

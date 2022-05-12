@@ -2,16 +2,18 @@
 ..\FrameXML\UI.xsd">
 	<Script file="ClickToZoomDataProvider.lua"/>
 	
-	<Frame name="ClickToZoomDataProvider_LabelTemplate" mixin="ClickToZoomDataProvider_LabelMixin" virtual="true" alpha="0">
+	<Frame name="ClickToZoomDataProvider_LabelTemplate" virtual="true">
 		<Size x="1" y="1"/>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString parentKey="Text" inherits="SystemFont_Huge1_Outline">
+				<FontString parentKey="Text" inherits="SystemFont_Huge1_Outline" text="FLIGHT_MAP_CLICK_TO_ZOOM_HINT">
 					<Anchors>
 						<Anchor point="RIGHT"/>
 					</Anchors>
 					<Shadow>
-						<Offset x="1" y="-1"/>
+						<Offset>
+							<AbsDimension x="1" y="-1"/>
+						</Offset>
 						<Color r="0" g="0" b="0"/>
 					</Shadow>
 					<Color r="1" g="0.82" b="0"/>

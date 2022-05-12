@@ -1,15 +1,15 @@
 BattlefieldFlagDataProviderMixin = CreateFromMixins(MapCanvasDataProviderMixin);
 
 function BattlefieldFlagDataProviderMixin:OnShow()
-	self:RegisterEvent("ARENA_OPPONENT_UPDATE");
+	self:RegisterEvent("UNIT_AURA");
 end
 
 function BattlefieldFlagDataProviderMixin:OnHide()
-	self:UnregisterEvent("ARENA_OPPONENT_UPDATE");
+	self:UnregisterEvent("UNIT_AURA");
 end
 
 function BattlefieldFlagDataProviderMixin:OnEvent(event, ...)
-	if event == "ARENA_OPPONENT_UPDATE" then
+	if event == "UNIT_AURA" then
 		self:RefreshAllData(false);
 	end
 end
@@ -40,7 +40,7 @@ function BattlefieldFlagMixin:OnAcquired(flagIndex)
 end
 
 function BattlefieldFlagMixin:Refresh()
-	local flagX, flagY, flagTexture = C_PvP.GetBattlefieldFlagPosition(self.flagIndex, self:GetMap():GetMapID());
+	local flagX, flagY, flagTexture = GetBattlefieldFlagPosition(self.flagIndex);
 	self.Texture:SetTexture(flagTexture);
 	self:SetPosition(flagX or 0, flagY or 0);
 	local shown = flagX ~= nil;

@@ -36,9 +36,9 @@ local AreaPoiInfo =
 			},
 		},
 		{
-			Name = "GetAreaPOISecondsLeft",
+			Name = "GetAreaPOITimeLeft",
 			Type = "Function",
-			Documentation = { "Returns the number of seconds until the POI expires." },
+			Documentation = { "Returns the number of minutes until the POI expires." },
 
 			Arguments =
 			{
@@ -47,7 +47,7 @@ local AreaPoiInfo =
 
 			Returns =
 			{
-				{ Name = "secondsLeft", Type = "number", Nilable = false },
+				{ Name = "minutesLeft", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -90,7 +90,6 @@ local AreaPoiInfo =
 				{ Name = "textureIndex", Type = "number", Nilable = true },
 				{ Name = "widgetSetID", Type = "number", Nilable = true },
 				{ Name = "atlasName", Type = "string", Nilable = true },
-				{ Name = "uiTextureKit", Type = "string", Nilable = true },
 				{ Name = "shouldGlow", Type = "bool", Nilable = false },
 			},
 		},

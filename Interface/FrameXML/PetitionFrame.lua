@@ -32,6 +32,13 @@ function PetitionFrame_Update(self)
 		PetitionFrameMasterTitle:SetText(GUILD_RANK0_DESC);
 		PetitionFrameMasterName:SetText(originatorName);
 		PetitionFrameRenameButton:SetText(RENAME_GUILD);
+	elseif ( petitionType == "arena" ) then
+		PetitionFrameNpcNameText:SetFormattedText(ARENA_CHARTER_TEMPLATE, title);
+		PetitionFrameCharterTitle:SetText(ARENA_TEAM);
+		PetitionFrameCharterName:SetText(title..", "..format(PVP_TEAMSIZE, minSignatures + 1, minSignatures + 1));
+		PetitionFrameMasterTitle:SetText(ARENA_TEAM_CAPTAIN);
+		PetitionFrameMasterName:SetText(originatorName);
+		PetitionFrameRenameButton:SetText(RENAME_ARENA_TEAM);
 	else
 		PetitionFrameNpcNameText:SetText("Petition");
 	end
@@ -65,12 +72,14 @@ function PetitionFrame_Update(self)
 end
 
 function PetitionFrameSignButton_OnClick(self)
-	local name, description, standingID, barMin, barMax, barValue = GetGuildFactionInfo();
-	if ( standingID > 4 or barValue > 0 ) then
-		StaticPopup_Show("CONFIRM_GUILD_CHARTER_SIGNATURE");
-	else
-		SignPetition();
-	end
+	SignPetition();
 end
 
+function PetitionFrameRenameButton_OnClick(self)
+	if ( PetitionFrame.petitionType == "guild" ) then
+		StaticPopup_Show("RENAME_GUILD");
+	elseif ( PetitionFrame.petitionType == "arena" ) then
+		StaticPopup_Show("RENAME_ARENA_TEAM");
+	end
+end
 

@@ -16,7 +16,7 @@ local SocialRestrictions =
 
 			Returns =
 			{
-				{ Name = "disabled", Type = "bool", Nilable = false },
+				{ Name = "isDisabled", Type = "bool", Nilable = false },
 			},
 		},
 		{

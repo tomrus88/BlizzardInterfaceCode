@@ -1,17 +1,42 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<Script file="GlueDialog.lua"/>
-	<Button name="GlueDialogButtonTemplate" inherits="GlueButtonTemplate" virtual="true">
+	<Button name="GlueDialogButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="220" y="40"/>
+		</Size>
 		<Scripts>
 			<OnClick function="GlueDialog_OnClick"/>
 		</Scripts>
+		<ButtonText>
+			<Anchors>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="2"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GlueFontNormal"/>
+		<HighlightFont style="GlueFontHighlight"/>
+		<DisabledFont style="GlueFontDisable"/>
+		<NormalTexture inherits="GluePanelButtonUpTexture"/>
+		<PushedTexture inherits="GluePanelButtonDownTexture"/>
+		<DisabledTexture inherits="GluePanelButtonDisabledTexture"/>
+		<HighlightTexture inherits="GluePanelButtonHighlightTexture"/>
 	</Button>
 	<Frame name="GlueDialog" toplevel="true" parent="GlueParent" setAllPoints="true" enableMouse="true" enableKeyboard="true" frameStrata="DIALOG" hidden="true">
 		<Frames>
-			<Frame name="GlueDialogBackground">
-				<Size x="512" y="256"/>
+			<Frame name="GlueDialogBackground" inherits="BackdropTemplate">
+				<Size>
+					<AbsDimension x="512" y="256"/>
+				</Size>
 				<Anchors>
-					<Anchor point="CENTER" x="0" y="0"/>
+					<Anchor point="CENTER">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -42,7 +67,6 @@
 					</Layer>
 				</Layers>
 				<Frames>
-					<Frame parentKey="BG" inherits="DialogBorderTemplate"/>
 					<SimpleHTML name="GlueDialogHTML" hyperlinkFormat="|cff06ff07|H%s|h[%s]|h|r" hidden="true">
 						<Size>
 							<AbsDimension x="450" y="30"/>
@@ -71,6 +95,14 @@
 						<Anchors>
 							<Anchor point="BOTTOM" x="0" y="14" />
 						</Anchors>
+						<Scripts>
+							<OnShow>
+								self.Anim:Play();
+							</OnShow>
+							<OnHide>
+								self.Anim:Stop();
+							</OnHide>
+						</Scripts>
 					</Frame>
 				</Frames>
 			</Frame>
@@ -141,14 +173,11 @@
 			</Frame>
 		</Frames>
 		<Scripts>
-			<OnLoad function="GlueDialog_OnLoad"/>
+			<OnLoad inherit="prepend" function="GlueDialog_OnLoad"/>
 			<OnShow function="GlueDialog_OnShow"/>
 			<OnHide function="GlueDialog_OnHide"/>
 			<OnUpdate function="GlueDialog_OnUpdate"/>
 			<OnKeyDown function="GlueDialog_OnKeyDown"/>
-			<OnMouseWheel function="nop"/>
 		</Scripts>
 	</Frame>
-
-	<Frame name="GlueAnnouncementDialog" parent="GlueParent" inherits="BaseNineSliceDialog" mixin="GlueAnnouncementDialogMixin"/>
 </Ui>

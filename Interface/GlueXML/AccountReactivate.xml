@@ -1,13 +1,24 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<Script file="AccountReactivate.lua"/>
-
-	<Frame name="ReactivateDialogBackground" virtual="true">
-		<Frames>
-			<Frame parentKey="Border" inherits="DialogBorderTranslucentTemplate"/>
-		</Frames>
+	
+	<Frame name="ReactivateDialogBackground" virtual="true" inherits="BackdropTemplate">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+		</KeyValues>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="4" y="-4"/>
+						<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+					</Anchors>
+					<Color r="0" b="0" g="0" a=".4"/>
+				</Texture>
+			</Layer>
+		</Layers>
 	</Frame>
-
+	
 	<!-- Player has enough tokens or gold. -->
 	<Frame name="ReactivateAccountDialog" toplevel="true" parent="CharacterSelect" enableMouse="true" frameStrata="HIGH" hidden="true" inherits="ReactivateDialogBackground">
 		<Size x="450" y="64"/>
@@ -53,11 +64,11 @@
 			</Button>
 		</Frames>
 		<Scripts>
-			<OnLoad function="ReactivateAccountDialog_OnLoad"/>
+			<OnLoad inherit="prepend" function="ReactivateAccountDialog_OnLoad"/>
 			<OnEvent function="ReactivateAccountDialog_OnEvent"/>
 		</Scripts>
 	</Frame>
-
+	
 	<Frame name="AccountReactivationInProgressDialog" toplevel="true" parent="CharacterSelect" enableMouse="true" frameStrata="DIALOG" hidden="true" inherits="ReactivateDialogBackground">
 		<Size x="350" y="64"/>
 		<Anchors>
@@ -66,11 +77,11 @@
 		<Layers>
 			<Layer level="ARTWORK">
 				<Texture parentKey="Icon" file="Interface\Store\Store-Main">
-					<Size x="188" y="185"/>
+					<Size x="188" y="185"/>	
 					<Anchors>
 						<Anchor point="TOP" x="0" y="20"/>
 					</Anchors>
-					<TexCoords left="0.18457031" right="0.36816406" top="0.46289063" bottom="0.64355469"/>
+					<TexCoords left="0.18457031" right="0.36816406" top="0.46289063" bottom="0.64355469"/>	
 				</Texture>
 				<FontString parentKey="Title" inherits="GlueFontNormalLarge" text="BLIZZARD_STORE_TRANSACTION_IN_PROGRESS">
 					<Size x="300" y="0"/>
@@ -83,7 +94,7 @@
 					<Anchors>
 						<Anchor point="TOP" x="0" y="-8" relativeKey="$parent.Title" relativePoint="BOTTOM"/>
 					</Anchors>
-					<TexCoords left="0.50878906" right="0.79980469" top="0.63085938" bottom="0.63281250"/>
+					<TexCoords left="0.50878906" right="0.79980469" top="0.63085938" bottom="0.63281250"/>	
 				</Texture>
 				<FontString parentKey="Notice" inherits="GameFontGreen" text="ACCOUNT_REACTIVATE_LOGOUT_NOTICE">
 					<Size x="300" y="0"/>
@@ -99,7 +110,7 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>
-
+		
 	<Frame name="GoldReactivateConfirmationDialog" toplevel="true" parent="CharacterSelect" enableMouse="true" frameStrata="HIGH" hidden="true" inherits="ReactivateDialogBackground">
 		<Size x="450" y="64"/>
 		<Anchors>
@@ -155,7 +166,7 @@
 		</Layers>
 		<Frames>
 			<Button parentKey="Accept" inherits="GlueDialogButtonTemplate" text="ACCEPT_GLUE">
-				<Size x="132" y="30"/>
+				<Size x="132" y="44"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.LogoutNotice" relativePoint="BOTTOM" x="-4" y="-8"/>
 				</Anchors>
@@ -166,11 +177,11 @@
 						AccountReactivationInProgressDialog:Show();
 						CharacterSelect_UpdateButtonState();
 						self:GetParent():Hide();
-					</OnClick>
+					</OnClick> 
 				</Scripts>
 			</Button>
 			<Button parentKey="Cancel" inherits="GlueDialogButtonTemplate" text="CANCEL">
-				<Size x="132" y="30"/>
+				<Size x="132" y="44"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.Accept" relativePoint="RIGHT" x="8" y="0"/>
 				</Anchors>
@@ -186,7 +197,7 @@
 		</Frames>
 		<Scripts>
 			<OnShow>
-				self:SetHeight( 60 + self.Description:GetHeight() + 96 + self.Accept:GetHeight() + self.LogoutNotice:GetHeight() + 30 );
+				self:SetHeight( 60 + self.Description:GetHeight() + 96 + self.Accept:GetHeight() + self.LogoutNotice:GetHeight() + 20 );
 			</OnShow>
 			<OnHide>
 				if (self.ticker) then
@@ -196,7 +207,7 @@
 			</OnHide>
 		</Scripts>
 	</Frame>
-
+			
 	<Frame name="TokenReactivateConfirmationDialog" toplevel="true" parent="CharacterSelect" enableMouse="true" frameStrata="DIALOG" hidden="true" inherits="ReactivateDialogBackground">
 		<Size x="450" y="64"/>
 		<Anchors>
@@ -233,7 +244,7 @@
 		</Layers>
 		<Frames>
 			<Button parentKey="Accept" inherits="GlueDialogButtonTemplate" text="ACCEPT_GLUE">
-				<Size x="170" y="30"/>
+				<Size x="192" y="44"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.LogoutNotice" relativePoint="BOTTOM" x="-6" y="-8"/>
 				</Anchors>
@@ -244,11 +255,11 @@
 						C_WowTokenSecure.RedeemTokenConfirm(LE_TOKEN_REDEEM_TYPE_GAME_TIME);
 						AccountReactivationInProgressDialog:Show();
 						CharacterSelect_UpdateButtonState();
-					</OnClick>
+					</OnClick> 
 				</Scripts>
 			</Button>
 			<Button parentKey="Cancel" inherits="GlueDialogButtonTemplate" text="CANCEL">
-				<Size x="170" y="30"/>
+				<Size x="192" y="44"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.Accept" relativePoint="RIGHT" x="13" y="0"/>
 				</Anchors>
@@ -267,7 +278,7 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>
-
+	
 	<!-- Not Enough Gold and no tokens. Display if attempt to login with a greater than level 20 character/ -->
 	<Frame name="SubscriptionRequestDialog" toplevel="true" parent="CharacterSelect" enableMouse="true" frameStrata="DIALOG" hidden="true" inherits="ReactivateDialogBackground">
 		<Size x="450" y="64"/>
@@ -285,7 +296,7 @@
 				<FontString parentKey="ButtonDivider" inherits="GlueFontNormal" text="ACCOUNT_REACTIVATE_BUTTON_DIVIDER">
 					<Size x="400" y="12"/>
 					<Anchors>
-						<Anchor point="TOP" relativeKey="$parent.Text" relativePoint="BOTTOM" x="0" y="-62"/>
+						<Anchor point="TOP" relativeKey="$parent.Text" relativePoint="BOTTOM" x="0" y="-54"/>
 					</Anchors>
 					<Color r="0.5" g="0.5" b="0.5"/>
 				</FontString>
@@ -301,8 +312,8 @@
 					<OnClick function="AccountReactivate_ReactivateNow"/>
 				</Scripts>
 			</Button>
-			<Button parentKey="Reactivate" inherits="GlueDialogButtonTemplate" motionScriptsWhileDisabled="true">
-				<Size x="250" y="44"/>
+			<Button parentKey="Reactivate" inherits="GluePanelButtonTemplate" motionScriptsWhileDisabled="true">
+				<Size x="320" y="48"/>
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.ButtonDivider" relativePoint="BOTTOM" x="0" y="-4"/>
 				</Anchors>
@@ -320,10 +331,13 @@
 					</OnLeave>
 				</Scripts>
 			</Button>
-			<Button parentKey="CloseButton" inherits="BigRedExitButtonTemplate">
-				<Size x="24" y="24"/>
+			<Button parentKey="CloseButton" inherits="GlueCloseButton">
 				<Anchors>
-					<Anchor point="TOPRIGHT"  x="-4" y="-4"/>
+					<Anchor point="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-3" y="-3"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>

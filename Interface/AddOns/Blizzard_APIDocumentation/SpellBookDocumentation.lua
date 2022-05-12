@@ -6,85 +6,6 @@ local SpellBook =
 
 	Functions =
 	{
-		{
-			Name = "ContainsAnyDisenchantSpell",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "contains", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "GetCurrentLevelSpells",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "level", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "spellIDs", Type = "table", InnerType = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "GetSkillLineIndexByID",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "skillLineID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "skillIndex", Type = "number", Nilable = true },
-			},
-		},
-		{
-			Name = "GetSpellInfo",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "spellID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "spellInfo", Type = "SpellInfo", Nilable = false },
-			},
-		},
-		{
-			Name = "GetSpellLinkFromSpellID",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "spellID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "spellLink", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "IsSpellDisabled",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "spellID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "disabled", Type = "bool", Nilable = false },
-			},
-		},
 	},
 
 	Events =
@@ -125,28 +46,6 @@ local SpellBook =
 			Payload =
 			{
 				{ Name = "totemSlot", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "SpellFlyoutUpdate",
-			Type = "Event",
-			LiteralName = "SPELL_FLYOUT_UPDATE",
-			Payload =
-			{
-				{ Name = "flyoutID", Type = "number", Nilable = true },
-				{ Name = "spellID", Type = "number", Nilable = true },
-				{ Name = "isLearned", Type = "bool", Nilable = true },
-			},
-		},
-		{
-			Name = "SpellPushedToActionbar",
-			Type = "Event",
-			LiteralName = "SPELL_PUSHED_TO_ACTIONBAR",
-			Payload =
-			{
-				{ Name = "spellID", Type = "number", Nilable = false },
-				{ Name = "slot", Type = "number", Nilable = false },
-				{ Name = "page", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -229,19 +128,6 @@ local SpellBook =
 
 	Tables =
 	{
-		{
-			Name = "SpellInfo",
-			Type = "Structure",
-			Fields =
-			{
-				{ Name = "name", Type = "string", Nilable = false },
-				{ Name = "iconID", Type = "number", Nilable = false },
-				{ Name = "castTime", Type = "number", Nilable = false },
-				{ Name = "minRange", Type = "number", Nilable = false },
-				{ Name = "maxRange", Type = "number", Nilable = false },
-				{ Name = "spellID", Type = "number", Nilable = false },
-			},
-		},
 	},
 };
 

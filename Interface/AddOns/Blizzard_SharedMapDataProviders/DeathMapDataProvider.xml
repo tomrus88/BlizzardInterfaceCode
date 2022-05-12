@@ -10,7 +10,7 @@
 		<Layers>
 			<Layer level="ARTWORK">
 				<Texture file="Interface\Minimap\POIIcons" setAllPoints="true">
-					<TexCoords left="0.56640625" right="0.6328125" top="0.001953125" bottom="0.03515625"/>
+					<TexCoords left="0.875" right="1.0" top="0.0" bottom="0.125"/>
 				</Texture>
 			</Layer>
 		</Layers>

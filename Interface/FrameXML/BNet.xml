@@ -47,7 +47,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame parentKey="TooltipFrame" frameStrata="TOOLTIP" clampedToScreen="true" hidden="true" inherits="TooltipBackdropTemplate">
+			<Frame parentKey="TooltipFrame" inherits="TooltipBackdropTemplate" frameStrata="TOOLTIP" clampedToScreen="true" hidden="true">
 				<Size x="250" y="60"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativePoint="TOPRIGHT"/>

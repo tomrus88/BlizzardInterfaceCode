@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<Script file="PetActionBarFrame.lua"/>
-	<CheckButton name="PetActionButtonTemplate" inherits="QuickKeybindButtonTemplate, SecureFrameTemplate, ActionButtonTemplate" frameStrata="MEDIUM" virtual="true">
+	<CheckButton name="PetActionButtonTemplate" inherits="SecureFrameTemplate, ActionButtonTemplate" frameStrata="MEDIUM" virtual="true">
 		<Size x="30" y="30"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -44,13 +44,11 @@
 			<PreClick>
 				self:SetChecked(false);
 			</PreClick>
-			<OnClick inherit="append">
-				if ( not KeybindFrames_InQuickKeybindMode() ) then
-					if ( IsModifiedClick() ) then
-						PetActionButton_OnModifiedClick(self, button);
-					else
-						PetActionButton_OnClick(self, button);
-					end
+			<OnClick>
+				if ( IsModifiedClick() ) then
+					PetActionButton_OnModifiedClick(self, button);
+				else
+					PetActionButton_OnClick(self, button);
 				end
 			</OnClick>
 			<OnDragStart>
@@ -59,13 +57,13 @@
 			<OnReceiveDrag>
 				PetActionButton_OnReceiveDrag(self);
 			</OnReceiveDrag>
-			<OnEnter inherit="append">
+			<OnEnter>
 				PetActionButton_OnEnter(self, motion);
 			</OnEnter>
-			<OnLeave inherit="append">
+			<OnLeave>
 				PetActionButton_OnLeave(self, motion);
 			</OnLeave>
-			<OnUpdate inherit="append">
+			<OnUpdate>
 				PetActionButton_OnUpdate(self, elapsed);
 			</OnUpdate>
 		</Scripts>
@@ -111,9 +109,6 @@
 		</Layers>
 		<Frames>
 			<CheckButton name="PetActionButton1" inherits="PetActionButtonTemplate" id="1">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON1" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT">
 						<Offset>
@@ -123,9 +118,6 @@
 				</Anchors>
 			</CheckButton>
 			<CheckButton name="PetActionButton2" inherits="PetActionButtonTemplate" id="2">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON2" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="PetActionButton1" relativePoint="RIGHT">
 						<Offset>
@@ -135,9 +127,6 @@
 				</Anchors>
 			</CheckButton>
 			<CheckButton name="PetActionButton3" inherits="PetActionButtonTemplate" id="3">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON3" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="PetActionButton2" relativePoint="RIGHT">
 						<Offset>
@@ -147,9 +136,6 @@
 				</Anchors>
 			</CheckButton>
 			<CheckButton name="PetActionButton4" inherits="PetActionButtonTemplate" id="4">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON4" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="PetActionButton3" relativePoint="RIGHT">
 						<Offset>
@@ -159,9 +145,6 @@
 				</Anchors>
 			</CheckButton>
 			<CheckButton name="PetActionButton5" inherits="PetActionButtonTemplate" id="5">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON5" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="PetActionButton4" relativePoint="RIGHT">
 						<Offset>
@@ -171,9 +154,6 @@
 				</Anchors>
 			</CheckButton>
 			<CheckButton name="PetActionButton6" inherits="PetActionButtonTemplate" id="6">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON6" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="PetActionButton5" relativePoint="RIGHT">
 						<Offset>
@@ -183,9 +163,6 @@
 				</Anchors>
 			</CheckButton>
 			<CheckButton name="PetActionButton7" inherits="PetActionButtonTemplate" id="7">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON7" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="PetActionButton6" relativePoint="RIGHT">
 						<Offset>
@@ -195,9 +172,6 @@
 				</Anchors>
 			</CheckButton>
 			<CheckButton name="PetActionButton8" inherits="PetActionButtonTemplate" id="8">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON8" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="PetActionButton7" relativePoint="RIGHT">
 						<Offset>
@@ -207,9 +181,6 @@
 				</Anchors>
 			</CheckButton>
 			<CheckButton name="PetActionButton9" inherits="PetActionButtonTemplate" id="9">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON9" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="PetActionButton8" relativePoint="RIGHT">
 						<Offset>
@@ -219,9 +190,6 @@
 				</Anchors>
 			</CheckButton>
 			<CheckButton name="PetActionButton10" inherits="PetActionButtonTemplate" id="10">
-				<KeyValues>
-					<KeyValue key="commandName" value="BONUSACTIONBUTTON10" type="string"/>
-				</KeyValues>
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="PetActionButton9" relativePoint="RIGHT">
 						<Offset>

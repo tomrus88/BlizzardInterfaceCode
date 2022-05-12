@@ -3,7 +3,7 @@ BUFF_FLASH_TIME_OFF = 0.75;
 BUFF_MIN_ALPHA = 0.3;
 BUFF_WARNING_TIME = 31;
 BUFF_DURATION_WARNING_TIME = 60;
-BUFFS_PER_ROW = 8;
+BUFFS_PER_ROW = 10;
 BUFF_MAX_DISPLAY = 32;
 BUFF_ACTUAL_DISPLAY = 0;
 DEBUFF_MAX_DISPLAY = 16
@@ -12,7 +12,6 @@ BUFF_ROW_SPACING = 15;
 NUM_TEMP_ENCHANT_FRAMES = 3;
 BUFF_BUTTON_HEIGHT = 30;
 BUFF_FRAME_BASE_EXTENT = 13;	-- pixels from the top of the screen to the top edge of the buff frame, needed to calculate extent for UIParentManageFramePositions
-BUFF_FRAME_HEIGHT = 50;
 BUFF_HORIZ_SPACING = -5;
 DEFAULT_AURA_DURATION_FONT = "GameFontNormalSmall";
 
@@ -38,7 +37,6 @@ function BuffFrame_OnLoad(self)
 	self.BuffAlphaValue = 1;
 	self:RegisterUnitEvent("UNIT_AURA", "player", "vehicle");
 	self:RegisterEvent("GROUP_ROSTER_UPDATE");
-	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED");
 	self.numEnchants = 0;
 	self.bottomEdgeExtent = 0;
 end
@@ -84,35 +82,25 @@ function BuffFrame_OnUpdate(self, elapsed)
 	self.BuffAlphaValue = (self.BuffAlphaValue * (1 - BUFF_MIN_ALPHA)) + BUFF_MIN_ALPHA;
 end
 
-do
-	local function BuffFrame_UpdateWithSlots(buttonName, unit, filter, maxCount)
-		local index = 1;
-		AuraUtil.ForEachAura(unit, filter, maxCount, function(...)
-			local _, texture, count, debuffType, duration, expirationTime, _, _, _, _, _, _, _, _, timeMod = ...;
-			AuraButton_Update(buttonName, index, filter, texture, count, debuffType, duration, expirationTime, timeMod);
-			index = index + 1;
-			return index > maxCount;
-		end);
 
-		local count = index - 1;
-
-		-- Hide remaining frames
-		local buffArray = BuffFrame[buttonName];
-		if buffArray then
-			for i = index,#buffArray do
-				buffArray[i]:Hide();
-			end
+function BuffFrame_Update()
+	-- Handle Buffs
+	BUFF_ACTUAL_DISPLAY = 0;
+	for i=1, BUFF_MAX_DISPLAY do
+		if ( AuraButton_Update("BuffButton", i, "HELPFUL") ) then
+			BUFF_ACTUAL_DISPLAY = BUFF_ACTUAL_DISPLAY + 1;
 		end
-
-		return count;
 	end
-
-	function BuffFrame_Update()
-		BUFF_ACTUAL_DISPLAY = BuffFrame_UpdateWithSlots("BuffButton", PlayerFrame.unit, "HELPFUL", BUFF_MAX_DISPLAY);
-		DEBUFF_ACTUAL_DISPLAY = BuffFrame_UpdateWithSlots("DebuffButton", PlayerFrame.unit, "HARMFUL", DEBUFF_MAX_DISPLAY);
 	
-		BuffFrame_UpdateAllBuffAnchors();
+	-- Handle debuffs
+	DEBUFF_ACTUAL_DISPLAY = 0;
+	for i=1, DEBUFF_MAX_DISPLAY do
+		if ( AuraButton_Update("DebuffButton", i, "HARMFUL") ) then
+			DEBUFF_ACTUAL_DISPLAY = DEBUFF_ACTUAL_DISPLAY + 1;
+		end
 	end
+	
+	BuffFrame_UpdateAllBuffAnchors();
 end
 
 function BuffFrame_UpdatePositions()
@@ -124,105 +112,110 @@ function BuffFrame_UpdatePositions()
 	BuffFrame_Update();
 end
 
-function AuraButton_Update(buttonName, index, filter, texture, count, debuffType, duration, expirationTime, timeMod)
+function AuraButton_Update(buttonName, index, filter)
 	local unit = PlayerFrame.unit;
-	local buffArray = BuffFrame[buttonName];
-	local buff = buffArray and BuffFrame[buttonName][index];
-
-	if AuraButton_Update_BackwardsCompat then
-		if not texture then
-			texture, count, debuffType, duration, expirationTime, timeMod = AuraButton_Update_BackwardsCompat(buff, unit, index, filter);
-			-- backwards compatibility -- will be removed in a future update
-			if not texture then
-				return;
-			end
-		end
-	end
-
-	local helpful = (filter == "HELPFUL");
-
-	-- If button doesn't exist make it
-	if ( not buff ) then
-		local template = helpful and "BuffButtonTemplate" or "DebuffButtonTemplate";
-		local buffName = buttonName..index;
-		buff = CreateFrame("Button", buffName, BuffFrame, template);
-		buff.parent = BuffFrame;
-	end
-	-- Setup Buff
-	buff:SetID(index);
-	buff.unit = unit;
-	buff.filter = filter;
-	buff:SetAlpha(1.0);
-	buff.exitTime = nil;
-	buff:Show();
-	-- Set filter-specific attributes
-	if ( not helpful ) then
-		-- Anchor Debuffs
-		DebuffButton_UpdateAnchors(buttonName, index);
-
-		-- Set color of debuff border based on dispel class.
-		if ( buff.Border ) then
-			local color;
-			if ( debuffType ) then
-				color = DebuffTypeColor[debuffType];
-				if ( ENABLE_COLORBLIND_MODE == "1" ) then
-					buff.symbol:Show();
-					buff.symbol:SetText(DebuffTypeSymbol[debuffType] or "");
-				else
-					buff.symbol:Hide();
-				end
-			else
-				buff.symbol:Hide();
-				color = DebuffTypeColor["none"];
-			end
-			buff.Border:SetVertexColor(color.r, color.g, color.b);
-		end
-	end
-
-	if ( duration > 0 and expirationTime ) then
-		if ( SHOW_BUFF_DURATIONS == "1" ) then
-			buff.duration:Show();
-		else
+	local name, texture, count, debuffType, duration, expirationTime, _, _, _, spellId, _, _, _, _, timeMod = UnitAura(unit, index, filter);
+	local buffName = buttonName..index;
+	local buff = _G[buffName];
+	
+	if ( not name ) then
+		-- No buff so hide it if it exists
+		if ( buff ) then
+			buff:Hide();
 			buff.duration:Hide();
 		end
+		return nil;
+	else
+		local helpful = (filter == "HELPFUL" or filter == "HELPFUL");
+
+		-- If button doesn't exist make it
+		if ( not buff ) then
+			if ( helpful ) then
+				buff = CreateFrame("Button", buffName, BuffFrame, "BuffButtonTemplate");
+			else
+				buff = CreateFrame("Button", buffName, BuffFrame, "DebuffButtonTemplate");
+			end
+			buff.parent = BuffFrame;
+		end
+		-- Setup Buff
+		buff:SetID(index);
+		buff.unit = unit;
+		buff.filter = filter;
+		buff:SetAlpha(1.0);
+		buff.exitTime = nil;
+		buff:Show();
+		-- Set filter-specific attributes
+		if ( not helpful ) then
+			-- Anchor Debuffs
+			DebuffButton_UpdateAnchors(buttonName, index);
+
+			-- Set color of debuff border based on dispel class.
+			local debuffSlot = _G[buffName.."Border"];
+			if ( debuffSlot ) then
+				local color;
+				if ( debuffType ) then
+					color = DebuffTypeColor[debuffType];
+					if ( ENABLE_COLORBLIND_MODE == "1" ) then
+						buff.symbol:Show();
+						buff.symbol:SetText(DebuffTypeSymbol[debuffType] or "");
+					else
+						buff.symbol:Hide();
+					end
+				else
+					buff.symbol:Hide();
+					color = DebuffTypeColor["none"];
+				end
+				debuffSlot:SetVertexColor(color.r, color.g, color.b);
+			end
+		end
+
+		if ( duration > 0 and expirationTime ) then
+			if ( SHOW_BUFF_DURATIONS == "1" ) then
+				buff.duration:Show();
+			else
+				buff.duration:Hide();
+			end
 			
-		local timeLeft = (expirationTime - GetTime());
-		if(timeMod > 0) then
-			buff.timeMod = timeMod;
-			timeLeft = timeLeft / timeMod;
-		end
+			local timeLeft = (expirationTime - GetTime());
+			if(timeMod > 0) then
+				buff.timeMod = timeMod;
+				timeLeft = timeLeft / timeMod;
+			end
 
-		if ( not buff.timeLeft ) then
-			buff.timeLeft = timeLeft;
-			buff:SetScript("OnUpdate", AuraButton_OnUpdate);
+			if ( not buff.timeLeft ) then
+				buff.timeLeft = timeLeft;
+				buff:SetScript("OnUpdate", AuraButton_OnUpdate);
+			else
+				buff.timeLeft = timeLeft;
+			end
+
+			buff.expirationTime = expirationTime;	
 		else
-			buff.timeLeft = timeLeft;
+			buff.duration:Hide();
+			if ( buff.timeLeft ) then
+				buff:SetScript("OnUpdate", nil);
+			end
+			buff.timeLeft = nil;
 		end
 
-		buff.expirationTime = expirationTime;	
-	else
-		buff.duration:Hide();
-		if ( buff.timeLeft ) then
-			buff:SetScript("OnUpdate", nil);
+		-- Set Texture
+		local icon = _G[buffName.."Icon"];
+		icon:SetTexture(texture);
+
+		-- Set the number of applications of an aura
+		if ( count > 1 ) then
+			buff.count:SetText(count);
+			buff.count:Show();
+		else
+			buff.count:Hide();
 		end
-		buff.timeLeft = nil;
-	end
 
-	-- Set Texture
-	buff.Icon:SetTexture(texture);
-
-	-- Set the number of applications of an aura
-	if ( count > 1 ) then
-		buff.count:SetText(count);
-		buff.count:Show();
-	else
-		buff.count:Hide();
+		-- Refresh tooltip
+		if ( GameTooltip:IsOwned(buff) ) then
+			GameTooltip:SetUnitAura(PlayerFrame.unit, index, filter);
+		end
 	end
-
-	-- Refresh tooltip
-	if ( GameTooltip:IsOwned(buff) ) then
-		GameTooltip:SetUnitAura(PlayerFrame.unit, index, filter);
-	end
+	return 1;
 end
 
 function AuraButton_OnUpdate(self)
@@ -293,7 +286,7 @@ function BuffFrame_UpdateAllBuffAnchors()
 	local slack = BuffFrame.numEnchants;
 	
 	for i = 1, BUFF_ACTUAL_DISPLAY do
-		buff = BuffFrame.BuffButton[i];
+		buff = _G["BuffButton"..i];
 		numBuffs = numBuffs + 1;
 		index = numBuffs + slack;
 		if ( buff.parent ~= BuffFrame ) then
@@ -329,7 +322,7 @@ function BuffFrame_UpdateAllBuffAnchors()
 	-- check if we need to manage frames
 	local bottomEdgeExtent = BUFF_FRAME_BASE_EXTENT;
 	if ( DEBUFF_ACTUAL_DISPLAY > 0 ) then
-		bottomEdgeExtent = bottomEdgeExtent + DebuffButton1.offsetY + BUFF_FRAME_HEIGHT + ceil(DEBUFF_ACTUAL_DISPLAY / BUFFS_PER_ROW) * (BUFF_BUTTON_HEIGHT + BUFF_ROW_SPACING);
+		bottomEdgeExtent = bottomEdgeExtent + DebuffButton1.offsetY + BUFF_BUTTON_HEIGHT + ceil(DEBUFF_ACTUAL_DISPLAY / BUFFS_PER_ROW) * (BUFF_BUTTON_HEIGHT + BUFF_ROW_SPACING);
 	else
 		bottomEdgeExtent = bottomEdgeExtent + numAuraRows * (BUFF_BUTTON_HEIGHT + BUFF_ROW_SPACING);
 	end
@@ -344,12 +337,12 @@ function DebuffButton_UpdateAnchors(buttonName, index)
 	local numBuffs = BUFF_ACTUAL_DISPLAY + BuffFrame.numEnchants;
 	
 	local rows = ceil(numBuffs/BUFFS_PER_ROW);
-	local buff = BuffFrame[buttonName][index];
+	local buff = _G[buttonName..index];
 
 	-- Position debuffs
 	if ( (index > 1) and (mod(index, BUFFS_PER_ROW) == 1) ) then
 		-- New row
-		buff:SetPoint("TOP", BuffFrame[buttonName][index-BUFFS_PER_ROW], "BOTTOM", 0, -BUFF_ROW_SPACING);
+		buff:SetPoint("TOP", _G[buttonName..(index-BUFFS_PER_ROW)], "BOTTOM", 0, -BUFF_ROW_SPACING);
 	elseif ( index == 1 ) then
 		if ( rows < 2 ) then
 			DebuffButton1.offsetY = 1*((2*BUFF_ROW_SPACING)+BUFF_BUTTON_HEIGHT);
@@ -358,7 +351,7 @@ function DebuffButton_UpdateAnchors(buttonName, index)
 		end
 		buff:SetPoint("TOPRIGHT", BuffFrame, "BOTTOMRIGHT", 0, -DebuffButton1.offsetY);
 	else
-		buff:SetPoint("RIGHT", BuffFrame[buttonName][index-1], "LEFT", -5, 0);
+		buff:SetPoint("RIGHT", _G[buttonName..(index-1)], "LEFT", -5, 0);
 	end
 end
 
@@ -372,8 +365,6 @@ function TemporaryEnchantFrame_Hide()
 	TempEnchant1Duration:Hide();
 	TempEnchant2:Hide();
 	TempEnchant2Duration:Hide();
-	TempEnchant3:Hide();
-	TempEnchant3Duration:Hide();
 end
 
 function TemporaryEnchantFrame_OnUpdate(self, elapsed)
@@ -407,10 +398,10 @@ function TemporaryEnchantFrame_Update(...)
 		local hasEnchant, enchantExpiration, enchantCharges = select(RETURNS_PER_ITEM * (itemIndex - 1) + 1, ...);
 		if ( hasEnchant ) then
 			enchantIndex = enchantIndex + 1;
-			local enchantButton = TemporaryEnchantFrame.TempEnchant[enchantIndex];
+			local enchantButton = _G["TempEnchant"..enchantIndex];
 			local textureName = GetInventoryItemTexture("player", textureMapping[itemIndex]);
 			enchantButton:SetID(textureMapping[itemIndex]);
-			enchantButton.Icon:SetTexture(textureName);
+			_G[enchantButton:GetName().."Icon"]:SetTexture(textureName);
 			enchantButton:Show();
 
 			-- Show buff durations if necessary
@@ -430,8 +421,8 @@ function TemporaryEnchantFrame_Update(...)
 	
 	--Hide unused enchants
 	for i=enchantIndex+1, NUM_TEMP_ENCHANT_FRAMES do
-		TemporaryEnchantFrame.TempEnchant[i]:Hide();
-		TemporaryEnchantFrame.TempEnchant[i].duration:Hide();
+		_G["TempEnchant"..i]:Hide();
+		_G["TempEnchant"..i.."Duration"]:Hide();
 	end
 
 	-- Position buff frame

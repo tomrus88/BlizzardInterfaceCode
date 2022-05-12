@@ -136,8 +136,8 @@ local ItemConstants =
 			Fields =
 			{
 				{ Name = "Poor", Type = "ItemQuality", EnumValue = 0 },
-				{ Name = "Common", Type = "ItemQuality", EnumValue = 1 },
-				{ Name = "Uncommon", Type = "ItemQuality", EnumValue = 2 },
+				{ Name = "Standard", Type = "ItemQuality", EnumValue = 1 },
+				{ Name = "Good", Type = "ItemQuality", EnumValue = 2 },
 				{ Name = "Rare", Type = "ItemQuality", EnumValue = 3 },
 				{ Name = "Epic", Type = "ItemQuality", EnumValue = 4 },
 				{ Name = "Legendary", Type = "ItemQuality", EnumValue = 5 },
@@ -280,6 +280,16 @@ local ItemConstants =
 				{ Name = "CleanseCorruption", Type = "UIItemInteractionType", EnumValue = 2 },
 				{ Name = "RunecarverScrapping", Type = "UIItemInteractionType", EnumValue = 3 },
 				{ Name = "ItemConversion", Type = "UIItemInteractionType", EnumValue = 4 },
+			},
+		},
+		{
+			Name = "ITEM_WEAPON_SUBCLASS_CLASSIC",
+			Type = "Constants",
+			Values =
+			{
+				{ Name = "ITEM_WEAPON_SUBCLASS_EXOTIC1H", Type = "ItemWeaponSubclass", Value = Bearclaw },
+				{ Name = "ITEM_WEAPON_SUBCLASS_EXOTIC2H", Type = "ItemWeaponSubclass", Value = Catclaw },
+				{ Name = "ITEM_WEAPON_SUBCLASS_SPEAR", Type = "ItemWeaponSubclass", Value = Obsolete3 },
 			},
 		},
 		{

@@ -99,6 +99,10 @@ local Calendar =
 			},
 		},
 		{
+			Name = "ContextMenuEventComplain",
+			Type = "Function",
+		},
+		{
 			Name = "ContextMenuEventCopy",
 			Type = "Function",
 		},

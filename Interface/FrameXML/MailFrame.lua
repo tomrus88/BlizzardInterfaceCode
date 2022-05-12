@@ -11,11 +11,9 @@ MAX_COD_AMOUNT = 10000;
 SEND_MAIL_TAB_LIST = {};
 SEND_MAIL_TAB_LIST[1] = "SendMailNameEditBox";
 SEND_MAIL_TAB_LIST[2] = "SendMailSubjectEditBox";
-SEND_MAIL_TAB_LIST[3] = "SendMailBodyEditBox";
+SEND_MAIL_TAB_LIST[3] = "MailEditBox";
 SEND_MAIL_TAB_LIST[4] = "SendMailMoneyGold";
 SEND_MAIL_TAB_LIST[5] = "SendMailMoneyCopper";
-
-local MAX_INBOX_SIZE = 100;
 
 function MailFrame_OnLoad(self)
 	-- Init pagenum
@@ -37,7 +35,7 @@ function MailFrame_OnLoad(self)
 	self:RegisterEvent("MAIL_UNLOCK_SEND_ITEMS");
 	self:RegisterEvent("TRIAL_STATUS_UPDATE");
 	-- Set previous and next fields
-	MoneyInputFrame_SetPreviousFocus(SendMailMoney, SendMailBodyEditBox);
+	MoneyInputFrame_SetPreviousFocus(SendMailMoney, MailEditBox);
 	MoneyInputFrame_SetNextFocus(SendMailMoney, SendMailNameEditBox);
 	MoneyFrame_SetMaxDisplayWidth(SendMailMoneyFrame, 160);
 	MailFrame_UpdateTrialState(self);
@@ -65,12 +63,11 @@ function MailFrame_OnEvent(self, event, ...)
 		OpenAllBags(self);
 		SendMailFrame_Update();
 		MailFrameTab_OnClick(nil, 1);
-		MailFrame_RefreshInbox(self);
+		CheckInbox();
 		DoEmote("READ", nil, true);
 	elseif ( event == "MAIL_INBOX_UPDATE" ) then
 		InboxFrame_Update();
 		OpenMail_Update();
-		self.inboxBeingChecked = false;
 	elseif ( event == "MAIL_SEND_INFO_UPDATE" ) then
 		SendMailFrame_Update();
 	elseif ( event == "MAIL_SEND_SUCCESS" ) then
@@ -153,33 +150,10 @@ end
 
 -- Inbox functions
 
-function MailFrame_RefreshInbox(self)
-	if self.refreshQueued or self.inboxBeingChecked then
-		return;
-	end
-
-	local canCheck, timeUntilAvailable = C_Mail.CanCheckInbox();
-	if canCheck then
-		CheckInbox();
-		self.inboxBeingChecked = true;
-	else
-		self.refreshQueued = true;
-		C_Timer.After(timeUntilAvailable, function()
-			self.refreshQueued = false;
-			MailFrame_RefreshInbox(self);
-		end);
-	end
-end
-
 function InboxFrame_Update()
 	local numItems, totalItems = GetInboxNumItems();
-
-	if numItems ~= totalItems and numItems < MAX_INBOX_SIZE then
-		MailFrame_RefreshInbox(MailFrame)
-	end
-
 	local index = ((InboxFrame.pageNum - 1) * INBOXITEMS_TO_DISPLAY) + 1;
-	local packageIcon, stationeryIcon, sender, subject, money, CODAmount, daysLeft, itemCount, wasRead, x, y, z, isGM, firstItemQuantity, firstItemLink;
+	local packageIcon, stationeryIcon, sender, subject, money, CODAmount, daysLeft, itemCount, wasRead, x, y, z, isGM, firstItemQuantity;
 	local icon, button, expireTime, senderText, subjectText, buttonIcon;
 	
 	if ( totalItems > numItems ) then
@@ -195,7 +169,7 @@ function InboxFrame_Update()
 	for i=1, INBOXITEMS_TO_DISPLAY do
 		if ( index <= numItems ) then
 			-- Setup mail item
-			packageIcon, stationeryIcon, sender, subject, money, CODAmount, daysLeft, itemCount, wasRead, x, y, z, isGM, firstItemQuantity, firstItemLink = GetInboxHeaderInfo(index);
+			packageIcon, stationeryIcon, sender, subject, money, CODAmount, daysLeft, itemCount, wasRead, x, y, z, isGM, firstItemQuantity, firstItemID = GetInboxHeaderInfo(index);
 			
 			-- Set icon
 			if ( packageIcon ) and ( not isGM ) then
@@ -216,7 +190,7 @@ function InboxFrame_Update()
 			button.itemCount = itemCount;
 			SetItemButtonCount(button, firstItemQuantity);
 			if ( firstItemQuantity ) then
-				SetItemButtonQuality(button, select(3, GetItemInfo(firstItemLink)), firstItemLink);
+				SetItemButtonQuality(button, select(3, GetItemInfo(firstItemID)), firstItemID);
 			else
 				button.IconBorder:Hide();
 				button.IconOverlay:Hide();
@@ -286,6 +260,7 @@ function InboxFrame_Update()
 			_G["MailItem"..i.."Sender"]:SetText("");
 			_G["MailItem"..i.."Subject"]:SetText("");
 			_G["MailItem"..i.."ExpireTime"]:Hide();
+			MoneyInputFrame_ResetMoney(SendMailMoney);
 		end
 		index = index + 1;
 	end
@@ -537,21 +512,27 @@ function OpenMail_Update()
 	-- Is an invoice
 	if ( isInvoice ) then
 		local invoiceType, itemName, playerName, bid, buyout, deposit, consignment, moneyDelay, etaHour, etaMin, count, commerceAuction = GetInboxInvoiceInfo(InboxFrame.openMailID);
-		if ( invoiceType ) then
-			if ( playerName == nil ) then
-				playerName = (invoiceType == "buyer") and AUCTION_HOUSE_MAIL_MULTIPLE_SELLERS or AUCTION_HOUSE_MAIL_MULTIPLE_BUYERS;
-			end
-
+		if ( playerName ) then
 			-- Setup based on whether player is the buyer or the seller
-			local multipleSale = count and count > 1;
-			if ( multipleSale ) then
+			local buyMode;
+			if ( count and count > 1 ) then
 				itemName = format(AUCTION_MAIL_ITEM_STACK, itemName, count);
 			end
 			OpenMailInvoicePurchaser:SetShown(not commerceAuction);
+			OpenMailInvoiceBuyMode:SetShown(not commerceAuction);
 			if ( invoiceType == "buyer" ) then
-				OpenMailInvoiceItemLabel:SetText(ITEM_PURCHASED_COLON.." "..itemName);
+				if ( bid == buyout ) then
+					buyMode = "("..BUYOUT..")";
+				else
+					buyMode = "("..HIGH_BIDDER..")";
+				end
+				OpenMailInvoiceItemLabel:SetText(ITEM_PURCHASED_COLON.." "..itemName.."  "..buyMode);
 				OpenMailInvoicePurchaser:SetText(SOLD_BY_COLON.." "..playerName);
 				OpenMailInvoiceAmountReceived:SetText(AMOUNT_PAID_COLON);
+				-- Clear buymode
+				OpenMailInvoiceBuyMode:SetText("");
+				-- Position amount paid
+				OpenMailInvoiceAmountReceived:SetPoint("TOPRIGHT", "OpenMailInvoiceSalePrice", "TOPRIGHT", 0, 0);
 				-- Update purchase price
 				MoneyFrame_Update("OpenMailTransactionAmountMoneyFrame", bid);	
 				-- Position buy line
@@ -570,15 +551,16 @@ function OpenMail_Update()
 				OpenMailInvoicePurchaser:SetText(PURCHASED_BY_COLON.." "..playerName);
 				OpenMailInvoiceAmountReceived:SetText(AMOUNT_RECEIVED_COLON);
 				-- Determine if auction was bought out or bid on
-
-				OpenMailSalePriceMoneyFrame.Count:SetShown(multipleSale);
-				if ( multipleSale ) then
-					OpenMailSalePriceMoneyFrame.Count:SetText(AUCTION_HOUSE_MAIL_FORMAT_COUNT:format(count));
+				if ( bid == buyout ) then
+					OpenMailInvoiceBuyMode:SetText("("..BUYOUT..")");
+				else
+					OpenMailInvoiceBuyMode:SetText("("..HIGH_BIDDER..")");
 				end
-
+				-- Position amount received
+				OpenMailInvoiceAmountReceived:SetPoint("TOPRIGHT", "OpenMailInvoiceHouseCut", "BOTTOMRIGHT", 0, -18);
 				-- Position buy line
-				OpenMailArithmeticLine:SetPoint("TOP", "OpenMailInvoiceHouseCut", "BOTTOMRIGHT", -114, -9);
-				MoneyFrame_Update("OpenMailSalePriceMoneyFrame", multipleSale and (bid / count) or bid);
+				OpenMailArithmeticLine:SetPoint("TOP", "OpenMailInvoiceHouseCut", "BOTTOMRIGHT", 0, 9);
+				MoneyFrame_Update("OpenMailSalePriceMoneyFrame", bid);
 				MoneyFrame_Update("OpenMailDepositMoneyFrame", deposit);
 				MoneyFrame_Update("OpenMailHouseCutMoneyFrame", consignment);
 				SetMoneyFrameColor("OpenMailHouseCutMoneyFrame", "red");
@@ -593,16 +575,25 @@ function OpenMail_Update()
 				OpenMailSalePriceMoneyFrame:Show();
 				OpenMailInvoiceNotYetSent:Hide();
 				OpenMailInvoiceMoneyDelay:Hide();
-			elseif (invoiceType == "seller_temp_invoice") then 
-				OpenMailInvoiceItemLabel:SetText(ITEM_SOLD_COLON.." "..itemName);
+			elseif (invoiceType == "seller_temp_invoice") then
+				if ( bid == buyout ) then
+					buyMode = "("..BUYOUT..")";
+				else
+					buyMode = "("..HIGH_BIDDER..")";
+				end
+				OpenMailInvoiceItemLabel:SetText(ITEM_SOLD_COLON.." "..itemName.."  "..buyMode);
 				OpenMailInvoicePurchaser:SetText(PURCHASED_BY_COLON.." "..playerName);
 				OpenMailInvoiceAmountReceived:SetText(AUCTION_INVOICE_PENDING_FUNDS_COLON);
+				-- Clear buymode
+				OpenMailInvoiceBuyMode:SetText("");
+				-- Position amount paid
+				OpenMailInvoiceAmountReceived:SetPoint("TOPRIGHT", "OpenMailInvoiceSalePrice", "TOPRIGHT", 0, 0);
 				-- Update purchase price
 				MoneyFrame_Update("OpenMailTransactionAmountMoneyFrame", bid+deposit-consignment);	
 				-- Position buy line
 				OpenMailArithmeticLine:SetPoint("TOP", "OpenMailInvoicePurchaser", "BOTTOMLEFT", 125, 0);
 				-- How long they have to wait to get the money
-				OpenMailInvoiceMoneyDelay:SetFormattedText(AUCTION_INVOICE_FUNDS_DELAY, GameTime_GetFormattedTime(etaHour, etaMin, true));
+				OpenMailInvoiceMoneyDelay:SetFormattedText(AUCTION_INVOICE_FUNDS_DELAY, "12:22");
 				-- Not used for a temp sale invoice
 				OpenMailInvoiceSalePrice:Hide();
 				OpenMailInvoiceDeposit:Hide();
@@ -779,11 +770,10 @@ function OpenMail_Reply()
 		subject = prefix..subject;
 	end
 	SendMailSubjectEditBox:SetText(subject)
-	SendMailBodyEditBox:SetFocus();
+	MailEditBox:GetEditBox():SetFocus();
 
 	-- Set the send mode so the work flow can change accordingly
 	SendMailFrame.sendMode = "reply";
-	SendMailFrame.replyMailID = InboxFrame.openMailID;
 end
 
 function OpenMail_Delete()
@@ -806,10 +796,10 @@ function OpenMail_Delete()
 end
 
 function OpenMail_ReportSpam()
-	local reportInfo = ReportInfo:CreateMailReportInfo(Enum.ReportType.Mail, InboxFrame.openMailID);
-	if(reportInfo) then 
-		ReportFrame:InitiateReport(reportInfo, InboxFrame.openMailSender); 
-	end		
+	local dialog = StaticPopup_Show("CONFIRM_REPORT_SPAM_MAIL", InboxFrame.openMailSender);
+	if ( dialog ) then
+		dialog.data = InboxFrame.openMailID;
+	end
 	OpenMailReportSpamButton:Disable();
 end
 
@@ -868,8 +858,7 @@ function SendMailMailButton_OnClick(self)
 end
 
 function SendMailFrame_SendMail()
-	local replyMailID = SendMailFrame.sendMode == "reply" and SendMailFrame.replyMailID or nil;
-	SendMail(SendMailNameEditBox:GetText(), SendMailSubjectEditBox:GetText(), SendMailBodyEditBox:GetText(), replyMailID);
+	SendMail(SendMailNameEditBox:GetText(), SendMailSubjectEditBox:GetText(), MailEditBox:GetInputText());
 end
 
 function SendMailFrame_EnableSendMailButton()
@@ -979,12 +968,7 @@ function SendMailFrame_Update()
 	local taby = (icony + gapy1);
 	local scrollHeight = 249 - areay;
 
-	-- Resize the scroll frame
-	SendMailScrollFrame:SetHeight(scrollHeight);
-	SendMailScrollChildFrame:SetHeight(scrollHeight);
 	SendMailHorizontalBarLeft2:SetPoint("TOPLEFT", "SendMailFrame", "BOTTOMLEFT", 2, 184 + areay);
-	SendScrollBarBackgroundTop:SetHeight(min(scrollHeight, 256));
-	SendScrollBarBackgroundTop:SetTexCoord(0, 0.484375, 0, min(scrollHeight, 256) / 256);
 	SendStationeryBackgroundLeft:SetHeight(min(scrollHeight, 256));
 	SendStationeryBackgroundLeft:SetTexCoord(0, 1.0, 0, min(scrollHeight, 256) / 256);
 	SendStationeryBackgroundRight:SetHeight(min(scrollHeight, 256));
@@ -1019,7 +1003,7 @@ function SendMailFrame_Reset()
 	SendMailNameEditBox:SetText("");
 	SendMailNameEditBox:SetFocus();
 	SendMailSubjectEditBox:SetText("");
-	SendMailBodyEditBox:SetText("");
+	MailEditBox:SetText("");
 	SendMailFrame_Update();
 	MoneyInputFrame_ResetMoney(SendMailMoney);
 	SendMailRadioButton_OnClick(1);
@@ -1254,4 +1238,13 @@ end
 
 function OpenAllMailMixin:IsItemBlacklisted(itemID)
 	return self.blacklistedItemIDs and self.blacklistedItemIDs[itemID];
+end
+
+function SendMailEditBox_OnLoad()
+	ScrollUtil.RegisterScrollBoxWithScrollBar(MailEditBox.ScrollBox, MailEditBoxScrollBar);
+	MailEditBox:RegisterCallback("OnTabPressed", SendMailEditBox_OnTabPressed, MailEditBox);
+end
+
+function SendMailEditBox_OnTabPressed(self)
+	EditBox_HandleTabbing(self, SEND_MAIL_TAB_LIST);
 end

@@ -1,19 +1,4 @@
-
-local barHeight = 18;
-local customOptions = 
-{
-	healthBarHeight = barHeight,
-	castBarHeight = barHeight,
-	castBarFontHeight = 12,
-	maxHealOverflowRatio = 1.0,
-	ignoreIconSize = true,
-	ignoreIconPoint = true,
-	ignoreBarSize = true,
-	ignoreBarPoints = true,
-	ignoreOverAbsorbGlow = true,
-	ignoreOverHealAbsorbGlow = true,
-	nameFont = SystemFont_LargeNamePlateFixed,
-};
+local BarHeight = 18;
 
 CommentatorNamePlateMixin = {}
 
@@ -36,16 +21,43 @@ function CommentatorNamePlateMixin:OnLoad()
 	self.SetupOverride = self.OnSetupOverride;
 	self.UpdateNameOverride = self.OnUpdateNameOverride;
 	self.UpdateHealthBorderOverride = self.OnUpdateHealthBorderOverride;
-	self.SetBarPointsOverride = self.OnSetBarPointsOverride;
+	self.UpdateHealthColorOverride = self.OnUpdateHealthColorOverride;
 	self.CommentatorTeamSwapped = self.OnCommentatorTeamSwapped;
-
-	-- We cannot leverage the setup functions or frame functions in Blizzard_Nameplates because many
-	-- values are repeatedly overwritten (ex. UpdateNamePlateOptions).
-	self.customOptions = customOptions;
 
 	-- Attaching elements to inherited frames and textures to preserve as much of the original
 	-- functionality as possible without redefining it in the XML.
-	self.castBar.border = CreateFrame("FRAME", nil, self.castBar, "NamePlateFullBorderTemplate");
+	self:GetHealthBar().border:ClearAllPoints();
+	self:GetHealthBar().border = CreateFrame("FRAME", nil, self:GetHealthBar(), "CommentatorNamePlateFullBorderTemplate");
+	self:GetHealthBar():SetStatusBarAtlas("_Bar-mid");
+	self:GetHealthBar():SetHeight(BarHeight);
+	
+	if (self:GetCastBar()) then
+		self:GetCastBar():SetScript("OnShow", nil);
+		self:GetCastBar().Border:SetAlpha(0);
+		self:GetCastBar().border = CreateFrame("FRAME", nil, self:GetCastBar(), "CommentatorNamePlateFullBorderTemplate");
+		self:GetCastBar():SetStatusBarAtlas("_Bar-mid");
+	
+		self:GetCastBar().Flash:ClearAllPoints();
+		self:GetCastBar().Flash:SetAllPoints();
+		self:GetCastBar().Flash:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-BarFill");
+		self:GetCastBar().Flash:SetBlendMode("ADD");
+
+		local fontName, fontSize, fontFlags = self.CastBar.Text:GetFont();
+		self:GetCastBar():SetHeight(BarHeight);
+		self:GetCastBar().Text:SetFont(fontName, 12, fontFlags);
+	end
+
+	self.name:SetFontObject(SystemFont_LargeNamePlateFixed);
+
+	self.LevelFrame:Hide();
+end
+
+function CommentatorNamePlateMixin:GetCastBar()
+	return self.CastBar;
+end
+
+function CommentatorNamePlateMixin:GetHealthBar()
+	return self.healthBar;
 end
 
 function CommentatorNamePlateMixin:OnEvent(event, ...)
@@ -75,6 +87,11 @@ function CommentatorNamePlateMixin:OnUpdate(elapsed)
 	CompactUnitFrame_OnUpdate(self, elapsed);
 
 	self:UpdateCrowdControlAuras();
+end
+
+function CommentatorNamePlateMixin:OnSizeChanged(w, h)
+	PixelUtil.SetPoint(self.healthBar, "LEFT", self, "LEFT", 12, 5);
+	PixelUtil.SetPoint(self.healthBar, "RIGHT", self, "RIGHT", -12, 5);
 end
 
 function CommentatorNamePlateMixin:GetNameText()
@@ -109,34 +126,31 @@ end
 
 function CommentatorNamePlateMixin:SetPointsByPixelUtil()
 	self.healthBar:ClearAllPoints();
-	PixelUtil.SetSize(self.healthBar, 190, barHeight);
+	PixelUtil.SetSize(self.healthBar, 190, BarHeight);
 	PixelUtil.SetPoint(self.healthBar, "LEFT", self, "LEFT", 0, -10);
 	
 	self.healthBar:SetFrameLevel(self:GetFrameLevel() - 1);
+	self.healthBar.border:UpdateSizes();
 
-	self.overAbsorbGlow:ClearAllPoints();
-	PixelUtil.SetPoint(self.overAbsorbGlow, "BOTTOMLEFT", self.healthBar, "BOTTOMRIGHT", -8, -1);
-	PixelUtil.SetPoint(self.overAbsorbGlow, "TOPLEFT", self.healthBar, "TOPRIGHT", -8, 1);
-	PixelUtil.SetHeight(self.overAbsorbGlow, 8);
+	if (self:GetCastBar()) then
+		PixelUtil.SetWidth(self:GetCastBar(), 170, BarHeight);
+		PixelUtil.SetPoint(self:GetCastBar(), "TOP", self.healthBar, "BOTTOM", 0, -6);
 	
-	self.overHealAbsorbGlow:ClearAllPoints();
-	--PixelUtil.SetPoint(self.overHealAbsorbGlow, "BOTTOMRIGHT", self.healthBar, "BOTTOMLEFT", 2, -1);
-	--PixelUtil.SetPoint(self.overHealAbsorbGlow, "TOPRIGHT", self.healthBar, "TOPLEFT", 2, 1);
-	--PixelUtil.SetWidth(self.overHealAbsorbGlow, 8);
+		self:GetCastBar().Text:ClearAllPoints();
+		local iconSize = BarHeight + 2;
+		local textOffset = iconSize / 2;
+		PixelUtil.SetPoint(self:GetCastBar().Text, "CENTER", self:GetCastBar(), "CENTER", textOffset, 0);
 	
-	PixelUtil.SetWidth(self.castBar, 170, barHeight);
-	PixelUtil.SetPoint(self.castBar, "TOP", self.healthBar, "BOTTOM", 0, -6);
-	
-	self.castBar.Text:ClearAllPoints();
-	local iconSize = barHeight + 2;
-	local textOffset = iconSize / 2;
-	PixelUtil.SetPoint(self.castBar.Text, "CENTER", self.castBar, "CENTER", textOffset, 0);
-	
-	self.castBar.Icon:ClearAllPoints();
-	PixelUtil.SetSize(self.castBar.Icon, iconSize, iconSize);
-	PixelUtil.SetPoint(self.castBar.Icon, "TOPLEFT", self.castBar, "TOPLEFT", -1, 1);
-	
-	self.castBar.border:UpdateSizes();
+		self:GetCastBar().Icon:ClearAllPoints();
+		self:GetCastBar().Icon:SetDrawLayer("OVERLAY", 7);
+		PixelUtil.SetSize(self:GetCastBar().Icon, iconSize, iconSize);
+		PixelUtil.SetPoint(self:GetCastBar().Icon, "TOPLEFT", self:GetCastBar(), "TOPLEFT", -1, 1);
+
+		self:GetCastBar().border:UpdateSizes();
+	end
+
+	self.name:ClearAllPoints();
+	PixelUtil.SetPoint(self.name, "BOTTOM", self.healthBar, "TOP", 0, 4);
 
 	self.ClassIcon:ClearAllPoints();
 	PixelUtil.SetPoint(self.ClassIcon, "RIGHT", self.healthBar, "LEFT", 0, 0);
@@ -157,15 +171,7 @@ function CommentatorNamePlateMixin:SetPointsByPixelUtil()
 	PixelUtil.SetPoint(self.Mask, "CENTER", self.ClassIcon, "CENTER", 0, 0);
 end
 
-function CommentatorNamePlateMixin:OnSetupOverride()
-	self.healthBar:SetStatusBarAtlas("_Bar-mid");
-	self.castBar:SetStatusBarAtlas("_Bar-mid");
-	self.myHealPrediction:SetAtlas("_Bar-mid");
-	self.otherHealPrediction:SetAtlas("_Bar-mid");
-	self.myHealAbsorb:SetAtlas("_Bar-mid");
-	self.myHealAbsorb:SetVertexColor(21/255, 89/255, 72/255);
-	self.totalAbsorb:SetAtlas("_Bar-mid");
-
+function CommentatorNamePlateMixin:OnSetupOverride(setupOptions, frameOptions)
 	self:SetPointsByPixelUtil();
 	-- CUF can continue.
 	return false;
@@ -187,8 +193,10 @@ end
 
 function CommentatorNamePlateMixin:SetBorderColors()
 	local color = C_Commentator.GetTeamColorByUnit(self.unit);
-	self.healthBar.border:SetVertexColor(color.r, color.g, color.b, color.a);
-	self.castBar.border:SetVertexColor(color.r, color.g, color.b, color.a);
+	self:GetHealthBar().border:SetVertexColor(color.r, color.g, color.b, color.a);
+	if (self:GetCastBar()) then
+		self:GetCastBar().border:SetVertexColor(color.r, color.g, color.b, color.a);
+	end
 end
 
 function CommentatorNamePlateMixin:OnUpdateHealthBorderOverride()
@@ -196,6 +204,15 @@ function CommentatorNamePlateMixin:OnUpdateHealthBorderOverride()
 
 	local class = select(2, UnitClass(self.unit))
 	self.ClassIcon:SetAtlas(GetClassAtlas(class));
+
+	-- CUF cannot continue.
+	return true;
+end
+
+function CommentatorNamePlateMixin:OnUpdateHealthColorOverride()
+	local localizedClass, englishClass = UnitClass(self.unit);
+	local classColor = RAID_CLASS_COLORS[englishClass];
+	self:GetHealthBar():SetStatusBarColor(classColor.r, classColor.g, classColor.b);
 
 	-- CUF cannot continue.
 	return true;
@@ -230,5 +247,46 @@ function CommentatorNamePlateMixin:UpdateCrowdControlAuras()
 	else
 		self.CCText:Hide();
 		self.CCCooldown:Clear();
+	end
+end
+
+CommentatorNamePlateBorderTemplateMixin = {};
+
+function CommentatorNamePlateBorderTemplateMixin:SetVertexColor(r, g, b, a)
+	for i, texture in ipairs(self.Textures) do
+		texture:SetVertexColor(r, g, b, a);
+	end
+end
+
+function CommentatorNamePlateBorderTemplateMixin:SetBorderSizes(borderSize, borderSizeMinPixels, upwardExtendHeightPixels, upwardExtendHeightMinPixels)
+	self.borderSize = borderSize;
+	self.borderSizeMinPixels = borderSizeMinPixels;
+	self.upwardExtendHeightPixels = upwardExtendHeightPixels;
+	self.upwardExtendHeightMinPixels = upwardExtendHeightMinPixels;
+end
+
+function CommentatorNamePlateBorderTemplateMixin:UpdateSizes()
+	local borderSize = self.borderSize or 1;
+	local minPixels = self.borderSizeMinPixels or 2;
+
+	local upwardExtendHeightPixels = self.upwardExtendHeightPixels or borderSize;
+	local upwardExtendHeightMinPixels = self.upwardExtendHeightMinPixels or minPixels;
+
+	PixelUtil.SetWidth(self.Left, borderSize, minPixels);
+	PixelUtil.SetPoint(self.Left, "TOPRIGHT", self, "TOPLEFT", 0, upwardExtendHeightPixels, 0, upwardExtendHeightMinPixels);
+	PixelUtil.SetPoint(self.Left, "BOTTOMRIGHT", self, "BOTTOMLEFT", 0, -borderSize, 0, minPixels);
+
+	PixelUtil.SetWidth(self.Right, borderSize, minPixels);
+	PixelUtil.SetPoint(self.Right, "TOPLEFT", self, "TOPRIGHT", 0, upwardExtendHeightPixels, 0, upwardExtendHeightMinPixels);
+	PixelUtil.SetPoint(self.Right, "BOTTOMLEFT", self, "BOTTOMRIGHT", 0, -borderSize, 0, minPixels);
+
+	PixelUtil.SetHeight(self.Bottom, borderSize, minPixels);
+	PixelUtil.SetPoint(self.Bottom, "TOPLEFT", self, "BOTTOMLEFT", 0, 0);
+	PixelUtil.SetPoint(self.Bottom, "TOPRIGHT", self, "BOTTOMRIGHT", 0, 0);
+
+	if self.Top then
+		PixelUtil.SetHeight(self.Top, borderSize, minPixels);
+		PixelUtil.SetPoint(self.Top, "BOTTOMLEFT", self, "TOPLEFT", 0, 0);
+		PixelUtil.SetPoint(self.Top, "BOTTOMRIGHT", self, "TOPRIGHT", 0, 0);
 	end
 end

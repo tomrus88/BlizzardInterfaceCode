@@ -36,6 +36,15 @@ function CycleFollowCameraTransitionPreset(index)
 	C_Commentator.SetFollowCameraSpeeds(unpack(FOLLOW_CAM_TRANSITION_SPEEDS[CurrentCamTransitionIndex]));
 end
 
+function SetSpectatorModeForOtherFrames(spectatorMode)
+	if (UIWidgetTopCenterContainerFrame) then
+		UIWidgetTopCenterContainerFrame:SetSpectatorMode(spectatorMode, Commentator.Scoreboard.Clock);
+	end
+	if (BattlefieldMapFrame) then
+		BattlefieldMapFrame:SetSpectatorMode(spectatorMode);
+	end
+end
+
 CommentatorMixin = {}
 
 function CommentatorMixin:OnLoad()
@@ -232,20 +241,15 @@ function CommentatorMixin:SetDefaultCVars()
 	SetCVar("nameplateSelectedScale", nativeScale);
 
 	SetCVar("nameplateShowAll", 1);
-	SetCVar("UnitNameFriendlySpecialNPCName", 0);
-	SetCVar("UnitNameHostleNPC", 0);
-	SetCVar("UnitNameInteractiveNPC", 0);
 	SetCVar("UnitNameNPC", 0);
-	SetCVar("ShowQuestUnitCircles", 0);
 	SetCVar("ShowClassColorInNameplate", 0);
 	SetCVar("nameplateMotion", 0);
 	SetCVar("showVKeyCastbar", 0);
-	SetCVar("threatWarning", 0);
 	SetCVar("deselectOnClick", 1);
 	SetCVar("maxfpsbk", 0);
 	SetCVar("showSpectatorTeamCircles", 1);
 	SetCVar("ShowClassColorInNameplate", "1");
-	SetCVar("nameplateMinAlpha", ".75");
+	SetCVar("nameplateMinAlpha", "1");
 	SetCVar("nameplateOccludedAlphaMult", "1.0");
 	SetCVar("UnitNamePlayerGuild", "0");
 	SetCVar("UnitNameEnemyMinionName", "0");
@@ -281,6 +285,7 @@ function CommentatorMixin:Shutdown()
 	self.Scoreboard:Hide();
 	self:ClearUnitFrames();
 	self:SetFrameLock(false);
+	SetSpectatorModeForOtherFrames(false);
 end
 
 function CommentatorMixin:Reset()
@@ -328,14 +333,17 @@ end
 function CommentatorMixin:InitUnitFrames()
 	self.sortedPlayerIndices = {{},{}};
 
+	local highestPlayerCount = 0;
 	for teamIndex = 1, 2 do
 		local playerCount = C_Commentator.GetNumPlayers(teamIndex);
+		highestPlayerCount = math.max(highestPlayerCount, playerCount);
 		if playerCount then
 			local isAlignedLeft = teamIndex == 1;
 			local unitFrames = self.unitFrames[teamIndex];
 			for playerIndex = 1, playerCount do
 				local unitFrame = self.unitFramePool:Acquire();
-				lastFrameTest = unitFrame;
+				unitFrame:SetFrameLevel(playerIndex);
+
 				local playerData = C_Commentator.GetPlayerData(teamIndex, playerIndex);
 				unitFrame:Init(isAlignedLeft, playerData, teamIndex);
 				unitFrame.tempRole = unitFrame:GetRole();
@@ -355,14 +363,24 @@ function CommentatorMixin:InitUnitFrames()
 		end
 	end
 
-	local originY = -25;
-	local padding = -230;
-	local offsetX = 20;
+	local minified = highestPlayerCount > 5;
+	local originY = minified and 30 or -25;
+	local offsetX = minified and -100 or 20;
+	local padding;
+	if minified then
+		padding = -56;
+	elseif highestPlayerCount > 3 then
+		padding = -160;
+	else
+		padding = -230;
+	end
+
 	do
 		local offsetY = originY;
 		for index, unitFrame in ipairs(self.unitFrames[1]) do
 			unitFrame:ClearAllPoints();
 			unitFrame:SetPoint("TOPLEFT", self, offsetX, offsetY);
+			unitFrame:SetMinified(minified);
 			offsetY = offsetY + padding;
 		end
 	end
@@ -372,6 +390,7 @@ function CommentatorMixin:InitUnitFrames()
 		for index, unitFrame in ipairs(self.unitFrames[2]) do
 			unitFrame:ClearAllPoints();
 			unitFrame:SetPoint("TOPRIGHT", self, -offsetX, offsetY);
+			unitFrame:SetMinified(minified);
 			offsetY = offsetY + padding;
 		end
 	end
@@ -448,6 +467,7 @@ function CommentatorMixin:OnObserverStateChanged(oldState, newState)
 		self:ClearUnitFrames();
 
 		self:SetFrameLock(true);
+		SetSpectatorModeForOtherFrames(true);
 	elseif newState == TOURNAMENTARENA_ZONESTATE_OBSERVING or newState == TOURNAMENTARENA_ZONESTATE_PREMATCH then
 		ClearTarget();
 
@@ -457,6 +477,7 @@ function CommentatorMixin:OnObserverStateChanged(oldState, newState)
 		self.currentSpeedFactor = nil;
 
 		self:SetFrameLock(true);
+		SetSpectatorModeForOtherFrames(true);
 	elseif newState == TOURNAMENTARENA_ZONESTATE_SCANNING then
 		ClearTarget();
 
@@ -468,6 +489,7 @@ function CommentatorMixin:OnObserverStateChanged(oldState, newState)
 		self:ClearUnitFrames();
 
 		self:SetFrameLock(false);
+		SetSpectatorModeForOtherFrames(false);
 	end
 end
 

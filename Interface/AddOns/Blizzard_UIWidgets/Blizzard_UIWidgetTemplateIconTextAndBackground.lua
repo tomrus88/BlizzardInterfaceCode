@@ -14,13 +14,8 @@ local textureKitRegions = {
 	["Glow"] = "%s-glow",
 };
 
-function UIWidgetTemplateIconTextAndBackgroundMixin:OnLoad()
-	UIWidgetBaseTemplateMixin.OnLoad(self);
-end
-
-function UIWidgetTemplateIconTextAndBackgroundMixin:Setup(widgetInfo, widgetContainer)
-	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo, widgetContainer);
-	SetupTextureKitOnRegions(widgetInfo.textureKit, self, textureKitRegions, TextureKitConstants.SetVisibility, TextureKitConstants.UseAtlasSize);
-	self.Text:SetText(widgetInfo.text);
-	self:Layout();
+function UIWidgetTemplateIconTextAndBackgroundMixin:Setup(widgetInfo)
+	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo);
+	SetupTextureKits(widgetInfo.textureKitID, self, textureKitRegions, true);
+	self.Text:SetText(widgetInfo.value);
 end

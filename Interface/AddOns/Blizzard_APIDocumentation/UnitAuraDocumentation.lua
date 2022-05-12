@@ -16,8 +16,6 @@ local UnitAura =
 			Payload =
 			{
 				{ Name = "unitTarget", Type = "string", Nilable = false },
-				{ Name = "isFullUpdate", Type = "bool", Nilable = false },
-				{ Name = "updatedAuras", Type = "table", InnerType = "UnitAuraUpdateInfo", Nilable = true },
 			},
 		},
 	},

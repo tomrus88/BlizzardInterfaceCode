@@ -22,7 +22,7 @@ function CommunitiesFrameTabMixin:OnEnter()
 	end
 end
 
-function CommunitiesFrameTabMixin:OnLeave()
+function CommunitiesFrameTabMixin:OnLeave(self)
 	GameTooltip:Hide();
 end
 

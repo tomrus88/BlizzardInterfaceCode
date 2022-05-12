@@ -16,25 +16,25 @@ local textureKitRegions = {
 }
 
 function UIWidgetTemplateIconAndTextMixin:OnAcquired(widgetInfo)
-	local widgetWidth = self.Text:GetStringWidth();
+	self.Text:ClearAllPoints();
 
 	if self.Icon:IsShown() then
-		widgetWidth = widgetWidth + self.Icon:GetWidth()- 12;
+		self.alignWidth = self.Icon:GetWidth()- 12 + self.Text:GetStringWidth();
 		self.Text:SetPoint("TOPLEFT", self.Icon, "TOPRIGHT", -12, -6);
 	else
+		self.alignWidth = self.Text:GetStringWidth();
 		self.Text:SetPoint("TOPLEFT", self.Icon, "TOPLEFT", 0, -6);
 	end
 
-	self:SetWidth(widgetWidth);
+	self:SetWidth(self.alignWidth);
 end
 
-function UIWidgetTemplateIconAndTextMixin:Setup(widgetInfo, widgetContainer)
-	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo, widgetContainer);
-	SetupTextureKitOnRegions(widgetInfo.textureKit, self, textureKitRegions, TextureKitConstants.SetVisibility);
+function UIWidgetTemplateIconAndTextMixin:Setup(widgetInfo)
+	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo);
+	SetupTextureKits(widgetInfo.textureKitID, self, textureKitRegions, true);
 
 	self.Text:SetText(widgetInfo.text);
 	self:SetTooltip(widgetInfo.tooltip);
-	self.DynamicIconButton:SetTooltipLocation(widgetInfo.tooltipLoc);
 	self.DynamicIconButton:SetTooltip(widgetInfo.dynamicTooltip);
 
 	if ( widgetInfo.state == Enum.IconAndTextWidgetState.ShownWithDynamicIconFlashing ) then

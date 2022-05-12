@@ -11,79 +11,126 @@
 		</Scripts>
 	</Button>
 	<Frame name="MoneyFrameTemplate" virtual="true">
-		<Size x="192" y="28"/>
+		<Size>
+			<AbsDimension x="192" y="28"/>
+		</Size>
 		<Frames>
 			<Button name="$parentCopperButton" inherits="MoneyFrameButtonTemplate">
-				<Size x="47" y="19"/>
+				<Size>
+					<AbsDimension x="47" y="19"/>
+				</Size>
 				<Anchors>
-					<Anchor point="RIGHT" x="-13" y="0"/>
+					<Anchor point="RIGHT">
+						<Offset>
+							<AbsDimension x="-13" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
 						MoneyInputFrame_OpenPopup(self:GetParent());
 					</OnClick>
 				</Scripts>
-				<NormalTexture atlas="coin-copper">
-					<Size x="19" y="19"/>
+				<NormalTexture file="Interface\MoneyFrame\UI-MoneyIcons">
+					<Size>
+						<AbsDimension x="19" y="19"/>
+					</Size>
 					<Anchors>
 						<Anchor point="RIGHT"/>
 					</Anchors>
+					<TexCoords left="0.5" right="0.75" top="0" bottom="1"/>
 				</NormalTexture>
 				<ButtonText name="$parentText" parentKey="Text">
 					<Anchors>
-						<Anchor point="RIGHT"  x="-19" y="0"/>
+						<Anchor point="RIGHT">
+							<Offset>
+								<AbsDimension x="-19" y="0"/>
+							</Offset>
+						</Anchor>
 					</Anchors>
 				</ButtonText>
 				<NormalFont style="NumberFontNormalLargeRight"/>
-				<PushedTextOffset x="0" y="0"/>
+				<PushedTextOffset>
+					<AbsDimension x="0" y="0"/>
+				</PushedTextOffset>
 			</Button>
 			<Button name="$parentSilverButton" inherits="MoneyFrameButtonTemplate">
-				<Size x="47" y="19"/>
+				<Size>
+					<AbsDimension x="47" y="19"/>
+				</Size>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentCopperButton" relativePoint="LEFT" x="-4" y="0"/>
+					<Anchor point="RIGHT" relativeTo="$parentCopperButton" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-4" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
 						MoneyInputFrame_OpenPopup(self:GetParent());
 					</OnClick>
 				</Scripts>
-				<NormalTexture atlas="coin-silver">
-					<Size x="19" y="19"/>
+				<NormalTexture file="Interface\MoneyFrame\UI-MoneyIcons">
+					<Size>
+						<AbsDimension x="19" y="19"/>
+					</Size>
 					<Anchors>
 						<Anchor point="RIGHT"/>
 					</Anchors>
+					<TexCoords left="0.25" right="0.5" top="0" bottom="1"/>
 				</NormalTexture>
 				<ButtonText name="$parentText" parentKey="Text">
 					<Anchors>
-						<Anchor point="RIGHT" x="-19" y="0"/>
+						<Anchor point="RIGHT">
+							<Offset>
+								<AbsDimension x="-19" y="0"/>
+							</Offset>
+						</Anchor>
 					</Anchors>
 				</ButtonText>
 				<NormalFont style="NumberFontNormalLargeRight"/>
-				<PushedTextOffset x="0" y="0"/>
+				<PushedTextOffset>
+					<AbsDimension x="0" y="0"/>
+				</PushedTextOffset>
 			</Button>
 			<Button name="$parentGoldButton" inherits="MoneyFrameButtonTemplate">
-				<Size x="47" y="19"/>
+				<Size>
+					<AbsDimension x="47" y="19"/>
+				</Size>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentSilverButton" relativePoint="LEFT" x="-4" y="0"/>
+					<Anchor point="RIGHT" relativeTo="$parentSilverButton" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-4" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
 						MoneyInputFrame_OpenPopup(self:GetParent());
 					</OnClick>
 				</Scripts>
-				<NormalTexture atlas="coin-gold">
-					<Size x="19" y="19"/>
+				<NormalTexture file="Interface\MoneyFrame\UI-MoneyIcons">
+					<Size>
+						<AbsDimension x="19" y="19"/>
+					</Size>
 					<Anchors>
 						<Anchor point="RIGHT"/>
 					</Anchors>
+					<TexCoords left="0" right="0.25" top="0" bottom="1"/>
 				</NormalTexture>
 				<ButtonText name="$parentText" parentKey="Text">
 					<Anchors>
-						<Anchor point="RIGHT" x="-19" y="0"/>
+						<Anchor point="RIGHT">
+							<Offset>
+								<AbsDimension x="-19" y="0"/>
+							</Offset>
+						</Anchor>
 					</Anchors>
 				</ButtonText>
 				<NormalFont style="NumberFontNormalLargeRight"/>
-				<PushedTextOffset x="0" y="0"/>
+				<PushedTextOffset>
+					<AbsDimension x="0" y="0"/>
+				</PushedTextOffset>
 			</Button>
 		</Frames>
 		<Scripts>
@@ -105,12 +152,14 @@
 		</Scripts>
 	</Frame>
 	<Frame name="SmallMoneyFrameTemplate" virtual="true">
-		<Size x="128" y="13"/>
+		<Size>
+			<AbsDimension x="128" y="13"/>
+		</Size>
 		<Frames>
 			<Frame name="$parentTrialErrorButton" parentKey="trialErrorButton" hidden="true">
 				<Size x="13" y="13"/>
 				<Anchors>
-					<Anchor point="LEFT"  x="-23" y="0" />
+					<Anchor point="LEFT" x="-23" y="0" />
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -134,76 +183,124 @@
 				</Scripts>
 			</Frame>
 			<Button name="$parentCopperButton" inherits="MoneyFrameButtonTemplate">
-				<Size x="32" y="13"/>
+				<Size>
+					<AbsDimension x="32" y="13"/>
+				</Size>
 				<Anchors>
-					<Anchor point="RIGHT" x="-13" y="0"/>
+					<Anchor point="RIGHT">
+						<Offset>
+							<AbsDimension x="-13" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
 						MoneyInputFrame_OpenPopup(self:GetParent());
 					</OnClick>
 				</Scripts>
-				<NormalTexture atlas="coin-copper">
-					<Size x="13" y="13"/>
+				<NormalTexture file="Interface\MoneyFrame\UI-MoneyIcons">
+					<!-- Overwritten in Lua. -->
+					<Size>
+						<AbsDimension x="13" y="13"/>
+					</Size>
 					<Anchors>
-						<Anchor point="RIGHT"/>
+						<Anchor point="RIGHT" x="-1" y="1"/>
 					</Anchors>
+					<TexCoords left="0.5" right="0.75" top="0" bottom="1"/>
 				</NormalTexture>
 				<ButtonText name="$parentText" parentKey="Text">
 					<Anchors>
-						<Anchor point="RIGHT" x="-13" y="0"/>
+						<Anchor point="RIGHT">
+							<Offset>
+								<AbsDimension x="-13" y="0"/>
+							</Offset>
+						</Anchor>
 					</Anchors>
 				</ButtonText>
 				<NormalFont style="NumberFontNormalRight"/>
-				<PushedTextOffset x="0" y="0"/>
+				<PushedTextOffset>
+					<AbsDimension x="0" y="0"/>
+				</PushedTextOffset>
 			</Button>
 			<Button name="$parentSilverButton" inherits="MoneyFrameButtonTemplate">
-				<Size x="32" y="13"/>
+				<Size>
+					<AbsDimension x="32" y="13"/>
+				</Size>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentCopperButton" relativePoint="LEFT" x="-4" y="0"/>
+					<Anchor point="RIGHT" relativeTo="$parentCopperButton" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-4" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
 						MoneyInputFrame_OpenPopup(self:GetParent());
 					</OnClick>
 				</Scripts>
-				<NormalTexture atlas="coin-silver">
-					<Size x="13" y="13"/>
+				<NormalTexture file="Interface\MoneyFrame\UI-MoneyIcons">
+					<!-- Overwritten in Lua. -->
+					<Size>
+						<AbsDimension x="13" y="13"/>
+					</Size>
 					<Anchors>
-						<Anchor point="RIGHT"/>
+						<Anchor point="RIGHT" x="-1" y="1"/>
 					</Anchors>
+					<TexCoords left="0.25" right="0.5" top="0" bottom="1"/>
 				</NormalTexture>
 				<ButtonText name="$parentText" parentKey="Text">
 					<Anchors>
-						<Anchor point="RIGHT" x="-13" y="0"/>
+						<Anchor point="RIGHT">
+							<Offset>
+								<AbsDimension x="-13" y="0"/>
+							</Offset>
+						</Anchor>
 					</Anchors>
 				</ButtonText>
 				<NormalFont style="NumberFontNormalRight"/>
-				<PushedTextOffset x="0" y="0"/>
+				<PushedTextOffset>
+					<AbsDimension x="0" y="0"/>
+				</PushedTextOffset>
 			</Button>
 			<Button name="$parentGoldButton" inherits="MoneyFrameButtonTemplate">
-				<Size x="32" y="13"/>
+				<Size>
+					<AbsDimension x="32" y="13"/>
+				</Size>
 				<Anchors>
-					<Anchor point="RIGHT" relativeTo="$parentSilverButton" relativePoint="LEFT" x="-4" y="0"/>
+					<Anchor point="RIGHT" relativeTo="$parentSilverButton" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-4" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
 						MoneyInputFrame_OpenPopup(self:GetParent());
 					</OnClick>
 				</Scripts>
-				<NormalTexture atlas="coin-gold">
-					<Size x="13" y="13"/>
+				<NormalTexture file="Interface\MoneyFrame\UI-MoneyIcons">
+					<!-- Overwritten in Lua. -->
+					<Size>
+						<AbsDimension x="13" y="13"/>
+					</Size>
 					<Anchors>
-						<Anchor point="RIGHT"/>
+						<Anchor point="RIGHT" x="-1" y="1"/>
 					</Anchors>
+					<TexCoords left="0" right="0.25" top="0" bottom="1"/>
 				</NormalTexture>
 				<ButtonText name="$parentText" parentKey="Text">
 					<Anchors>
-						<Anchor point="RIGHT" x="-13" y="0"/>
+						<Anchor point="RIGHT">
+							<Offset>
+								<AbsDimension x="-13" y="0"/>
+							</Offset>
+						</Anchor>
 					</Anchors>
 				</ButtonText>
 				<NormalFont style="NumberFontNormalRight"/>
-				<PushedTextOffset x="0" y="0"/>
+				<PushedTextOffset>
+					<AbsDimension x="0" y="0"/>
+				</PushedTextOffset>
 			</Button>
 		</Frames>
 		<Scripts>
@@ -225,7 +322,9 @@
 		</Scripts>
 	</Frame>
 	<Button name="SmallDenominationTemplate" virtual="true">
-		<Size x="32" y="13"/>
+		<Size>
+			<AbsDimension x="32" y="13"/>
+		</Size>
 		<Scripts>
 			<OnEnter>
 				GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
@@ -238,102 +337,59 @@
 		</Scripts>
 		<ButtonText name="$parentText" parentKey="Text">
 			<Anchors>
-				<Anchor point="LEFT"/>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="-13" y="0"/>
+					</Offset>
+				</Anchor>
 			</Anchors>
 		</ButtonText>
 		<NormalTexture name="$parentTexture">
-			<Size x="13" y="13"/>
+			<!-- Overwritten in Lua. -->
+			<Size>
+				<AbsDimension x="13" y="13"/>
+			</Size>
 			<Anchors>
-				<Anchor point="LEFT" x="13" y="0"/>
+				<Anchor point="LEFT" x="-1" y="1"/>
 			</Anchors>
 		</NormalTexture>
 		<NormalFont style="NumberFontNormalRight"/>
-		<PushedTextOffset x="0" y="0"/>
+		<PushedTextOffset>
+			<AbsDimension x="0" y="0"/>
+		</PushedTextOffset>
 	</Button>
 	<Frame name="SmallAlternateCurrencyFrameTemplate" virtual="true">
-		<Size x="128" y="13"/>
+		<Size>
+			<AbsDimension x="128" y="13"/>
+		</Size>
 		<Frames>
 			<Button name="$parentItem1" inherits="SmallDenominationTemplate" hidden="true">
 				<Anchors>
-					<Anchor point="LEFT"/>
+					<Anchor point="LEFT">
+						<Offset>
+							<AbsDimension x="13" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 			</Button>
 			<Button name="$parentItem2" inherits="SmallDenominationTemplate" hidden="true">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentItem1" relativePoint="RIGHT" x="4" y="0"/>
+					<Anchor point="LEFT" relativeTo="$parentItem1" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="4" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 			</Button>
 			<Button name="$parentItem3" inherits="SmallDenominationTemplate" hidden="true">
 				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentItem2" relativePoint="RIGHT" x="4" y="0"/>
+					<Anchor point="LEFT" relativeTo="$parentItem2" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="4" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 			</Button>
 		</Frames>
-	</Frame>
-
-	<Frame name="MoneyDenominationDisplayTemplate" mixin="MoneyDenominationDisplayMixin" virtual="true">
-		<Size x="32" y="13"/>
-		<!-- This key value is required and determines the denomination to display.
-		<KeyValues>
-			<KeyValue key="displayType" value="MoneyDenominationDisplayType.Copper" type="global"/>
-		</KeyValues>
-		-->
-		<Layers>
-			<Layer level="ARTWORK">
-				<Texture parentKey="Icon">
-					<Size  x="13" y="13"/>
-					<Anchors>
-						<Anchor point="RIGHT"/>
-					</Anchors>
-				</Texture>
-				<FontString parentKey="Text" inherits="PriceFont" justifyH="RIGHT">
-					<Anchors>
-						<Anchor point="RIGHT" x="-13" y="0"/>
-					</Anchors>
-					<Shadow x="1" y="-1">
-						<Color r="0" g="0" b="0"/>
-					</Shadow>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnLoad method="OnLoad"/>
-		</Scripts>
-	</Frame>
-
-	<Frame name="MoneyDisplayFrameTemplate" mixin="MoneyDisplayFrameMixin" virtual="true">
-		<Size x="128" y="13"/>
-		<!--
-			hideCopper: Hides the copper amount.
-			leftAlign: Aligns the display to the left of the frame instead of the right.
-			resizeToFit: Changes width based on the amount displayed.
-			useAuctionHouseIcons: Use the newer auction house money icons. This may become the default in the future.
-		<KeyValues>
-			<KeyValue key="hideCopper" value="true" type="boolean"/>
-			<KeyValue key="leftAlign" value="true" type="boolean"/>
-			<KeyValue key="resizeToFit" value="true" type="boolean"/>
-			<KeyValue key="useAuctionHouseIcons" value="true" type="boolean"/>
-		</KeyValues>
-		-->
-		<Frames>
-			<Frame parentKey="CopperDisplay" inherits="MoneyDenominationDisplayTemplate">
-				<KeyValues>
-					<KeyValue key="displayType" value="MoneyDenominationDisplayType.Copper" type="global"/>
-				</KeyValues>
-			</Frame>
-			<Frame parentKey="SilverDisplay" inherits="MoneyDenominationDisplayTemplate">
-				<KeyValues>
-					<KeyValue key="displayType" value="MoneyDenominationDisplayType.Silver" type="global"/>
-				</KeyValues>
-			</Frame>
-			<Frame parentKey="GoldDisplay" inherits="MoneyDenominationDisplayTemplate">
-				<KeyValues>
-					<KeyValue key="displayType" value="MoneyDenominationDisplayType.Gold" type="global"/>
-				</KeyValues>
-			</Frame>
-		</Frames>
-		<Scripts>
-			<OnLoad method="OnLoad"/>
-		</Scripts>
 	</Frame>
 </Ui>

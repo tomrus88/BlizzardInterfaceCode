@@ -29,59 +29,12 @@ local Loot =
 			},
 		},
 		{
-			Name = "BonusRollActivate",
-			Type = "Event",
-			LiteralName = "BONUS_ROLL_ACTIVATE",
-		},
-		{
-			Name = "BonusRollDeactivate",
-			Type = "Event",
-			LiteralName = "BONUS_ROLL_DEACTIVATE",
-		},
-		{
-			Name = "BonusRollFailed",
-			Type = "Event",
-			LiteralName = "BONUS_ROLL_FAILED",
-		},
-		{
-			Name = "BonusRollResult",
-			Type = "Event",
-			LiteralName = "BONUS_ROLL_RESULT",
-			Payload =
-			{
-				{ Name = "typeIdentifier", Type = "string", Nilable = false },
-				{ Name = "itemLink", Type = "string", Nilable = false },
-				{ Name = "quantity", Type = "number", Nilable = false },
-				{ Name = "specID", Type = "number", Nilable = false },
-				{ Name = "sex", Type = "number", Nilable = false },
-				{ Name = "personalLootToast", Type = "bool", Nilable = false },
-				{ Name = "currencyID", Type = "number", Nilable = true },
-				{ Name = "isSecondaryResult", Type = "bool", Nilable = false },
-				{ Name = "corrupted", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "BonusRollStarted",
-			Type = "Event",
-			LiteralName = "BONUS_ROLL_STARTED",
-		},
-		{
 			Name = "CancelLootRoll",
 			Type = "Event",
 			LiteralName = "CANCEL_LOOT_ROLL",
 			Payload =
 			{
 				{ Name = "rollID", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "ConfirmDisenchantRoll",
-			Type = "Event",
-			LiteralName = "CONFIRM_DISENCHANT_ROLL",
-			Payload =
-			{
-				{ Name = "rollID", Type = "number", Nilable = false },
-				{ Name = "rollType", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -93,30 +46,6 @@ local Loot =
 				{ Name = "rollID", Type = "number", Nilable = false },
 				{ Name = "rollType", Type = "number", Nilable = false },
 				{ Name = "confirmReason", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "EncounterLootReceived",
-			Type = "Event",
-			LiteralName = "ENCOUNTER_LOOT_RECEIVED",
-			Payload =
-			{
-				{ Name = "encounterID", Type = "number", Nilable = false },
-				{ Name = "itemID", Type = "number", Nilable = false },
-				{ Name = "itemLink", Type = "string", Nilable = false },
-				{ Name = "quantity", Type = "number", Nilable = false },
-				{ Name = "itemName", Type = "string", Nilable = false },
-				{ Name = "fileName", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "GarrisonMissionBonusRollLoot",
-			Type = "Event",
-			LiteralName = "GARRISON_MISSION_BONUS_ROLL_LOOT",
-			Payload =
-			{
-				{ Name = "itemID", Type = "number", Nilable = false },
-				{ Name = "quantity", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -203,7 +132,6 @@ local Loot =
 			Payload =
 			{
 				{ Name = "autoLoot", Type = "bool", Nilable = false },
-				{ Name = "isFromItem", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -246,62 +174,6 @@ local Loot =
 			Name = "OpenMasterLootList",
 			Type = "Event",
 			LiteralName = "OPEN_MASTER_LOOT_LIST",
-		},
-		{
-			Name = "PetBattleLootReceived",
-			Type = "Event",
-			LiteralName = "PET_BATTLE_LOOT_RECEIVED",
-			Payload =
-			{
-				{ Name = "typeIdentifier", Type = "string", Nilable = false },
-				{ Name = "itemLink", Type = "string", Nilable = false },
-				{ Name = "quantity", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "PlayerLootSpecUpdated",
-			Type = "Event",
-			LiteralName = "PLAYER_LOOT_SPEC_UPDATED",
-		},
-		{
-			Name = "QuestCurrencyLootReceived",
-			Type = "Event",
-			LiteralName = "QUEST_CURRENCY_LOOT_RECEIVED",
-			Payload =
-			{
-				{ Name = "questID", Type = "number", Nilable = false },
-				{ Name = "currencyId", Type = "number", Nilable = false },
-				{ Name = "quantity", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "QuestLootReceived",
-			Type = "Event",
-			LiteralName = "QUEST_LOOT_RECEIVED",
-			Payload =
-			{
-				{ Name = "questID", Type = "number", Nilable = false },
-				{ Name = "itemLink", Type = "string", Nilable = false },
-				{ Name = "quantity", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "ShowLootToast",
-			Type = "Event",
-			LiteralName = "SHOW_LOOT_TOAST",
-			Payload =
-			{
-				{ Name = "typeIdentifier", Type = "string", Nilable = false },
-				{ Name = "itemLink", Type = "string", Nilable = false },
-				{ Name = "quantity", Type = "number", Nilable = false },
-				{ Name = "specID", Type = "number", Nilable = false },
-				{ Name = "sex", Type = "number", Nilable = false },
-				{ Name = "personalLootToast", Type = "bool", Nilable = false },
-				{ Name = "toastMethod", Type = "number", Nilable = false },
-				{ Name = "lessAwesome", Type = "bool", Nilable = false },
-				{ Name = "upgraded", Type = "bool", Nilable = false },
-				{ Name = "corrupted", Type = "bool", Nilable = false },
-			},
 		},
 		{
 			Name = "ShowLootToastLegendaryLooted",

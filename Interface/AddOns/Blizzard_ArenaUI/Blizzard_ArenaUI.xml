@@ -310,12 +310,6 @@
 	</Button>
 	<Button name="ArenaEnemyFrameTemplate" frameStrata="LOW" toplevel="true" movable="true" hidden="true" inherits="ArenaPrepFrameTemplate" virtual="true">
 		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentTotalAbsorbBar" inherits="TotalAbsorbBarTemplate"/>
-			</Layer>
-			<Layer level="ARTWORK" textureSubLevel="1">
-				<Texture name="$parentTotalAbsorbBarOverlay" inherits="TotalAbsorbBarOverlayTemplate"/>
-			</Layer>
 		</Layers>
 		<Frames>
 			<Frame setAllPoints="true">
@@ -328,10 +322,6 @@
 								<Texture name="$parentHealAbsorbBar" inherits="HealAbsorbBarTemplate"/>
 								<Texture name="$parentHealAbsorbBarLeftShadow" inherits="HealAbsorbBarLeftShadowTemplate"/>
 								<Texture name="$parentHealAbsorbBarRightShadow" inherits="HealAbsorbBarRightShadowTemplate"/>
-							</Layer>
-							<Layer level="OVERLAY" textureSubLevel="1">
-								<Texture name="$parentOverAbsorbGlow" inherits="OverAbsorbGlowTemplate"/>
-								<Texture name="$parentOverHealAbsorbGlow" inherits="OverHealAbsorbGlowTemplate"/>
 							</Layer>
 						</Layers>
 					</Frame>
@@ -408,7 +398,6 @@
 				</KeyValues>
 				<Scripts>
 					<OnLoad inherit="prepend">
-						self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS");
 						ArenaPrepFrames_UpdateBackground();
 					</OnLoad>
 					<OnShow>
@@ -430,8 +419,6 @@
 			</Frame>
 		</Frames>
 		<Scripts>
-			<OnLoad function="ArenaPrepFrames_OnLoad"/>
-			<OnEvent function="ArenaPrepFrames_OnEvent"/>
 			<OnShow function="ArenaPrepFrames_OnShow"/>
 			<OnHide function="ArenaPrepFrames_OnHide"/>
 		</Scripts>

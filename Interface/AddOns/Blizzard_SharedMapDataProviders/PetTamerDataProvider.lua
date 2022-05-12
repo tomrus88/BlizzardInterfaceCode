@@ -1,23 +1,23 @@
-PetTamerDataProviderMixin = CreateFromMixins(CVarMapCanvasDataProviderMixin);
-PetTamerDataProviderMixin:Init("showTamers", "SHOW_TAMERS");
+PetTamerDataProviderMixin = CreateFromMixins(MapCanvasDataProviderMixin);
 
 function PetTamerDataProviderMixin:OnShow()
-	CVarMapCanvasDataProviderMixin.OnShow(self);
-	
 	self:RegisterEvent("SPELLS_CHANGED");
+	self:RegisterEvent("CVAR_UPDATE");
 end
 
 function PetTamerDataProviderMixin:OnHide()
-	CVarMapCanvasDataProviderMixin.OnHide(self);
-	
 	self:UnregisterEvent("SPELLS_CHANGED");
+	self:UnregisterEvent("CVAR_UPDATE");
 end
 
 function PetTamerDataProviderMixin:OnEvent(event, ...)
-	CVarMapCanvasDataProviderMixin.OnEvent(self, event, ...);
-	
 	if event == "SPELLS_CHANGED" then
 		self:RefreshAllData();
+	elseif event == "CVAR_UPDATE" then
+		local eventName, value = ...;
+		if eventName == "SHOW_TAMERS" then
+			self:RefreshAllData();
+		end
 	end
 end
 
@@ -28,7 +28,7 @@ end
 function PetTamerDataProviderMixin:RefreshAllData(fromOnShow)
 	self:RemoveAllData();
 
-	if not CanTrackBattlePets() or not self:IsCVarSet() then
+	if not CanTrackBattlePets() or not GetCVarBool("showTamers") then
 		return;
 	end
 

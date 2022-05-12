@@ -14,10 +14,9 @@ function GroupMembersDataProviderMixin:OnAdded(mapCanvas)
 end
 
 function GroupMembersDataProviderMixin:OnRemoved(mapCanvas)
+	MapCanvasDataProviderMixin.OnRemoved(self, mapCanvas);
 	self:GetMap():RemoveAllPinsByTemplate("GroupMembersPinTemplate");
 	mapCanvas:RemoveCanvasClickHandler(self.onClickHandler);
-
-	MapCanvasDataProviderMixin.OnRemoved(self, mapCanvas);
 end
 
 function GroupMembersDataProviderMixin:OnMapChanged()
@@ -34,6 +33,7 @@ function GroupMembersDataProviderMixin:SetUnitPinSize(unit, size)
 		unitPinSizes[unit] = size;
 		if self.pin then
 			self.pin:UpdateShownUnits();
+			self.pin:SynchronizePinSizes();
 		end
 	end
 end
@@ -45,15 +45,15 @@ end
 
 function GroupMembersDataProviderMixin:ShouldShowUnit(unit)
 	local unitPinSizes = self:GetUnitPinSizesTable();
-	return unitPinSizes[unit] > 0;
+	return unitPinSizes[unit] and unitPinSizes[unit] > 0;
 end
 
 function GroupMembersDataProviderMixin:GetUnitPinSizesTable()
 	if not self.unitPinSizes then
 		self.unitPinSizes = {
-			player = 27,
-			party = 11,
-			raid = 11 * 0.75;
+			player = 16,
+			party = 16,
+			raid = 16,
 		};
 	end
 	return self.unitPinSizes;
@@ -125,7 +125,7 @@ end
 
 function GroupMembersPinMixin:UpdateShownUnits()
 	for unit, size in self.dataProvider:EnumerateUnitPinSizes() do
-		self:SetShouldShowUnits(unit, size > 0);
+		self:SetShouldShowUnits(unit, size > 0 and not C_Commentator.IsSpectating());
 	end
 end
 
@@ -136,7 +136,7 @@ function GroupMembersPinMixin:SynchronizePinSizes()
 			self:SetPinSize(unit, size / scale);
 		end
 	end
-	self:SetPlayerPingScale(.65 / scale);
+	self:SetPlayerPingScale(.35 / scale);
 end
 
 function GroupMembersPinMixin:OnCanvasSizeChanged()
@@ -152,7 +152,7 @@ function GroupMembersPinMixin:OnCanvasClicked(button, cursorX, cursorY)
 	self.reportableUnits = { };
 	if GetCVarBool("enablePVPNotifyAFK") and button == "RightButton" then
 		local _, instanceType = IsInInstance();
-		if instanceType == "pvp" or IsInActiveWorldPVP() then
+		if instanceType == "pvp" then
 			local timeNowSeconds = GetTime();
 			local mouseOverUnits = self:GetCurrentMouseOverUnits();
 			for unit in pairs(mouseOverUnits) do

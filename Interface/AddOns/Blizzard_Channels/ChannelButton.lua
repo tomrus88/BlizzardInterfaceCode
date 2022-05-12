@@ -68,30 +68,6 @@ function ChannelButtonBaseMixin:GetCategory()
 	return self.category;
 end
 
-function ChannelButtonBaseMixin:SetChannelRuleset(ruleset)
-	self.ruleset = ruleset;
-end
-
-function ChannelButtonBaseMixin:SetChannelIsRegional(isRegional)
-	self.isRegional = isRegional;
-end
-
-function ChannelButtonBaseMixin:IsRegional()
-	return self.isRegional;
-end
-
-function ChannelButtonBaseMixin:GetChannelRuleset()
-	return self.ruleset;
-end
-
-function ChannelButtonBaseMixin:AllowedToLeave()
-	if self:IsRegional() then
-		return false;
-	end
-
-	return not ChannelFrame_IsCategoryGroup(self:GetCategory()) and self:IsActive();
-end
-
 function ChannelButtonBaseMixin:SetVoiceChannel(voiceChannel)
 	self.linkedVoiceChannel = voiceChannel;
 
@@ -148,11 +124,6 @@ function ChannelButtonBaseMixin:SetActive(active)
 end
 
 function ChannelButtonBaseMixin:IsActive()
-	if self.active then
-		if self:IsRegional() then
-			return C_ChatInfo.IsRegionalServiceAvailable();
-		end
-	end
 	return self.active;
 end
 
@@ -230,11 +201,6 @@ function ChannelButtonBaseMixin:Setup(channelID, name, header, channelNumber, co
 	self:SetChannelName(name);
 	self:SetMemberCount(count);
 	self:SetCategory(category);
-
-	if channelNumber then
-		self:SetChannelRuleset(C_ChatInfo.GetChannelRuleset(channelNumber));
-		self:SetChannelIsRegional(C_ChatInfo.IsChannelRegional(channelNumber));
-	end
 
 	self:Update();
 end

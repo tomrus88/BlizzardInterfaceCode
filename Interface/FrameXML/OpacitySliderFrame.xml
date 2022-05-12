@@ -1,6 +1,11 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-	<Slider name="OpacitySliderFrame" orientation="VERTICAL" inherits="BackdropTemplate">
+	<Slider name="OpacitySliderFrame" inherits="BackdropTemplate" orientation="VERTICAL">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="TOOLTIP_BACKDROP_STYLE_DEFAULT" type="global"/>
+			<KeyValue key="backdropColor" value="TOOLTIP_DEFAULT_BACKGROUND_COLOR" type="global"/>
+			<KeyValue key="backdropBorderColor" value="TOOLTIP_DEFAULT_COLOR" type="global"/>
+		</KeyValues>
 		<Size>
 			<AbsDimension x="24" y="128"/>
 		</Size>
@@ -11,9 +16,6 @@
 				</Offset>
 			</Anchor>
 		</Anchors>
-		<KeyValues>
-			<KeyValue key="backdropInfo" value="BACKDROP_SLIDER_8_8" type="global"/>
-		</KeyValues>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentText" inherits="GameFontNormalSmall">

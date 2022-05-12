@@ -7,6 +7,52 @@
 		</SwipeTexture>
 	</Cooldown>
 	
+	<Frame name="CommentatorNamePlateFullBorderTemplate" mixin="CommentatorNamePlateBorderTemplateMixin" ignoreParentScale="true" setAllPoints="true" useParentLevel="true" virtual="true">
+		<Layers>
+			<Layer level="BACKGROUND" textureSubLevel="-8">
+				<!-- Left -->
+				<Texture parentKey="Left" parentArray="Textures">
+					<Size x="1.0" />
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativePoint="TOPLEFT" x="0" y="1.0" />
+						<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" x="0" y="-1.0" />
+					</Anchors>
+					<Color r="1" g="1" b="1" a="1"/>
+				</Texture>
+
+				<!-- Right -->
+				<Texture parentKey="Right" parentArray="Textures">
+					<Size x="1.0" />
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="1.0" />
+						<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="0" y="-1.0" />
+					</Anchors>
+					<Color r="1" g="1" b="1" a="1"/>
+				</Texture>
+
+				<!-- Bottom -->
+				<Texture parentKey="Bottom" parentArray="Textures">
+					<Size y="1.0" />
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
+						<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
+					</Anchors>
+					<Color r="1" g="1" b="1" a="1"/>
+				</Texture>
+
+				<!-- Top -->
+				<Texture parentKey="Top" parentArray="Textures">
+					<Size y="1.0" />
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />
+                        <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" />
+					</Anchors>
+					<Color r="1" g="1" b="1" a="1"/>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+	
 	<Button name="CommentatorNamePlateTemplate" inherits="NamePlateUnitFrameTemplate" mixin="CommentatorNamePlateMixin" virtual="true">
 		<Size x="190"/>
 		<Layers>
@@ -43,6 +89,7 @@
 			<OnLoad method="OnLoad"/>
 			<OnEvent method="OnEvent"/>
 			<OnUpdate method="OnUpdate"/>
+			<!--<OnSizeChanged method="OnSizeChanged"/>-->
 		</Scripts>
 	</Button>
 </Ui>

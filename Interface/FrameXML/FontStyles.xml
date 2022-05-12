@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<!-- This Fonts.xml is loaded before FontStyles.xml Set up Font objects to be localized in Fonts.xml not FontStyles.xml -->
-	<Include file="..\SharedXML\SharedFontStyles.xml"/>
+	<Include file="..\..\Interface\SharedXML\SharedFontStyles.xml"/>
 
 	<Script>
 		UNIT_NAME_FONT_KOREAN = "Fonts\\2002B.TTF";
@@ -30,7 +30,16 @@
 	<Font name="GameFontNormalLeftRed" inherits="GameFontNormalLeft" virtual="true">
 		<Color r="0.9" g="0.0" b="0.0"/>
 	</Font>
+	<Font name="GameFontDisableMed3" inherits="SystemFont_Shadow_Med3" virtual="true">
+		<Color r="0.5" g="0.5" b="0.5"/>
+	</Font>
 	<Font name="GameFontNormalRight" inherits="GameFontNormal" justifyH="RIGHT" virtual="true"/>
+	<Font name="GameFontHighlightLeft" inherits="GameFontHighlight" justifyH="LEFT" virtual="true"/>
+	<Font name="GameFontHighlightCenter" inherits="GameFontHighlight" justifyH="CENTER" virtual="true"/>
+	<Font name="GameFontHighlightRight" inherits="GameFontHighlight" justifyH="RIGHT" virtual="true"/>
+	<Font name="GameFontHighlightLarge2" inherits="GameFontNormalLarge2" virtual="true">
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>
 	<Font name="GameFontDisableLeft" inherits="GameFontDisable" justifyH="LEFT" virtual="true"/>
 	<Font name="GameFontGreen" inherits="GameFontNormal" virtual="true">
 		<Color r="0.1" g="1.0" b="0.1"/>
@@ -78,9 +87,6 @@
 	<Font name="NumberFontNormalRightRed" inherits="NumberFontNormalRight" virtual="true" >
 		<Color r="1.0" g="0.1" b="0.1"/>
 	</Font>
-	<Font name="NumberFontNormalRightGreen" inherits="NumberFontNormalRight" virtual="true" >
-		<Color r="0.1" g="1.0" b="0.1"/>
-	</Font>
 	<Font name="NumberFontNormalRightYellow" inherits="NumberFontNormalRight" virtual="true" >
 		<Color r="1.0" g="0.82" b="0"/>
 	</Font>
@@ -117,170 +123,6 @@
 	</Font>
 	<Font name="NumberFontNormalHuge" inherits="NumberFont_Outline_Huge" virtual="true">
 		<Color r="1.0" g="1.0" b="1.0"/>
-	</Font>
-
-	<Font name="NumberFontSmallYellowLeft" inherits="NumberFont_Small" justifyH="LEFT" virtual="true" >
-		<Color r="1.0" g="0.82" b="0"/>
-	</Font>
-
-	<Font name="NumberFontSmallWhiteLeft" inherits="NumberFont_Small" justifyH="LEFT" virtual="true" >
-		<Color r="1.0" g="1.0" b="1.0"/>
-	</Font>
-
-	<Font name="NumberFontSmallBattleNetBlueLeft" inherits="NumberFont_Small" justifyH="LEFT" virtual="true" >
-		<Color r="0.510" g="0.773" b="1.0"/>
-	</Font>
-	
-	<Font name="GameFontNormalSmallBattleNetBlueLeft" inherits="GameFontNormalSmall" justifyH="LEFT" virtual="true" >
-		<Color r="0.510" g="0.773" b="1.0"/>
-	</Font>
-
-	<Font name="Number11FontWhite" inherits="Number11Font" virtual="true" >
-		<Color r="1.0" g="1.0" b="1.0"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-	
-	<Font name="Number13FontWhite" inherits="Number13Font" virtual="true" >
-		<Color r="1.0" g="1.0" b="1.0"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-
-	<Font name="Number13FontYellow" inherits="Number13Font" virtual="true" >
-		<Color r="1.0" g="0.82" b="0"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-
-	<Font name="Number13FontGray" inherits="Number13Font" virtual="true" >
-		<Color r="0.5" g="0.5" b="0.5"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-	
-	<Font name="Number13FontRed" inherits="Number13Font" virtual="true" >
-		<Color r="1.0" g="0.1" b="0.1"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-
-	<Font name="PriceFontWhite" inherits="PriceFont" virtual="true" >
-		<Color r="1.0" g="1.0" b="1.0"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-
-	<Font name="PriceFontYellow" inherits="PriceFont" virtual="true" >
-		<Color r="1.0" g="0.82" b="0"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-
-	<Font name="PriceFontGray" inherits="PriceFont" virtual="true" >
-		<Color r="0.5" g="0.5" b="0.5"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-	
-	<Font name="PriceFontRed" inherits="PriceFont" virtual="true" >
-		<Color r="1.0" g="0.1" b="0.1"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-
-	<Font name="PriceFontGreen" inherits="PriceFont" virtual="true" >
-		<Color r="0.1" g="1" b="0.1"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-
-	<Font name="Number14FontWhite" inherits="NumberFont_Normal_Med" virtual="true" >
-		<Color r="1.0" g="1.0" b="1.0"/>
-		<Shadow x="1" y="-1">
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-	
-	<Font name="Number14FontGray" inherits="NumberFont_Normal_Med" virtual="true" >
-		<Color r="0.5" g="0.5" b="0.5"/>
-		<Shadow x="1" y="-1">
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-	
-	<Font name="Number14FontGreen" inherits="NumberFont_Normal_Med" virtual="true" >
-		<Color r="0.1" g="1" b="0.1"/>
-		<Shadow x="1" y="-1">
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-	
-	<Font name="Number14FontRed" inherits="NumberFont_Normal_Med" virtual="true" >
-		<Color r="1" g="0.1" b="0.1"/>
-		<Shadow x="1" y="-1">
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-
-	<Font name="Number15FontWhite" inherits="Number15Font" virtual="true" >
-		<Color r="1.0" g="1.0" b="1.0"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
-	</Font>
-	
-	<Font name="Number18FontWhite" inherits="Number18Font" virtual="true" >
-		<Color r="1.0" g="1.0" b="1.0"/>
-		<Shadow>
-			<Offset>
-				<AbsDimension x="1" y="-1"/>
-			</Offset>
-			<Color r="0" g="0" b="0"/>
-		</Shadow>
 	</Font>
 
 	<Font name="QuestTitleFont" inherits="QuestFont_Shadow_Huge" virtual="true">
@@ -356,9 +198,7 @@
 	<Font name="SubZoneTextFont" inherits="SystemFont_OutlineThick_Huge4" virtual="true"/>
 	<Font name="PVPInfoTextFont" inherits="SystemFont_OutlineThick_Huge2" virtual="true"/>
 	<Font name="ErrorFont" inherits="GameFontNormalLarge" virtual="true"/>
-	<Font name="TextStatusBarText" inherits="SystemFont_Outline_Small" virtual="true">
-		<Color r="1.0" g="1.0" b="1.0"/>
-	</Font>
+	<Font name="TextStatusBarText" inherits="NumberFontNormal" virtual="true"/>
 	<Font name="GameNormalNumberFont" inherits="NumberFont_GameNormal" virtual="true">
 		<Color r="1.0" g="0.82" b="0"/>
 	</Font>
@@ -384,10 +224,7 @@
     <Font name="CombatTextFontOutline" inherits="SystemFont_World_ThickOutline" virtual="true">
 		<Color r="1.0" g="0.82" b="0"/>
 	</Font>
-    <Font name="MissionCombatTextFontOutline" inherits="SystemFont_Outline_WTF2" virtual="true">
-		<Color r="1.0" g="1.0" b="1.0"/>
-	</Font>
-	<Font name="MovieSubtitleFont" inherits="GameFontNormalShadowOutline22" virtual="true">
+	<Font name="MovieSubtitleFont" inherits="GameFontNormalHugeOutline2" virtual="true">
 		<Color r="1.0" g="0.78" b="0"/>
 	</Font>
 
@@ -428,7 +265,7 @@
 	<Font name="ArtifactAppearanceSetHighlightFont" inherits="Fancy24Font" virtual="true">
 		<Color r="1.0" g="1.0" b="1.0"/>
 	</Font>
-	
+
 	<Font name="CommentatorTeamScoreFont" inherits="SystemFont_Shadow_Large" virtual="true">
 		<Shadow>
 			<Color r="0" g="0" b="0" a="0.9"/>
@@ -455,7 +292,7 @@
 		<Color r="1" g="1" b="1" a="1"/>
 		<Shadow x="1" y="-1"/>
 	</Font>
-	
+
 	<Font name="CommentatorFontMedium" inherits="SystemFont_Shadow_Large2" virtual="true">
 		<Color r="1" g="1" b="1" a="1"/>
 		<Shadow x="1" y="-1"/>

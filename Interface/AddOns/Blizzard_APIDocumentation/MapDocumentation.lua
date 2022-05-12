@@ -7,28 +7,6 @@ local Map =
 	Functions =
 	{
 		{
-			Name = "CanSetUserWaypointOnMap",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "canSet", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "ClearUserWaypoint",
-			Type = "Function",
-		},
-		{
-			Name = "CloseWorldMapInteraction",
-			Type = "Function",
-		},
-		{
 			Name = "GetAreaInfo",
 			Type = "Function",
 
@@ -58,17 +36,17 @@ local Map =
 			},
 		},
 		{
-			Name = "GetBountySetMaps",
+			Name = "GetBountySetIDForMap",
 			Type = "Function",
 
 			Arguments =
 			{
-				{ Name = "bountySetID", Type = "number", Nilable = false },
+				{ Name = "uiMapID", Type = "number", Nilable = false },
 			},
 
 			Returns =
 			{
-				{ Name = "mapIDs", Type = "table", InnerType = "number", Nilable = false },
+				{ Name = "bountySetID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -343,22 +321,6 @@ local Map =
 			},
 		},
 		{
-			Name = "GetMapWorldSize",
-			Type = "Function",
-			Documentation = { "Returns the size in yards of the area represented by the map." },
-
-			Arguments =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "width", Type = "number", Nilable = false },
-				{ Name = "height", Type = "number", Nilable = false },
-			},
-		},
-		{
 			Name = "GetPlayerMapPosition",
 			Type = "Function",
 			Documentation = { "Only works for the player and party members." },
@@ -375,52 +337,6 @@ local Map =
 			},
 		},
 		{
-			Name = "GetUserWaypoint",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "point", Type = "table", Nilable = false },
-			},
-		},
-		{
-			Name = "GetUserWaypointFromHyperlink",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "hyperlink", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "point", Type = "table", Nilable = false },
-			},
-		},
-		{
-			Name = "GetUserWaypointHyperlink",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "hyperlink", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "GetUserWaypointPositionForMap",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "mapPosition", Type = "table", Mixin = "Vector2DMixin", Nilable = false },
-			},
-		},
-		{
 			Name = "GetWorldPosFromMapPos",
 			Type = "Function",
 
@@ -434,29 +350,6 @@ local Map =
 			{
 				{ Name = "continentID", Type = "number", Nilable = false },
 				{ Name = "worldPosition", Type = "table", Mixin = "Vector2DMixin", Nilable = false },
-			},
-		},
-		{
-			Name = "HasUserWaypoint",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "hasUserWaypoint", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "IsMapValidForNavBarDropDown",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "isValid", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -482,15 +375,6 @@ local Map =
 				{ Name = "uiMapID", Type = "number", Nilable = false },
 			},
 		},
-		{
-			Name = "SetUserWaypoint",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "point", Type = "table", Nilable = false },
-			},
-		},
 	},
 
 	Events =
@@ -499,25 +383,6 @@ local Map =
 			Name = "NewWmoChunk",
 			Type = "Event",
 			LiteralName = "NEW_WMO_CHUNK",
-		},
-		{
-			Name = "UserWaypointUpdated",
-			Type = "Event",
-			LiteralName = "USER_WAYPOINT_UPDATED",
-		},
-		{
-			Name = "WorldMapClose",
-			Type = "Event",
-			LiteralName = "WORLD_MAP_CLOSE",
-		},
-		{
-			Name = "WorldMapOpen",
-			Type = "Event",
-			LiteralName = "WORLD_MAP_OPEN",
-			Payload =
-			{
-				{ Name = "uiMapID", Type = "number", Nilable = false },
-			},
 		},
 		{
 			Name = "ZoneChanged",
@@ -556,9 +421,9 @@ local Map =
 		{
 			Name = "UIMapFlag",
 			Type = "Enumeration",
-			NumValues = 17,
+			NumValues = 13,
 			MinValue = 1,
-			MaxValue = 65536,
+			MaxValue = 4096,
 			Fields =
 			{
 				{ Name = "NoHighlight", Type = "UIMapFlag", EnumValue = 1 },
@@ -574,24 +439,19 @@ local Map =
 				{ Name = "HideIcons", Type = "UIMapFlag", EnumValue = 1024 },
 				{ Name = "HideVignettes", Type = "UIMapFlag", EnumValue = 2048 },
 				{ Name = "ForceAllOverlayExplored", Type = "UIMapFlag", EnumValue = 4096 },
-				{ Name = "FlightMapShowZoomOut", Type = "UIMapFlag", EnumValue = 8192 },
-				{ Name = "FlightMapAutoZoom", Type = "UIMapFlag", EnumValue = 16384 },
-				{ Name = "ForceOnNavbar", Type = "UIMapFlag", EnumValue = 32768 },
-				{ Name = "AlwaysAllowUserWaypoints", Type = "UIMapFlag", EnumValue = 65536 },
 			},
 		},
 		{
 			Name = "UIMapSystem",
 			Type = "Enumeration",
-			NumValues = 4,
+			NumValues = 3,
 			MinValue = 0,
-			MaxValue = 3,
+			MaxValue = 2,
 			Fields =
 			{
 				{ Name = "World", Type = "UIMapSystem", EnumValue = 0 },
 				{ Name = "Taxi", Type = "UIMapSystem", EnumValue = 1 },
 				{ Name = "Adventure", Type = "UIMapSystem", EnumValue = 2 },
-				{ Name = "Minimap", Type = "UIMapSystem", EnumValue = 3 },
 			},
 		},
 		{
@@ -619,7 +479,6 @@ local Map =
 				{ Name = "areaPoiID", Type = "number", Nilable = false },
 				{ Name = "name", Type = "string", Nilable = false },
 				{ Name = "atlasName", Type = "string", Nilable = false },
-				{ Name = "uiTextureKit", Type = "string", Nilable = true },
 			},
 		},
 		{
@@ -643,7 +502,6 @@ local Map =
 				{ Name = "name", Type = "string", Nilable = false },
 				{ Name = "mapType", Type = "UIMapType", Nilable = false },
 				{ Name = "parentMapID", Type = "number", Nilable = false },
-				{ Name = "flags", Type = "number", Nilable = false },
 			},
 		},
 		{

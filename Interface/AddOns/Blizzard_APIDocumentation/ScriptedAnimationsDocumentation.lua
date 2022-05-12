@@ -19,11 +19,6 @@ local ScriptedAnimations =
 
 	Events =
 	{
-		{
-			Name = "ScriptedAnimationsUpdate",
-			Type = "Event",
-			LiteralName = "SCRIPTED_ANIMATIONS_UPDATE",
-		},
 	},
 
 	Tables =

@@ -9,23 +9,21 @@
 			<OnEvent method="OnEvent"/>
 		</Scripts>
 	</Frame>
-	<Frame name="KioskSessionFinishedDialog" toplevel="true" enableMouse="true" enableKeyboard="true" frameStrata="FULLSCREEN_DIALOG" parent="UIParent" setAllPoints="true" mixin="KioskSessionFinishedDialogMixin" hidden="true">
-		<Layers>
-			<Layer level="BACKGROUND" textureSubLevel="-1">
-				<Texture setAllPoints="true">
-					<Color color="BLACK_FONT_COLOR" a="0.80"/>
-				</Texture>
-			</Layer>
-		</Layers>
+	<Frame name="KioskSessionFinishedDialog" toplevel="true" enableMouse="true" enableKeyboard="true" frameStrata="FULLSCREEN_DIALOG" parent="UIParent" mixin="KioskSessionFinishedDialogMixin" hidden="true">
+		<Size x="375" y="230"/>
+		<Anchors>
+			<Anchor point="TOP" relativeTo="UIParent" relativePoint="TOP" x="0" y="-4"/>
+		</Anchors>
 		<Frames>
 			<Frame parentKey="Dialog">
-				<Size x="563" y="345"/>
+				<Size x="375" y="230"/>
 				<Anchors>
 					<Anchor point="CENTER"/>
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<Texture parentKey="Bg" atlas="ClassTrial-End-Frame" useAtlasSize="true">
+						<Texture parentKey="Bg" atlas="ClassTrial-End-Frame">
+							<Size x="375" y="230"/>
 							<Anchors>
 								<Anchor point="CENTER"/>
 							</Anchors>
@@ -34,7 +32,7 @@
 					<Layer level="ARTWORK">
 						<FontString parentKey="Title" inherits="KioskDialogHeaderFont">
 							<Anchors>
-								<Anchor point="TOP" x="0" y="-92.0" />
+								<Anchor point="TOP" x="0" y="-84.0" />
 							</Anchors>
 							<Color color="BLACK_FONT_COLOR"/>
 						</FontString>

@@ -51,33 +51,6 @@ function BagSearch_OnChar(self, text)
 	end
 end
 
-local ROLE_COUNT_EVENTS = {
-	"GROUP_ROSTER_UPDATE",
-	"PLAYER_ROLES_ASSIGNED",
-};
-
-RoleCountMixin = {};
-
-function RoleCountMixin:OnShow()
-	self:Refresh();
-	FrameUtil.RegisterFrameForEvents(self, ROLE_COUNT_EVENTS);
-end
-
-function RoleCountMixin:OnHide()
-	FrameUtil.UnregisterFrameForEvents(self, ROLE_COUNT_EVENTS);
-end
-
-function RoleCountMixin:OnEvent()
-	self:Refresh();
-end
-
-function RoleCountMixin:Refresh()
-	local counts = GetGroupMemberCountsForDisplay();
-	self.DamagerCount:SetText(counts.DAMAGER);
-	self.HealerCount:SetText(counts.HEALER);
-	self.TankCount:SetText(counts.TANK);
-end
-
 UIFrameCache = CreateFrame("FRAME");
 local caches = {};
 function UIFrameCache:New (frameType, baseName, parent, template)
@@ -285,7 +258,7 @@ function InlineHyperlinkFrame_OnClick(self, link, text, button)
 		local fixedLink;
 		local _, _, linkType, linkID = string.find(link, "([%a]+):([%d]+)");
 		if ( linkType == "currency" ) then
-			fixedLink = C_CurrencyInfo.GetCurrencyLink(linkID);
+			fixedLink = GetCurrencyLink(linkID);
 		end
 
 		if ( fixedLink ) then
@@ -299,52 +272,16 @@ end
 CurrencyTemplateMixin = {};
 
 function CurrencyTemplateMixin:SetCurrencyFromID(currencyID, amount, formatString, colorCode)
-	local currencyString = GetCurrencyString(currencyID, amount, colorCode, self.abbreviate);
+	local _, _, currencyTexture = GetCurrencyInfo(currencyID);
+	local markup = CreateTextureMarkup(currencyTexture, 64, 64, 16, 16, 0, 1, 0, 1);
+	colorCode = colorCode or HIGHLIGHT_FONT_COLOR_CODE;
+
+	local currencyString = ("%s%s %s|r"):format(colorCode, BreakUpLargeNumbers(amount), markup);
+
 	if formatString then
 		self:SetText(formatString:format(currencyString));
 	else
 		self:SetText(currencyString);
-	end
-	
-	self.currencyID = currencyID;
-	self.amount = amount;
-	self.formatString = formatString;
-	self.colorCode = colorCode;
-end
-
-function CurrencyTemplateMixin:SetTooltipAnchor(tooltipAnchor)
-	self.tooltipAnchor = tooltipAnchor;
-end
-
-function CurrencyTemplateMixin:SetAbbreviate(abbreviate)
-	self.abbreviate = abbreviate;
-end
-
-function CurrencyTemplateMixin:Refresh()
-	-- without an override amount this currency is eligible for a refresh
-	if not self.amount then
-		local overrideAmount = nil;
-		self:SetCurrencyFromID(self.currencyID, overrideAmount, self.formatString, self.colorCode);
-	end
-end
-
-function CurrencyTemplateMixin:OnEnter()
-	if self.tooltipAnchor and self.currencyID then
-		self:SetScript("OnUpdate", self.OnUpdate);
-	end
-end
-
-function CurrencyTemplateMixin:OnLeave()
-	self:SetScript("OnUpdate", nil);
-	GameTooltip:Hide();
-end
-
-function CurrencyTemplateMixin:OnUpdate()
-	if self.Text:IsMouseOver() then
-		GameTooltip:SetOwner(self, self.tooltipAnchor);
-		GameTooltip:SetCurrencyByID(self.currencyID);
-	elseif GameTooltip:GetOwner() == self then
-		GameTooltip:Hide();
 	end
 end
 
@@ -386,7 +323,7 @@ function UIExpandingButtonMixin:Update(override)
 	if (override ~= nil) then
 		self.currentlyExpanded = override;
 	end
-
+	
 	local direction = self.currentlyExpanded and GetOppositeDirection(self.expansionDirection) or self.expansionDirection;
 
 	SquareButton_SetIcon(self, direction);
@@ -403,232 +340,4 @@ end
 function UIExpandingButtonMixin:OnClick(button, down)
 	self.currentlyExpanded = not self.currentlyExpanded;
 	self:Update();
-end
-
-TalentRankDisplayMixin = { };
-
-function TalentRankDisplayMixin:SetValues(currentRank, maxRank, isDisabled, isAvailable)
-	self.Text:SetFormattedText(GENERIC_FRACTION_STRING, currentRank, maxRank);
-	local atlas, textColor;
-	if isDisabled then
-		atlas = "orderhalltalents-rankborder";
-		textColor = DISABLED_FONT_COLOR;
-	elseif isAvailable and currentRank < maxRank then
-		atlas = "orderhalltalents-rankborder-green";
-		textColor = GREEN_FONT_COLOR;
-	else
-		atlas = "orderhalltalents-rankborder-yellow";
-		textColor = YELLOW_FONT_COLOR;
-	end
-
-	local useAtlasSize = true;
-	self.Background:SetAtlas(atlas, true);
-	self.Text:SetTextColor(textColor:GetRGB());
-end
-
-ButtonWithDisableMixin = {};
-
-function ButtonWithDisableMixin:SetDisableTooltip(tooltipTitle, tooltipText)
-	self.disableTooltipTitle = tooltipTitle;
-	self.disableTooltipText = tooltipText;
-	self:SetEnabled(tooltipTitle == nil);
-end
-
-function ButtonWithDisableMixin:OnEnter()
-	if self.disableTooltipTitle and not self:IsEnabled() then
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-
-		local wrap = true;
-		GameTooltip_SetTitle(GameTooltip, self.disableTooltipTitle, RED_FONT_COLOR, wrap);
-
-		if self.disableTooltipText then
-			GameTooltip_AddNormalLine(GameTooltip, self.disableTooltipText, wrap);
-		end
-
-		GameTooltip:Show();
-	end
-end
-
-CurrencyDisplayMixin = CreateFromMixins(CurrencyTemplateMixin);
-
--- currencies: An array of currencyInfo
--- currencyInfo: either a currencyID, or an array with { currencyID, overrideAmount, colorCode }, or a table with { currencyID = 123, amount = 45, colorCode = RED_FONT_COLOR_CODE }
-function CurrencyDisplayMixin:SetCurrencies(currencies, formatString)
-	if #currencies == 1 then
-		local currency = currencies[1];
-		if type(currency) == "table" then
-			if currency.currencyID and currency.amount then
-				self:SetCurrencyFromID(currency.currencyID, currency.amount, formatString, currency.colorCode);
-			else
-				local currencyID, overrideAmount, colorCode = unpack(currency);
-				self:SetCurrencyFromID(currencyID, overrideAmount, formatString, colorCode);
-			end
-		else
-			self:SetCurrencyFromID(currency);
-		end
-
-		return;
-	end
-
-	local text = GetCurrenciesString(currencies);
-	if formatString then
-		self:SetText(formatString:format(text));
-	else
-		self:SetText(text);
-	end
-end
-
-function CurrencyDisplayMixin:SetText(text)
-	self.Text:SetText(text);
-	self:MarkDirty();
-end
-
-function CurrencyDisplayMixin:SetTextAnchorPoint(anchorPoint)
-	self.Text:ClearAllPoints();
-	self.Text:SetPoint(anchorPoint);
-	self:MarkDirty();
-end
-
-CurrencyDisplayGroupMixin = {};
-
-function CurrencyDisplayGroupMixin:OnLoad()
-	self.currencyFramePool = CreateFramePool("FRAME", self, "CurrencyDisplayTemplate");
-end
-
--- Defaults to a TOPRIGHT configuration.
-function CurrencyDisplayGroupMixin:SetCurrencies(currencies, initFunction, initialAnchor, layout, tooltipAnchor, abbreviate, reverseOrder)
-	initialAnchor = initialAnchor or AnchorUtil.CreateAnchor("TOPRIGHT", self, "TOPRIGHT");
-
-	local stride = nil;
-	local paddingX = 10;
-	local paddingY = nil;
-	local fixedWidth = 62;
-	layout = layout or AnchorUtil.CreateGridLayout(GridLayoutMixin.Direction.TopRightToBottomLeft, stride, paddingX, paddingY, fixedWidth);
-
-	self.currencyFramePool:ReleaseAll();
-
-	local function FactoryFunction(index)
-		local currencyFrame = self.currencyFramePool:Acquire();
-		local tIndex = index;
-		if reverseOrder then
-			tIndex = #currencies + 1 - index;
-		end
-		local currencyInfo = currencies[tIndex];
-
-		currencyFrame:SetTooltipAnchor(tooltipAnchor);
-		currencyFrame:SetAbbreviate(abbreviate);
-
-		if type(currencyInfo) == "table" then
-			if currencyInfo.currencyID and currencyInfo.amount then
-				local formatString = nil;
-				currencyFrame:SetCurrencyFromID(currencyInfo.currencyID, currencyInfo.amount, formatString, currencyInfo.colorCode);
-			else
-				currencyFrame:SetCurrencyFromID(unpack(currencyInfo));
-			end
-		else
-			currencyFrame:SetCurrencyFromID(currencyInfo);
-		end
-
-		if initFunction then
-			initFunction(currencyFrame);
-		end
-
-		-- Force the frame to resize. This anchor will be replaced by the grid layout function.
-		currencyFrame:SetPoint("CENTER");
-		currencyFrame:Layout();
-
-		currencyFrame:Show();
-
-		return currencyFrame;
-	end
-
-	AnchorUtil.GridLayoutFactoryByCount(FactoryFunction, #currencies, initialAnchor, layout);
-
-	self:MarkDirty();
-end
-
-function CurrencyDisplayGroupMixin:Refresh()
-	for currencyFrame in self.currencyFramePool:EnumerateActive() do
-		currencyFrame:Refresh();
-	end
-end
-
-CurrencyHorizontalLayoutFrameMixin = { };
-
-function CurrencyHorizontalLayoutFrameMixin:Clear()
-	if self.quantityPool then
-		self.quantityPool:ReleaseAll();
-	end
-	if self.iconPool then
-		self.iconPool:ReleaseAll();
-	end
-	self.nextLayoutIndex = nil;
-end
-
-function CurrencyHorizontalLayoutFrameMixin:AddToLayout(region)
-	if not self.nextLayoutIndex then
-		self.nextLayoutIndex = 1;
-	end
-	region.layoutIndex = self.nextLayoutIndex;
-	self.nextLayoutIndex = self.nextLayoutIndex + 1;
-	region:Show();
-	self:MarkDirty();
-end
-
-function CurrencyHorizontalLayoutFrameMixin:GetQuantityFontString()
-	if not self.quantityPool then
-		self.quantityPool = CreateFontStringPool(self, "ARTWORK", 0, (self.quantityFontObject or "GameFontHighlight"));
-	end
-	local fontString = self.quantityPool:Acquire();
-	self:AddToLayout(fontString);
-	return fontString;
-end
-
-function CurrencyHorizontalLayoutFrameMixin:GetIconFrame()
-	if not self.iconPool then
-		self.iconPool = CreateFramePool("FRAME", self, "CurrencyLayoutFrameIconTemplate");
-	end
-	local frame = self.iconPool:Acquire();
-	self:AddToLayout(frame);
-	return frame;
-end
-
-function CurrencyHorizontalLayoutFrameMixin:CreateLabel(text, color, fontObject, spacing)
-	if self.Label then
-		return;
-	end
-
-	local label = self:CreateFontString(nil, "ARTWORK", fontObject or "GameFontHighlight");
-	self.Label = label;
-	label.layoutIndex = 0;
-	label.rightPadding = spacing;
-	label:SetHeight(self.fixedHeight);
-	label:SetText(text);
-	color = color or HIGHLIGHT_FONT_COLOR;
-	label:SetTextColor(color:GetRGB());
-	self:MarkDirty();
-end
-
-function CurrencyHorizontalLayoutFrameMixin:AddCurrency(currencyID, overrideAmount, color)
-	local currencyInfo = C_CurrencyInfo.GetCurrencyInfo(currencyID);
-	if currencyInfo then
-		local height = self.fixedHeight;
-		-- quantity
-		local fontString = self:GetQuantityFontString();
-		fontString:SetHeight(height);
-		local amountString = BreakUpLargeNumbers(overrideAmount or currencyInfo.quantity);
-		fontString:SetText(amountString);
-		color = color or HIGHLIGHT_FONT_COLOR;
-		fontString:SetTextColor(color:GetRGB());
-		-- icon
-		local frame = self:GetIconFrame();
-		frame:SetSize(height, height);
-		frame.Icon:SetTexture(currencyInfo.iconFileID);
-		frame.id = currencyID;
-		-- spacing
-		fontString.rightPadding = self.quantitySpacing;
-		if fontString.layoutIndex > 1  then
-			fontString.leftPadding = self.currencySpacing;
-		end
-	end
 end

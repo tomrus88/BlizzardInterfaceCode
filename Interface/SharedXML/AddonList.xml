@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-	<Script file="..\SharedXML\AddonList.lua"/>
-
+	<Script file="AddonList.lua"/>
+	
 	<Button name="AddonListEntryTemplate" virtual="true">
 		<Size x="520" y="16"/>
 		<Layers>
@@ -71,7 +71,7 @@
 				<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
 			 	<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
 				<CheckedTexture name="$parentCheckedTexture" file="Interface\Buttons\UI-CheckBox-Check"/>
-				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
+				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>		
 			</CheckButton>
 			<Button name="$parentLoad" inherits="UIPanelButtonTemplate" text="LOAD_ADDON" hidden="true" parentKey="LoadAddonButton">
 				<Size x="100" y="22"/>
@@ -180,10 +180,10 @@
 				<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
 				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
 			</CheckButton>
-			<Button name="$parentCancelButton" inherits="SharedButtonSmallTemplate" parentKey="CancelButton" text="CANCEL">
+			<Button name="$parentCancelButton" inherits="MagicButtonTemplate" parentKey="CancelButton" text="CANCEL">
 				<Size x="80" y="22"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+					<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -191,7 +191,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentOkayButton" inherits="SharedButtonSmallTemplate" parentKey="OkayButton" text="OKAY">
+			<Button name="$parentOkayButton" inherits="MagicButtonTemplate" parentKey="OkayButton" text="OKAY">
 				<Size x="80" y="22"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeTo="$parentCancelButton" relativePoint="TOPLEFT" x="0" y="0"/>
@@ -202,16 +202,16 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentEnableAllButton" inherits="SharedButtonSmallTemplate" parentKey="EnableAllButton" text="ENABLE_ALL_ADDONS">
+			<Button name="$parentEnableAllButton" inherits="MagicButtonTemplate" parentKey="EnableAllButton" text="ENABLE_ALL_ADDONS">
 				<Size x="120" y="22"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="4" y="4"/>
+					<Anchor point="BOTTOMLEFT"/>
 				</Anchors>
 				<Scripts>
 					<OnClick function="AddonList_EnableAll"/>
 				</Scripts>
 			</Button>
-			<Button name="$parentDisableAllButton" inherits="SharedButtonSmallTemplate" parentKey="DisableAllButton" text="DISABLE_ALL_ADDONS">
+			<Button name="$parentDisableAllButton" inherits="MagicButtonTemplate" parentKey="DisableAllButton" text="DISABLE_ALL_ADDONS">
 				<Size x="120" y="22"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentEnableAllButton" relativePoint="TOPRIGHT" x="0" y="0"/>

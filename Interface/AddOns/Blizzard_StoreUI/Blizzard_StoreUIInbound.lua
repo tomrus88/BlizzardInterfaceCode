@@ -28,6 +28,10 @@ function StoreFrame_OpenGamesCategory()
 	StoreFrame:SetAttribute("opengamescategory");
 end
 
+function StoreFrame_OpenGameTimeCategory()
+	StoreFrame:SetAttribute("opengametimecategory");
+end
+
 function StoreFrame_SetGamesCategory()
 	StoreFrame:SetAttribute("setgamescategory");
 end
@@ -44,8 +48,10 @@ function StoreFrame_SelectBoost(boostType, reason, guid)
 	StoreFrame:SetAttribute("selectboost", data);
 end
 
-function StoreFrame_SelectSubscriptionProduct()
-	StoreFrame:SetAttribute("selectsubscription", true);
+function StoreFrame_SelectActivateProduct(guid)
+	if guid ~= nil then
+		StoreFrame:SetAttribute("selectactivateproduct", guid);
+	end
 end
 
 function StoreFrame_SelectGameTimeProduct()

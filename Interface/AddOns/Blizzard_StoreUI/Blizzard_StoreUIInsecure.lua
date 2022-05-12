@@ -1,6 +1,12 @@
 -- DO NOT PUT ANY SENSITIVE CODE IN THIS FILE
 -- This file does not have access to the secure (forbidden) code.  It is only called via Outbound and no function in this file should ever return values.
 
+function StoreShowPreview(name, modelID, modelSceneID)
+	local frame = ModelPreviewFrame;
+	ModelPreviewFrame_ShowModel(modelID, modelSceneID, false);
+	frame.Display.Name:SetText(name);
+end
+
 function StoreShowPreviews(displayInfoEntries)
 	ModelPreviewFrame_ShowModels(displayInfoEntries, false);
 end
@@ -32,20 +38,26 @@ if (InGlue()) then
 		OnAccept = function()
 			local data = GlueDialog.data;
 
-			if (not data.shouldHandle) then
+			if (not data.shouldHandle) then				
+				if (data.guid and GetServerName() == data.realmName) then
+					-- We're about to throw out the character list,
+					-- so if we want to try to select a character, it has to be now.
+					CharacterSelect_SelectCharacterByGUID(data.guid);
+				end
 				VASCharacterGUID = nil;
-				GetCharacterListUpdate();
+				GetCharacterListUpdate(); -- Request a new character list from the server.
 				return;
 			end
 
 			if (GetServerName() ~= data.realmName) then
-				CharacterSelect_SetAutoSwitchRealm(true);
-				C_StoreGlue.ChangeRealmByCharacterGUID(data.guid);
+				-- For Classic, we don't like how this is behaving with FCM. Disabling for now.
+				-- CharacterSelect_SetAutoSwitchRealm(true);
+				-- C_StoreGlue.ChangeRealmByCharacterGUID(data.guid);
+				VASCharacterGUID = nil;
 			else
 				UpdateCharacterList(true);
+				VASCharacterGUID = data.guid;
 			end
-
-			VASCharacterGUID = data.guid;
 		end
 	}
 

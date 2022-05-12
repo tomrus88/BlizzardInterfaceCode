@@ -22,7 +22,15 @@
 	<WorldFrame name="WorldFrame" movable="true" resizable="true" clipChildren="true" setAllPoints="true">
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="FramerateLabel" hidden="true" inherits="SystemFont_Shadow_Med1" text="FRAMERATE_LABEL"/>
+				<FontString name="FramerateLabel" hidden="true" inherits="SystemFont_Shadow_Med1" text="FRAMERATE_LABEL">
+					<Anchors>
+						<Anchor point="BOTTOM" relativePoint="BOTTOM">
+							<Offset>
+								<AbsDimension x="0" y="64"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
 				<FontString name="FramerateText" hidden="true" inherits="SystemFont_Shadow_Med1">
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="FramerateLabel" relativePoint="RIGHT"/>
@@ -30,6 +38,28 @@
 				</FontString>
 			</Layer>
 		</Layers>
+		<Frames>
+			<Frame name="ActionStatus" setAllPoints="true" frameStrata="TOOLTIP" hidden="true">
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="ActionStatusText" inherits="GameFontNormalLarge">
+							<Anchors>
+								<Anchor point="CENTER">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad function="ActionStatus_OnLoad"/>
+					<OnEvent function="ActionStatus_OnEvent"/>
+					<OnUpdate function="ActionStatus_OnUpdate"/>
+				</Scripts>
+			</Frame>
+		</Frames>
 		<Scripts>
 			<OnLoad function="WorldFrame_OnLoad"/>
 			<OnUpdate function="WorldFrame_OnUpdate"/>

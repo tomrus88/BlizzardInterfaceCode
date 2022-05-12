@@ -4,14 +4,15 @@ PowerBarColor["MANA"] = { r = 0.00, g = 0.00, b = 1.00 };
 PowerBarColor["RAGE"] = { r = 1.00, g = 0.00, b = 0.00, fullPowerAnim=true };
 PowerBarColor["FOCUS"] = { r = 1.00, g = 0.50, b = 0.25, fullPowerAnim=true };
 PowerBarColor["ENERGY"] = { r = 1.00, g = 1.00, b = 0.00, fullPowerAnim=true };
-PowerBarColor["COMBO_POINTS"] = { r = 1.00, g = 0.96, b = 0.41 };
+PowerBarColor["HAPPINESS"] = { r = 1.00, g = 0.41, b = 0.96 };
 PowerBarColor["RUNES"] = { r = 0.50, g = 0.50, b = 0.50 };
-PowerBarColor["RUNIC_POWER"] = { r = 0.00, g = 0.82, b = 1.00, fullPowerAnim=true };
+PowerBarColor["RUNIC_POWER"] = { r = 0.00, g = 0.82, b = 1.00 };
 PowerBarColor["SOUL_SHARDS"] = { r = 0.50, g = 0.32, b = 0.55 };
 PowerBarColor["LUNAR_POWER"] = { r = 0.30, g = 0.52, b = 0.90, atlas="_Druid-LunarBar" };
 PowerBarColor["HOLY_POWER"] = { r = 0.95, g = 0.90, b = 0.60 };
 PowerBarColor["MAELSTROM"] = { r = 0.00, g = 0.50, b = 1.00, atlas = "_Shaman-MaelstromBar", fullPowerAnim=true };
 PowerBarColor["INSANITY"] = { r = 0.40, g = 0, b = 0.80, atlas = "_Priest-InsanityBar"};
+PowerBarColor["COMBO_POINTS"] = { r = 1.00, g = 0.96, b = 0.41 };
 PowerBarColor["CHI"] = { r = 0.71, g = 1.0, b = 0.92 };
 PowerBarColor["ARCANE_CHARGES"] = { r = 0.1, g = 0.1, b = 0.98 };
 PowerBarColor["FURY"] = { r = 0.788, g = 0.259, b = 0.992, atlas = "_DemonHunter-DemonicFuryBar", fullPowerAnim=true };
@@ -60,8 +61,8 @@ function UnitFrame_Initialize (self, unit, name, portrait, healthbar, healthtext
 	self.portrait = portrait;
 	self.healthbar = healthbar;
 	self.manabar = manabar;
-	self.threatIndicator = threatIndicator;
-	self.threatNumericIndicator = threatNumericIndicator;
+	--self.threatIndicator = threatIndicator;
+	--self.threatNumericIndicator = threatNumericIndicator;
 	self.myHealPredictionBar = myHealPredictionBar;
 	self.otherHealPredictionBar = otherHealPredictionBar
 	self.totalAbsorbBar = totalAbsorbBar;
@@ -118,22 +119,15 @@ function UnitFrame_Initialize (self, unit, name, portrait, healthbar, healthtext
 	end
 	UnitFrameHealthBar_Initialize(unit, healthbar, healthtext, true);
 	UnitFrameManaBar_Initialize(unit, manabar, manatext, (unit == "player" or unit == "pet" or unit == "vehicle" or unit == "target" or unit == "focus"));
-	UnitFrameThreatIndicator_Initialize(unit, self, threatFeedbackUnit);
+	--UnitFrameThreatIndicator_Initialize(unit, self, threatFeedbackUnit);
 	UnitFrame_Update(self);
 	self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
 	self:RegisterEvent("UNIT_NAME_UPDATE");
 	self:RegisterEvent("UNIT_DISPLAYPOWER");
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE")
 	self:RegisterEvent("PORTRAITS_UPDATED");
-	if ( self.healAbsorbBar ) then
-		self:RegisterUnitEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", unit);
-	end
 	if ( self.myHealPredictionBar ) then
 		self:RegisterUnitEvent("UNIT_MAXHEALTH", unit);
-		self:RegisterUnitEvent("UNIT_HEAL_PREDICTION", unit);
-	end
-	if ( self.totalAbsorbBar ) then
-		self:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit);
 	end
 	if ( self.myManaCostPredictionBar ) then
 		self:RegisterUnitEvent("UNIT_SPELLCAST_START", unit);
@@ -148,10 +142,6 @@ function UnitFrame_SetUnit (self, unit, healthbar, manabar)
 	if ( self.unit ~= unit ) then
 		if ( self.myHealPredictionBar ) then
 			self:RegisterUnitEvent("UNIT_MAXHEALTH", unit);
-			self:RegisterUnitEvent("UNIT_HEAL_PREDICTION", unit);
-		end
-		if ( self.totalAbsorbBar ) then
-			self:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit);
 		end
 		if ( not healthbar.frequentUpdates ) then
 			healthbar:RegisterUnitEvent("UNIT_HEALTH", unit);
@@ -167,7 +157,7 @@ function UnitFrame_SetUnit (self, unit, healthbar, manabar)
 	end
 
 	self.unit = unit;
-	UnitFrameHealthBar_SetUnit(healthbar, unit)
+	healthbar.unit = unit;
 	if ( manabar ) then	--Party Pet frames don't have a mana bar.
 		manabar.unit = unit;
 	end
@@ -193,10 +183,6 @@ function UnitFrame_Update (self, isParty)
 	UnitFramePortrait_Update(self);
 	UnitFrameHealthBar_Update(self.healthbar, self.unit);
 	UnitFrameManaBar_Update(self.manabar, self.unit);
-	UnitFrame_UpdateThreatIndicator(self.threatIndicator, self.threatNumericIndicator);
-	UnitFrameHealPredictionBars_UpdateMax(self);
-	UnitFrameHealPredictionBars_Update(self);
-	UnitFrameManaCostPredictionBars_Update(self);
 end
 
 function UnitFramePortrait_Update (self)
@@ -218,15 +204,6 @@ function UnitFrame_OnEvent(self, event, ...)
 			if ( self.manabar ) then
 				UnitFrameManaBar_UpdateType(self.manabar);
 			end
-		elseif ( event == "UNIT_MAXHEALTH" ) then
-			UnitFrameHealPredictionBars_UpdateMax(self);
-			UnitFrameHealPredictionBars_Update(self);
-		elseif ( event == "UNIT_HEAL_PREDICTION" ) then
-			UnitFrameHealPredictionBars_Update(self);
-		elseif ( event == "UNIT_ABSORB_AMOUNT_CHANGED" ) then
-			UnitFrameHealPredictionBars_Update(self);
-		elseif ( event == "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" ) then
-			UnitFrameHealPredictionBars_Update(self);
 		elseif ( event == "UNIT_SPELLCAST_START" or event == "UNIT_SPELLCAST_STOP" or event == "UNIT_SPELLCAST_FAILED" or event == "UNIT_SPELLCAST_SUCCEEDED" ) then
 			local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible, spellID = UnitCastingInfo(unit);
 			UnitFrameManaCostPredictionBars_Update(self, event == "UNIT_SPELLCAST_START", startTime, endTime, spellID);
@@ -234,177 +211,6 @@ function UnitFrame_OnEvent(self, event, ...)
 	elseif ( event == "PORTRAITS_UPDATED" ) then
 		UnitFramePortrait_Update(self);
 	end
-end
-
-function UnitFrameHealPredictionBars_UpdateMax(self)
-	if ( not self.myHealPredictionBar ) then
-		return;
-	end
-
-	UnitFrameHealPredictionBars_Update(self);
-end
-
-function UnitFrameHealPredictionBars_UpdateSize(self)
-	if ( not self.myHealPredictionBar or not self.otherHealPredictionBar ) then
-		return;
-	end
-
-	UnitFrameHealPredictionBars_Update(self);
-end
-
---WARNING: This function is very similar to the function CompactUnitFrame_UpdateHealPrediction in CompactUnitFrame.lua.
---If you are making changes here, it is possible you may want to make changes there as well.
-local MAX_INCOMING_HEAL_OVERFLOW = 1.0;
-function UnitFrameHealPredictionBars_Update(frame)
-	if ( not frame.myHealPredictionBar ) then
-		return;
-	end
-
-	local _, maxHealth = frame.healthbar:GetMinMaxValues();
-	local health = frame.healthbar:GetValue();
-	if ( maxHealth <= 0 ) then
-		return;
-	end
-
-	local myIncomingHeal = UnitGetIncomingHeals(frame.unit, "player") or 0;
-	local allIncomingHeal = UnitGetIncomingHeals(frame.unit) or 0;
-	local totalAbsorb = UnitGetTotalAbsorbs(frame.unit) or 0;
-
-	local myCurrentHealAbsorb = 0;
-	if ( frame.healAbsorbBar ) then
-		myCurrentHealAbsorb = UnitGetTotalHealAbsorbs(frame.unit) or 0;
-
-		--We don't fill outside the health bar with healAbsorbs.  Instead, an overHealAbsorbGlow is shown.
-		if ( health < myCurrentHealAbsorb ) then
-			frame.overHealAbsorbGlow:Show();
-			myCurrentHealAbsorb = health;
-		else
-			frame.overHealAbsorbGlow:Hide();
-		end
-	end
-
-	--See how far we're going over the health bar and make sure we don't go too far out of the frame.
-	if ( health - myCurrentHealAbsorb + allIncomingHeal > maxHealth * MAX_INCOMING_HEAL_OVERFLOW ) then
-		allIncomingHeal = maxHealth * MAX_INCOMING_HEAL_OVERFLOW - health + myCurrentHealAbsorb;
-	end
-
-	local otherIncomingHeal = 0;
-
-	--Split up incoming heals.
-	if ( allIncomingHeal >= myIncomingHeal ) then
-		otherIncomingHeal = allIncomingHeal - myIncomingHeal;
-	else
-		myIncomingHeal = allIncomingHeal;
-	end
-
-	--We don't fill outside the the health bar with absorbs.  Instead, an overAbsorbGlow is shown.
-	local overAbsorb = false;
-	if ( health - myCurrentHealAbsorb + allIncomingHeal + totalAbsorb >= maxHealth or health + totalAbsorb >= maxHealth ) then
-		if ( totalAbsorb > 0 ) then
-			overAbsorb = true;
-		end
-
-		if ( allIncomingHeal > myCurrentHealAbsorb ) then
-			totalAbsorb = max(0,maxHealth - (health - myCurrentHealAbsorb + allIncomingHeal));
-		else
-			totalAbsorb = max(0,maxHealth - health);
-		end
-	end
-
-	if ( overAbsorb ) then
-		frame.overAbsorbGlow:Show();
-	else
-		frame.overAbsorbGlow:Hide();
-	end
-
-	local healthTexture = frame.healthbar:GetStatusBarTexture();
-	local myCurrentHealAbsorbPercent = 0;
-	local healAbsorbTexture = nil;
-
-	if ( frame.healAbsorbBar ) then
-		myCurrentHealAbsorbPercent = myCurrentHealAbsorb / maxHealth;
-
-		--If allIncomingHeal is greater than myCurrentHealAbsorb, then the current
-		--heal absorb will be completely overlayed by the incoming heals so we don't show it.
-		if ( myCurrentHealAbsorb > allIncomingHeal ) then
-			local shownHealAbsorb = myCurrentHealAbsorb - allIncomingHeal;
-			local shownHealAbsorbPercent = shownHealAbsorb / maxHealth;
-
-			healAbsorbTexture = UnitFrameUtil_UpdateFillBar(frame, healthTexture, frame.healAbsorbBar, shownHealAbsorb, -shownHealAbsorbPercent);
-
-			--If there are incoming heals the left shadow would be overlayed by the incoming heals
-			--so it isn't shown.
-			if ( allIncomingHeal > 0 ) then
-				frame.healAbsorbBarLeftShadow:Hide();
-			else
-				frame.healAbsorbBarLeftShadow:SetPoint("TOPLEFT", healAbsorbTexture, "TOPLEFT", 0, 0);
-				frame.healAbsorbBarLeftShadow:SetPoint("BOTTOMLEFT", healAbsorbTexture, "BOTTOMLEFT", 0, 0);
-				frame.healAbsorbBarLeftShadow:Show();
-			end
-
-			-- The right shadow is only shown if there are absorbs on the health bar.
-			if ( totalAbsorb > 0 ) then
-				frame.healAbsorbBarRightShadow:SetPoint("TOPLEFT", healAbsorbTexture, "TOPRIGHT", -8, 0);
-				frame.healAbsorbBarRightShadow:SetPoint("BOTTOMLEFT", healAbsorbTexture, "BOTTOMRIGHT", -8, 0);
-				frame.healAbsorbBarRightShadow:Show();
-			else
-				frame.healAbsorbBarRightShadow:Hide();
-			end
-		else
-			frame.healAbsorbBar:Hide();
-			frame.healAbsorbBarLeftShadow:Hide();
-			frame.healAbsorbBarRightShadow:Hide();
-		end
-	end
-
-	--Show myIncomingHeal on the health bar.
-	local incomingHealTexture = UnitFrameUtil_UpdateFillBar(frame, healthTexture, frame.myHealPredictionBar, myIncomingHeal, -myCurrentHealAbsorbPercent);
-
-	--Append otherIncomingHeal on the health bar
-	if (myIncomingHeal > 0) then
-		incomingHealTexture = UnitFrameUtil_UpdateFillBar(frame, incomingHealTexture, frame.otherHealPredictionBar, otherIncomingHeal);
-	else
-		incomingHealTexture = UnitFrameUtil_UpdateFillBar(frame, healthTexture, frame.otherHealPredictionBar, otherIncomingHeal, -myCurrentHealAbsorbPercent);
-	end
-
-	--Append absorbs to the correct section of the health bar.
-	local appendTexture = nil;
-	if ( healAbsorbTexture ) then
-		--If there is a healAbsorb part shown, append the absorb to the end of that.
-		appendTexture = healAbsorbTexture;
-	else
-		--Otherwise, append the absorb to the end of the the incomingHeals part;
-		appendTexture = incomingHealTexture;
-	end
-	UnitFrameUtil_UpdateFillBar(frame, appendTexture, frame.totalAbsorbBar, totalAbsorb)
-end
-
-function UnitFrameManaCostPredictionBars_Update(frame, isStarting, startTime, endTime, spellID)
-	if (not frame.manabar or not frame.myManaCostPredictionBar) then
-		return;
-	end
-
-	local cost = 0;
-	if (not isStarting or startTime == endTime) then
-        local currentSpellID = select(9, UnitCastingInfo(frame.unit));
-        if(currentSpellID and frame.predictedPowerCost) then --if we're currently casting something with a power cost, then whatever cast
-		    cost = frame.predictedPowerCost;                 --just finished was allowed while casting, don't reset the original cast
-        else
-            frame.predictedPowerCost = nil;
-        end
-	else
-		local costTable = GetSpellPowerCost(spellID);
-		for _, costInfo in pairs(costTable) do
-			if (costInfo.type == frame.manabar.powerType) then
-				cost = costInfo.cost;
-				break;
-			end
-		end
-		frame.predictedPowerCost = cost;
-	end
-	local manaBarTexture = frame.manabar:GetStatusBarTexture();
-	UnitFrameManaBar_Update(frame.manabar, frame.unit);
-	UnitFrameUtil_UpdateManaFillBar(frame, manaBarTexture, frame.myManaCostPredictionBar, cost);
 end
 
 --WARNING: This function is very similar to the function CompactUnitFrameUtil_UpdateFillBar in CompactUnitFrame.lua.
@@ -449,12 +255,28 @@ function UnitFrameUtil_UpdateManaFillBar(frame, previousTexture, bar, amount, ba
 end
 
 function UnitFrame_OnEnter (self)
+	-- If showing newbie tips then only show the explanation
+	if ( GetCVar("showNewbieTips") == "1" ) then
+		if ( self == PlayerFrame ) then
+			GameTooltip_SetDefaultAnchor(GameTooltip, self);
+			GameTooltip_AddNewbieTip(self, PARTY_OPTIONS_LABEL, 1.0, 1.0, 1.0, NEWBIE_TOOLTIP_PARTYOPTIONS);
+			return;
+		elseif ( self == TargetFrame and UnitPlayerControlled("target") and not UnitIsUnit("target", "player") and not UnitIsUnit("target", "pet") ) then
+			GameTooltip_SetDefaultAnchor(GameTooltip, self);
+			GameTooltip_AddNewbieTip(self, PLAYER_OPTIONS_LABEL, 1.0, 1.0, 1.0, NEWBIE_TOOLTIP_PLAYEROPTIONS);
+			return;
+		end
+	end
 	UnitFrame_UpdateTooltip(self);
 end
 
 function UnitFrame_OnLeave (self)
 	self.UpdateTooltip = nil;
-	GameTooltip:FadeOut();
+	if ( GetCVar("showNewbieTips") == "1" ) then
+		GameTooltip:Hide();
+	else
+		GameTooltip:FadeOut();
+	end
 end
 
 function UnitFrame_UpdateTooltip (self)
@@ -477,18 +299,16 @@ function UnitFrameManaBar_UpdateType (manaBar)
 	local powerType, powerToken, altR, altG, altB = UnitPowerType(manaBar.unit);
 	local prefix = _G[powerToken];
 	local info = PowerBarColor[powerToken];
-
-	manaBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");
-
 	if ( info ) then
 		if ( not manaBar.lockColor ) then
-			local playerDeadOrGhost = (manaBar.unit == "player" and (UnitIsDead("player") or UnitIsGhost("player")));
+			local playerDeadOrGhost = manaBar.unit == "player" and (UnitIsDead("player") or UnitIsGhost("player")) and not UnitIsFeignDeath("player");
 			if ( info.atlas ) then
 				manaBar:SetStatusBarAtlas(info.atlas);
 				manaBar:SetStatusBarColor(1, 1, 1);
 				manaBar:GetStatusBarTexture():SetDesaturated(playerDeadOrGhost);
 				manaBar:GetStatusBarTexture():SetAlpha(playerDeadOrGhost and 0.5 or 1);
 			else
+				manaBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");
 				if ( playerDeadOrGhost ) then
 					manaBar:SetStatusBarColor(0.6, 0.6, 0.6, 0.5);
 				else
@@ -505,7 +325,7 @@ function UnitFrameManaBar_UpdateType (manaBar)
 			end
 		end
 	else
-		if ( not altR ) then
+		if ( not altR) then
 			-- couldn't find a power token entry...default to indexing by power type or just mana if we don't have that either
 			info = PowerBarColor[powerType] or PowerBarColor["MANA"];
 		else
@@ -520,14 +340,7 @@ function UnitFrameManaBar_UpdateType (manaBar)
 		if ( manaBar.FullPowerFrame ) then
 			manaBar.FullPowerFrame:RemoveAnims();
 		end
-		if manaBar.FeedbackFrame then
-			manaBar.FeedbackFrame:StopFeedbackAnim();
-		end
 		manaBar.currValue = UnitPower("player", powerType);
-		if unitFrame.myManaCostPredictionBar then
-			unitFrame.myManaCostPredictionBar:Hide();
-		end
-		unitFrame.predictedPowerCost = 0;
 	end
 
 	-- Update the manabar text
@@ -540,7 +353,7 @@ function UnitFrameManaBar_UpdateType (manaBar)
 	if ( manaBar.unit ~= "pet") then
 	    if ( unitFrame:GetName() == "PlayerFrame" ) then
 		    manaBar.tooltipTitle = prefix;
-		    manaBar.tooltipText = _G["NEWBIE_TOOLTIP_MANABAR_"..powerType];
+		    manaBar.tooltipText = _G["NEWBIE_TOOLTIP_MANABAR"..powerType];
 	    else
 		    manaBar.tooltipTitle = nil;
 		    manaBar.tooltipText = nil;
@@ -560,9 +373,11 @@ function UnitFrameHealthBar_Initialize (unit, statusbar, statustext, frequentUpd
 	if ( frequentUpdates ) then
 		statusbar:RegisterEvent("VARIABLES_LOADED");
 	end
-	
-	UnitFrameHealthBar_RefreshUpdateEvent(statusbar);
-
+	if ( GetCVarBool("predictedHealth") and frequentUpdates ) then
+		statusbar:SetScript("OnUpdate", UnitFrameHealthBar_OnUpdate);
+	else
+		statusbar:RegisterUnitEvent("UNIT_HEALTH", unit);
+	end
 	statusbar:RegisterUnitEvent("UNIT_MAXHEALTH", unit);
 	statusbar:SetScript("OnEvent", UnitFrameHealthBar_OnEvent);
 
@@ -576,28 +391,19 @@ function UnitFrameHealthBar_Initialize (unit, statusbar, statustext, frequentUpd
 	end
 end
 
-function UnitFrameHealthBar_RefreshUpdateEvent(self)
-	if ( GetCVarBool("predictedHealth") and self.frequentUpdates ) then
-		self:SetScript("OnUpdate", UnitFrameHealthBar_OnUpdate);
-		self:UnregisterEvent("UNIT_HEALTH");
-	else
-		self:SetScript("OnUpdate", nil);
-		self:RegisterUnitEvent("UNIT_HEALTH", self.unit);
-	end
-end
-
-function UnitFrameHealthBar_SetUnit(self, unit)
-	self.unit = unit;
-	UnitFrameHealthBar_RefreshUpdateEvent(self);
-end
-
 function UnitFrameHealthBar_OnEvent(self, event, ...)
 	if ( event == "CVAR_UPDATE" ) then
 		TextStatusBar_OnEvent(self, event, ...);
 	elseif ( event == "VARIABLES_LOADED" ) then
 		self:UnregisterEvent("VARIABLES_LOADED");
-		UnitFrameHealthBar_RefreshUpdateEvent(self);
-	elseif self:IsShown() then
+		if ( GetCVarBool("predictedHealth") and self.frequentUpdates ) then
+			self:SetScript("OnUpdate", UnitFrameHealthBar_OnUpdate);
+			self:UnregisterEvent("UNIT_HEALTH");
+		else
+			self:RegisterUnitEvent("UNIT_HEALTH", self.unit);
+			self:SetScript("OnUpdate", nil);
+		end
+	else
 		if ( not self.ignoreNoUnit or UnitGUID(self.unit) ) then
 			UnitFrameHealthBar_Update(self, ...);
 		end
@@ -732,7 +538,6 @@ function UnitFrameHealthBar_OnUpdate(self)
 				self:SetValue(currValue);
 				self.currValue = currValue;
 				TextStatusBar_UpdateTextString(self);
-				UnitFrameHealPredictionBars_Update(self:GetParent());
 			end
 		end
 
@@ -750,11 +555,16 @@ function UnitFrameHealthBar_Update(statusbar, unit)
 	if ( unit == statusbar.unit ) then
 		local maxValue = UnitHealthMax(unit);
 
+		statusbar.showPercentage = false;
+
 		-- Safety check to make sure we never get an empty bar.
 		statusbar.forceHideText = false;
 		if ( maxValue == 0 ) then
 			maxValue = 1;
 			statusbar.forceHideText = true;
+		elseif ( GetClassicExpansionLevel() >= LE_EXPANSION_BURNING_CRUSADE and (maxValue == 100 or not ShouldKnowUnitHealth(unit)) ) then
+			--This should be displayed as percentage.
+			statusbar.showPercentage = true;
 		end
 
 		statusbar:SetMinMaxValues(0, maxValue);
@@ -780,7 +590,6 @@ function UnitFrameHealthBar_Update(statusbar, unit)
 		end
 	end
 	TextStatusBar_UpdateTextString(statusbar);
-	UnitFrameHealPredictionBars_Update(statusbar:GetParent());
 end
 
 function UnitFrameHealthBar_OnValueChanged(self, value)
@@ -908,7 +717,7 @@ function UnitFrameManaBar_Update(statusbar, unit)
 	end
 	TextStatusBar_UpdateTextString(statusbar);
 end
-
+--[[
 function UnitFrameThreatIndicator_Initialize(unit, unitFrame, feedbackUnit)
 	local indicator = unitFrame.threatIndicator;
 	if ( not indicator ) then
@@ -981,7 +790,7 @@ function UnitFrame_UpdateThreatIndicator(indicator, numericIndicator, unit)
 		end
 	end
 end
-
+--]]
 function GetUnitName(unit, showServerName)
 	local name, server = UnitName(unit);
 	local relationship = UnitRealmRelationship(unit);
@@ -999,7 +808,7 @@ function GetUnitName(unit, showServerName)
 		return name;
 	end
 end
-
+--[[
 function ShowNumericThreat()
 	if ( GetCVar("threatShowNumeric") == "1" ) then
 		return true;
@@ -1007,3 +816,4 @@ function ShowNumericThreat()
 		return false;
 	end
 end
+--]]

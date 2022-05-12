@@ -12,9 +12,9 @@ function FogOfWarDataProviderMixin:OnAdded(mapCanvas)
 end
 
 function FogOfWarDataProviderMixin:OnRemoved(mapCanvas)
-	self:GetMap():RemoveAllPinsByTemplate("FogOfWarPinTemplate");
-
 	MapCanvasDataProviderMixin.OnRemoved(self, mapCanvas);
+
+	self:GetMap():RemoveAllPinsByTemplate("FogOfWarPinTemplate");
 end
 
 function FogOfWarDataProviderMixin:RefreshAllData(fromOnShow)

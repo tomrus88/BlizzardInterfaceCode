@@ -1,3 +1,23 @@
+VoiceChatDotsMixin = {};
+
+function VoiceChatDotsMixin:OnLoad()
+	self:StopAnimation();
+end
+
+function VoiceChatDotsMixin:PlayAnimation()
+	self.Dot1:SetAlpha(0);
+	self.Dot2:SetAlpha(0);
+	self.Dot3:SetAlpha(0);
+	self.PendingAnim:Play();
+end
+
+function VoiceChatDotsMixin:StopAnimation()
+	self.PendingAnim:Stop();
+	self.Dot1:SetAlpha(0);
+	self.Dot2:SetAlpha(0);
+	self.Dot3:SetAlpha(0);
+end
+
 VoiceChatHeadsetButtonMixin = {};
 
 function VoiceChatHeadsetButtonMixin:OnLoad()
@@ -47,8 +67,7 @@ end
 function VoiceChatHeadsetButtonMixin:OnVoiceChannelJoined(statusCode, voiceChannelID, channelType, clubId, streamId)
 	if statusCode == Enum.VoiceChatStatusCode.Success then
 		if self:VoiceChannelIDMatches(voiceChannelID) or self:VoiceChannelInfoMatches(channelType, clubId, streamId) then
-			local voiceChannel = C_VoiceChat.GetChannel(voiceChannelID);
-			self:GetParent():SetVoiceChannel(voiceChannel);
+			self:GetParent():SetVoiceChannel(C_VoiceChat.GetChannel(voiceChannelID));
 		end
 	end
 end
@@ -92,7 +111,6 @@ function VoiceChatHeadsetButtonMixin:OnVoiceChatError(platformCode, statusCode)
 end
 
 function VoiceChatHeadsetButtonMixin:OnClick()
-	local operationRequested = true;
 	local voiceChannel = self:GetVoiceChannel();
 	if voiceChannel then
 		local isActive = C_VoiceChat.GetActiveChannelID() == voiceChannel.channelID;
@@ -102,16 +120,10 @@ function VoiceChatHeadsetButtonMixin:OnClick()
 			C_VoiceChat.ActivateChannel(voiceChannel.channelID);
 		end
 	elseif self:IsCommunityChannel() then
-		operationRequested = ChannelFrame:TryJoinCommunityStreamChannel(self.clubId, self.streamId);
+		ChannelFrame:TryJoinCommunityStreamChannel(self.clubId, self.streamId);
 	else
 		local activate = true;
-		operationRequested = ChannelFrame:TryJoinVoiceChannelByType(self:GetChannelType(), activate);
-	end
-
-	-- If a request wasn't made yet because something else needed to happen first, at least acknowledge that the user clicked
-	-- something while the initial operation happens (usually it's a login)
-	if not operationRequested then
-		self:GetParent():SetPendingState(true);
+		ChannelFrame:TryJoinVoiceChannelByType(self:GetChannelType(), activate);
 	end
 
 	if self.onClickFn then
@@ -177,7 +189,6 @@ function VoiceChatHeadsetButtonMixin:SetCommunityInfo(clubId, streamInfo)
 	self:SetChannelType(Enum.ChatChannelType.Communities);
 	self:GetParent():SetVoiceChannel(C_VoiceChat.GetChannelForCommunityStream(clubId, streamInfo.streamId));
 	self:GetParent():SetPendingState(C_VoiceChat.IsChannelJoinPending(Enum.ChatChannelType.Communities, self.clubId, self.streamId));
-	self:SetEnabled(self:ShouldEnable());
 end
 
 function VoiceChatHeadsetButtonMixin:IsCommunityChannel()
@@ -209,40 +220,18 @@ function VoiceChatHeadsetButtonMixin:OnLeave()
 	GameTooltip:Hide();
 end
 
-function VoiceChatHeadsetButtonMixin:GetClubErrorReason()
-	if self.clubId then
-		return C_VoiceChat.GetJoinClubVoiceChannelError(self.clubId);
-	end
-
-	return nil;
-end
-
 function VoiceChatHeadsetButtonMixin:ShowTooltip()
 	local isActive = self:IsVoiceActive();
 	local message = isActive and VOICE_CHAT_LEAVE or VOICE_CHAT_JOIN;
 
 	local tooltip = GameTooltip;
 	tooltip:SetOwner(self, "ANCHOR_RIGHT");
-
-	local errorReason = self:GetClubErrorReason();
-	if errorReason then
-		if errorReason == Enum.VoiceChannelErrorReason.IsBattleNetChannel then
-			GameTooltip_SetTitle(tooltip, ERR_GROUPS_VOICE_CHAT_DISABLED, RED_FONT_COLOR);
-		else
-			GameTooltip_SetTitle(tooltip, VOICECHAT_DISABLED, RED_FONT_COLOR);
-		end
-	elseif not self:IsEnabled() then
-		-- COMMUNITY_FEATURE_UNAVAILABLE_MUTED is actually for if parental control is blocking a feature...
-		local errMsg = C_VoiceChat.IsParentalDisabled() and COMMUNITY_FEATURE_UNAVAILABLE_MUTED or VOICECHAT_DISABLED;
-		GameTooltip_SetTitle(tooltip, errMsg, RED_FONT_COLOR);
-	else
-		GameTooltip_SetTitle(tooltip, message);
-	end
+	GameTooltip_SetTitle(tooltip, message);
 	tooltip:Show();
 end
 
-function VoiceChatHeadsetButtonMixin:ShouldShow()
-	if self:GetVoiceChannel() or self:IsCommunityChannel() then
+function VoiceChatHeadsetButtonMixin:ShouldEnable()
+	if self:GetVoiceChannel() or (self:IsCommunityChannel() and C_VoiceChat.CanPlayerUseVoiceChat()) then
 		return true;
 	end
 
@@ -254,27 +243,13 @@ function VoiceChatHeadsetButtonMixin:ShouldShow()
 	return false;
 end
 
-function VoiceChatHeadsetButtonMixin:ShouldEnable()
-	if not C_VoiceChat.CanPlayerUseVoiceChat() then
-		return false;
-	end
-
-	if self:IsCommunityChannel() and C_VoiceChat.GetJoinClubVoiceChannelError(self.clubId) ~= nil then
-		return false;
-	end
-
-	return true;
-end
-
 function VoiceChatHeadsetButtonMixin:Update()
-	if self:ShouldShow() then
+	if self:ShouldEnable() then
 		self:SetShown(true);
-		self:SetEnabled(self:ShouldEnable());
 
 		local isActive = self:IsVoiceActive();
 		local atlas = isActive and "voicechat-channellist-icon-headphone-on" or "voicechat-channellist-icon-headphone-off";
 		self:SetNormalAtlas(atlas);
-		self:SetDisabledAtlas(atlas);
 		self:SetHighlightAtlas(atlas);
 
 		if GameTooltip:GetOwner() == self then

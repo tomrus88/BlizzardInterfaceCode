@@ -4,8 +4,7 @@ function AlertFrameSystems_Register()
 	ScenarioAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("ScenarioAlertFrameTemplate", ScenarioAlertFrame_SetUp);
 	InvasionAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("ScenarioLegionInvasionAlertFrameTemplate", ScenarioLegionInvasionAlertFrame_SetUp, ScenarioLegionInvasionAlertFrame_Coalesce);
 	DigsiteCompleteAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("DigsiteCompleteToastFrameTemplate", DigsiteCompleteToastFrame_SetUp);
-	EntitlementDeliveredAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("EntitlementDeliveredAlertFrameTemplate", EntitlementDeliveredAlertFrame_SetUp);
-	RafRewardDeliveredAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("RafRewardDeliveredAlertFrameTemplate", RafRewardDeliveredAlertFrame_SetUp);
+	StorePurchaseAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("StorePurchaseAlertFrameTemplate", StorePurchaseAlertFrame_SetUp);
 	GarrisonBuildingAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("GarrisonBuildingAlertFrameTemplate", GarrisonBuildingAlertFrame_SetUp);
 	GarrisonMissionAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("GarrisonStandardMissionAlertFrameTemplate", GarrisonMissionAlertFrame_SetUp);
 	GarrisonShipMissionAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("GarrisonShipMissionAlertFrameTemplate", GarrisonMissionAlertFrame_SetUp);
@@ -15,11 +14,8 @@ function AlertFrameSystems_Register()
 	GarrisonTalentAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("GarrisonTalentAlertFrameTemplate", GarrisonTalentAlertFrame_SetUp);
 	WorldQuestCompleteAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("WorldQuestCompleteAlertFrameTemplate", WorldQuestCompleteAlertFrame_SetUp, WorldQuestCompleteAlertFrame_Coalesce);
 	LegendaryItemAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("LegendaryItemAlertFrameTemplate", LegendaryItemAlertFrame_SetUp);
-	NewPetAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewPetAlertFrameTemplate", NewPetAlertFrame_SetUp);
-	NewMountAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewMountAlertFrameTemplate", NewMountAlertFrame_SetUp);
-	NewToyAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewToyAlertFrameTemplate", NewToyAlertFrame_SetUp);
-	NewRuneforgePowerAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewRuneforgePowerAlertFrameTemplate", NewRuneforgePowerAlertSystem_SetUp);
-	NewCosmeticAlertFrameSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewCosmeticAlertFrameTemplate", NewCosmeticAlertFrameSystem_SetUp);
+	NewPetAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("NewPetAlertFrameTemplate", NewPetAlertFrame_SetUp);
+	NewMountAlertSystem = AlertFrame:AddSimpleAlertFrameSubSystem("NewMountAlertFrameTemplate", NewMountAlertFrame_SetUp);
 end
 
 -- [[ GuildChallengeAlertFrame ]] --
@@ -154,18 +150,15 @@ function DungeonCompletionAlertFrame_SetUp(frame, rewardData)
 	--For now we only have 1 dungeon alert frame. If you're completing more than one dungeon within ~5 seconds, tough luck.
 	local isRaid = rewardData.subtypeID == LFG_SUBTYPEID_RAID;
 	frame.raidArt:SetShown(isRaid);
-	frame.dungeonArt:SetShown(not isRaid);
+	frame.dungeonArt1:SetShown(not isRaid);
+	frame.dungeonArt2:SetShown(not isRaid);
+	frame.dungeonArt3:SetShown(not isRaid);
+	frame.dungeonArt4:SetShown(not isRaid);
 
 	if ( isRaid ) then
-		frame.dungeonTexture:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 26, 15);
-		frame.completionText:SetPoint("TOP", 25, -28);
-		frame.glowFrame.glow:SetPoint("CENTER", 0, -2);
-		frame.shine:SetPoint("BOTTOMLEFT", 0, 1);
+		frame.dungeonTexture:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 26, 18);
 	else
-		frame.dungeonTexture:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 13, 18);
-		frame.completionText:SetPoint("TOP", 25, -25);
-		frame.glowFrame.glow:SetPoint("CENTER", 0, 1);
-		frame.shine:SetPoint("BOTTOMLEFT", 0, 4);
+		frame.dungeonTexture:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 13, 13);
 	end
 
 	--Set up the rewards
@@ -187,14 +180,12 @@ function DungeonCompletionAlertFrame_SetUp(frame, rewardData)
 	--Set up the text and icons.
 
 	frame.instanceName:SetText(rewardData.name);
-
-	local instanceNameYOffset = isRaid and -43 or -39;
 	if ( rewardData.subtypeID == LFG_SUBTYPEID_HEROIC ) then
 		frame.heroicIcon:Show();
-		frame.instanceName:SetPoint("TOP", 33, instanceNameYOffset);
+		frame.instanceName:SetPoint("TOP", 33, -44);
 	else
 		frame.heroicIcon:Hide();
-		frame.instanceName:SetPoint("TOP", 25, instanceNameYOffset);
+		frame.instanceName:SetPoint("TOP", 25, -44);
 	end
 
 	frame.dungeonTexture:SetTexture(rewardData.iconTextureFile);
@@ -298,79 +289,107 @@ end
 function AchievementAlertFrame_SetUp(frame, achievementID, alreadyEarned)
 	local _, name, points, completed, month, day, year, description, flags, icon, rewardText, isGuildAch, wasEarnedByMe, earnedBy = GetAchievementInfo(achievementID);
 
+	local displayName = frame.Name;
 	local shieldPoints = frame.Shield.Points;
 	local shieldIcon = frame.Shield.Icon;
 	local unlocked = frame.Unlocked;
+	local oldCheevo = frame.OldAchievement;
 
-	unlocked:SetPoint("TOP", 7, -23);
-
-	frame.Name:SetText(name);
+	displayName:SetText(name);
 
 	AchievementShield_SetPoints(points, shieldPoints, GameFontNormal, GameFontNormalSmall);
+
 	if ( isGuildAch ) then
 		local guildName = frame.GuildName;
 		local guildBorder = frame.GuildBorder;
 		local guildBanner = frame.GuildBanner;
-
-		shieldPoints:Show();
-		shieldIcon:Show();
-		frame:SetHeight(104);
-		local background = frame.Background;
-		background:SetAtlas("ui-achievement-guild-background", TextureKitConstants.UseAtlasSize);
-		local iconBorder = frame.Icon.Overlay;
-		iconBorder:SetAtlas("ui-achievement-guild-iconframe", TextureKitConstants.UseAtlasSize);
-		iconBorder:SetPoint("CENTER", 0, 0);
-		frame.Icon:SetPoint("TOPLEFT", 0, -25);
-		frame.Icon.Texture:SetPoint("CENTER", -1, -2);
-		frame.Shield:SetPoint("TOPRIGHT", -12, -25);
-		shieldPoints:SetPoint("CENTER", 2, -2);
-		shieldPoints:SetVertexColor(0, 1, 0);
-		unlocked:SetPoint("TOP", 0, -38);
-		unlocked:SetText(GUILD_ACHIEVEMENT_UNLOCKED);
-		guildName:Show();
-		guildBanner:Show();
-		guildBorder:Show();
-		frame.glow:SetAtlas("ui-achievement-guild-glow", TextureKitConstants.UseAtlasSize);
-		frame.shine:SetAtlas("ui-achievement-guild-shine", TextureKitConstants.UseAtlasSize);
-		frame.shine:SetPoint("BOTTOMLEFT", 0, 16);
-
+		if ( not frame.guildDisplay or frame.oldCheevo) then
+			frame.oldCheevo = nil
+			shieldPoints:Show();
+			shieldIcon:Show();
+			oldCheevo:Hide();
+			frame.guildDisplay = true;
+			frame:SetHeight(104);
+			local background = frame.Background;
+			background:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Guild");
+			background:SetTexCoord(0.00195313, 0.62890625, 0.00195313, 0.19140625);
+			background:SetPoint("TOPLEFT", -2, 2);
+			background:SetPoint("BOTTOMRIGHT", 8, 8);
+			local iconBorder = frame.Icon.Overlay;
+			iconBorder:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Guild");
+			iconBorder:SetTexCoord(0.25976563,0.40820313,0.50000000,0.64453125);
+			iconBorder:SetPoint("CENTER", 0, 1);
+			frame.Icon:SetPoint("TOPLEFT", -26, 2);
+			displayName:SetPoint("BOTTOMLEFT", 79, 37);
+			displayName:SetPoint("BOTTOMRIGHT", -79, 37);
+			frame.Shield:SetPoint("TOPRIGHT", -15, -28);
+			shieldPoints:SetPoint("CENTER", 7, 5);
+			shieldPoints:SetVertexColor(0, 1, 0);
+			shieldIcon:SetTexCoord(0, 0.5, 0.5, 1);
+			unlocked:SetPoint("TOP", -1, -36);
+			unlocked:SetText(GUILD_ACHIEVEMENT_UNLOCKED);
+			guildName:Show();
+			guildBanner:Show();
+			guildBorder:Show();
+			frame.glow:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Guild");
+			frame.glow:SetTexCoord(0.00195313, 0.74804688, 0.19531250, 0.49609375);
+			frame.shine:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Guild");
+			frame.shine:SetTexCoord(0.75195313, 0.91601563, 0.19531250, 0.35937500);
+			frame.shine:SetPoint("BOTTOMLEFT", 0, 16);
+		end
 		guildName:SetText(GetGuildInfo("player"));
 		SetSmallGuildTabardTextures("player", nil, guildBanner, guildBorder);
 	else
-		shieldPoints:Show();
-		shieldIcon:Show();
-		frame:SetHeight(101);
-		local background = frame.Background;
-		background:SetAtlas("ui-achievement-alert-background", TextureKitConstants.UseAtlasSize);
-		local iconBorder = frame.Icon.Overlay;
-		iconBorder:SetAtlas("ui-achievement-iconframe", TextureKitConstants.UseAtlasSize);
-		iconBorder:SetPoint("CENTER", -1, 1);
-		frame.Icon:SetPoint("TOPLEFT", -4, -15);
-		frame.Shield:SetPoint("TOPRIGHT", -8, -15);
-		shieldPoints:SetPoint("CENTER", 2, -2);
-		shieldPoints:SetVertexColor(1, 1, 1);
-		unlocked:SetPoint("TOP", 7, -23);
-		unlocked:SetText(ACHIEVEMENT_UNLOCKED);
-		frame.GuildName:Hide();
-		frame.GuildBorder:Hide();
-		frame.GuildBanner:Hide();
-		frame.glow:SetAtlas("ui-achievement-glow-glow", TextureKitConstants.UseAtlasSize);
-		frame.shine:SetAtlas("ui-achievement-glow-shine", TextureKitConstants.UseAtlasSize);
-		frame.shine:SetPoint("BOTTOMLEFT", 0, 8);
+		if ( frame.guildDisplay  or frame.oldCheevo) then
+			frame.oldCheevo = nil
+			shieldPoints:Show();
+			shieldIcon:Show();
+			oldCheevo:Hide();
+			frame.guildDisplay = nil;
+			frame:SetHeight(88);
+			local background = frame.Background;
+			background:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Alert-Background");
+			background:SetTexCoord(0, 0.605, 0, 0.703);
+			background:SetPoint("TOPLEFT", 0, 0);
+			background:SetPoint("BOTTOMRIGHT", 0, 0);
+			local iconBorder = frame.Icon.Overlay;
+			iconBorder:SetTexture("Interface\\AchievementFrame\\UI-Achievement-IconFrame");
+			iconBorder:SetTexCoord(0, 0.5625, 0, 0.5625);
+			iconBorder:SetPoint("CENTER", -1, 2);
+			frame.Icon:SetPoint("TOPLEFT", -26, 16);
+			displayName:SetPoint("BOTTOMLEFT", 72, 36);
+			displayName:SetPoint("BOTTOMRIGHT", -60, 36);
+			frame.Shield:SetPoint("TOPRIGHT", -10, -13);
+			shieldPoints:SetPoint("CENTER", 7, 2);
+			shieldPoints:SetVertexColor(1, 1, 1);
+			shieldIcon:SetTexCoord(0, 0.5, 0, 0.45);
+			unlocked:SetPoint("TOP", 7, -23);
+			unlocked:SetText(ACHIEVEMENT_UNLOCKED);
+			frame.GuildName:Hide();
+			frame.GuildBorder:Hide();
+			frame.GuildBanner:Hide();
+			frame.glow:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Alert-Glow");
+			frame.glow:SetTexCoord(0, 0.78125, 0, 0.66796875);
+			frame.shine:SetTexture("Interface\\AchievementFrame\\UI-Achievement-Alert-Glow");
+			frame.shine:SetTexCoord(0.78125, 0.912109375, 0, 0.28125);
+			frame.shine:SetPoint("BOTTOMLEFT", 0, 8);
+		end
 
-		shieldPoints:SetShown(not alreadyEarned);
-		shieldIcon:SetShown(not alreadyEarned);
-
-		-- Center all text horizontally if the achievement has been earned and there's no points display
 		if (alreadyEarned) then
-			unlocked:SetPoint("TOP", 27, -23);
+			frame.oldCheevo = true;
+			shieldPoints:Hide();
+			shieldIcon:Hide();
+			oldCheevo:Show();
+			displayName:SetPoint("BOTTOMLEFT", 72, 37);
+			displayName:SetPoint("BOTTOMRIGHT", -25, 37);
+			unlocked:SetPoint("TOP", 21, -23);
 		end
 	end
 
 	if ( points == 0 ) then
-		shieldIcon:SetAtlas("UI-Achievement-Shield-NoPoints", TextureKitConstants.UseAtlasSize);
+		shieldIcon:SetTexture([[Interface\AchievementFrame\UI-Achievement-Shields-NoPoints]]);
 	else
-		shieldIcon:SetAtlas("ui-achievement-shield-2", TextureKitConstants.UseAtlasSize);
+		shieldIcon:SetTexture([[Interface\AchievementFrame\UI-Achievement-Shields]]);
 	end
 
 	frame.Icon.Texture:SetTexture(icon);
@@ -403,7 +422,7 @@ function AchievementAlertFrame_OnClick (self, button, down)
 end
 
 AchievementAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("AchievementAlertFrameTemplate", AchievementAlertFrame_SetUp, 2, 6);
-AchievementAlertSystem:SetCanShowMoreConditionFunc(function() return not C_PetBattles.IsInBattle() end);
+AchievementAlertSystem:SetCanShowMoreConditionFunc(function() return false end);
 
 -- [[ CriteriaAlertFrame ]] --
 function CriteriaAlertFrame_SetUp(frame, achievementID, criteriaString)
@@ -424,36 +443,50 @@ function LootAlertFrame_OnEnter(self)
 	GameTooltip:Show();
 end
 
+local LOOT_SOURCE_GARRISON_CACHE = 10;
+
 -- [[ LootUpgradeFrameTemplate ]] --
 LOOTUPGRADEFRAME_QUALITY_TEXTURES = {
-	[Enum.ItemQuality.Uncommon]	= {border = "loottoast-itemborder-green",	arrow = "loottoast-arrow-green"},
-	[Enum.ItemQuality.Rare]		= {border = "loottoast-itemborder-blue",	arrow = "loottoast-arrow-blue"},
-	[Enum.ItemQuality.Epic]		= {border = "loottoast-itemborder-purple",	arrow = "loottoast-arrow-purple"},
-	[Enum.ItemQuality.Legendary]	= {border = "loottoast-itemborder-orange",	arrow = "loottoast-arrow-orange"},
+	[LE_ITEM_QUALITY_UNCOMMON]	= {border = "loottoast-itemborder-green",	arrow = "loottoast-arrow-green"},
+	[LE_ITEM_QUALITY_RARE]		= {border = "loottoast-itemborder-blue",	arrow = "loottoast-arrow-blue"},
+	[LE_ITEM_QUALITY_EPIC]		= {border = "loottoast-itemborder-purple",	arrow = "loottoast-arrow-purple"},
+	[LE_ITEM_QUALITY_LEGENDARY]	= {border = "loottoast-itemborder-orange",	arrow = "loottoast-arrow-orange"},
 }
 
 -- [[ LootWonAlertFrameTemplate ]] --
 LOOTWONALERTFRAME_VALUES={
 	WonRoll = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=5, labelText=YOU_WON_LABEL, glowAtlas="loottoast-glow"},
 	Default = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=5, labelText=YOU_RECEIVED_LABEL, glowAtlas="loottoast-glow"},
-	Upgraded = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=5, labelText=ITEM_UPGRADED_LABEL, bgAtlas="LootToast-MoreAwesome", glowAtlas="loottoast-glow", soundKit=SOUNDKIT.UI_WARFORGED_ITEM_LOOT_TOAST},
-	LessAwesome = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=5, labelText=YOU_RECEIVED_LABEL, bgAtlas="LootToast-LessAwesome", soundKit=SOUNDKIT.UI_RAID_LOOT_TOAST_LESSER_ITEM_WON},
+	Upgraded = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=5, labelText=ITEM_UPGRADED_LABEL, bgAtlas="LootToast-MoreAwesome", glowAtlas="loottoast-glow"},
+	LessAwesome = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=5, labelText=YOU_RECEIVED_LABEL, bgAtlas="LootToast-LessAwesome"},
 	GarrisonCache = { bgOffsetX=-4, bgOffsetY=0, labelOffsetX=7, labelOffsetY=1, labelText=GARRISON_CACHE, glowAtlas="CacheToast-Glow", bgAtlas="CacheToast", noIconBorder=true, iconUnderBG=true},
 	Horde = { bgOffsetX=-1, bgOffsetY=-1, labelOffsetX=7, labelOffsetY=3, labelText=YOU_EARNED_LABEL, pvpAtlas="loottoast-bg-horde", glowAtlas="loottoast-glow"},
 	Alliance = { bgOffsetX=-1, bgOffsetY=-1, labelOffsetX=7, labelOffsetY=3, labelText=YOU_EARNED_LABEL, pvpAtlas="loottoast-bg-alliance", glowAtlas="loottoast-glow"},
 	RatedHorde = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=3, labelText=YOU_EARNED_LABEL, pvpAtlas="pvprated-loottoast-bg-horde", glowAtlas="loottoast-glow"},
 	RatedAlliance = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=3, labelText=YOU_EARNED_LABEL, pvpAtlas="pvprated-loottoast-bg-alliance", glowAtlas="loottoast-glow"},
-	Azerite = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=3, labelText=AZERITE_EMPOWERED_ITEM_LOOT_LABEL, bgAtlas="LootToast-Azerite", glowAtlas="loottoast-glow", soundKit=SOUNDKIT.UI_AZERITE_EMPOWERED_ITEM_LOOT_TOAST},
-	Conduit = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=3, labelText=CONDUIT_ITEM_LOOT_LABEL, bgAtlas="loottoast-oribos", noIconBorder=true, glowAtlas="loottoast-glow"},
-	Corrupted = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=3, labelText=CORRUPTED_ITEM_LOOT_LABEL, bgAtlas="LootToast-Nzoth", glowAtlas="loottoast-glow", soundKit=SOUNDKIT.UI_CORRUPTED_ITEM_LOOT_TOAST},
+	Azerite = { bgOffsetX=0, bgOffsetY=0, labelOffsetX=7, labelOffsetY=3, labelText=AZERITE_EMPOWERED_ITEM_LOOT_LABEL, bgAtlas="LootToast-Azerite", glowAtlas="loottoast-glow"},
 }
 
 -- NOTE - This may also be called for an externally created frame. (E.g. bonus roll has its own frame)
-function LootWonAlertFrame_SetUp(self, itemLink, originalQuantity, rollType, roll, specID, isCurrency, showFactionBG, lootSource, lessAwesome, isUpgraded, isCorrupted, wonRoll, showRatedBG, isSecondaryResult)
-	local itemName, itemTexture, quantity, itemRarity, itemLink = ItemUtil.GetItemDetails(itemLink, originalQuantity, isCurrency, lootSource);
+function LootWonAlertFrame_SetUp(self, itemLink, quantity, rollType, roll, specID, isCurrency, showFactionBG, lootSource, lessAwesome, isUpgraded, wonRoll, showRatedBG)
+	local itemName, itemHyperLink, itemRarity, itemTexture, _;
+	if (isCurrency) then
+		local currencyID = C_CurrencyInfo.GetCurrencyIDFromLink(itemLink); 
+		itemName, _, itemTexture, _, _, _, _, itemRarity = GetCurrencyInfo(itemLink);
+		itemName, itemTexture, quantity, itemRarity = CurrencyContainerUtil.GetCurrencyContainerInfoForAlert(currencyID, quantity, itemName, itemTexture, itemRarity); 
+		if ( lootSource == LOOT_SOURCE_GARRISON_CACHE ) then
+			itemName = format(GARRISON_RESOURCES_LOOT, quantity);
+		else
+			if (quantity > 1) then 
+				itemName = format(CURRENCY_QUANTITY_TEMPLATE, quantity, itemName);
+			end
+		end
+		itemHyperLink = itemLink;
+	else
+		itemName, itemHyperLink, itemRarity, _, _, _, _, _, _, itemTexture = GetItemInfo(itemLink);
+	end
 
-	self.isCurrency = isCurrency;
-
+	local isAzeriteEmpowered = false;
 	local windowInfo = wonRoll and LOOTWONALERTFRAME_VALUES.WonRoll or LOOTWONALERTFRAME_VALUES.Default;
 	if( showFactionBG ) then
 		local factionGroup = UnitFactionGroup("player");
@@ -476,16 +509,12 @@ function LootWonAlertFrame_SetUp(self, itemLink, originalQuantity, rollType, rol
 	else
 		if ( lootSource == LOOT_SOURCE_GARRISON_CACHE ) then
 			windowInfo = LOOTWONALERTFRAME_VALUES["GarrisonCache"];
-		elseif ( isCorrupted ) then
-			windowInfo = LOOTWONALERTFRAME_VALUES["Corrupted"];
 		elseif ( lessAwesome ) then
 			windowInfo = LOOTWONALERTFRAME_VALUES["LessAwesome"];
 		elseif ( isUpgraded ) then
 			windowInfo = LOOTWONALERTFRAME_VALUES["Upgraded"];
-		elseif ( C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(itemLink) ) then
+		elseif ( isAzeriteEmpowered ) then
 			windowInfo = LOOTWONALERTFRAME_VALUES["Azerite"];
-		elseif ( C_Soulbinds.IsItemConduitByItemInfo(itemLink) ) then
-			windowInfo = LOOTWONALERTFRAME_VALUES["Conduit"];
 		end
 		if ( windowInfo.bgAtlas ) then
 			self.Background:Hide();
@@ -507,17 +536,41 @@ function LootWonAlertFrame_SetUp(self, itemLink, originalQuantity, rollType, rol
 		self.glow.suppressGlow = true;
 	end
 
-	self.Label:SetText(isSecondaryResult and YOU_RECEIVED_LABEL or windowInfo.labelText);
-	self.Label:SetPoint("TOPLEFT", self.lootItem.Icon, "TOPRIGHT", windowInfo.labelOffsetX, windowInfo.labelOffsetY);
+	self.IconBorder:SetShown(not windowInfo.noIconBorder);
+	if ( windowInfo.iconUnderBG ) then
+		self.Icon:SetDrawLayer("BACKGROUND");
+	else
+		self.Icon:SetDrawLayer("BORDER");
+	end
 
+	self.Label:SetText(windowInfo.labelText);
+	self.Label:SetPoint("TOPLEFT", self.Icon, "TOPRIGHT", windowInfo.labelOffsetX, windowInfo.labelOffsetY);
+
+	self.isCurrency = isCurrency;
+
+	self.Icon:SetTexture(itemTexture);
 	self.ItemName:SetText(itemName);
 	local color = ITEM_QUALITY_COLORS[itemRarity];
 	self.ItemName:SetVertexColor(color.r, color.g, color.b);
+	local atlas = LOOT_BORDER_BY_QUALITY[itemRarity];
+	local desaturate = false;
+	if (not atlas) then
+		atlas = "loottoast-itemborder-gold";
+		desaturate = true;
+	end
+	self.IconBorder:SetAtlas(atlas);
+	self.IconBorder:SetDesaturated(desaturate);
+	self.IconOverlay:Hide();
 
-	local isIconBorderShown = not windowInfo.noIconBorder;
-	local isIconBorderDropShadowShown = false;
-	local iconDrawLayer = windowInfo.iconUnderBG and "BACKGROUND" or "BORDER";
-	self.lootItem:Init(itemLink, originalQuantity, specID, isCurrency, isUpgraded, isIconBorderShown, isIconBorderDropShadowShown, iconDrawLayer);
+	if ( specID and specID > 0 and not isCurrency ) then
+		local id, name, description, texture, role, class = GetSpecializationInfoByID(specID);
+		self.SpecIcon:SetTexture(texture);
+		self.SpecIcon:Show();
+		self.SpecRing:Show();
+	else
+		self.SpecIcon:Hide();
+		self.SpecRing:Hide();
+	end
 
 	if ( rollType == LOOT_ROLL_TYPE_NEED ) then
 		self.RollTypeIcon:SetTexture("Interface\\Buttons\\UI-GroupLoot-Dice-Up");
@@ -534,9 +587,30 @@ function LootWonAlertFrame_SetUp(self, itemLink, originalQuantity, rollType, rol
 		self.RollValue:Hide();
 	end
 
-	self.hyperlink = itemLink;
-	local soundKit = windowInfo.soundKit or SOUNDKIT.UI_EPICLOOT_TOAST;
-	PlaySound(soundKit);
+	-- item upgraded?
+	self.animArrows:Stop();
+	if ( isUpgraded ) then
+		local upgradeTexture = LOOTUPGRADEFRAME_QUALITY_TEXTURES[itemRarity] or LOOTUPGRADEFRAME_QUALITY_TEXTURES[LE_ITEM_QUALITY_UNCOMMON];
+		for i = 1, self.numArrows do
+			self["Arrow"..i]:SetAtlas(upgradeTexture.arrow, true);
+		end
+		self.animArrows:Play();
+	else
+		for i = 1, self.numArrows do
+			self["Arrow"..i]:SetAlpha(0);
+		end
+	end
+
+	self.hyperlink = itemHyperLink;
+	if ( lessAwesome ) then
+		PlaySound(SOUNDKIT.UI_RAID_LOOT_TOAST_LESSER_ITEM_WON);
+	elseif ( isUpgraded ) then
+		PlaySound(SOUNDKIT.UI_WARFORGED_ITEM_LOOT_TOAST);
+	elseif ( isAzeriteEmpowered ) then
+		PlaySound(SOUNDKIT.UI_AZERITE_EMPOWERED_ITEM_LOOT_TOAST);
+	else
+		PlaySound(SOUNDKIT.UI_EPICLOOT_TOAST);
+	end
 end
 
 function LootWonAlertFrame_OnClick(self, button, down)
@@ -571,8 +645,8 @@ function LootUpgradeFrame_SetUp(self, itemLink, quantity, specID, baseQuality)
 	self.TitleText:SetText(format(LOOTUPGRADEFRAME_TITLE, _G["ITEM_QUALITY"..itemRarity.."_DESC"]));
 	self.TitleText:SetTextColor(upgradeQualityColor.r, upgradeQualityColor.g, upgradeQualityColor.b);
 
-	local baseTexture = LOOTUPGRADEFRAME_QUALITY_TEXTURES[baseQuality] or LOOTUPGRADEFRAME_QUALITY_TEXTURES[Enum.ItemQuality.Uncommon];
-	local upgradeTexture = LOOTUPGRADEFRAME_QUALITY_TEXTURES[itemRarity] or LOOTUPGRADEFRAME_QUALITY_TEXTURES[Enum.ItemQuality.Uncommon];
+	local baseTexture = LOOTUPGRADEFRAME_QUALITY_TEXTURES[baseQuality] or LOOTUPGRADEFRAME_QUALITY_TEXTURES[LE_ITEM_QUALITY_UNCOMMON];
+	local upgradeTexture = LOOTUPGRADEFRAME_QUALITY_TEXTURES[itemRarity] or LOOTUPGRADEFRAME_QUALITY_TEXTURES[LE_ITEM_QUALITY_UNCOMMON];
 	self.BaseQualityBorder:SetAtlas(baseTexture.border, true);
 	self.UpgradeQualityBorder:SetAtlas(upgradeTexture.border, true);
 
@@ -624,14 +698,15 @@ function DigsiteCompleteToastFrame_SetUp(frame, raceName, raceTexture)
 	PlaySound(SOUNDKIT.UI_DIG_SITE_COMPLETION_TOAST);
 end
 
--- [[ EntitlementDeliveredAlertFrame ]] --
-function EntitlementDeliveredAlertFrame_SetUp(frame, type, icon, name, payloadID, showFancyToast)
+-- [[ StorePurchaseAlertFrame ]] --
+function StorePurchaseAlertFrame_SetUp(frame, type, icon, name, payloadID, payloadGUID)
 	frame.Icon:SetTexture(icon);
 	frame.Title:SetFontObject(GameFontNormalLarge);
 	frame.Title:SetText(name);
 
 	frame.type = type;
 	frame.payloadID = payloadID;
+	frame.payloadGUID = payloadGUID;
 
 	if ( frame.Title:IsTruncated() ) then
 		frame.Title:SetFontObject(GameFontNormal);
@@ -639,57 +714,22 @@ function EntitlementDeliveredAlertFrame_SetUp(frame, type, icon, name, payloadID
 	PlaySound(SOUNDKIT.UI_IG_STORE_PURCHASE_DELIVERED_TOAST_01);
 end
 
--- [[ RafRewardDeliveredAlertFrame ]] --
-function RafRewardDeliveredAlertFrame_SetUp(frame, type, icon, name, payloadID, showFancyToast)
-	EntitlementDeliveredAlertFrame_SetUp(frame, type, icon, name, payloadID, showFancyToast);
-
-	if showFancyToast then
-		frame.StandardBackground:SetShown(false);
-		frame.FancyBackground:SetShown(true);
-		frame.Icon:SetPoint("LEFT", frame, "LEFT", 34, -5);
-	else
-		frame.StandardBackground:SetShown(true);
-		frame.FancyBackground:SetShown(false);
-		frame.Icon:SetPoint("LEFT", frame, "LEFT", 35, -3);
-	end
-
-	if type == Enum.WoWEntitlementType.GameTime then
-		frame.Title:SetTextColor(HEIRLOOM_BLUE_COLOR:GetRGBA());
-	else
-		frame.Title:SetTextColor(EPIC_PURPLE_COLOR:GetRGBA());
-	end
-end
-
-function EntitlementDelivered_OnClick(self, button, down)
+function StorePurchaseAlertFrame_OnClick(self, button, down)
 	if( AlertFrame_OnClick(self, button, down) ) then
 		return;
 	end
 
-	if (self.type == Enum.WoWEntitlementType.Item) then
+	if (self.type == Enum.StoreDeliveryType.Item) then
 		local slot = SearchBagsForItem(self.payloadID);
 		if (slot >= 0) then
 			OpenBag(slot);
 		end
-	elseif (self.type == Enum.WoWEntitlementType.Mount) then
-		ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS);
-	elseif (self.type == Enum.WoWEntitlementType.Battlepet) then
-		ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_PETS);
-	elseif (self.type == Enum.WoWEntitlementType.Toy) then
-		ToggleToyCollection(self.payloadID);
-	elseif (self.type == Enum.WoWEntitlementType.AppearanceSet) then
-		if(self.payloadID) then
-			TransmogUtil.OpenCollectionToSet(self.payloadID);
-		else
-			ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_APPEARANCES);
-		end
-	elseif (self.type == Enum.WoWEntitlementType.Appearance) then
-		if(self.payloadID) then
-			TransmogUtil.OpenCollectionToItem(self.payloadID);
-		else
-			ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_APPEARANCES);
-		end
-	elseif (self.type == Enum.WoWEntitlementType.Illusion) then
-		ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_APPEARANCES);
+	elseif (self.type == Enum.StoreDeliveryType.Mount) then
+		ToggleCollectionsJournal(1);
+	elseif (self.type == Enum.StoreDeliveryType.Battlepet) then
+		ToggleCollectionsJournal(2);
+	elseif (self.type == Enum.StoreDeliveryType.Collection) then
+		ToggleCollectionsJournal(5);
 	end
 end
 
@@ -705,32 +745,10 @@ function GarrisonMissionAlertFrame_SetUp(frame, missionInfo)
 	frame.Name:SetText(missionInfo.name);
 	frame.MissionType:SetAtlas(missionInfo.typeAtlas);
 	frame.garrisonType = GarrisonFollowerOptions[missionInfo.followerTypeID].garrisonType;
-	frame.Title:SetText(GarrisonFollowerOptions[missionInfo.followerTypeID].strings.ALERT_FRAME_TITLE);
-	frame.MissionType:SetShown(true);
-
-	if(frame.EncounterIcon) then
-		frame.EncounterIcon:SetShown(false);
-	end
-
-	if (missionInfo.followerTypeID == Enum.GarrisonFollowerType.FollowerType_9_0) then
-		frame.EncounterIcon:SetShown(true);
-		frame.MissionType:SetShown(false);
-
-		local encounterIconInfo = C_Garrison.GetMissionEncounterIconInfo(missionInfo.missionID);
-		frame.EncounterIcon.RareOverlay:SetShown(encounterIconInfo.isRare);
-		frame.EncounterIcon.EliteOverlay:SetShown(encounterIconInfo.isElite);
-
-		if encounterIconInfo.portraitFileDataID == nil or encounterIconInfo.portraitFileDataID == 0 then
-			frame.EncounterIcon.Portrait:SetTexture("Interface\\Garrison\\Portraits\\FollowerPortrait_NoPortrait");
-		else
-			frame.EncounterIcon.Portrait:SetTexture(encounterIconInfo.portraitFileDataID);
-		end
-
-		frame.EncounterIcon:SetPoint("TOPLEFT", frame, "TOPLEFT", 24, -19);
-	elseif (missionInfo.followerTypeID == Enum.GarrisonFollowerType.FollowerType_7_0) then
+	if (missionInfo.followerTypeID == LE_FOLLOWER_TYPE_GARRISON_7_0) then
 		frame.MissionType:SetSize(50, 50);
 		frame.MissionType:SetPoint("TOPLEFT", frame, "TOPLEFT", 21, -14);
-	elseif (missionInfo.followerTypeID == Enum.GarrisonFollowerType.FollowerType_6_0) then
+	elseif (missionInfo.followerTypeID == LE_FOLLOWER_TYPE_GARRISON_6_0) then
 		frame.MissionType:SetSize(64, 64);
 		frame.MissionType:SetPoint("TOPLEFT", frame, "TOPLEFT", 14, -8);
 	end
@@ -741,38 +759,32 @@ end
 -- [[ GarrisonRandomMissionAlertFrame ]] --
 function GarrisonRandomMissionAlertFrame_SetUp(frame, missionInfo)
 	frame.Level:SetText(missionInfo.level);
-
-	local followerOptions = GarrisonFollowerOptions[missionInfo.followerTypeID];
-	local showItemLevel = followerOptions.showILevelOnMission and missionInfo.iLevel ~= 0;
-	if showItemLevel then
 	frame.ItemLevel:SetText("(" .. missionInfo.iLevel .. ")");
-	end
-
-	if (showItemLevel and missionInfo.isRare) then
-		frame.Level:SetPoint("TOP", -115, -14);
-		frame.ItemLevel:SetPoint("TOP", -115, -37);
-		frame.Rare:SetPoint("TOP", -115, -48);
+	if (missionInfo.iLevel ~= 0 and missionInfo.isRare) then
+		frame.Level:SetPoint("TOP", "$parent", "TOP", -115, -14);
+		frame.ItemLevel:SetPoint("TOP", "$parent", "TOP", -115, -37);
+		frame.Rare:SetPoint("TOP", "$parent", "TOP", -115, -48);
 	elseif (missionInfo.isRare) then
-		frame.Level:SetPoint("TOP", -115, -19);
-		frame.Rare:SetPoint("TOP", -115, -45);
-	elseif (showItemLevel) then
-		frame.Level:SetPoint("TOP", -115, -19);
-		frame.ItemLevel:SetPoint("TOP", -115, -45);
+		frame.Level:SetPoint("TOP", "$parent", "TOP", -115, -19);
+		frame.Rare:SetPoint("TOP", "$parent", "TOP", -115, -45);
+	elseif (missionInfo.iLevel ~= 0) then
+		frame.Level:SetPoint("TOP", "$parent", "TOP", -115, -19);
+		frame.ItemLevel:SetPoint("TOP", "$parent", "TOP", -115, -45);
 	else
-		frame.Level:SetPoint("TOP", -115, -28);
+		frame.Level:SetPoint("TOP", "$parent", "TOP", -115, -28);
 	end
 
-	frame.ItemLevel:SetShown(showItemLevel);
+	frame.ItemLevel:SetShown(missionInfo.iLevel ~= 0);
 	frame.Rare:SetShown(missionInfo.isRare);
-	frame.garrisonType = followerOptions.garrisonType;
+	frame.garrisonType = GarrisonFollowerOptions[missionInfo.followerTypeID].garrisonType;
 	PlaySound(SOUNDKIT.UI_GARRISON_TOAST_MISSION_COMPLETE);
 end
 
 -- [[ GarrisonFollowerAlertFrame ]] --
 GARRISON_FOLLOWER_QUALITY_TEXTURE_SUFFIXES = {
-	[Enum.ItemQuality.Uncommon] = "Uncommon",
-	[Enum.ItemQuality.Epic] = "Epic",
-	[Enum.ItemQuality.Rare] = "Rare",
+	[LE_ITEM_QUALITY_UNCOMMON] = "Uncommon",
+	[LE_ITEM_QUALITY_EPIC] = "Epic",
+	[LE_ITEM_QUALITY_RARE] = "Rare",
 }
 
 function GarrisonCommonFollowerAlertFrame_SetUp(frame, followerID, name, quality, isUpgraded)
@@ -788,7 +800,7 @@ function GarrisonCommonFollowerAlertFrame_SetUp(frame, followerID, name, quality
 
 	frame.Arrows.ArrowsAnim:Stop();
 	if ( isUpgraded ) then
-		local upgradeTexture = LOOTUPGRADEFRAME_QUALITY_TEXTURES[quality] or LOOTUPGRADEFRAME_QUALITY_TEXTURES[Enum.ItemQuality.Uncommon];
+		local upgradeTexture = LOOTUPGRADEFRAME_QUALITY_TEXTURES[quality] or LOOTUPGRADEFRAME_QUALITY_TEXTURES[LE_ITEM_QUALITY_UNCOMMON];
 		for i = 1, frame.Arrows.numArrows do
 			frame.Arrows["Arrow"..i]:SetAtlas(upgradeTexture.arrow, true);
 		end
@@ -825,14 +837,10 @@ function GarrisonFollowerAlertFrame_SetUp(frame, followerID, name, level, qualit
 	GarrisonCommonFollowerAlertFrame_SetUp(frame, followerID, name, quality, isUpgraded);
 end
 
-function GarrisonShipFollowerAlertFrame_SetUp(frame, followerID, name, class, textureKit, level, quality, isUpgraded, followerInfo)
+function GarrisonShipFollowerAlertFrame_SetUp(frame, followerID, name, class, texPrefix, level, quality, isUpgraded, followerInfo)
 	frame.followerInfo = followerInfo;
-	if textureKit then
-		frame.Portrait:SetAtlas(textureKit.."-List", false);
-	else
-		frame.Portrait:SetAtlas(nil);
-	end
-
+	local mapAtlas = texPrefix .. "-List";
+	frame.Portrait:SetAtlas(mapAtlas, false);
 	local color = ITEM_QUALITY_COLORS[quality];
 	frame.Name:SetTextColor(color.r, color.g, color.b);
 	if ( isUpgraded ) then
@@ -870,48 +878,26 @@ function GarrisonFollowerAlertFrame_OnClick(self, button, down)
 	if (not GarrisonLandingPage) then
 		Garrison_LoadUI();
 	end
-	local garrisonType = GarrisonFollowerOptions[self.followerInfo.followerTypeID].garrisonType;
-	if(garrisonType and C_Garrison.GetLandingPageGarrisonType() == garrisonType) then 
-		ShowGarrisonLandingPage(GarrisonFollowerOptions[self.followerInfo.followerTypeID].garrisonType);
-	end 
+	ShowGarrisonLandingPage(GarrisonFollowerOptions[self.followerInfo.followerTypeID].garrisonType);
 end
 
--- Trees that override behaviors associated with their tree type
-local talentAlertOverrides =
-{
-	[474] = -- 9.2 Cypher Talents tree
-	{
-		suppressClick = true,
-		toastTitle = CYPHER_RESEARCH_TOAST,
-	},
-};
 function GarrisonAlertFrame_OnClick(self, button, down)
 	if( AlertFrame_OnClick(self, button, down) ) then
 		return;
 	end
 	self:Hide();
-	local overrideInfo = talentAlertOverrides[self.treeID];
-	local suppressClick = overrideInfo ~= nil and overrideInfo.suppressClick;
-	if (self.garrisonType and not suppressClick) then
-		if (not GarrisonLandingPage) then
-			Garrison_LoadUI();
-		end
-
-		if(self.garrisonType and C_Garrison.GetLandingPageGarrisonType() == self.garrisonType) then 
-			ShowGarrisonLandingPage(self.garrisonType);
-		end 
+	if (not GarrisonLandingPage) then
+		Garrison_LoadUI();
+	end
+	if (self.garrisonType) then
+		ShowGarrisonLandingPage(self.garrisonType);
 	end
 end
 
 -- [[ GarrisonTalentAlertFrame ]] --
 function GarrisonTalentAlertFrame_SetUp(frame, garrisonType, talent)
-	local garrisonFollowerType = GetPrimaryGarrisonFollowerType(garrisonType);
     frame.Icon:SetTexture(talent.icon);
-	local overrideInfo = talentAlertOverrides[talent.treeID];
-	local toastTitle = overrideInfo ~= nil and overrideInfo.toastTitle or GarrisonFollowerOptions[garrisonFollowerType].strings.TALENT_COMPLETE_TOAST_TITLE;
-	frame.Title:SetText(toastTitle);
 	frame.garrisonType = garrisonType;
-	frame.treeID = talent.treeID;
 	PlaySound(SOUNDKIT.UI_ORDERHALL_TALENT_READY_TOAST);
 end
 
@@ -927,15 +913,12 @@ function NewRecipeLearnedAlertFrame_GetStarTextureFromRank(rank)
 	return nil;
 end
 
-function NewRecipeLearnedAlertFrame_SetUp(self, recipeID, recipeLevel)
-	local tradeSkillID, skillLineName, parentTradeSkillID = C_TradeSkillUI.GetTradeSkillLineForRecipe(recipeID);
+function NewRecipeLearnedAlertFrame_SetUp(self, recipeID)
+--[[ Removed for classic
+	local tradeSkillID, skillLineName = C_TradeSkillUI.GetTradeSkillLineForRecipe(recipeID);
 	if tradeSkillID then
 		local recipeName = GetSpellInfo(recipeID);
 		if recipeName then
-			if recipeLevel ~= nil then
-				recipeName = TRADESKILL_RECIPE_LEVEL_RECIPE_FORMAT:format(recipeName, recipeLevel);
-			end
-
 			PlaySound(SOUNDKIT.UI_PROFESSIONS_NEW_RECIPE_LEARNED_TOAST);
 
 			self.Icon:SetMask("Interface\\CharacterFrame\\TempPortraitAlphaMask");
@@ -950,11 +933,12 @@ function NewRecipeLearnedAlertFrame_SetUp(self, recipeID, recipeLevel)
 			else
 				self.Name:SetText(recipeName);
 			end
-			self.tradeSkillID = parentTradeSkillID or tradeSkillID;
+			self.tradeSkillID = tradeSkillID;
 			self.recipeID = recipeID;
 			return true;
 		end
 	end
+]]
 	return false;
 end
 
@@ -973,18 +957,17 @@ NewRecipeLearnedAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewRecipe
 
 -- [[WorldQuestCompleteAlertFrame ]] --
 function WorldQuestCompleteAlertFrame_GetIconForQuestID(questID)
-	local info = C_QuestLog.GetQuestTagInfo(questID);
+	local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex, displayTimeLeft = GetQuestTagInfo(questID);
 
-	if info then
-		if info.worldQuestType == Enum.QuestTagType.PvP then
-			return "Interface\\Icons\\achievement_arena_2v2_1";
-		elseif info.worldQuestType == Enum.QuestTagType.PetBattle then
-			return "Interface\\Icons\\INV_Pet_BattlePetTraining";
-		elseif info.worldQuestType == Enum.QuestTagType.Profession then
-			return C_TradeSkillUI.GetTradeSkillTexture(info.tradeskillLineID);
-		elseif info.worldQuestType == Enum.QuestTagType.Dungeon or info.worldQuestType == Enum.QuestTagType.Raid then
-			return "Interface\\Icons\\INV_Misc_Bone_Skull_02";
-		end
+	if ( worldQuestType == LE_QUEST_TAG_TYPE_PVP ) then
+		return "Interface\\Icons\\achievement_arena_2v2_1";
+	elseif ( worldQuestType == LE_QUEST_TAG_TYPE_PET_BATTLE ) then
+		return "Interface\\Icons\\INV_Pet_BattlePetTraining";
+	elseif ( worldQuestType == LE_QUEST_TAG_TYPE_PROFESSION ) then
+		local tradeskillLineID = select(7, GetProfessionInfo(tradeskillLineIndex));
+		return C_TradeSkillUI.GetTradeSkillTexture(tradeskillLineID);
+	elseif ( worldQuestType == LE_QUEST_TAG_TYPE_DUNGEON or worldQuestType == LE_QUEST_TAG_TYPE_RAID ) then
+		return "Interface\\Icons\\INV_Misc_Bone_Skull_02";
 	end
 
 	return "Interface\\Icons\\Achievement_Quests_Completed_TwilightHighlands";
@@ -997,8 +980,6 @@ function WorldQuestCompleteAlertFrame_SetUp(frame, questData)
 	frame.QuestName:SetText(questData.taskName);
 
 	frame.QuestTexture:SetTexture(questData.icon);
-
-	frame.ToastText:SetText(questData.displayAsObjective and TOAST_OBJECTIVE_COMPLETE or WORLD_QUEST_COMPLETE);
 
 	ResetRewardFrames(frame);
 
@@ -1075,17 +1056,11 @@ end
 
 ItemAlertFrameMixin = {};
 
-function ItemAlertFrameMixin:SetUpDisplay(icon, itemQuality, name, label, overlayAtlas)
+function ItemAlertFrameMixin:SetUpDisplay(icon, itemQuality, name, label)
 	self.Icon:SetTexture(icon);
-	self.IconBorder:SetAtlas(LOOT_BORDER_BY_QUALITY[itemQuality] or LOOT_BORDER_BY_QUALITY[Enum.ItemQuality.Uncommon]);
+	self.IconBorder:SetAtlas(LOOT_BORDER_BY_QUALITY[itemQuality] or LOOT_BORDER_BY_QUALITY[LE_ITEM_QUALITY_UNCOMMON]);
 	self.Name:SetText(ITEM_QUALITY_COLORS[itemQuality].hex..name.."|r");
 	self.Label:SetText(label);
-	if overlayAtlas then
-		self.IconOverlay:SetAtlas(overlayAtlas);
-		self.IconOverlay:Show();
-	else
-		self.IconOverlay:Hide();
-	end
 end
 
 -- [[ NewPetAlertFrame ]] --
@@ -1101,10 +1076,8 @@ function NewPetAlertFrameMixin:SetUp(petID)
 
 	local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name, icon = C_PetJournal.GetPetInfoByPetID(petID);
 	local health, maxHealth, attack, speed, rarity = C_PetJournal.GetPetStats(petID);
-	if speciesID ~= nil and health ~= nil then
-		local itemQuality = rarity - 1;
-		self:SetUpDisplay(icon, itemQuality, customName or name, YOU_COLLECTED_LABEL);
-	end
+	local itemQuality = rarity - 1;
+	self:SetUpDisplay(icon, itemQuality, customName or name, YOU_EARNED_LABEL);
 end
 
 function NewPetAlertFrameMixin:OnClick(button, down)
@@ -1128,8 +1101,8 @@ function NewMountAlertFrameMixin:SetUp(mountID)
 	self.mountID = mountID;
 
 	local creatureName, spellID, icon, active, isUsable, sourceType = C_MountJournal.GetMountInfoByID(mountID);
-	local itemQuality = Enum.ItemQuality.Epic; -- Mounts don't have an inherent concept of quality so we always use epic (for now).
-	self:SetUpDisplay(icon, itemQuality, creatureName, YOU_COLLECTED_LABEL);
+	local itemQuality = LE_ITEM_QUALITY_EPIC; -- Mounts don't have an inherent concept of quality so we always use epic (for now).
+	self:SetUpDisplay(icon, itemQuality, creatureName, YOU_EARNED_LABEL);
 end
 
 function NewMountAlertFrameMixin:OnClick(button, down)
@@ -1140,124 +1113,3 @@ function NewMountAlertFrameMixin:OnClick(button, down)
 	SetCollectionsJournalShown(true, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS);
 	MountJournal_SelectByMountID(self.mountID);
 end
-
--- [[ NewToyAlertFrame ]] --
-
-function NewToyAlertFrame_SetUp(frame, toyID)
-	frame:SetUp(toyID);
-end
-
-NewToyAlertFrameMixin = CreateFromMixins(ItemAlertFrameMixin);
-
-function NewToyAlertFrameMixin:SetUp(toyID)
-	self.toyID = toyID;
-
-	local itemID, toyName, icon, isFavorite, hasFanfare, itemQuality = C_ToyBox.GetToyInfo(self.toyID);
-	self:SetUpDisplay(icon, itemQuality, toyName, YOU_COLLECTED_LABEL);
-end
-
-function NewToyAlertFrameMixin:OnClick(button, down)
-	if AlertFrame_OnClick(self, button, down) then
-		return;
-	end
-
-	ToggleToyCollection(self.toyID);
-end
-
--- [[ NewRuneforgePowerAlertSystem ]] --
-
-function NewRuneforgePowerAlertSystem_SetUp(frame, powerID)
-	frame:SetUp(powerID);
-end
-
-NewRuneforgePowerAlertFrameMixin = CreateFromMixins(ItemAlertFrameMixin, RuneforgePowerBaseMixin);
-
-function NewRuneforgePowerAlertFrameMixin:SetUp(powerID)
-	self:SetPowerID(powerID);
-end
-
-function NewRuneforgePowerAlertFrameMixin:OnPowerSet(oldPowerID, newPowerID)
-	local powerInfo = self:GetPowerInfo();
-	self.powerInfo = powerInfo;
-	self:SetUpDisplay(powerInfo.iconFileID, Enum.ItemQuality.Legendary, powerInfo.name, YOU_EARNED_LABEL);
-end
-
-function NewRuneforgePowerAlertFrameMixin:OnEnter()
-	RuneforgePowerBaseMixin.OnEnter(self);
-
-	AlertFrame_PauseOutAnimation(self);
-end
-
-function NewRuneforgePowerAlertFrameMixin:OnLeave()
-	RuneforgePowerBaseMixin.OnLeave(self);
-
-	AlertFrame_ResumeOutAnimation(self);
-end
-
-function NewRuneforgePowerAlertFrameMixin:OnClick(button, down)
-	if AlertFrame_OnClick(self, button, down) then
-		return;
-	end
-
-	if self:OnSelected() then
-		return;
-	end
-
-	EncounterJournal_LoadUI();
-	EncounterJournal_OpenToPowerID(self:GetPowerID());
-end
-
--- [[ NewCosmeticAlertFrameSystem ]] --
-
-function NewCosmeticAlertFrameSystem_SetUp(frame, itemModifiedAppearanceID)
-	frame:SetUp(itemModifiedAppearanceID);
-end
-
-NewCosmeticAlertFrameMixin = CreateFromMixins(ItemAlertFrameMixin);
-
-function NewCosmeticAlertFrameMixin:SetUp(itemModifiedAppearanceID)
-	PlaySound(SOUNDKIT.UI_COSMETIC_ITEM_TOAST_SHOW);
-	self.itemModifiedAppearanceID = itemModifiedAppearanceID;
-	local info = C_TransmogCollection.GetSourceInfo(itemModifiedAppearanceID);
-	local icon = C_TransmogCollection.GetSourceIcon(itemModifiedAppearanceID);
-	local name = "";
-	local quality = Enum.ItemQuality.Epic;	-- most cosmetics are epic
-	self:SetUpDisplay(icon, quality, name, YOU_COLLECTED_LABEL, "CosmeticIconFrame");
-
-	local item = Item:CreateFromItemID(info.itemID);
-	item:ContinueOnItemLoad(function()	
-		if self.itemModifiedAppearanceID == itemModifiedAppearanceID then
-			self:SetUpDisplay(icon, item:GetItemQuality(), item:GetItemName(), YOU_COLLECTED_LABEL, "CosmeticIconFrame");
-		end
-	end);
-
-	self.timers = { };
-	local effectID1 = 135;
-	local effectID2 = 136;
-
-	-- stagger effect timings
-	self.LeftModelScene:AddEffect(effectID1, self.LeftModelScene);
-	table.insert(self.timers, C_Timer.NewTimer(0.25, function() self.LeftModelScene:AddEffect(effectID2, self.LeftModelScene); end));
-	table.insert(self.timers, C_Timer.NewTimer(0.5, function() self.LeftModelScene:AddEffect(effectID1, self.LeftModelScene); end));
-
-	table.insert(self.timers, C_Timer.NewTimer(0.3, function() self.RightModelScene:AddEffect(effectID1, self.RightModelScene); end));
-	table.insert(self.timers, C_Timer.NewTimer(0.55, function() self.RightModelScene:AddEffect(effectID2, self.RightModelScene); end));
-	table.insert(self.timers, C_Timer.NewTimer(0.8, function() self.RightModelScene:AddEffect(effectID1, self.RightModelScene); end));
-end
-
-function NewCosmeticAlertFrameMixin:OnClick(button, down)
-	if AlertFrame_OnClick(self, button, down) then
-		return;
-	end
-
-	TransmogUtil.OpenCollectionToItem(self.itemModifiedAppearanceID);
-end
- 
-function NewCosmeticAlertFrameMixin:OnRelease()
-	self.LeftModelScene:ClearEffects();
-	self.RightModelScene:ClearEffects();
-	for i, timer in ipairs(self.timers) do
-		timer:Cancel();
-	end
-	self.timers = { };
- end

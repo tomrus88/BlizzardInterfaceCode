@@ -1044,7 +1044,7 @@ local CommentatorFrame =
 
 			Arguments =
 			{
-				{ Name = "specID", Type = "number", Nilable = false },
+				{ Name = "classID", Type = "number", Nilable = false },
 				{ Name = "spellIDs", Type = "table", InnerType = "number", Nilable = false },
 			},
 		},
@@ -1245,7 +1245,7 @@ local CommentatorFrame =
 
 			Arguments =
 			{
-				{ Name = "specID", Type = "number", Nilable = false },
+				{ Name = "classID", Type = "number", Nilable = false },
 				{ Name = "spellIDs", Type = "table", InnerType = "number", Nilable = false },
 			},
 		},
@@ -1255,7 +1255,7 @@ local CommentatorFrame =
 
 			Arguments =
 			{
-				{ Name = "specID", Type = "number", Nilable = false },
+				{ Name = "classID", Type = "number", Nilable = false },
 				{ Name = "spellIDs", Type = "table", InnerType = "number", Nilable = false },
 			},
 		},
@@ -1265,7 +1265,7 @@ local CommentatorFrame =
 
 			Arguments =
 			{
-				{ Name = "specID", Type = "number", Nilable = false },
+				{ Name = "classID", Type = "number", Nilable = false },
 				{ Name = "spellIDs", Type = "table", InnerType = "number", Nilable = false },
 			},
 		},
@@ -1511,8 +1511,6 @@ local CommentatorFrame =
 				{ Name = "healingTaken", Type = "number", Nilable = false },
 				{ Name = "kills", Type = "number", Nilable = false },
 				{ Name = "deaths", Type = "number", Nilable = false },
-				{ Name = "soloShuffleRoundWins", Type = "number", Nilable = false },
-				{ Name = "soloShuffleRoundLosses", Type = "number", Nilable = false },
 			},
 		},
 		{

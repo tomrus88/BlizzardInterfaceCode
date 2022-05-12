@@ -16,24 +16,51 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="InterfaceOptionsFrame" toplevel="true" parent="UIParent" hidden="true" enableMouse="true" frameStrata="HIGH">
-		<Size x="858" y="660"/>
+	<Frame name="InterfaceOptionsFrame" inherits="BackdropTemplate" toplevel="true" parent="UIParent" hidden="true" enableMouse="true" frameStrata="HIGH">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+		</KeyValues>
+		<Size>
+			<AbsDimension x="858" y="660"/>
+		</Size>
 		<Anchors>
 			<Anchor point="CENTER"/>
 		</Anchors>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentHeader" file="Interface\DialogFrame\UI-DialogBox-Header">
+					<Size>
+						<AbsDimension x="300" y="68"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset>
+								<AbsDimension x="0" y="12"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<FontString name="$parentHeaderText" inherits="GameFontNormal" text="UIOPTIONS_MENU">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parentHeader">
+							<Offset>
+								<AbsDimension x="0" y="-14"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 		<Frames>
-			<Frame parentKey="Border" inherits="DialogBorderTemplate"/>
-			<Frame parentKey="Header" inherits="DialogHeaderTemplate">
-				<KeyValues>
-					<KeyValue key="headerTextPadding" value="100" type="number"/>
-					<KeyValue key="textString" value="UIOPTIONS_MENU" type="global"/>
-				</KeyValues>
-			</Frame>
 			<Button name="$parentCancel" inherits="UIPanelButtonTemplate" text="CANCEL">
-				<Size x="96" y="22"/>
+				<Size>
+					<AbsDimension x="96" y="22"/>
+				</Size>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT">
-						<Offset x="-16" y="16"/>
+						<Offset>
+							<AbsDimension x="-16" y="16"/>
+						</Offset>
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -41,7 +68,9 @@
 				</Scripts>
 			</Button>
 			<Button name="$parentOkay" inherits="UIPanelButtonTemplate" text="OKAY">
-				<Size x="96" y="22"/>
+				<Size>
+					<AbsDimension x="96" y="22"/>
+				</Size>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT" relativeTo="$parentCancel" relativePoint="BOTTOMLEFT"/>
 				</Anchors>
@@ -50,57 +79,83 @@
 				</Scripts>
 			</Button>
 			<Button name="$parentDefaults" inherits="UIPanelButtonTemplate" text="DEFAULTS">
-				<Size x="96" y="22"/>
+				<Size>
+					<AbsDimension x="96" y="22"/>
+				</Size>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="16" y="16"/>
+					<Anchor point="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="16" y="16"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick function="InterfaceOptionsFrameDefaults_OnClick"/>
 				</Scripts>
 			</Button>
 			<Frame name="$parentCategories" inherits="OptionsFrameListTemplate">
-				<Size x="175" y="569"/>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="22" y="-40"/>
-					</Anchor>
-				</Anchors>
 				<KeyValues>
 					<KeyValue key="labelText" value="CATEGORY" type="global"/>
 					<KeyValue key="buttonTemplate" value="InterfaceOptionsListButtonTemplate" type="string"/>
 					<KeyValue key="update" value="InterfaceCategoryList_Update" type="global"/>
 				</KeyValues>
+				<Size>
+					<AbsDimension x="175" y="569"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="22" y="-40"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
 			</Frame>
 			<Frame name="$parentAddOns" inherits="OptionsFrameListTemplate" hidden="true">
-				<Size x="175" y="569"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" x="22" y="-40"/>
-				</Anchors>
 				<KeyValues>
 					<KeyValue key="labelText" value="ADDONS" type="global"/>
 					<KeyValue key="buttonTemplate" value="InterfaceOptionsListButtonTemplate" type="string"/>
 					<KeyValue key="update" value="InterfaceAddOnsList_Update" type="global"/>
 				</KeyValues>
-			</Frame>
-			<Frame name="$parentPanelContainer" inherits="TooltipBorderBackdropTemplate">
+				<Size>
+					<AbsDimension x="175" y="569"/>
+				</Size>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentCategories" relativePoint="TOPRIGHT">
-						<Offset x="16" y="0"/>
-					</Anchor>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentCategories" relativePoint="BOTTOMRIGHT">
-						<Offset x="16" y="1"/>
-					</Anchor>
-					<Anchor point="RIGHT">
-						<Offset x="-22" y="0"/>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="22" y="-40"/>
+						</Offset>
 					</Anchor>
 				</Anchors>
+			</Frame>
+			<Frame name="$parentPanelContainer" inherits="TooltipBorderBackdropTemplate">
 				<KeyValues>
 					<KeyValue key="backdropBorderColor" value="LIGHTGRAY_FONT_COLOR" type="global"/>
 				</KeyValues>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentCategories" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="16" y="0"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentCategories" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="16" y="1"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="RIGHT">
+						<Offset>
+							<AbsDimension x="-22" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
 			</Frame>
 			<Button name="$parentTab1" inherits="OptionsFrameTabButtonTemplate" text="GAME" id="1" hidden="true">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeTo="$parentCategories" relativePoint="TOPLEFT" x="6" y="-2"/>
+					<Anchor point="BOTTOMLEFT" relativeTo="$parentCategories" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="6" y="-3"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -112,7 +167,11 @@
 			</Button>
 			<Button name="$parentTab2" inherits="OptionsFrameTabButtonTemplate" text="ADDONS" id="2" hidden="true">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="$parentTab1" relativePoint="TOPRIGHT" x="-16" y="0"/>
+					<Anchor point="TOPLEFT" relativeTo="$parentTab1" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-16" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -120,13 +179,13 @@
 						PanelTemplates_Tab_OnClick(self, InterfaceOptionsFrame);
 						InterfaceOptionsFrame_TabOnClick();
 					</OnClick>
-				</Scripts>
+				</Scripts>	
 			</Button>
 		</Frames>
 		<Scripts>
 			<OnShow function="InterfaceOptionsFrame_OnShow"/>
 			<OnHide function="InterfaceOptionsFrame_OnHide"/>
-			<OnLoad function="InterfaceOptionsFrame_OnLoad"/>
+			<OnLoad inherit="prepend" function="InterfaceOptionsFrame_OnLoad"/>
 			<OnEvent function="InterfaceOptionsFrame_OnEvent"/>
 		</Scripts>
 	</Frame>

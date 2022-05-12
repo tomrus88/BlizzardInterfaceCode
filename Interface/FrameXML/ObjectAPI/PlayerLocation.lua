@@ -43,9 +43,9 @@ end
 	return playerLocation;
 end
 
---[[static]] function PlayerLocation:CreateFromBattleNetID(battleNetID)
+--[[static]] function PlayerLocation:CreateFromWhoIndex(whoIndex)
 	local playerLocation = CreateFromMixins(PlayerLocationMixin);
-	playerLocation:SetBattleNetID(battleNetID);
+	playerLocation:SetWhoIndex(whoIndex);
 	return playerLocation;
 end
 
@@ -55,12 +55,8 @@ function PlayerLocationMixin:SetGUID(guid)
 end
 
 function PlayerLocationMixin:IsValid()
-	if self:IsGUID() then
-		return C_PlayerInfo.GUIDIsPlayer(self:GetGUID()) or C_AccountInfo.IsGUIDBattleNetAccountType(self:GetGUID());
-	elseif self:IsCommunityData() then
+	if (self:IsCommunityData()) then
 		return C_Club.CanResolvePlayerLocationFromClubMessageData(self.communityClubID, self.communityStreamID, self.communityEpoch, self.communityPosition);
-	elseif self:IsUnit() then
-		return UnitIsPlayer(self:GetUnit());
 	end
 
 	return true;
@@ -128,17 +124,16 @@ function PlayerLocationMixin:GetVoiceID()
 	return self.voiceMemberID, self.voiceChannelID;
 end
 
-function PlayerLocationMixin:SetBattleNetID(battleNetID)
-	self:Clear();
-	self.battleNetID = battleNetID;
+function PlayerLocationMixin:SetWhoIndex(whoIndex)
+	self:ClearAndSetField("whoIndex", whoIndex);
 end
 
-function PlayerLocationMixin:IsBattleNetID()
-	return self.battleNetID ~= nil;
+function PlayerLocationMixin:IsWhoIndex()
+	return self.whoIndex ~= nil;
 end
 
-function PlayerLocationMixin:GetBattleNetID()
-	return self.battleNetID;
+function PlayerLocationMixin:GetWhoIndex()
+	return self.whoIndex;
 end
 
 function PlayerLocationMixin:SetCommunityData(clubID, streamID, epoch, position)
@@ -176,7 +171,6 @@ function PlayerLocationMixin:Clear()
 	self.communityEpoch = nil;
 	self.communityPosition = nil;
 	self.communityClubInviterGUID = nil;
-	self.battleNetID = nil;
 end
 
 function PlayerLocationMixin:ClearAndSetField(fieldName, field)

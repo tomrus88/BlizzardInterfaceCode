@@ -1,56 +1,27 @@
+FIRE_TOTEM_SLOT = 1;
+EARTH_TOTEM_SLOT = 2;
+WATER_TOTEM_SLOT = 3;
+AIR_TOTEM_SLOT = 4;
+
+MAX_TOTEMS = 4;
+
+TOTEM_PRIORITIES =
+{
+	AIR_TOTEM_SLOT,
+	WATER_TOTEM_SLOT,
+	EARTH_TOTEM_SLOT,
+	FIRE_TOTEM_SLOT
+};
 
 function TotemFrame_OnLoad(self)
 	self:RegisterEvent("PLAYER_TOTEM_UPDATE");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
-	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM");
-	self:RegisterEvent("PLAYER_TALENT_UPDATE");	
 
-	local _, class = UnitClass("player");
-	if ( class == "DEATHKNIGHT" ) then
-		self:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 65, -55);
-	elseif ( class == "WARLOCK" ) then
-		TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 28, -85);
-	end
+	TotemFrame_Update();
 end
 
 function TotemFrame_Update()
-	local _, class = UnitClass("player");
-	local priorities = STANDARD_TOTEM_PRIORITIES;
-	if (class == "SHAMAN") then
-		priorities = SHAMAN_TOTEM_PRIORITIES;
-	end
-	
-	local hasPet = PetFrame and PetFrame:IsShown();
-	if ( class == "PALADIN" or class == "DEATHKNIGHT"  ) then
-		if ( hasPet ) then
-			TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 28, -75);
-		else
-			TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 67, -63);
-		end
-	elseif ( class == "DRUID" ) then
-		local form  = GetShapeshiftFormID();
-		if ( form == MOONKIN_FORM or not form ) then
-			if ( GetSpecialization() == 1 ) then
-				TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 115, -88);
-			else
-				TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "BOTTOMLEFT", 99, 38);
-			end
-		elseif ( form == BEAR_FORM or form == CAT_FORM ) then
-			TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 99, -78);
-		else
-			TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "BOTTOMLEFT", 99, 38);
-		end
-	elseif ( class == "MONK" ) then
-		TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 28, -75);
-	elseif ( class == "MAGE" ) then
-		TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 50, -75);
-	elseif ( class == "SHAMAN" ) then
-		if ( GetSpecialization() == 3) then
-			TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "BOTTOMLEFT", 99, 38);
-		else
-			TotemFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 99, -78);
-		end
-	elseif ( hasPet  and class ~= "SHAMAN" and class ~= "WARLOCK" ) then
+	if ( PetFrame and PetFrame:IsShown() ) then
 		TotemFrame:Hide();
 		return;
 	end
@@ -61,21 +32,21 @@ function TotemFrame_Update()
 	local buttonIndex = 1;
 	TotemFrame.activeTotems = 0;
 	for i=1, MAX_TOTEMS do
-		slot = priorities[i];
+		slot = TOTEM_PRIORITIES[i];
 		haveTotem, name, startTime, duration, icon = GetTotemInfo(slot);
 		if ( haveTotem ) then
-			button = _G["TotemFrameTotem"..buttonIndex];
+			button = getglobal("TotemFrameTotem"..buttonIndex);
 			button.slot = slot;
 			TotemButton_Update(button, startTime, duration, icon);
+			buttonIndex = buttonIndex + 1;
 
 			if ( button:IsShown() ) then
 				TotemFrame.activeTotems = TotemFrame.activeTotems + 1;
 			end
-
-			buttonIndex = buttonIndex + 1;
 		else
-			button = _G["TotemFrameTotem"..MAX_TOTEMS - i + buttonIndex];
+			button = getglobal("TotemFrameTotem"..MAX_TOTEMS - i + buttonIndex);
 			button.slot = 0;
+
 			button:Hide();
 		end
 	end
@@ -84,56 +55,50 @@ function TotemFrame_Update()
 	else
 		TotemFrame:Hide();
 	end
-	TotemFrame_AdjustPetFrame();
-	PlayerFrame_AdjustAttachments();
 end
 
 function TotemFrame_OnEvent(self, event, ...)
-	if ( event == "PLAYER_TOTEM_UPDATE" ) then
+	if ( event == "PLAYER_ENTERING_WORLD" ) then
+		TotemFrame_Update();
+	elseif ( event == "PLAYER_TOTEM_UPDATE" ) then
 		local slot = ...;
-		if ( slot <= MAX_TOTEMS ) then
-			local haveTotem, name, startTime, duration, icon = GetTotemInfo(slot);
-			local button;
-			for i=1, MAX_TOTEMS do
-				button = _G["TotemFrameTotem"..i];
-				if ( button.slot == slot ) then
-					local previouslyShown = button:IsShown();
-					TotemButton_Update(button, startTime, duration, icon);
-					-- if we have no active totems then we need to hide the whole frame, otherwise show it
-					if ( previouslyShown ) then
-						if ( not button:IsShown() ) then
-							self.activeTotems = self.activeTotems - 1;
-						end
-					else
-						if ( button:IsShown() ) then
-							self.activeTotems = self.activeTotems + 1;
-						end
+		local haveTotem, name, startTime, duration, icon = GetTotemInfo(slot);
+		local button;
+		for i=1, MAX_TOTEMS do
+			button = getglobal("TotemFrameTotem"..i);
+			if ( button.slot == slot ) then
+				local previouslyShown = button:IsShown();
+				TotemButton_Update(button, startTime, duration, icon);
+				-- check to see if we should be showing or hiding the parent frame
+				if ( previouslyShown ) then
+					if ( not button:IsShown() ) then
+						TotemFrame.activeTotems = TotemFrame.activeTotems - 1;
 					end
-					if ( self.activeTotems > 0 ) then
-						self:Show();
-					else
-						self:Hide();
+				else
+					if ( button:IsShown() ) then
+						TotemFrame.activeTotems = TotemFrame.activeTotems + 1;
 					end
-					TotemFrame_AdjustPetFrame();
-					return;
 				end
+				if ( TotemFrame.activeTotems > 0 ) then
+					TotemFrame:Show();
+				else
+					TotemFrame:Hide();
+				end
+				return;
 			end
 		end
+
+		-- The assumption is that we have gained a totem that we did not previously have
+		-- so the totem buttons have to be reordered. It's easier to just do a full update
+		-- rather than sorting the buttons since there aren't that many.
+		TotemFrame_Update();
 	end
-	TotemFrame_Update();
 end
 
 function TotemButton_OnClick(self, mouseButton)
-	local cannotDismiss = GetTotemCannotDismiss(self.slot)
-	if ( not cannotDismiss ) then
-		if ( mouseButton == "RightButton" and self.slot > 0 ) then
-			DestroyTotem(self.slot);
-		end
+	if ( mouseButton == "RightButton" ) then
+		DestroyTotem(self.slot);
 	end
-end
-
-function TotemButton_OnLoad(self)
-	self:RegisterForClicks("RightButtonUp");
 end
 
 function TotemButton_OnUpdate(button, elapsed)
@@ -145,14 +110,16 @@ end
 
 function TotemButton_Update(button, startTime, duration, icon)
 	local buttonName = button:GetName();
-	local buttonIcon = _G[buttonName.."IconTexture"];
-	local buttonDuration = _G[buttonName.."Duration"];
-	local buttonCooldown = _G[buttonName.."IconCooldown"];
+	local buttonIcon = getglobal(buttonName.."IconTexture");
+	local buttonDuration = getglobal(buttonName.."Duration");
+	button.duration = buttonDuration;
+	local buttonCooldown = getglobal(buttonName.."IconCooldown");
 
 	if ( duration > 0 ) then
 		buttonIcon:SetTexture(icon);
 		buttonIcon:Show();
-		CooldownFrame_Set(buttonCooldown, startTime, duration, true);
+		CooldownFrame_Set(buttonCooldown, startTime, duration, 1);
+		--CooldownFrame_SetTimer(buttonCooldown, startTime, duration, 1);
 		buttonCooldown:Show();
 		button:SetScript("OnUpdate", TotemButton_OnUpdate);
 		button:Show();
@@ -162,20 +129,5 @@ function TotemButton_Update(button, startTime, duration, icon)
 		buttonCooldown:Hide();
 		button:SetScript("OnUpdate", nil);
 		button:Hide();
-	end
-end
-
-function TotemFrame_AdjustPetFrame()
-	local _, class = UnitClass("player");
-	if ( class == "WARLOCK" ) then
-		if ( PetFrame:IsShown() and TotemFrameTotem4:IsShown() ) then
-			PetFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 156, -90);
-		elseif ( PetFrame:IsShown() and TotemFrameTotem3:IsShown() ) then
-			PetFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 126, -90);
-		elseif ( PetFrame:IsShown() and TotemFrameTotem2:IsShown() ) then
-			PetFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 93, -90);
-		else
-			PetFrame:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 60, -90);
-		end
 	end
 end

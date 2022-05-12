@@ -2,12 +2,6 @@ local function ShouldShowRegulationOverlay()
 	return SHOW_KOREAN_RATINGS or (SHOW_CHINA_AGE_APPROPRIATENESS_WARNING and not C_Login.WasEverLauncherLogin());
 end
 
-AccountLoginEditBoxBehaviorMixin = {}
-
-function AccountLoginEditBoxBehaviorMixin:OnKeyDown(key)
-	EventRegistry:TriggerEvent("AccountLogin.OnKeyDown", key);
-end
-
 function AccountLogin_OnLoad(self)
 	local versionType, buildType, version, internalVersion, date = GetBuildInfo();
 	self.UI.ClientVersion:SetFormattedText(VERSION_TEMPLATE, versionType, version, internalVersion, buildType, date);
@@ -66,7 +60,7 @@ function AccountLogin_CheckLoginState(self)
 end
 
 function AccountLogin_OnShow(self)
-	SetExpansionLogo(self.UI.GameLogo, GetClientDisplayExpansionLevel());
+	SetGameLogo(self.UI.GameLogo);
 	self.UI.AccountEditBox:SetText("");
 	AccountLogin_UpdateSavedData(self);
 
@@ -101,7 +95,8 @@ function AccountLogin_Update()
 		ServerAlert_Enable(ServerAlertFrame);
 	end
 
-	EventRegistry:TriggerEvent("AccountLogin.Update", showButtonsAndStuff);
+	--Cached login
+	CachedLoginFrameContainer_Update(AccountLogin.UI.CachedLoginFrameContainer);
 
 	local isReconnectMode = C_Login.IsReconnectLoginPossible();
 	for _, region in pairs(AccountLogin.UI.NormalLoginRegions) do
@@ -119,15 +114,14 @@ function AccountLogin_Update()
 	end
 
 	if ( GetSavedAccountName() ~= "" and GetSavedAccountList() ~= "" and not isReconnectMode) then
-		AccountLogin.UI.PasswordEditBox:SetPoint("BOTTOM", -2, 255);
-		AccountLogin.UI.LoginButton:SetPoint("BOTTOM", 0, 160);
+		AccountLogin.UI.PasswordEditBox:SetPoint("BOTTOM", -2, 250);
+		AccountLogin.UI.LoginButton:SetPoint("BOTTOM", 0, 183);
 		AccountLogin.UI.AccountsDropDown:SetShown(showButtonsAndStuff);
 	else
-		AccountLogin.UI.PasswordEditBox:SetPoint("BOTTOM", -2, 275);
-		AccountLogin.UI.LoginButton:SetPoint("BOTTOM", 0, 180);
+		AccountLogin.UI.PasswordEditBox:SetPoint("BOTTOM", -2, 270);
+		AccountLogin.UI.LoginButton:SetPoint("BOTTOM", 0, 203);
 		AccountLogin.UI.AccountsDropDown:Hide();
-	end
-
+	end	
 end
 
 function AccountLogin_UpdateSavedData(self)
@@ -157,8 +151,62 @@ function AccountLogin_OnKeyDown(self, key)
 			AccountLogin_ClearReconnectLogin();
 		end
 	end
+end
 
-	EventRegistry:TriggerEvent("AccountLogin.OnKeyDown", key);
+function CachedLoginFrameContainer_Update(self)
+	local cachedLogins = C_Login.GetCachedCredentials();
+	if ( cachedLogins ) then
+		if ( not self.Frames ) then
+			self.Frames = {};
+		end
+		local frames = self.Frames;
+		for i=1, #cachedLogins do
+			local frame = frames[i];
+			if ( not frame ) then
+				frame = CreateFrame("FRAME", nil, self, "CachedLoginFrameTemplate");
+				if ( i == 1 ) then
+					frame:SetPoint("TOPRIGHT", self, "TOPRIGHT", -5, -25);
+				else
+					frame:SetPoint("TOP", frames[i-1], "BOTTOM", 0, 5);
+				end
+			end
+
+			frame.account = cachedLogins[i];
+			frame.LoginButton:SetText(frame.account);
+			frame:Show();
+		end
+
+		for i=#cachedLogins + 1, #frames do
+			frames[i]:Hide();
+		end
+	elseif ( self.Frames ) then
+		for i=1, #self.Frames do
+			self.Frames[i]:Hide();
+		end
+	end
+end
+
+function CachedLoginButton_OnClick(self)
+	PlaySound(SOUNDKIT.GS_LOGIN);
+
+	local account = self:GetParent().account;
+	C_Login.CachedLogin(account);
+	if ( AccountLoginDropDown:IsShown() ) then
+		C_Login.SelectGameAccount(GlueDropDownMenu_GetSelectedValue(AccountLoginDropDown));
+	end
+
+	AccountLogin.UI.PasswordEditBox:SetText("");
+	if ( AccountLogin.UI.SaveAccountNameCheckButton:GetChecked() ) then
+		SetSavedAccountName(account);
+	else
+		SetUsesToken(false);
+	end
+end
+
+function CachedLoginDeleteButton_OnClick(self)
+	local account = self:GetParent().account;
+	C_Login.DeleteCachedCredentials(account);
+	CachedLoginFrameContainer_Update(AccountLogin.UI.CachedLoginFrameContainer);
 end
 
 function AccountLogin_Login()
@@ -173,7 +221,7 @@ function AccountLogin_Login()
 		local username = AccountLogin.UI.AccountEditBox:GetText();
 		C_Login.Login(string.gsub(username, "||", "|"), AccountLogin.UI.PasswordEditBox);
 		if ( AccountLoginDropDown:IsShown() ) then
-			C_Login.SelectGameAccount(UIDropDownMenu_GetSelectedValue(AccountLoginDropDown));
+			C_Login.SelectGameAccount(GlueDropDownMenu_GetSelectedValue(AccountLoginDropDown));
 		end
 	end
 
@@ -287,8 +335,8 @@ function WoWAccountSelect_Update()
 	end
 
 	self.Background:SetSize(275, 265);
-	self.Background.AcceptButton:SetPoint("BOTTOMLEFT", 15, 12);
-	self.Background.CancelButton:SetPoint("BOTTOMRIGHT", -15, 12);
+	self.Background.AcceptButton:SetPoint("BOTTOMLEFT", 8, 6);
+	self.Background.CancelButton:SetPoint("BOTTOMRIGHT", -8, 6);
 	self.Background.Container:SetPoint("BOTTOMRIGHT", -16, 36);
 
 	GlueScrollFrame_Update(self.Background.Container.ScrollFrame, #self.gameAccounts, MAX_ACCOUNTNAME_DISPLAYED, ACCOUNTNAME_BUTTON_HEIGHT);
@@ -324,23 +372,23 @@ end
 -- =============================================================
 
 function AccountLoginDropDown_OnLoad(self)
-	UIDropDownMenu_SetWidth(self, 174);
-	UIDropDownMenu_SetSelectedValue(self, 1);
-	AccountLoginDropDownText:SetJustifyH("LEFT");
+	GlueDropDownMenu_SetWidth(self, 134);
+	GlueDropDownMenu_SetSelectedValue(self, 1);
+	AccountLoginDropDownText:SetJustifyH("LEFT");	
 	AccountLoginDropDown_SetupList();
-	UIDropDownMenu_Initialize(self, AccountLoginDropDown_Initialize);
+	GlueDropDownMenu_Initialize(self, AccountLoginDropDown_Initialize);
 end
 
 function AccountLoginDropDown_OnClick(self)
-	UIDropDownMenu_SetSelectedValue(AccountLoginDropDown, self.value);
+	GlueDropDownMenu_SetSelectedValue(AccountLoginDropDown, self.value);
 end
 
 function AccountLoginDropDown_Initialize()
-	local selectedValue = UIDropDownMenu_GetSelectedValue(AccountLoginDropDown);
+	local selectedValue = GlueDropDownMenu_GetSelectedValue(AccountLoginDropDown);
 	local list = AccountLoginDropDown.list;
 	for i = 1, #list do
 		list[i].checked = (list[i].text == selectedValue);
-		UIDropDownMenu_AddButton(list[i]);
+		GlueDropDownMenu_AddButton(list[i]);
 	end
 end
 
@@ -352,8 +400,8 @@ function AccountLoginDropDown_SetupList()
 		if ( strsub(str, 1, 1) == "!" ) then
 			selected = true;
 			str = strsub(str, 2, #str);
-			UIDropDownMenu_SetSelectedValue(AccountLoginDropDown, str);
-			UIDropDownMenu_SetText(AccountLoginDropDown, str);
+			GlueDropDownMenu_SetSelectedValue(AccountLoginDropDown, str);
+			GlueDropDownMenu_SetText(AccountLoginDropDown, str);
 		end
 		AccountLoginDropDown.list[i] = { ["text"] = str, ["value"] = str, ["selected"] = selected, func = AccountLoginDropDown_OnClick };
 		i = i + 1;

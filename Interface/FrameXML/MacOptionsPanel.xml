@@ -51,21 +51,42 @@
 			</OnShow>
 		</Scripts>
 	</Frame>
-	<Frame name="FolderPicker" toplevel="true" frameStrata="DIALOG" movable="true" enableMouse="true" clampedToScreen="true" hidden="true" parent="UIParent">
+	<Frame name="FolderPicker" inherits="BackdropTemplate" toplevel="true" frameStrata="DIALOG" movable="true" enableMouse="true" clampedToScreen="true" hidden="true" parent="UIParent">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+		</KeyValues>
 		<Size>
 			<AbsDimension x="500" y="400"/>
 		</Size>
 		<Anchors>
 			<Anchor point="CENTER"/>
 		</Anchors>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="FolderPickerHeader" file="Interface\DialogFrame\UI-DialogBox-Header">
+					<Size>
+						<AbsDimension x="296" y="70"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOP" relativeTo="FolderPicker" relativePoint="TOP">
+							<Offset>
+								<AbsDimension x="0" y="12"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<FontString inherits="GameFontNormalLarge" text="Folder...">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="FolderPickerHeader">
+							<Offset>
+								<AbsDimension x="0" y="-14"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 		<Frames>
-			<Frame parentKey="Border" inherits="DialogBorderTemplate"/>
-			<Frame parentKey="Header" inherits="DialogHeaderTemplate">
-				<KeyValues>
-					<KeyValue key="headerTextPadding" value="110" type="number"/>
-					<KeyValue key="textString" value="Folder..." type="string"/>
-				</KeyValues>
-			</Frame>
 			<Button name="FolderPickerButton01" text="YES">
 				<Size>
 					<AbsDimension x="100" y="21"/>

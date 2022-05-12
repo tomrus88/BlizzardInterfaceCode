@@ -48,7 +48,7 @@ end
 function MapCanvasScrollControllerMixin:WouldCursorPositionBeClick(button, cursorX, cursorY)
 	local mouseButtonInfo = self.mouseButtonInfo[button];
 	if mouseButtonInfo and mouseButtonInfo.down then
-		local MAX_DIST_FOR_CLICK_SQ = 20;
+		local MAX_DIST_FOR_CLICK_SQ = 10;
 		local deltaX, deltaY = cursorX - mouseButtonInfo.startX, cursorY - mouseButtonInfo.startY;
 		return deltaX * deltaX + deltaY * deltaY <= MAX_DIST_FOR_CLICK_SQ;
 	end
@@ -65,7 +65,10 @@ function MapCanvasScrollControllerMixin:FindBestLocationForClick()
 
 		local mapInfo = C_Map.GetMapInfoAtPosition(self.mapID, normalizedCursorX, normalizedCursorY);
 		if mapInfo and mapInfo.mapID ~= self.mapID then
-			local centerX, centerY = MapUtil.GetMapCenterOnMap(mapInfo.mapID, self.mapID);
+			local left, right, top, bottom = C_Map.GetMapRectOnMap(mapInfo.mapID, self.mapID);
+			local centerX = left + (right - left) * .5;
+			local centerY = top + (bottom - top) * .5;
+
 			normalizedCursorX = centerX;
 			normalizedCursorY = centerY;
 		end
@@ -112,7 +115,7 @@ function MapCanvasScrollControllerMixin:OnMouseUp(button)
 					self:TryPanOrZoomOnClick();
 				end
 			end
-		elseif not self:TryPanOrZoomOnClick() and self:IsPanning() then
+		elseif not self:TryPanOrZoomOnClick() and self:IsPanning() then		
 			local deltaX, deltaY = self:GetNormalizedMouseDelta(button);
 			self:AccumulateMouseDeltas(GetTickTime(), deltaX, deltaY);
 
@@ -251,7 +254,7 @@ do
 		if deltaY > 0 and self.accumulatedMouseDeltaY < 0 or deltaY < 0 and self.accumulatedMouseDeltaY > 0 then
 			self.accumulatedMouseDeltaY = 0.0;
 		end
-
+			
 		local normalizedSamples = MOUSE_DELTA_SAMPLES * elapsed * 60;
 		self.accumulatedMouseDeltaX = (self.accumulatedMouseDeltaX / normalizedSamples) + (deltaX * MOUSE_DELTA_FACTOR) / normalizedSamples;
 		self.accumulatedMouseDeltaY = (self.accumulatedMouseDeltaY / normalizedSamples) + (deltaY * MOUSE_DELTA_FACTOR) / normalizedSamples;
@@ -358,7 +361,7 @@ function MapCanvasScrollControllerMixin:OnUpdate(elapsed)
 
 		panChanged = true;
 	end
-
+	
 	if panChanged then
 		self:GetMap():OnCanvasPanChanged();
 	end
@@ -402,7 +405,6 @@ function MapCanvasScrollControllerMixin:SetMapID(mapID)
 	self.mapID = mapID;
 
 	self:OnCanvasSizeChanged();
-	self:GetMap():AddMaskableTexture(self.Child.TiledBackground);
 end
 
 function MapCanvasScrollControllerMixin:OnCanvasSizeChanged()
@@ -443,13 +445,8 @@ function MapCanvasScrollControllerMixin:CreateZoomLevels()
 		end
 
 		for zoomLevelIndex = 0, numZoomLevels - 1 do
-			currentScale = math.max(layerInfo.minScale + zoomDeltaPerStep * zoomLevelIndex, currentScale + MIN_SCALE_DELTA);
-			local desiredScale = currentScale * self.baseScale;
-			if desiredScale == 0 then
-				desiredScale = 1;
-			end
-
-			table.insert(self.zoomLevels, { scale = desiredScale, layerIndex = layerIndex })
+			currentScale = math.max(layerInfo.minScale + zoomDeltaPerStep * zoomLevelIndex, currentScale + MIN_SCALE_DELTA);			
+			table.insert(self.zoomLevels, { scale = currentScale * self.baseScale, layerIndex = layerIndex })
 		end
 	end
 end
@@ -617,12 +614,10 @@ function MapCanvasScrollControllerMixin:ResetZoom()
 	self:InstantPanAndZoom(self.zoomLevels[1].scale, 0.5, 0.5);
 end
 
-function MapCanvasScrollControllerMixin:InstantPanAndZoom(scale, panX, panY, ignoreScaleRatio)
-	if not ignoreScaleRatio then
-		local scaleRatio = self:GetCanvasScale() / scale;
-		panX = Lerp(panX, self:GetCurrentScrollX() or .5, scaleRatio);
-		panY = Lerp(panY, self:GetCurrentScrollY() or .5, scaleRatio);
-	end
+function MapCanvasScrollControllerMixin:InstantPanAndZoom(scale, panX, panY)
+	local scaleRatio = self:GetCanvasScale() / scale;
+	panX = Lerp(panX, self:GetCurrentScrollX() or .5, scaleRatio);
+	panY = Lerp(panY, self:GetCurrentScrollY() or .5, scaleRatio);
 
 	self.currentScale = scale;
 	self.targetScale = self.currentScale;
@@ -685,15 +680,7 @@ function MapCanvasScrollControllerMixin:IsPanning()
 end
 
 function MapCanvasScrollControllerMixin:GetCanvasScale()
-	if self.currentScale and self.currentScale ~= 0 then
-		return self.currentScale;
-	end
-
-	if self.targetScale and self.targetScale ~= 0 then
-		return self.targetScale;
-	end
-
-	return 1;
+	return self.currentScale or self.targetScale or 1;
 end
 
 function MapCanvasScrollControllerMixin:GetCurrentScrollX()
@@ -744,8 +731,7 @@ end
 
 function MapCanvasScrollControllerMixin:GetCursorPosition()
 	local currentX, currentY = GetCursorPosition();
-	local effectiveScale = UIParent:GetEffectiveScale();
-	return currentX / effectiveScale, currentY / effectiveScale;
+	return currentX, currentY;
 end
 
 function MapCanvasScrollControllerMixin:GetNormalizedMouseDelta(button)
@@ -759,16 +745,8 @@ end
 
 -- Normalizes a global UI position to the map canvas
 function MapCanvasScrollControllerMixin:NormalizeUIPosition(x, y)
-	local scale = self:GetCanvasScale() or 1;
-	if scale == 0 then
-		scale = 1;
-	end
-
-	local left = self.Child:GetLeft() or 0;
-	local top = self.Child:GetTop() or 0;
-
-	return Saturate(self:NormalizeHorizontalSize(x / scale - left)),
-		   Saturate(self:NormalizeVerticalSize(top - y / scale));
+	return Saturate(self:NormalizeHorizontalSize(x / self:GetCanvasScale() - self.Child:GetLeft())),
+		   Saturate(self:NormalizeVerticalSize(self.Child:GetTop() - y / self:GetCanvasScale()));
 end
 
 function MapCanvasScrollControllerMixin:GetNormalizedCursorPosition()

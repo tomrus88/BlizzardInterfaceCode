@@ -40,7 +40,7 @@ function VideoOptionsValueChanged(self, value, flag)
 	self.newValue = value;
 
 	if(self.type == CONTROLTYPE_DROPDOWN) then
-		UIDropDownMenu_SetSelectedID(self, value, flag);
+		VideoOptionsDropDownMenu_SetSelectedID(self, value, flag);
 	else
 		if(self.SetDisplayValue) then
 			self.SetDisplayValue(self, value);
@@ -190,13 +190,6 @@ function Graphics_Refresh(self)
 	VideoOptionsPanel_Refresh( Advanced_);
 end
 
-function Advanced_Refresh(self)
-	for i, control in ipairs(self.controls) do
-		control.selectedID = nil;
-	end
-	VideoOptionsPanel_Refresh(self);
-end
-
 function VideoOptionsPanel_Refresh (self)
 	inrefresh = true;
 	BlizzardOptionsPanel_Refresh(self);
@@ -277,8 +270,8 @@ local function FinishChanges(self)
 		VideoOptionsFrame.windowUpdate = nil;
 
 		-- reload some tables and redisplay
-		Display_DisplayModeDropDown.selectedID = nil; 							 	-- invalidates cached value
-		BlizzardOptionsPanel_RefreshControlSingle(Display_DisplayModeDropDown);		-- hardware may not have set this, so we need to refresh
+		Display_DisplayModeDropDown.selectedID = nil;                                  -- invalidates cached value
+		BlizzardOptionsPanel_RefreshControlSingle(Display_DisplayModeDropDown);        -- hardware may not have set this, so we need to refresh
 
 		Display_ResolutionDropDown.tablerefresh = true;
 		Display_PrimaryMonitorDropDown.tablerefresh = true;
@@ -356,7 +349,7 @@ function VideoOptionsPanel_Default (self)
 	end
 end
 
-function Graphics_Default (self)
+function Graphics_Default (self, perControlCallback)
 	SetDefaultVideoOptions(0);
 	VideoOptionsPanel_Default( Display_);
 	VideoOptionsPanel_Default( Graphics_);
@@ -364,7 +357,26 @@ function Graphics_Default (self)
 	FinishChanges(self);
 end
 
-function Advanced_Default (self)
+function Graphics_Classic (self)
+	for key, value in pairs(VideoData) do
+		local control = _G[key];
+		if(control.classic and control:GetValue() ~= control.classic) then
+			VideoOptions_OnClick(control, control.classic);
+			if(control.type == CONTROLTYPE_DROPDOWN) then
+				local text = control.data[control.classic].text;
+				VideoOptionsDropDownMenu_SetText(control, text);
+			elseif(control.type == CONTROLTYPE_SLIDER) then
+				control:SetDisplayValue(control.classic);
+			end
+		elseif(key == "Graphics_Quality" or key == "RaidGraphics_Quality") then
+			control.noclick = true;
+			Graphics_Quality:SetValue(""..ClassicGraphicsQuality);	-- set the slider only
+			control.noclick = false;
+		end
+	end
+end
+
+function Advanced_Default (self, perControlCallback)
 	SetDefaultVideoOptions(1);
 	if(not InGlue()) then
 		SetDefaultVideoOptions(2);
@@ -418,44 +430,10 @@ local function IsValid(self,index)
 	return valid, is32BitFail;
 end
 
-function Graphics_ValidateControlImmediate(self)
-	-- check if this has been initialized
-	if not self.table then
-		return;
-	end
-
-	if self.rebuildTableOnValidate and self.tablefunction then
-		self.tablerefresh = true;
-		self:tablefunction();
-	end
-
-	-- refresh tooltip, which also updates dropdown options, because of course it does
-	Graphics_PrepareTooltip(self);
-
-	local index = self.selectedID;
-	while index > 0 and not IsValid(self, index) do
-		index = index - 1;
-	end
-	if index > 0 and index ~= self.selectedID then
-		-- change the cvar
-		local cvars = VideoData[self:GetName()].data[index].cvars;
-		for cvar, value in pairs(cvars) do
-			BlizzardOptionsPanel_SetCVarSafe(cvar, value);
-		end
-		-- change the dropdown value
-		self.newValue = index;
-		self.selectedID = index;
-		UIDropDownMenu_SetText(self, self.data[index].text);
-	end
-end
-
 function Graphics_NotifyTarget(self, masterIndex, isRaid)
 	local dropdownIndex = GetGraphicsDropdownIndexByMasterIndex(self.graphicsCVar, masterIndex, isRaid);
 	local value = nil;
 	if(self.type == CONTROLTYPE_DROPDOWN) then
-		while self.data[dropdownIndex].skipForSlider do
-			dropdownIndex = dropdownIndex+1;
-		end
 		value = self.data[dropdownIndex].text;
 	elseif(self.type == CONTROLTYPE_SLIDER) then
 		value = dropdownIndex;
@@ -468,10 +446,7 @@ function Graphics_NotifyTarget(self, masterIndex, isRaid)
 		self.newValue = dropdownIndex;
 		self.selectedID = dropdownIndex;
 		if(self.type == CONTROLTYPE_DROPDOWN) then
-			if self.data[dropdownIndex].warning then
-				value = WARNING_FONT_COLOR:WrapTextInColorCode(value);
-			end
-			UIDropDownMenu_SetText(self, value);
+			VideoOptionsDropDownMenu_SetText(self, value);
 		elseif(self.type == CONTROLTYPE_SLIDER) then
 			self:SetDisplayValue(dropdownIndex);
 		end
@@ -487,7 +462,7 @@ function Graphics_NotifyTarget(self, masterIndex, isRaid)
 				if (isValid) then
 					self.newValue = fallbackIndex;
 					self.selectedID = fallbackIndex;
-					UIDropDownMenu_SetText(self, self.data[fallbackIndex].text);
+					VideoOptionsDropDownMenu_SetText(self, self.data[fallbackIndex].text);
 					break;
 				end
 			end
@@ -535,13 +510,7 @@ function Graphics_TableGetValue(self)
 			for _, child in pairs(self.childOptions) do
 				if(_G[child].graphicsCVar) then
 					local childValue = _G[child].newValue or tonumber(GetCVar(_G[child].graphicsCVar));
-					local dropdownIndex = GetGraphicsDropdownIndexByMasterIndex(_G[child].graphicsCVar, i, self.raid);
-					if _G[child].data then
-						while _G[child].data[dropdownIndex].skipForSlider do
-							dropdownIndex = dropdownIndex+1;
-						end
-					end
-					if(dropdownIndex ~= childValue) then
+					if(GetGraphicsDropdownIndexByMasterIndex(_G[child].graphicsCVar, i, self.raid) ~= childValue) then
 						allMatch = false;
 						break;
 					end
@@ -609,16 +578,15 @@ function VideoOptions_OnClick(self, value)
 	self.newValue = value;
 	if(self.dependent ~= nil) then
 		for i, key in ipairs(self.dependent) do
-			local keyObject = _G[key];
-			keyObject.isdependtarget = true;
-			if(keyObject.onrefresh) then
-				keyObject:onrefresh();
+			_G[key].isdependtarget = true;
+			if(_G[key].onrefresh) then
+				_G[key]:onrefresh();
 			end
-			local func = keyObject.dependtarget;
+			local func = _G[key].dependtarget;
 			if(func ~= nil) then
-				func(keyObject);
+				func(_G[key]);
 			end
-			keyObject.isdependtarget = false;
+			_G[key].isdependtarget = false;
 		end
 	end
 	if ( self.capTargets ) then
@@ -719,8 +687,8 @@ function Graphics_SliderRefreshValue(self)
 end
 
 function Graphics_DropDownRefreshValue(self)
-	UIDropDownMenu_Initialize(self, self.initialize);
-	UIDropDownMenu_SetSelectedID(self, self:GetValue(), 1);
+	VideoOptionsDropDownMenu_Initialize(self, self.initialize);
+	VideoOptionsDropDownMenu_SetSelectedID(self, self:GetValue(), 1);
 	local graphicsQuality = "Graphics_Quality";
 	if (self.raid) then
 		graphicsQuality = "RaidGraphics_Quality";
@@ -745,11 +713,6 @@ function Graphics_DropDownRefreshValue(self)
 			end
 			if(self.cvar) then
 				local index = GetGraphicsDropdownIndexByMasterIndex(self.cvar, masterIndex, self.raid);
-				if(self.data) then
-					while self.data[index].skipForSlider do
-						index = index+1;
-					end
-				end
 				isValid, is32BitFail = IsValid(self, index);
 				if ( not isValid ) then
 					if ( is32BitFail ) then
@@ -785,7 +748,7 @@ end
 
 function VideoOptions_Enable(self)
 	if(self.type == CONTROLTYPE_DROPDOWN) then
-		UIDropDownMenu_EnableDropDown(self);
+		VideoOptionsDropDownMenu_EnableDropDown(self);
 	elseif(self.type == CONTROLTYPE_SLIDER) then
 		Slider_Enable(self);
 	elseif(self.type == CONTROLTYPE_CHECKBOX) then
@@ -795,7 +758,7 @@ end
 
 function VideoOptions_Disable(self)
 	if(self.type == CONTROLTYPE_DROPDOWN) then
-		UIDropDownMenu_DisableDropDown(self);
+		VideoOptionsDropDownMenu_DisableDropDown(self);
 	elseif(self.type == CONTROLTYPE_SLIDER) then
 		Slider_Disable(self);
 	elseif(self.type == CONTROLTYPE_CHECKBOX) then
@@ -827,12 +790,6 @@ end
 
 function VideoOptionsDropDown_OnLoad(self)
 	LoadVideoData(self);
-	if self.validateOnGXRestart then
-		self:RegisterEvent("GX_RESTARTED");
-	end
-	if self.validateOnAdapterListChange then
-		self:RegisterEvent("ADAPTER_LIST_CHANGED");
-	end
 	self.tablerefresh = true;
 	if(self.onload ~= nil) then
 		self.onload(self);
@@ -869,22 +826,15 @@ function VideoOptionsDropDown_OnLoad(self)
 				Graphics_PrepareTooltip(self);
 			end
 
-			local data = self.data;
-			local hasData = data ~= nil;
 			for mode, text in ipairs(self.table) do
-				local modeData = hasData and data[mode] or nil;
-				if ( hasData and modeData.warning ) then
-					text = WARNING_FONT_COLOR:WrapTextInColorCode(text);
-				end
-
-				local info = UIDropDownMenu_CreateInfo();
+				local info = VideoOptionsDropDownMenu_CreateInfo();
 				info.text = text;
 				info.value = text;
 				info.func = self.onclickfunction or VideoOptionsDropDown_OnClick;
 				-- disable settings
-				if(hasData) then
-					if(modeData.cvars ~= nil) then
-						for cvar_name, cvar_value in pairs(modeData.cvars) do
+				if(self.data ~= nil) then
+					if(self.data[mode].cvars ~= nil) then
+						for cvar_name, cvar_value in pairs(self.data[mode].cvars) do
 							if(self.validity[cvar_name][cvar_value] ~= 0 and self.validity[cvar_name][cvar_value] ~= VR_WINDOWS_32BIT) then
 								info.notClickable = true;
 								info.disablecolor = GREYCOLORCODE;
@@ -901,7 +851,7 @@ function VideoOptionsDropDown_OnLoad(self)
 					info.notClickable = true;
 					info.disablecolor = GREYCOLORCODE;
 				end
-				UIDropDownMenu_AddButton(info);
+				VideoOptionsDropDownMenu_AddButton(info);
 			end
 		end
 	self.SetValue = self.SetValue or Graphics_TableSetValue;
@@ -927,7 +877,7 @@ function VideoOptionsDropDown_OnLoad(self)
 	if(self.width == nil) then
 		self.width = 110;
 	end
-	UIDropDownMenu_SetWidth(self, self.width);
+	VideoOptionsDropDownMenu_SetWidth(self, self.width);
 	-- force another control to change to a value
 	if(self.graphicsCVar) then
 		self.notifytarget = self.notifytarget or Graphics_NotifyTarget;
@@ -944,10 +894,6 @@ function VideoOptionsDropDown_OnLoad(self)
 	end
 end
 
-function VideoOptionsDropDown_OnEvent(self, event)
-	Graphics_ValidateControlImmediate(self);
-end
-
 function VideoOptionsCheckbox_OnLoad(self)
 	LoadVideoData(self);
 	self.type = self.type or CONTROLTYPE_CHECKBOX;
@@ -961,7 +907,6 @@ function VideoOptionsCheckbox_OnLoad(self)
 end
 
 function VideoOptionsSlider_OnLoad(self)
-	BackdropTemplateMixin.OnBackdropLoaded(self);
 	LoadVideoData(self);
 	self.type = self.type or CONTROLTYPE_SLIDER;
 	if(self.onload ~= nil) then
@@ -970,50 +915,6 @@ function VideoOptionsSlider_OnLoad(self)
 	self.RefreshValue = self.RefreshValue or Graphics_ControlRefreshValue;
 	BlizzardOptionsPanel_RegisterControl(self, self:GetParent());
 end
-
-function VideoOptionsControl_OnEnter(self)
-	local hasTooltip = self.tooltip ~= nil;
-	local data = self.data and self.data[self:GetValue()] or nil;
-	local warning = data and data.warning or nil;
-	local hasWarning = warning ~= nil;
-
-	if ( hasTooltip ) then
-		local tooltipFrame = GetAppropriateTooltip();
-		tooltipFrame:SetOwner(self);
-		if ( self.name == nil) then
-			self.name = " ";
-		end
-		tooltipFrame:SetText(self.name .. ":", nil, nil, nil, nil, 1);
-
-		if ( hasTooltip ) then
-			tooltipFrame:AddLine(self.tooltip, 1.0, 1.0, 1.0, 1.0, 1);
-		end
-
-		if ( hasWarning ) then
-			local r, g, b = WARNING_FONT_COLOR:GetRGB();
-			tooltipFrame:AddLine(" ");
-			tooltipFrame:AddLine(warning, r, g, b, true, 1);
-		end
-
-		tooltipFrame:Show();
-	end
-end
-
-function VideoOptionsControl_OnLeave(self)
-	GetAppropriateTooltip():Hide();
-end
-
-function VideoOptionsWarning_OnEnter(self)
-	if ( self.tooltip ) then
-		GetAppropriateTooltip():SetOwner(self, "ANCHOR_LEFT");
-		GetAppropriateTooltip():SetText(self.tooltip, 1.0, 1.0, 1.0, 1, 1);
-	end
-end
-
-function VideoOptionsWarning_OnLeave(self)
-	GetAppropriateTooltip():Hide();
-end
-
 
 -------------------------------------------------------------------------------------------------------
 
@@ -1042,6 +943,7 @@ end
 function Graphics_OnLoad (self)
 	self.name = GRAPHICS_LABEL;
 	self.hasApply = true;
+	self.classic = Graphics_Classic;
 	VideoOptionsPanel_OnLoad( Display_);
 	VideoOptionsPanel_OnLoad( Graphics_);
 	VideoOptionsPanel_OnLoad( RaidGraphics_);
@@ -1060,8 +962,17 @@ function Advanced_OnLoad (self)
 	self.hasApply = true;
 
 	VideoOptionsPanel_OnLoad(self);
-	BlizzardOptionsPanel_OnLoad(self, VideoOptionsPanel_Okay, VideoOptionsPanel_Cancel, Advanced_Default, Advanced_Refresh);
+	BlizzardOptionsPanel_OnLoad(self, VideoOptionsPanel_Okay, VideoOptionsPanel_Cancel, Advanced_Default, VideoOptionsPanel_Refresh);
 	OptionsFrame_AddCategory(VideoOptionsFrame, self);
+
+	if(true) then
+		local name = self:GetName();
+		_G[name .. "StereoEnabled"]:Hide();
+		_G[name .. "Convergence"]:Hide();
+		_G[name .. "EyeSeparation"]:Hide();
+		_G[name .. "StereoHeader"]:Hide();
+		_G[name .. "StereoHeaderUnderline"]:Hide();
+	end
 end
 
 --
@@ -1137,14 +1048,7 @@ function InterfaceOptionsLanguagesPanel_UpdateRestartTexture()
 	end
 end
 
-function InterfaceOptionsLanguagePanelLocalDropDown_OnEnter(self)
-	GetAppropriateTooltip():SetOwner(self, "ANCHOR_TOPRIGHT");
-	GetAppropriateTooltip():SetText(self.tooltip, nil, nil, nil, nil, 1);
-end
 
-function InterfaceOptionsLanguagePanelLocalDropDown_OnLeave(self)
-	GetAppropriateTooltip():Hide();
-end
 
 function InterfaceOptionsLanguagesPanelLocaleDropDown_OnLoad (self)
 	self.type = CONTROLTYPE_DROPDOWN;
@@ -1159,38 +1063,38 @@ function InterfaceOptionsLanguagesPanelLocaleDropDown_OnLoad (self)
 	self.value = value;
 	self.tooltip = OPTION_TOOLTIP_LOCALE;
 
-	UIDropDownMenu_SetWidth(self, 200);
-	UIDropDownMenu_Initialize(self, InterfaceOptionsLanguagesPanelLocaleDropDown_Initialize);
-	UIDropDownMenu_SetSelectedValue(self, value);
+	VideoOptionsDropDownMenu_SetWidth(self, 200);
+	VideoOptionsDropDownMenu_Initialize(self, InterfaceOptionsLanguagesPanelLocaleDropDown_Initialize);
+	VideoOptionsDropDownMenu_SetSelectedValue(self, value);
 
 	self.SetValue =
 		function (self, value)
-			local currentValue = UIDropDownMenu_GetSelectedValue(self);
-			local audioCurrentValue = UIDropDownMenu_GetSelectedValue(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
+			local currentValue = VideoOptionsDropDownMenu_GetSelectedValue(self);
+			local audioCurrentValue = VideoOptionsDropDownMenu_GetSelectedValue(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
 			-- Audio dropdown value should follow changes to text dropdown, except if user has explicitly chosen English instead of
 			-- the text level.
 			if (audioCurrentValue ~= "enUS" or currentValue == "enUS") then
 				InterfaceOptionsLanguagesPanelAudioLocaleDropDown.SetValue(InterfaceOptionsLanguagesPanelAudioLocaleDropDown, value);
 			end
 			if (value == "enUS") then
-				UIDropDownMenu_DisableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
+				VideoOptionsDropDownMenu_DisableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
 			else
-				UIDropDownMenu_EnableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
+				VideoOptionsDropDownMenu_EnableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
 			end
 
 			SetCVar("textLocale", value, self.event);
 			self.value = value;
 			InterfaceOptionsLanguagesPanel_UpdateRestartTexture();
-			UIDropDownMenu_SetSelectedValue(self, value);
+			VideoOptionsDropDownMenu_SetSelectedValue(self, value);
 		end
 	self.GetValue =
 		function (self)
-			return UIDropDownMenu_GetSelectedValue(self);
+			return VideoOptionsDropDownMenu_GetSelectedValue(self);
 		end
 	self.RefreshValue =
 		function (self)
-			UIDropDownMenu_Initialize(self, InterfaceOptionsLanguagesPanelLocaleDropDown_Initialize);
-			UIDropDownMenu_SetSelectedValue(self, self.value);
+			VideoOptionsDropDownMenu_Initialize(self, InterfaceOptionsLanguagesPanelLocaleDropDown_Initialize);
+			VideoOptionsDropDownMenu_SetSelectedValue(self, self.value);
 		end
 end
 
@@ -1207,31 +1111,31 @@ function InterfaceOptionsLanguagesPanelAudioLocaleDropDown_OnLoad(self)
 	self.value = value;
 	self.tooltip = OPTION_TOOLTIP_AUDIO_LOCALE;
 
-	UIDropDownMenu_SetWidth(self, 200);
-	UIDropDownMenu_Initialize(self, InterfaceOptionsLanguagesPanelLocaleDropDown_Initialize);
-	UIDropDownMenu_SetSelectedValue(self, value);
+	VideoOptionsDropDownMenu_SetWidth(self, 200);
+	VideoOptionsDropDownMenu_Initialize(self, InterfaceOptionsLanguagesPanelLocaleDropDown_Initialize);
+	VideoOptionsDropDownMenu_SetSelectedValue(self, value);
 
 	self.SetValue =
 		function (self, value)
 			SetCVar("audioLocale", value, self.event);
 			self.value = value;
 			InterfaceOptionsLanguagesPanel_UpdateRestartTexture();
-			UIDropDownMenu_SetSelectedValue(self, value);
+			VideoOptionsDropDownMenu_SetSelectedValue(self, value);
 		end
 	self.GetValue =
 		function (self)
-			return UIDropDownMenu_GetSelectedValue(self);
+			return VideoOptionsDropDownMenu_GetSelectedValue(self);
 		end
 	self.RefreshValue =
 		function (self)
-			UIDropDownMenu_Initialize(self, InterfaceOptionsLanguagesPanelAudioLocaleDropDown_Initialize);
-			UIDropDownMenu_SetSelectedValue(self, self.value);
+			VideoOptionsDropDownMenu_Initialize(self, InterfaceOptionsLanguagesPanelAudioLocaleDropDown_Initialize);
+			VideoOptionsDropDownMenu_SetSelectedValue(self, self.value);
 
 			local audioLocales = {GetAvailableAudioLocales()};
 			if (#audioLocales <= 1) then
-				UIDropDownMenu_DisableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
+				VideoOptionsDropDownMenu_DisableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
 			else
-				UIDropDownMenu_EnableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
+				VideoOptionsDropDownMenu_EnableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
 			end
 		end
 
@@ -1244,8 +1148,8 @@ function InterfaceOptionsLanguagesPanelLocaleDropDown_OnClick (self)
 end
 
 function InterfaceOptionsLanguagesPanelLocaleDropDown_Initialize (self)
-	local selectedValue = UIDropDownMenu_GetSelectedValue(self);
-	local info = UIDropDownMenu_CreateInfo();
+	local selectedValue = VideoOptionsDropDownMenu_GetSelectedValue(self);
+	local info = VideoOptionsDropDownMenu_CreateInfo();
 
 	InterfaceOptionsLanguagesPanelLocaleDropDown_InitializeHelper(info, selectedValue, GetAvailableLocales());
 end
@@ -1258,12 +1162,12 @@ function GetAvailableAudioLocales()
 end
 
 function InterfaceOptionsLanguagesPanelAudioLocaleDropDown_Initialize (self)
-	local selectedValue = UIDropDownMenu_GetSelectedValue(self);
-	local info = UIDropDownMenu_CreateInfo();
+	local selectedValue = VideoOptionsDropDownMenu_GetSelectedValue(self);
+	local info = VideoOptionsDropDownMenu_CreateInfo();
 
 	InterfaceOptionsLanguagesPanelLocaleDropDown_InitializeHelper(info, selectedValue, GetAvailableAudioLocales());
 	if (GetCVar("textLocale") == "enUS") then
-		UIDropDownMenu_DisableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
+		VideoOptionsDropDownMenu_DisableDropDown(InterfaceOptionsLanguagesPanelAudioLocaleDropDown);
 	end
 end
 
@@ -1282,7 +1186,7 @@ LanguageRegions["esMX"] = 10;
 LanguageRegions["ruRU"] = 11;
 LanguageRegions["ptBR"] = 12;
 LanguageRegions["ptPT"] = 13;
-LanguageRegions["itIT"] = 14;
+LanguageRegions["itIT"] = 14; -- For 1.12: These indices map to UV coordiantes in textures that we don't need to update, so don't remove itIT
 
 LANGUAGE_TEXT_HEIGHT = 22/512;
 
@@ -1321,14 +1225,14 @@ function InterfaceOptionsLanguagesPanelLocaleDropDown_InitializeHelper (createIn
 			else
 				createInfo.checked = nil;
 			end
-			UIDropDownMenu_AddButton(createInfo);
+			VideoOptionsDropDownMenu_AddButton(createInfo);
 		end
 	end
 
 	if ( not currentChoiceAdded and LanguageRegions[selectedValue]) then
 		InterfaceOptionsLanguagesPanelLocaleDropDown_InitializeChoice(createInfo, selectedValue);
 		createInfo.checked = 1;
-		UIDropDownMenu_AddButton(createInfo);
+		VideoOptionsDropDownMenu_AddButton(createInfo);
 	end
 end
 
@@ -1386,10 +1290,7 @@ function Graphics_SliderOnValueChanged(self, value, userInput)
 		self.newValue = value;
 		VideoOptions_OnClick(self, value);
 	end
-
-	if not self.preventValueChangeHandlerFromSettingLabel then
-		self.Label:SetText(value);
-	end
+	self.Label:SetText(value);
 end
 
 function Graphics_SliderOnShow(self)

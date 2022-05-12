@@ -18,14 +18,6 @@ end
 	return itemLocation;
 end
 
---[[static]] function ItemLocation:ApplyLocationToTooltip(itemLocation, tooltip)
-	if itemLocation:IsEquipmentSlot() then
-		tooltip:SetInventoryItem("player", itemLocation:GetEquipmentSlot());
-	elseif itemLocation:IsBagAndSlot() then
-		tooltip:SetBagItem(itemLocation:GetBagAndSlot());
-	end
-end
-
 function ItemLocationMixin:Clear()
 	self.bagID = nil;
 	self.slotIndex = nil;
@@ -63,10 +55,6 @@ end
 
 function ItemLocationMixin:HasAnyLocation()
 	return self:IsEquipmentSlot() or self:IsBagAndSlot();
-end
-
-function ItemLocationMixin:IsValid()
-	return C_Item.DoesItemExist(self);
 end
 
 function ItemLocationMixin:IsEqualToBagAndSlot(otherBagID, otherSlotIndex)

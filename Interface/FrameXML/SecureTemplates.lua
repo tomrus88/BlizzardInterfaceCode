@@ -145,7 +145,7 @@ function SecureButton_GetModifiedUnit(self, button)
                         unit = gsub(unit, "^[pP][lL][aA][yY][eE][rR][pP][eE][tT]", "pet");
                 end
 
-                local noPet, hadPet = unit:gsub("[pP][eE][tT](%d)", "%1");
+                --[[local noPet, hadPet = unit:gsub("[pP][eE][tT](%d)", "%1");
                 if ( hadPet == 0 ) then
                         noPet, hadPet = unit:gsub("^[pP][eE][tT]", "player");
                 end
@@ -163,23 +163,9 @@ function SecureButton_GetModifiedUnit(self, button)
                         elseif ( (hadTarget == 0) or SecureButton_GetModifiedAttribute(self, "allowVehicleTarget", button) ) then
                                 unit = unit:gsub("^[pP][lL][aA][yY][eE][rR]", "pet"):gsub("^([%a]+)([%d]+)", "%1pet%2");
                         end
-                end
+                end]]
 
                 return unit;
-        end
-        if ( SecureButton_GetModifiedAttribute(self, "checkmouseovercast", button) ) then
-            local useMouseoverCasting = GetCVarBool("enableMouseoverCast") and (GetModifiedClick("MOUSEOVERCAST") == "NONE" or IsModifiedClick("MOUSEOVERCAST"));
-            if ( useMouseoverCasting and UnitExists("mouseover") ) then
-                local action = self:CalculateAction(button);
-                local targetIsFriendly = UnitIsFriend("player", "mouseover");
-                local useNeutral = true;
-                if ( (targetIsFriendly and C_ActionBar.IsHelpfulAction(action, useNeutral)) or (not targetIsFriendly and C_ActionBar.IsHarmfulAction(action, useNeutral)) ) then
-                    if ( SpellIsTargeting() ) then
-                        SpellStopTargeting();
-                    end
-                    return "mouseover";
-                end
-            end
         end
         if ( SecureButton_GetModifiedAttribute(self, "checkselfcast", button) ) then
                 if ( IsModifiedClick("SELFCAST") ) then
@@ -235,8 +221,6 @@ local InitializeSecureMenu = function(self)
 		menu = "VEHICLE";
 	elseif( UnitIsUnit(unit, "pet") ) then
 		menu = "PET";
-	elseif( UnitIsOtherPlayersBattlePet(unit) ) then
-		menu = "OTHERBATTLEPET";
 	elseif( UnitIsOtherPlayersPet(unit) ) then
 		menu = "OTHERPET";
 	-- Last ditch checks
@@ -348,7 +332,7 @@ SECURE_ACTIONS.actionbar =
 
 SECURE_ACTIONS.action =
     function (self, unit, button)
-        local action = self:CalculateAction(button);
+        local action = ActionButton_CalculateAction(self, button);
         if ( action ) then
             -- Save macros in case the one for this action is being edited
             securecall("MacroFrame_SaveMacro");
@@ -356,13 +340,7 @@ SECURE_ACTIONS.action =
             local actionType, flyoutId = GetActionInfo(action);
             local cursorType = GetCursorInfo();
 
-            if ( actionType == "flyout" and not cursorType ) then
-				local direction = SecureButton_GetModifiedAttribute(self, "flyoutDirection", button);
-                SpellFlyout:Toggle(flyoutId, self, direction, 3, true);
-            else
-                SpellFlyout:Hide();
-                UseAction(action, unit, button);
-            end
+			UseAction(action, unit, button);
         end
     end;
 
@@ -384,7 +362,7 @@ SECURE_ACTIONS.flyout =
 
 SECURE_ACTIONS.multispell =
     function (self, unit, button)
-        local action = self:CalculateAction(button);
+        local action = ActionButton_CalculateAction(self, button);
         local spell = SecureButton_GetModifiedAttribute(self, "spell", button);
         if ( action and spell ) then
             SetMultiCastSpell(action, tonumber(spell) or spell);
@@ -435,16 +413,7 @@ SECURE_ACTIONS.item =
             end
         end
     end;
-	
-SECURE_ACTIONS.equipmentset =
-	function (self, unit, button)
-		local setName = SecureButton_GetModifiedAttribute(self, "equipmentset", button);
-		local setID = setName and C_EquipmentSet.GetEquipmentSetID(setName);
-		if ( setID ) then
-			C_EquipmentSet.UseEquipmentSet(setID);
-		end
-	end;
-	
+
 SECURE_ACTIONS.macro =
     function (self, unit, button)
         local macro = SecureButton_GetModifiedAttribute(self, "macro", button);
@@ -465,6 +434,7 @@ SECURE_ACTIONS.macro =
 local CANCELABLE_ITEMS = {
     [GetInventorySlotInfo("MainHandSlot")] = 1, -- main hand slot
     [GetInventorySlotInfo("SecondaryHandSlot")] = 2, -- off-hand slot
+	[GetInventorySlotInfo("RangedSlot")] = 3 -- ranged slot
 };
 
 SECURE_ACTIONS.cancelaura =
@@ -596,28 +566,6 @@ SECURE_ACTIONS.worldmarker =
 		end
 	end;
 
- SecureActionButtonMixin = {};
-
-function SecureActionButtonMixin:CalculateAction(button)
-    if ( not button ) then
-        button = SecureButton_GetEffectiveButton(self);
-    end
-    if ( self:GetID() > 0 ) then
-        local page = SecureButton_GetModifiedAttribute(self, "actionpage", button);
-        if ( not page ) then
-            page = GetActionBarPage();
-            if ( self.isExtra ) then
-                page = GetExtraBarIndex();
-            elseif ( self.buttonType == "MULTICASTACTIONBUTTON" ) then
-                page = GetMultiCastBarIndex();
-            end
-        end
-        return (self:GetID() + ((page - 1) * NUM_ACTIONBAR_BUTTONS));
-    else
-        return SecureButton_GetModifiedAttribute(self, "action", button) or 1;
-    end
-end
-
 function SecureActionButton_OnClick(self, button, down)
     -- TODO check with Tom etc if this is kosher
     if (down) then
@@ -643,7 +591,7 @@ function SecureActionButton_OnClick(self, button, down)
         end
     end
 
-    if ( type(button) ~= "string" ) then
+	if ( type(button) ~= "string" ) then
         return;
     end
 
@@ -700,7 +648,6 @@ function SecureActionButton_OnClick(self, button, down)
 end
 
 function SecureUnitButton_OnLoad(self, unit, menufunc)
-    self:RegisterForClicks("AnyUp");
     self:SetAttribute("*type1", "target");
     self:SetAttribute("*type2", "menu");
     self:SetAttribute("unit", unit);
@@ -708,20 +655,12 @@ function SecureUnitButton_OnLoad(self, unit, menufunc)
 end
 
 function SecureUnitButton_OnClick(self, button)
-    local modifiers = C_ClickBindings.MakeModifiers();
-    local bindingType = C_ClickBindings.GetBindingType(button, modifiers);
-    if ( (bindingType == Enum.ClickBindingType.Spell) or (bindingType == Enum.ClickBindingType.Macro) ) then
-        local unit = SecureButton_GetModifiedUnit(self);
-        C_ClickBindings.ExecuteBinding(unit, button, modifiers);
-    else
-        local effectiveButton = (bindingType == Enum.ClickBindingType.Interaction) and C_ClickBindings.GetEffectiveInteractionButton(button, modifiers) or button;
-        local type = SecureButton_GetModifiedAttribute(self, "type", effectiveButton);
-        if ( type == "menu" or type == "togglemenu" ) then
-            if ( SpellIsTargeting() ) then
-                SpellStopTargeting();
-                return;
-            end
+    local type = SecureButton_GetModifiedAttribute(self, "type", button);
+    if ( type == "menu" or type == "togglemenu" ) then
+        if ( SpellIsTargeting() ) then
+            SpellStopTargeting();
+            return;
         end
-        SecureActionButton_OnClick(self, effectiveButton);
     end
+    SecureActionButton_OnClick(self, button);
 end

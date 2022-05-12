@@ -14,12 +14,11 @@
 							<Offset x="0" y="0"/>
 						</Anchor>
 					</Anchors>
-					<Color r="1" g="1" b="1" a="0.6"/>
 				</Texture>
-				<FontString name="$parentDuration" inherits="GameFontNormalSmall" parentKey="duration">
+				<FontString name="$parentDuration" inherits="GameFontNormalSmall">
 					<Anchors>
 						<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$parent">
-							<Offset x="0" y="5"/>
+							<Offset x="0" y="0"/>
 						</Anchor>
 					</Anchors>
 				</FontString>
@@ -39,7 +38,7 @@
 					</Layer>
 				</Layers>
 				<Frames>
-					<Cooldown name="$parentCooldown" inherits="CooldownFrameTemplate" hideCountdownNumbers="true" reverse="true"/>
+					<Cooldown name="$parentCooldown" inherits="CooldownFrameTemplate" reverse="true"/>
 				</Frames>
 			</Frame>
 			<Frame>
@@ -56,17 +55,16 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						self:SetFrameLevel(_G[self:GetParent():GetName().."Icon"]:GetFrameLevel() + 1);
+						self:SetFrameLevel(getglobal(self:GetParent():GetName().."Icon"):GetFrameLevel() + 1);
 					</OnLoad>
 				</Scripts>
 			</Frame>
 		</Frames>
 		<Scripts>
-			<OnClick>
-				TotemButton_OnClick(self, button, down);
-			</OnClick>
+			<OnClick function="TotemButton_OnClick"/>
 			<OnLoad>
-				TotemButton_OnLoad(self);
+				self:RegisterForClicks("RightButtonUp");
+				getglobal(self:GetName().."Background"):SetAlpha(0.6);
 			</OnLoad>
 			<OnEnter>
 				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT");
@@ -128,13 +126,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad function="TotemFrame_OnLoad"/>
-			<OnShow>
-				PlayerFrame_AdjustAttachments();
-			</OnShow>
 			<OnEvent function="TotemFrame_OnEvent"/>
-			<OnHide>
-				PlayerFrame_AdjustAttachments();
-			</OnHide>
 		</Scripts>
 	</Frame>
 </Ui>

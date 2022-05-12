@@ -1,7 +1,0 @@
-## Title: Blizzard PVP UI
-## Notes:  MegaQueue
-## Author: Blizzard Entertainment
-## Version: 1.0
-## LoadOnDemand: 1
-Blizzard_PVPUI.xml
-Localization.lua

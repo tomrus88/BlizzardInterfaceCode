@@ -25,7 +25,7 @@ function NavBar_Initialize(self, template, homeData, homeButton, overflowButton)
 
 	if not overflowButton then
 		local overflowButtonName = name and name.."OverflowButton" or nil;
-		overflowButton = CreateFrame("DROPDOWNTOGGLEBUTTON", overflowButtonName, self, self.template);
+		overflowButton = CreateFrame("BUTTON", overflowButtonName, self, self.template);
 		overflowButton:SetWidth(30);
 		
 		-- LOOK AT CLICK
@@ -45,6 +45,7 @@ function NavBar_Initialize(self, template, homeData, homeButton, overflowButton)
 		overflowButton:RegisterForClicks("LeftButtonUp", "RightButtonUp");
 	else
 		homeButton:RegisterForClicks("LeftButtonUp");
+		overflowButton:RegisterForClicks("LeftButtonUp");
 	end
 	overflowButton.listFunc = NavBar_ListOverFlowButtons;
 	homeButton:ClearAllPoints();
@@ -54,8 +55,9 @@ function NavBar_Initialize(self, template, homeData, homeButton, overflowButton)
 	overflowButton:Hide();
 		
 	homeButton.oldClick = homeButton:GetScript("OnClick");
+	overflowButton.oldClick = overflowButton:GetScript("OnClick");
 	homeButton:SetScript("OnClick", NavBar_ButtonOnClick);
-	overflowButton:SetScript("OnMouseDown", NavBar_ToggleMenu);
+	overflowButton:SetScript("OnClick", NavBar_ToggleMenu);
 	self.homeButton = homeButton;
 	self.overflowButton = overflowButton;
 	
@@ -170,6 +172,7 @@ end
 
 function NavBar_ButtonOnClick(self, button)
 	local parent = self:GetParent()
+	CloseDropDownMenus();
 	if button == "LeftButton" then
 		NavBar_ClearTrailingButtons(parent.navList, parent.freeButtons, self);
 		
@@ -180,6 +183,8 @@ function NavBar_ButtonOnClick(self, button)
 		if self.myclick then
 			self:myclick(button);
 		end
+	elseif button == "RightButton" then
+		NavBar_ToggleMenu(self);
 	end
 end
 
@@ -292,7 +297,10 @@ function NavBar_ListOverFlowButtons(self)
 end
 
 
-function NavBar_ToggleMenu(self, button)
+function NavBar_ToggleMenu(self)
+	if ( self:GetParent().dropDown.buttonOwner ~= self ) then
+		CloseDropDownMenus();
+	end
 	self:GetParent().dropDown.buttonOwner = self;
 	ToggleDropDownMenu(nil, nil, self:GetParent().dropDown, self, 20, 3);
 end

@@ -1,2 +1,0 @@
-## Title: Blizzard UI Money Receipt
-Blizzard_MoneyReceipt.lua

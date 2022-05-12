@@ -8,7 +8,6 @@ CommunitiesInvitationFrameMixin = {};
 
 function CommunitiesInvitationFrameMixin:OnShow()
 	FrameUtil.RegisterFrameForEvents(self, COMMUNITIES_INVITATION_FRAME_EVENTS);
-	self:GetCommunitiesFrame().ClubFinderInvitationFrame:Hide(); 
 end
 
 function CommunitiesInvitationFrameMixin:OnHide()
@@ -42,25 +41,12 @@ function CommunitiesInvitationFrameMixin:DisplayInvitation(invitationInfo)
 	self.inviterInfo = inviterInfo;
 	self.clubId = clubInfo.clubId;
 	
-	local isCharacterClub = clubInfo.clubType == Enum.ClubType.Character;
-	local inviterName = inviterInfo.name or "";
-	local classInfo = inviterInfo.classID and C_CreatureInfo.GetClassInfo(inviterInfo.classID);
-	local inviterText;
-	if isCharacterClub and classInfo then
-		local classColorInfo = RAID_CLASS_COLORS[classInfo.classFile];
-		inviterText = GetPlayerLink(inviterName, ("[%s]"):format(WrapTextInColorCode(inviterName, classColorInfo.colorStr)));
-	elseif isCharacterClub then
-		inviterText = GetPlayerLink(inviterName, ("[%s]"):format(inviterName));
-	else
-		inviterText = inviterName;
-	end
+	local inviterText = inviterInfo.name or "";
 
 	self.InvitationText:SetText(COMMUNITY_INVITATION_FRAME_INVITATION_TEXT:format(inviterText));
 	
-	local clubTypeText = isCharacterClub and COMMUNITIES_INVITATION_FRAME_TYPE_CHARACTER or COMMUNITIES_INVITATION_FRAME_TYPE;
-	self.Type:SetText(clubTypeText);
+	self.Type:SetText(COMMUNITIES_INVITATION_FRAME_TYPE);
 	C_Club.SetAvatarTexture(self.Icon, clubInfo.avatarId, clubInfo.clubType);
-	self.IconRing:SetAtlas(clubInfo.clubType == Enum.ClubType.BattleNet and "communities-ring-blue" or "communities-ring-gold");
 	self.Name:SetText(clubInfo.name);
 	
 	if clubInfo.description ~= "" then
@@ -82,7 +68,7 @@ function CommunitiesInvitationFrameMixin:DisplayInvitation(invitationInfo)
 	self.Leader:SetText(COMMUNITIES_INVIVATION_FRAME_LEADER_FORMAT:format(leadersText));
 	self.MemberCount:SetText(COMMUNITIES_INVITATION_FRAME_MEMBER_COUNT:format(clubInfo.memberCount or 1));
 	
-	GuildMicroButton:MarkCommunitiesInvitiationDisplayed(self.clubId);
+	MarkCommunitiesInvitiationDisplayed(self.clubId);
 end
 
 function CommunitiesInvitationFrameMixin:AcceptInvitation()
@@ -112,8 +98,6 @@ function CommunitiesInviteButton_OnClick(self)
 	local clubId = communitiesFrame:GetSelectedClubId();
 	local streamId = communitiesFrame:GetSelectedStreamId();
 	CommunitiesUtil.OpenInviteDialog(clubId, streamId);
-
-	HelpTip:Acknowledge(communitiesFrame, CLUB_FINDER_TUTORIAL_GUILD_LINK);
 end
 
 function CommunitiesInvitebutton_OnHide(self)
@@ -145,9 +129,7 @@ function CommunitiesTicketFrameMixin:DisplayTicket(ticketInfo)
 	local clubInfo = ticketInfo.clubInfo;
 	self.clubId = clubInfo.clubId;
 
-	local isCharacterClub = clubInfo.clubType == Enum.ClubType.Character;
-	local clubTypeText = isCharacterClub and COMMUNITIES_INVITATION_FRAME_TYPE_CHARACTER or COMMUNITIES_INVITATION_FRAME_TYPE;
-	self.Type:SetText(clubTypeText);
+	self.Type:SetText(COMMUNITIES_INVITATION_FRAME_TYPE);
 	C_Club.SetAvatarTexture(self.Icon, clubInfo.avatarId, clubInfo.clubType);
 	self.Name:SetText(clubInfo.name);
 	

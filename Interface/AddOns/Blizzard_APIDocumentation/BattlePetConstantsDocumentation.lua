@@ -199,7 +199,7 @@ local BattlePetConstants =
 			Fields =
 			{
 				{ Name = "MatchPlayerHighPetLevel", Type = "BattlePetNpcTeamFlag", EnumValue = 1 },
-				{ Name = "NoPlayerXP", Type = "BattlePetNpcTeamFlag", EnumValue = 2 },
+				{ Name = "NoPlayerXp", Type = "BattlePetNpcTeamFlag", EnumValue = 2 },
 			},
 		},
 		{

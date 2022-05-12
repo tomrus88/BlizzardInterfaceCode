@@ -3,6 +3,15 @@ COMBATFEEDBACK_FADEINTIME = 0.2;
 COMBATFEEDBACK_HOLDTIME = 0.7;
 COMBATFEEDBACK_FADEOUTTIME = 0.3;
 
+SCHOOL_MASK_NONE		= 0x00;
+SCHOOL_MASK_PHYSICAL	= 0x01;
+SCHOOL_MASK_HOLY		= 0x02;
+SCHOOL_MASK_FIRE		= 0x04;
+SCHOOL_MASK_NATURE		= 0x08;
+SCHOOL_MASK_FROST		= 0x10;
+SCHOOL_MASK_SHADOW		= 0x20;
+SCHOOL_MASK_ARCANE		= 0x40;
+
 CombatFeedbackText = { };
 CombatFeedbackText["INTERRUPT"]	= INTERRUPT;
 CombatFeedbackText["MISS"]		= MISS;
@@ -15,7 +24,6 @@ CombatFeedbackText["IMMUNE"]	= IMMUNE;
 CombatFeedbackText["DEFLECT"]	= DEFLECT;
 CombatFeedbackText["ABSORB"]	= ABSORB;
 CombatFeedbackText["REFLECT"]	= REFLECT;
-CombatFeedbackText["BLOCK_REDUCED"]	= BLOCK_REDUCED;
 
 
 function CombatFeedback_Initialize(self, feedbackText, fontHeight)
@@ -41,15 +49,12 @@ function CombatFeedback_OnCombatEvent(self, event, flags, amount, type)
 			elseif ( flags == "GLANCING" ) then
 				fontHeight = fontHeight * 0.75;
 			end
-			if ( type ~= Enum.Damageclass.MaskPhysical ) then
+			if ( type ~= SCHOOL_MASK_PHYSICAL ) then
 				r = 1.0;
 				g = 1.0;
 				b = 0.0;
 			end
 			text = BreakUpLargeNumbers(amount);
-			if(flags == "BLOCK_REDUCED") then
-				text = COMBAT_TEXT_BLOCK_REDUCED:format(text);
-			end
 		elseif ( flags == "ABSORB" ) then
 			fontHeight = fontHeight * 0.75;
 			text = CombatFeedbackText["ABSORB"];

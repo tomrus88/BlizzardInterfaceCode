@@ -1,8 +1,4 @@
 
-local SHADOWLANDS_CONTINENT_MAP_ID = 1550;
-local ORIBOS_UI_MAP_IDS = { 1670, 1671, 1672, 1673 };
-
-
 MapUtil = {};
 
 function MapUtil.IsMapTypeZone(mapID)
@@ -31,32 +27,17 @@ function MapUtil.ShouldMapTypeShowQuests(mapType)
 end
 
 function MapUtil.ShouldShowTask(mapID, info)
-	if (info.isQuestStart and info.inProgress) then
-		return false
-	end
-	if not HaveQuestData(info.questId) then
-		return false;
-	end
-	-- callings are allowed on other maps if they are zone maps 
-	if C_QuestLog.IsQuestCalling(info.questId) and MapUtil.IsMapTypeZone(mapID) then
-		return true;
-	end
-	return mapID == info.mapID;
+	return (mapID == info.mapID) and HaveQuestData(info.questId);
 end
 
 function MapUtil.MapHasUnlockedBounties(mapID)
-	local displayLocation, lockedQuestID, bountySetID = C_QuestLog.GetBountySetInfoForMapID(mapID);
-	if displayLocation and (not lockedQuestID or not C_QuestLog.IsOnQuest(lockedQuestID)) then
-		local bounties = C_QuestLog.GetBountiesForMapID(mapID);
-		return bounties and #bounties > 0;
-	end
-
-	return false;
+	--[[local bounties, displayLocation, lockedQuestID = GetQuestBountyInfoForMapID(mapID);
+	return displayLocation and not lockedQuestID and #bounties > 0;]]
 end
 
 function MapUtil.MapHasEmissaries(mapID)
-	local displayLocation, lockedQuestID, bountySetID = C_QuestLog.GetBountySetInfoForMapID(mapID);
-	return displayLocation ~= nil;
+	--[[local bounties, displayLocation, lockedQuestID = GetQuestBountyInfoForMapID(mapID);
+	return not not displayLocation;]]
 end
 
 function MapUtil.FindBestAreaNameAtMouse(mapID, normalizedCursorX, normalizedCursorY)
@@ -86,59 +67,35 @@ function MapUtil.GetDisplayableMapForPlayer()
 	return C_Map.GetFallbackWorldMapID();
 end
 
-function MapUtil.GetBountySetMaps(bountySetID)
-	if not MapUtil.bountySetMaps then
-		MapUtil.bountySetMaps = { };
-	end
-	local bountySetMaps = MapUtil.bountySetMaps[bountySetID];
-	if not bountySetMaps then
-		bountySetMaps = C_Map.GetBountySetMaps(bountySetID);
-		MapUtil.bountySetMaps[bountySetID] = bountySetMaps;
-	end
-	return bountySetMaps;
-end
-
-function MapUtil.GetMapCenterOnMap(mapID, topMapID)
-	local left, right, top, bottom = C_Map.GetMapRectOnMap(mapID, topMapID);
-	if left == nil then
-		return nil, nil;
-	end
-
-	local centerX = left + (right - left) * .5;
-	local centerY = top + (bottom - top) * .5;
-	return centerX, centerY;
-end
-
-function MapUtil.IsChildMap(mapID, ancestorMapID)
+function MapUtil.GetRelatedBountyZoneMaps(mapID)
 	local mapInfo = C_Map.GetMapInfo(mapID);
-	while (mapInfo ~= nil) and (mapInfo.parentMapID ~= nil) do
-		if mapInfo.parentMapID == ancestorMapID then
-			return true;
+	local targetBountySetID;
+	-- find the world map and any bountySetID on the way
+	while mapInfo and mapInfo.mapType ~= Enum.UIMapType.World do
+		if mapInfo.mapType == Enum.UIMapType.Continent then
+			local continentBountySetID = C_Map.GetBountySetIDForMap(mapInfo.mapID);
+			if continentBountySetID > 0 then
+				targetBountySetID = continentBountySetID;
+			end
 		end
-
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID);
 	end
 
-	return false;
-end
-
-function MapUtil.IsOribosMap(mapID)
-	return tContains(ORIBOS_UI_MAP_IDS, mapID);
-end
-
-function MapUtil.IsShadowlandsZoneMap(mapID)
-	if mapID == SHADOWLANDS_CONTINENT_MAP_ID or MapUtil.IsOribosMap(mapID) then
-		return true;
+	local ALL_DESCENDANTS = true;
+	local bountyMaps = { };
+	if targetBountySetID and mapInfo and mapInfo.mapType == Enum.UIMapType.World then
+		-- check all first-order continents on that world for same bountySetID
+		local continents = C_Map.GetMapChildrenInfo(mapInfo.mapID, Enum.UIMapType.Continent);
+		for i, continentInfo in ipairs(continents) do
+			local continentBountySetID = C_Map.GetBountySetIDForMap(continentInfo.mapID);
+			if continentBountySetID == targetBountySetID then
+				-- add all child zones
+				local zones = C_Map.GetMapChildrenInfo(continentInfo.mapID, Enum.UIMapType.Zone, ALL_DESCENDANTS);
+				for i, zoneInfo in ipairs(zones) do
+					tinsert(bountyMaps, zoneInfo.mapID);
+				end
+			end
+		end
 	end
-
-	local mapInfo = C_Map.GetMapInfo(mapID);
-	if (mapInfo.mapType ~= Enum.UIMapType.Zone) and (mapInfo.mapType ~= Enum.UIMapType.Continent) then
-		return false;
-	end
-
-	return MapUtil.IsChildMap(mapID, SHADOWLANDS_CONTINENT_MAP_ID);
-end
-
-function MapUtil.MapShouldShowWorldQuestFilters(mapID)
-	return MapUtil.MapHasEmissaries(mapID) or MapUtil.IsShadowlandsZoneMap(mapID);
+	return bountyMaps;
 end

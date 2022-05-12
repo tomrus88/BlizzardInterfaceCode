@@ -38,25 +38,10 @@ end
 --[[ Area POI Pin ]]--
 AreaPOIPinMixin = BaseMapPoiPinMixin:CreateSubPin("PIN_FRAME_LEVEL_AREA_POI");
 
-local AREAPOI_HIGHLIGHT_PARAMS = { backgroundPadding = 20 };
-
 function AreaPOIPinMixin:OnAcquired(poiInfo) -- override
 	BaseMapPoiPinMixin.OnAcquired(self, poiInfo);
 
 	self.areaPoiID = poiInfo.areaPoiID;
-	MapPinHighlight_CheckHighlightPin(poiInfo.shouldGlow, self, self.Texture, AREAPOI_HIGHLIGHT_PARAMS);
-
-	if self.textureKit == "OribosGreatVault" then
-		local function OribosGreatVaultPOIOnMouseUp(self, button, upInside)
-			if upInside and (button == "LeftButton") then
-				WeeklyRewards_ShowUI();
-			end
-		end
-
-		self:SetScript("OnMouseUp", OribosGreatVaultPOIOnMouseUp);
-	else
-		self:SetScript("OnMouseUp", nil);
-	end
 end
 
 function AreaPOIPinMixin:OnMouseEnter()
@@ -66,12 +51,9 @@ function AreaPOIPinMixin:OnMouseEnter()
 
 	self.UpdateTooltip = function() self:OnMouseEnter(); end;
 
-	local tooltipShown = self:TryShowTooltip();
-	if not tooltipShown then
+	if not self:TryShowTooltip() then
 		self:GetMap():TriggerEvent("SetAreaLabel", MAP_AREA_LABEL_TYPE.POI, self.name, self.description);
 	end
-
-	EventRegistry:TriggerEvent("AreaPOIPin.MouseOver", self, tooltipShown, self.areaPoiID, self.name);
 end
 
 function AreaPOIPinMixin:TryShowTooltip()
@@ -83,7 +65,7 @@ function AreaPOIPinMixin:TryShowTooltip()
 	local hasTooltip = hasDescription or isTimed or hasWidgetSet;
 
 	if hasTooltip then
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT");
 		GameTooltip_SetTitle(GameTooltip, self.name, HIGHLIGHT_FONT_COLOR);
 
 		if hasDescription then
@@ -91,28 +73,17 @@ function AreaPOIPinMixin:TryShowTooltip()
 		end
 
 		if isTimed then
-			local secondsLeft = C_AreaPoiInfo.GetAreaPOISecondsLeft(self.areaPoiID);
-			if secondsLeft and secondsLeft > 0 then
-				local timeString = SecondsToTime(secondsLeft);
+			local timeLeftMinutes = C_AreaPoiInfo.GetAreaPOITimeLeft(self.areaPoiID);
+			if timeLeftMinutes then
+				local timeString = SecondsToTime(timeLeftMinutes * 60);
 				GameTooltip_AddNormalLine(GameTooltip, BONUS_OBJECTIVE_TIME_LEFT:format(timeString));
 			end
 		end
 
-		if self.textureKit == "OribosGreatVault" then
-			GameTooltip_AddBlankLineToTooltip(GameTooltip);
-			GameTooltip_AddInstructionLine(GameTooltip, ORIBOS_GREAT_VAULT_POI_TOOLTIP_INSTRUCTIONS);
-		end
-
 		if hasWidgetSet then
-			GameTooltip_AddWidgetSet(GameTooltip, self.widgetSetID, 10);
+			GameTooltip_AddWidgetSet(GameTooltip, self.widgetSetID);
 		end
 
-		if self.textureKit then
-			local backdropStyle = GAME_TOOLTIP_TEXTUREKIT_BACKDROP_STYLES[self.textureKit];
-			if (backdropStyle) then
-				SharedTooltip_SetBackdropStyle(GameTooltip, backdropStyle);
-			end
-		end
 		GameTooltip:Show();
 		return true;
 	end

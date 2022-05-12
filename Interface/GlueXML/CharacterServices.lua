@@ -1,4 +1,60 @@
--- See CharacterServicesFlowMixin for more documentation
+----
+-- Character Services uses a master which acts as a sort of state machine in combination with flows and blocks.
+--
+-- Flows must have the following functions:
+--  :Initialize(controller):  This sets up the flow and any associated blocks.
+--  :Advance(controller):  Advances the flow one step.
+--  :Finish(controller):  Finishes the flow and does whatever it needs to process the data.  Should return true if completed sucessfully or false if it failed.
+--
+-- The methods are provided by a base class for all flows but may be overridden if necessary:
+--  :SetUpBlock(controller): This sets up the current block for the given step.
+--  :Rewind(controller): Backs the flow up to the next available step.
+--  :HideBlock():  Hides the current block.
+--  :Restart(controller):  Hide all blocks and restart the flow at step 1.
+--  :OnHide():  Check each block for a :OnHide method and call it if it exists.
+--  :GetFinishLabel(): The label for the final step of a flow is updated every time the flow is updated (going to next step, etc) this allows a dynamic string to be used.
+--
+-- Flows should have the following members:
+--  .data - reference to an entry in CharacterUpgrade_Items with display info
+--  .FinishLabel - The label to show on the finish button for this flow.
+--
+-- Blocks are opaque data structures.  Frames that belong to blocks inherit the template for blocks, and all controls used for data collection must be in the ControlsFrame.
+--
+-- Blocks must have the following methods:
+--  :Initialize(results, wasFromRewind) - Initializes the block and any controls to the active state.  The argument wasFromRewind indicates whether or not this block is being checked due to the user returning to this step.
+--  :IsFinished(wasFromRewind) - Returns whether or not the block is finished and its result set. The argument wasFromRewind indicates whether or not this block is being checked due to the user returning to this step.
+--  :GetResult() - Gets the result from the block in a table passed back to the flow.
+--
+-- The following optional methods may be present on a block:
+--  :FormatResult() - Formats the result for display with the result label.  If absent, :GetResult() will be used instead.
+--  :OnHide() - This function is called when a block needs to handle any resetting when the flow is hidden.
+--  :OnAdvance() - This function is called in response to the flow:Advance call if the block needs to handle any logic here.
+--  :OnRewind() - This function is called in response to the flow:Rewind call if the block needs to handle any logic here.
+--  :SkipIf() - Skip this block if a certain result is present
+--  :OnSkip() - If you have a SkipIf() then OnSkip() will perform any actions you need if you are skipped.
+--  :ShouldShowPopup() - If you have a .Popup, then ShouldShowPopup will perform a check if the popup should appear.
+--  :GetPopupText() - If you have a .Popup, then GetPopupText fetch the text to display.
+--
+-- The following members must be present on a block:
+--  .Back - Show the back button on the flow frame.
+--  .Next - Show the next button on the flow frame.  Conflicts with .Finish
+--  .Finish - Show the finish button on the flow frame.  Conflicts with .Next
+
+-- The following must be on all blocks not marked as HiddenStep:
+--  .ActiveLabel - The label to show when the block is active above the controls.
+--  .ResultsLabel - The label to show when the block is finished above the results themselves.
+--
+-- The following members may be present on a block:
+--  .AutoAdvance - If true the flow will automatically advance when the block is finished and will not wait for user input.
+--  .HiddenStep - This is only valid for the end step of any flow.  This says that this block has no meaningful controls or results for the user and should instead just
+--    cause the master to change the flow controls.
+--  .SkipOnRewind - This tells the flow to ignore the :IsFinished() result when deciding where to rewind and instead skip this block.
+--  .ExtraOffset - May be set on a block by the flow for the master to add extra vertical offset to a block based on previous results.
+--  .Popup - May be set on a block to potentially show a popup before advancing to the next step.
+--
+-- However a block uses controls to gather data, once it has data and is finished it should call
+-- CharacterServicesMaster_Update() to advance the flow and button states.
+----
 
 CHARACTER_UPGRADE_CREATE_CHARACTER_DATA = nil;
 
@@ -6,18 +62,51 @@ local UPGRADE_BONUS_LEVEL = 60;
 
 CURRENCY_KRW = 3;
 
+local factionLogoTextures = {
+	[1]	= "Interface\\Icons\\Inv_Misc_Tournaments_banner_Orc",
+	[2]	= "Interface\\Icons\\Achievement_PVP_A_A",
+};
+
+local factionLabels = {
+	[1] = FACTION_HORDE,
+	[2] = FACTION_ALLIANCE,
+};
+
+-- TODO: Expose enum to Lua?
+FACTION_IDS = {
+	["Horde"] = 0,
+	["Alliance"] = 1,
+};
+
+local factionColors = {
+	[FACTION_IDS["Horde"]] = "ffe50d12",
+	[FACTION_IDS["Alliance"]] = "ff4a54e8"
+};
+
+local stepTextures = {
+	[1] = { 0.16601563, 0.23535156, 0.00097656, 0.07812500 },
+	[2] = { 0.23730469, 0.30664063, 0.00097656, 0.07812500 },
+	[3] = { 0.30859375, 0.37792969, 0.00097656, 0.07812500 },
+	[4] = { 0.37988281, 0.44921875, 0.00097656, 0.07812500 },
+	[5] = { 0.45117188, 0.52050781, 0.00097656, 0.07812500 },
+	[6] = { 0.52246094, 0.59179688, 0.00097656, 0.07812500 },
+	[7] = { 0.59375000, 0.66308594, 0.00097656, 0.07812500 },
+	[8] = { 0.66503906, 0.73437500, 0.00097656, 0.07812500 },
+	[9] = { 0.73632813, 0.80566406, 0.00097656, 0.07812500 },
+};
+
 local professionsMap = {
-	[Constants.ProfessionIDs.PROFESSION_BLACKSMITHING] = CHARACTER_PROFESSION_BLACKSMITHING,
-	[Constants.ProfessionIDs.PROFESSION_LEATHERWORKING] = CHARACTER_PROFESSION_LEATHERWORKING,
-	[Constants.ProfessionIDs.PROFESSION_ALCHEMY] = CHARACTER_PROFESSION_ALCHEMY,
-	[Constants.ProfessionIDs.PROFESSION_HERBALISM] = CHARACTER_PROFESSION_HERBALISM,
-	[Constants.ProfessionIDs.PROFESSION_MINING] = CHARACTER_PROFESSION_MINING,
-	[Constants.ProfessionIDs.PROFESSION_TAILORING] = CHARACTER_PROFESSION_TAILORING,
-	[Constants.ProfessionIDs.PROFESSION_ENGINEERING] = CHARACTER_PROFESSION_ENGINEERING,
-	[Constants.ProfessionIDs.PROFESSION_ENCHANTING] = CHARACTER_PROFESSION_ENCHANTING,
-	[Constants.ProfessionIDs.PROFESSION_SKINNING] = CHARACTER_PROFESSION_SKINNING,
-	[Constants.ProfessionIDs.PROFESSION_JEWELCRAFTING] = CHARACTER_PROFESSION_JEWELCRAFTING,
-	[Constants.ProfessionIDs.PROFESSION_INSCRIPTION] = CHARACTER_PROFESSION_INSCRIPTION,
+	[164] = CHARACTER_PROFESSION_BLACKSMITHING,
+	[165] = CHARACTER_PROFESSION_LEATHERWORKING,
+	[171] = CHARACTER_PROFESSION_ALCHEMY,
+	[182] = CHARACTER_PROFESSION_HERBALISM,
+	[186] = CHARACTER_PROFESSION_MINING,
+	[197] = CHARACTER_PROFESSION_TAILORING,
+	[202] = CHARACTER_PROFESSION_ENGINEERING,
+	[333] = CHARACTER_PROFESSION_ENCHANTING,
+	[393] = CHARACTER_PROFESSION_SKINNING,
+	[755] = CHARACTER_PROFESSION_JEWELCRAFTING,
+	[773] = CHARACTER_PROFESSION_INSCRIPTION,
 };
 
 local classDefaultProfessionMap = {
@@ -53,30 +142,126 @@ GlueDialogTypes["BOOST_FACTION_CHANGE_IN_PROGRESS"] = {
 	escapeHides = true,
 };
 
-GlueDialogTypes["MUST_LOG_IN_FIRST"] = {
-	text = MUST_LOG_IN_FIRST,
-	button1 = OKAY,
-	escapeHides = true,
-};
-
-local CharacterUpgradeCharacterSelectBlock = { FrameName = "CharacterUpgradeSelectCharacterFrame", Back = false, Next = false, Finish = false, AutoAdvance = true, ResultsLabel = SELECT_CHARACTER_RESULTS_LABEL, ActiveLabel = SELECT_CHARACTER_ACTIVE_LABEL, Popup = "BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING" };
-local CharacterUpgradeSpecSelectBlock = { FrameName = "CharacterUpgradeSelectSpecFrame", Back = true, Next = true, Finish = false, ActiveLabel = SELECT_SPEC_ACTIVE_LABEL, ResultsLabel = SELECT_SPEC_RESULTS_LABEL, Popup = "BOOST_NOT_RECOMMEND_SPEC_WARNING" };
-local CharacterUpgradeFactionSelectBlock = { FrameName = "CharacterUpgradeSelectFactionFrame", Back = true, Next = true, Finish = false, ActiveLabel = SELECT_FACTION_ACTIVE_LABEL, ResultsLabel = SELECT_FACTION_RESULTS_LABEL };
+local CharacterUpgradeCharacterSelectBlock = { Back = false, Next = false, Finish = false, AutoAdvance = true, ResultsLabel = SELECT_CHARACTER_RESULTS_LABEL, ActiveLabel = SELECT_CHARACTER_ACTIVE_LABEL, Popup = "BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING" };
 local CharacterUpgradeEndStep = { Back = true, Next = false, Finish = true, HiddenStep = true, SkipOnRewind = true };
 
-CharacterUpgradeFlow = Mixin(
-	{
-		FinishLabel = CHARACTER_UPGRADE_FINISH_LABEL,
+CharacterServicesFlowPrototype = {};
 
-		Steps = {
-			[1] = CharacterUpgradeCharacterSelectBlock,
-			[2] = CharacterUpgradeSpecSelectBlock,
-			[3] = CharacterUpgradeFactionSelectBlock,
-			[4] = CharacterUpgradeEndStep,
-		},
+CharacterUpgradeFlow = {
+	Icon = "Interface\\Icons\\achievement_level_90",
+	Text = CHARACTER_UPGRADE_90_FLOW_LABEL,
+	FinishLabel = CHARACTER_UPGRADE_FINISH_LABEL,
+
+	Steps = {
+		[1] = CharacterUpgradeCharacterSelectBlock,
+		[2] = CharacterUpgradeEndStep,
 	},
-	CharacterServicesFlowMixin
-);
+
+	numSteps = 2,
+};
+
+function CharacterServicesFlowPrototype:BuildResults(steps)
+	if (not self.results) then
+		self.results = {};
+	end
+	wipe(self.results);
+	for i = 1, steps do
+		for k,v in pairs(self.Steps[i]:GetResult()) do
+			self.results[k] = v;
+		end
+	end
+	return self.results;
+end
+
+function CharacterServicesFlowPrototype:Rewind(controller)
+	local block = self.Steps[self.step];
+	local results;
+	local wasFromRewind = true;
+
+	if (block.OnRewind) then
+		block:OnRewind();
+	end
+
+	if (block:IsFinished(wasFromRewind) and not block.SkipOnRewind) then
+		if (self.step ~= 1) then
+			results = self:BuildResults(self.step - 1);
+		end
+		self:SetUpBlock(controller, results);
+	else
+		self:HideBlock(self.step);
+		self.step = self.step - 1;
+		while ( self.Steps[self.step].SkipOnRewind ) do
+			if (self.Steps[self.step].OnRewind) then
+				self.Steps[self.step]:OnRewind();
+			end
+			self:HideBlock(self.step);
+			self.step = self.step - 1;
+		end
+		if (self.step ~= 1) then
+			results = self:BuildResults(self.step - 1);
+		end
+		self:SetUpBlock(controller, results, wasFromRewind);
+	end
+end
+
+function CharacterServicesFlowPrototype:Restart(controller)
+	for i = 1, #self.Steps do
+		self:HideBlock(i);
+	end
+	self.step = 1;
+	self:SetUpBlock(controller);
+end
+
+local function moveBlock(self, block, offset)
+	local extraOffset = block.ExtraOffset or 0;
+	local lastNonHiddenStep = self.step - 1;
+	while (self.Steps[lastNonHiddenStep].HiddenStep and lastNonHiddenStep >= 1) do
+		lastNonHiddenStep = lastNonHiddenStep - 1;
+	end
+	if (lastNonHiddenStep >= 1) then
+		block.frame:SetPoint("TOP", self.Steps[lastNonHiddenStep].frame, "TOP", 0, offset - extraOffset);
+	end
+end
+
+function CharacterServicesFlowPrototype:SetUpBlock(controller, results, wasFromRewind)
+	local block = self.Steps[self.step];
+	CharacterServicesMaster_SetCurrentBlock(controller, block, wasFromRewind);
+	if (not block.HiddenStep) then
+		if (self.step == 1) then
+			block.frame:SetPoint("TOP", CharacterServicesMaster, "TOP", -30, 0);
+		else
+			moveBlock(self, block, -105);
+		end
+		block.frame.StepNumber:SetTexCoord(unpack(stepTextures[self.step]));
+		block.frame:Show();
+	end
+	block:Initialize(results, wasFromRewind);
+	CharacterServicesMaster_Update();
+end
+
+function CharacterServicesFlowPrototype:HideBlock(step)
+	local block = self.Steps[step];
+	if (not block.HiddenStep) then
+		block.frame:Hide();
+	end
+end
+
+function CharacterServicesFlowPrototype:OnHide()
+	for i = 1, #self.Steps do
+		local block = self.Steps[i];
+		if (block.OnHide) then
+			block:OnHide();
+		end
+	end
+end
+
+function CharacterServicesFlowPrototype:GetFinishLabel()
+	return "";
+end
+
+function CharacterUpgradeFlow:SetTarget(data)
+	self.data = data;
+end
 
 function CharacterUpgradeFlow:SetAutoSelectGuid(guid)
 	self.autoSelectGuid = guid;
@@ -89,12 +274,6 @@ end
 function CharacterUpgradeFlow:SetTrialBoostGuid(guid)
 	self:SetAutoSelectGuid(guid);
 	self.isTrialBoost = guid ~= nil;
-
-	if self.isTrialBoost then
-		CharacterUpgradeFactionSelectBlock.SkipOnRewind = true;
-	else
-		CharacterUpgradeFactionSelectBlock.SkipOnRewind = nil;
-	end
 end
 
 function CharacterUpgradeFlow:IsTrialBoost()
@@ -102,111 +281,89 @@ function CharacterUpgradeFlow:IsTrialBoost()
 end
 
 function CharacterUpgradeFlow:IsUnrevoke()
-	-- This is copy-pasted below as ShouldSkipSpecSelect(), please update both functions together
 	if self:IsTrialBoost() then
 		return false;
 	end
-
-	local results = self:BuildResults(self:GetNumSteps());
+	
+	local results = self:BuildResults(self.numSteps);
 	if not results.charid then
 		-- We haven't chosen a character yet.
 		return nil;
 	end
-
-	local revokedCharacterUpgrade = select(24, GetCharacterInfo(results.charid));
-	return revokedCharacterUpgrade;
-end
-
-function CharacterUpgradeFlow:ShouldSkipSpecSelect()
-	-- This is copy-pasted above as IsUnrevoke(), please update both functions together
-	-- This was the original behavior of IsUnrevoke(), but this logic doesn't technically prove that the boost is an unrevoke
-	-- Presumably we will eventually want some clearer factoring of different upgrade types - VAS 20200805
-	if self:IsTrialBoost() then
-		return false;
-	end
-
-	local results = self:BuildResults(self:GetNumSteps());
-	if not results.charid then
-		-- We haven't chosen a character yet.
-		return nil;
-	end
-
+	
 	local experienceLevel = select(7, GetCharacterInfo(results.charid));
 	return experienceLevel >= self.data.level;
 end
 
-local function IsBoostFlowValidForCharacter(flowData, class, level, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter)
-	if (boostInProgress or vasServiceInProgress) then
-		return false;
-	end
-
-	if isExpansionTrialCharacter and CanUpgradeExpansion()  then
-		return false;
-	elseif isTrialBoost then
-		return true;
-	elseif revokedCharacterUpgrade then
-		if level > flowData.level then
-			return false;
-		end
-	elseif level >= flowData.level then
-		return false;
-	end
-
-	return true;
-end
-
-local function CanBoostCharacter(class, level, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter)
-	return IsBoostFlowValidForCharacter(CharacterUpgradeFlow.data, class, level, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter);
-end
-
-local function IsCharacterEligibleForVeteranBonus(level, isTrialBoost, revokedCharacterUpgrade)
-	return false;
-end
-
 function CharacterUpgradeFlow:Initialize(controller)
 	CharacterUpgradeSecondChanceWarningFrame.warningAccepted = false;
+
+	CharacterUpgradeCharacterSelectBlock.frame = CharacterUpgradeSelectCharacterFrame;
+
 	CharacterUpgradeSecondChanceWarningFrame:Hide();
 
-	CharacterServicesFlowMixin.Initialize(self, controller);
-
-	self.hasVeteran = nil;
+	self:Restart(controller);
 end
 
 function CharacterUpgradeFlow:Rewind(controller)
 	self:SetAutoSelectGuid(nil);
-	return CharacterServicesFlowMixin.Rewind(self, controller);
+	return CharacterServicesFlowPrototype.Rewind(self, controller);
 end
 
 function CharacterUpgradeFlow:OnHide()
 	self:SetAutoSelectGuid(nil);
-	return CharacterServicesFlowMixin.OnHide(self);
+	return CharacterServicesFlowPrototype.OnHide(self);
 end
 
-function CharacterUpgradeFlow:OnAdvance(controller, results)
-	if (self.step == 1) then
-		local level = select(7, GetCharacterInfo(results.charid));
-		if (level >= UPGRADE_BONUS_LEVEL) then
-			self.Steps[2].ExtraOffset = 45;
-		else
-			self.Steps[2].ExtraOffset = 0;
-		end
-		local factionGroup = C_CharacterServices.GetFactionGroupByIndex(results.charid);
-		self.Steps[3].SkipOnRewind = (factionGroup ~= "Neutral");
-	end
-
-	local block = self:GetCurrentStep();
-	if not block.HiddenStep and self.step ~= 1 then
+function CharacterUpgradeFlow:OnAdvance()
+	local block = self.Steps[self.step];
+	if (self.step == 1) then return end;
+	if (not block.HiddenStep) then
 		local extraOffset = 0;
 		if (self.step == 2) then
 			extraOffset = 15;
 		end
-		self:MoveBlock(block, -60 - extraOffset);
+		moveBlock(self, block, -60 - extraOffset);
+	end
+end
+
+function CharacterUpgradeFlow:Advance(controller)
+	if (self.step == self.numSteps) then
+		self:Finish(controller);
+	else
+		local block = self.Steps[self.step];
+		if (block.OnAdvance) then
+			block:OnAdvance();
+		end
+
+		self:OnAdvance();
+
+		local results = self:BuildResults(self.step);
+		if (self.step == 1) then
+			local level = select(7, GetCharacterInfo(results.charid));
+			if (level >= UPGRADE_BONUS_LEVEL) then
+				self.Steps[2].ExtraOffset = 45;
+			else
+				self.Steps[2].ExtraOffset = 0;
+			end
+			local factionGroup = C_CharacterServices.GetFactionGroupByIndex(results.charid);
+		end
+		self.step = self.step + 1;
+		while (self.Steps[self.step].SkipIf and self.Steps[self.step]:SkipIf(results)) do
+			if (self.Steps[self.step].OnSkip) then
+				self.Steps[self.step]:OnSkip();
+			end
+			self.step = self.step + 1;
+		end
+		self:SetUpBlock(controller, results);
 	end
 end
 
 function CharacterUpgradeFlow:Finish(controller)
+	local results = self:BuildResults(self.numSteps);
 	if (not CharacterUpgradeSecondChanceWarningFrame.warningAccepted) then
 		CharacterUpgradeSecondChanceWarningBackground.ConfirmButton:SetText(self:GetFinishLabel());
+		CharacterUpgradeSecondChanceWarningBackground.ConfirmButton:Disable();
 
 		if ( self:IsTrialBoost() ) then
 			if ( C_StoreSecure.GetCurrencyID() == CURRENCY_KRW ) then
@@ -222,19 +379,22 @@ function CharacterUpgradeFlow:Finish(controller)
 			end
 		end
 
+		local realmName = GetServerName();
+		local name, _, _, class, classFileName, _, level, _, _, _, _, _, _, _, _, prof1, prof2, _, _, _, _, isTrialBoost, _, revokedCharacterUpgrade = GetCharacterInfo(results.charid);
+		CharacterUpgradeSecondChanceWarningBackground.CharacterDetails:SetText(SELECT_CHARACTER_RESULTS_FORMAT:format(RAID_CLASS_COLORS[classFileName].colorStr, name .. " - " .. realmName .. "\n", level, class));
+
 		CharacterUpgradeSecondChanceWarningFrame:Show();
 		return false;
 	end
-
-	local results = self:BuildResults(self:GetNumSteps());
+	
 	if self:IsUnrevoke() then
 		local guid = select(15, GetCharacterInfo(results.charid));
 		C_CharacterServices.RequestManualUnrevoke(guid);
 	else
-
+		
 		if (not results.faction) then
 			-- Non neutral character, convert faction group to id.
-			results.faction = PLAYER_FACTION_GROUP[C_CharacterServices.GetFactionGroupByIndex(results.charid)];
+			results.faction = FACTION_IDS[C_CharacterServices.GetFactionGroupByIndex(results.charid)];
 		end
 		local guid = select(15, GetCharacterInfo(results.charid));
 		if (guid ~= results.playerguid) then
@@ -247,7 +407,11 @@ function CharacterUpgradeFlow:Finish(controller)
 		self:SetTrialBoostGuid(nil);
 
 		CharacterServicesMaster.pendingGuid = results.playerguid;
-		C_CharacterServices.AssignUpgradeDistribution(results.playerguid, results.faction, results.spec, results.classId, self.data.boostType, 0);
+		results.spec = 0;
+		local raceFilename, _, _, classId = select(3, GetCharacterInfo(GetCharIDFromIndex(results.charid)));
+		results.classId = classId;
+		results.raceId = C_CharacterCreation.GetRaceIDFromName(raceFilename);
+		C_CharacterServices.AssignUpgradeDistribution(results.playerguid, results.faction, results.spec, results.classId, self.data.boostType, results.raceId);
 	end
 	return true;
 end
@@ -257,12 +421,12 @@ function CharacterUpgradeFlow:GetFinishLabel()
 	if self:IsTrialBoost() then
 		return CHARACTER_UPGRADE_UNLOCK_TRIAL_CHARACTER_FINISH_LABEL;
 	end
-
+	
 	if self:IsUnrevoke() then
 		return CHARACTER_UPGRADE_UNREVOKE_CHARACTER_FINISH_LABEL;
 	end
 
-	return CharacterServicesFlowMixin.GetFinishLabel(self);
+	return self.FinishLabel;
 end
 
 local function replaceScripts(button)
@@ -276,6 +440,68 @@ local function replaceScripts(button)
 	button.downButton:SetScript("OnClick", nil);
 	button:SetScript("OnEnter", nil);
 	button:SetScript("OnLeave", nil);
+end
+
+local function resetScripts(button)
+	button:SetScript("OnClick", CharacterSelectButton_OnClick);
+	button:SetScript("OnDoubleClick", CharacterSelectButton_OnDoubleClick);
+	button:SetScript("OnDragStart", CharacterSelectButton_OnDragStart);
+	button:SetScript("OnDragStop", CharacterSelectButton_OnDragStop);
+	-- Functions here copied from CharacterSelect.xml
+	button:SetScript("OnMouseDown", function(self)
+		CharacterSelect.pressDownButton = self;
+		CharacterSelect.pressDownTime = 0;
+	end);
+	button.upButton:SetScript("OnClick", function(self)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+		local index = self:GetParent().index;
+		MoveCharacter(index, index - 1);
+	end);
+	button.downButton:SetScript("OnClick", function(self)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+		local index = self:GetParent().index;
+		MoveCharacter(index, index + 1);
+	end);
+	button:SetScript("OnEnter", function(self)
+		if ( self.isVeteranLocked ) then
+			GlueTooltip:SetText(CHARSELECT_CHAR_LIMITED_TOOLTIP, nil, nil, nil, nil, true);
+			GlueTooltip:Show();
+			GlueTooltip:SetOwner(self, "ANCHOR_LEFT", -16, -5);
+			CharSelectAccountUpgradeButtonPointerFrame:Show();
+			CharSelectAccountUpgradeButtonGlow:Show();
+		end
+	end);
+	button:SetScript("OnLeave", function(self)
+		if ( self.upButton:IsShown() and not (self.upButton:IsMouseOver() or self.downButton:IsMouseOver()) ) then
+			self.upButton:Hide();
+			self.downButton:Hide();
+		end
+		CharSelectAccountUpgradeButtonPointerFrame:Hide();
+		CharSelectAccountUpgradeButtonGlow:Hide();
+		GlueTooltip:Hide();
+	end);
+	button:SetScript("OnMouseUp", CharacterSelectButton_OnDragStop);
+end
+
+local function disableScroll(scrollBar)
+	scrollBar.ScrollUpButton:SetEnabled(false);
+	scrollBar.ScrollDownButton:SetEnabled(false);
+	scrollBar:GetParent():EnableMouseWheel(false);
+end
+
+local function enableScroll(scrollBar)
+	scrollBar.ScrollUpButton:SetEnabled(true);
+	scrollBar.ScrollDownButton:SetEnabled(true);
+	scrollBar:GetParent():EnableMouseWheel(true);
+end
+
+local function replaceAllScripts()
+	for i = 1, math.min(GetNumCharacters(), MAX_CHARACTERS_DISPLAYED) do
+		local button = _G["CharSelectCharacterButton"..i];
+		replaceScripts(button);
+		button.upButton:Hide();
+		button.downButton:Hide();
+	end
 end
 
 function CharacterUpgrade_IsCreatedCharacterUpgrade()
@@ -304,6 +530,73 @@ local function IsUsingValidProductForCreateNewCharacterBoost()
 	return not C_CharacterServices.IsTrialBoostEnabled() or not IsUsingValidProductForTrialBoost(CharacterUpgradeFlow.data);
 end
 
+local function IsBoostFlowValidForCharacter(flowData, class, level, raceFilename, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter, eraChoiceState)
+	if (boostInProgress or vasServiceInProgress) then
+		return false;
+	end
+
+	if class == "DEMONHUNTER" and flowData.level <= 100 then
+		return false;
+	end
+
+	if raceFilename == "BloodElf" or raceFilename == "Draenei" then
+		return false;
+	end
+	
+	if IsEraChoiceStateLocked(eraChoiceState) or DoesEraChoiceStateRequireDecision(eraChoiceState) then
+		return false;
+	end
+
+	if isExpansionTrialCharacter and CanUpgradeExpansion()  then
+		return false;
+	elseif isTrialBoost then
+		if level >= flowData.level and not IsUsingValidProductForTrialBoost(flowData) then
+			return false;
+		end
+	elseif revokedCharacterUpgrade then
+		if level > flowData.level then
+			return false;
+		end
+	else
+		if level >= flowData.level then
+			return false;
+		end
+	end
+
+	return true;
+end
+
+local function CanBoostCharacter(class, level, raceFileName, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter, eraChoiceState)
+	return IsBoostFlowValidForCharacter(CharacterUpgradeFlow.data, class, level, raceFileName, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter, eraChoiceState);
+end
+
+local function IsCharacterEligibleForVeteranBonus(level, isTrialBoost, revokedCharacterUpgrade)
+	return false;
+end
+
+local function SetCharacterButtonEnabled(button, enabled)
+	if enabled then
+		button.buttonText.name:SetTextColor(1, 0.82, 0);
+		button.buttonText.Info:SetTextColor(1, 1, 1);
+		button.buttonText.Location:SetTextColor(0.5, 0.5, 0.5);
+	else
+		button.buttonText.name:SetTextColor(0.25, 0.25, 0.25);
+		button.buttonText.Info:SetTextColor(0.25, 0.25, 0.25);
+		button.buttonText.Location:SetTextColor(0.25, 0.25, 0.25);
+	end
+
+	button:SetEnabled(enabled);
+end
+
+local function formatDescription(description, gender)
+	if (not strfind(description, "%$")) then
+		return description;
+	end
+
+	-- This is a very simple parser that will only handle $G/$g tokens
+	return gsub(description, "$[Gg]([^:]+):([^;]+);", "%"..gender);
+end
+
 function IsExpansionTrialCharacter(characterGUID)
 	local isExpansionTrialCharacter = select(28, GetCharacterInfoByGUID(characterGUID));
 	return isExpansionTrialCharacter;
@@ -313,14 +606,14 @@ function GetAvailableBoostTypesForCharacterByGUID(characterGUID)
 	local availableBoosts = {};
 	local upgradeDistributions = C_SharedCharacterServices.GetUpgradeDistributions();
 	if upgradeDistributions then
-		local class, _, level, _, _, _, _, _, _, _, playerguid, _, _, _, boostInProgress, _, _, isTrialBoost, _, revokedCharacterUpgrade, vasServiceInProgress = select(5, GetCharacterInfoByGUID(characterGUID));
+		local _, _, raceFileName, _, class, _, level, _, _, _, _, _, _, _, playerguid, _, _, _, boostInProgress, _, _, isTrialBoost, _, revokedCharacterUpgrade, vasServiceInProgress, _, _, isExpansionTrialCharacter, eraChoiceState = GetCharacterInfoByGUID(characterGUID);
 		for boostType, data in pairs(upgradeDistributions) do
-			if IsBoostFlowValidForCharacter(C_CharacterServices.GetCharacterServiceDisplayData(boostType), class, level, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress) then
+			if IsBoostFlowValidForCharacter(C_CharacterServices.GetCharacterServiceDisplayData(boostType), class, level, raceFileName, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter, eraChoiceState) then
 				availableBoosts[#availableBoosts + 1] = boostType;
 			end
 		end
 	end
-
+	
 	return availableBoosts;
 end
 
@@ -457,17 +750,6 @@ function CharacterUpgradeCharacterSelectBlock:OnRewind()
 	self:ClearResultInfo();
 end
 
-function CharacterUpgradeCharacterSelectBlock:GetServiceInfoByCharacterID(characterID)
-	local serviceInfo = { checkAutoSelect = true, checkTrialBoost = true };
-	local class, _, level, _, _, _, _, _, _, _, playerguid, _, _, _, boostInProgress, _, _, isTrialBoost, _, revokedCharacterUpgrade, vasServiceInProgress, _, _, isExpansionTrialCharacter, _, _, _, _, _, characterServiceRequiresLogin = select(5, GetCharacterInfo(characterID));
-	serviceInfo.playerguid = playerguid
-	serviceInfo.requiresLogin = characterServiceRequiresLogin
-	serviceInfo.isTrialBoost = isTrialBoost
-	serviceInfo.isEligible = CanBoostCharacter(class, level, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter);
-	serviceInfo.hasBonus = IsCharacterEligibleForVeteranBonus(level, isTrialBoost, revokedCharacterUpgrade);
-	return serviceInfo;
-end
-
 function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 	for i = 1, 3 do
 		if (self.frame.BonusResults[i]) then
@@ -476,7 +758,7 @@ function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 	end
 	self.seenPopup = false;
 	self.frame.NoBonusResult:Hide();
-	CharacterSelect_SetScrollEnabled(true);
+	enableScroll(CharacterSelectCharacterFrame.scrollBar);
 
 	self:ClearResultInfo();
 	self.lastSelectedIndex = CharacterSelect.selectedIndex;
@@ -489,7 +771,7 @@ function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 		CHARACTER_LIST_OFFSET = max(numCharacters - MAX_CHARACTERS_DISPLAYED, 0);
 
 		if (self.createNum < numCharacters) then
-			CharacterSelect.selectedIndex = numCharacters;
+			CharacterSelect.selectedIndex = GetNumCharactersActiveForEra();
 
 			CharacterSelectCharacterFrame.scrollBar.blockUpdates = true;
 			CharacterSelectCharacterFrame.scrollBar:SetValue(CHARACTER_LIST_OFFSET);
@@ -497,7 +779,7 @@ function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 
 			UpdateCharacterSelection(CharacterSelect);
 
-			self.index = CharacterSelect.selectedIndex;
+			self.index = CharacterSelect.selectedIndex - CHARACTER_LIST_OFFSET;
 			self.charid = GetCharIDFromIndex(CharacterSelect.selectedIndex);
 			self.playerguid = select(15, GetCharacterInfo(self.charid));
 
@@ -510,17 +792,89 @@ function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 		end
 	end
 
-	CharacterServicesCharacterSelector:Show();
-	CharacterServicesCharacterSelector:UpdateDisplay(self);
+	CharacterSelect_SaveCharacterOrder();
+	-- Set up the GlowBox around the show characters
+	self.frame.ControlsFrame.GlowBox:SetHeight(58 * numDisplayedCharacters);
+	if (CharacterSelectCharacterFrame.scrollBar:IsShown()) then
+		self.frame.ControlsFrame.GlowBox:SetPoint("TOP", CharacterSelectCharacterFrame, -8, -60);
+		self.frame.ControlsFrame.GlowBox:SetWidth(238);
+	else
+		self.frame.ControlsFrame.GlowBox:SetPoint("TOP", CharacterSelectCharacterFrame, 2, -60);
+		self.frame.ControlsFrame.GlowBox:SetWidth(244);
+	end
+	for i = 1, MAX_CHARACTERS_DISPLAYED do
+		if (not self.frame.ControlsFrame.Arrows[i]) then
+			self.frame.ControlsFrame.Arrows[i] = CreateFrame("Frame", nil, self.frame.ControlsFrame, "CharacterServicesArrowTemplate");
+		end
+		if (not self.frame.ControlsFrame.BonusIcons[i]) then
+			self.frame.ControlsFrame.BonusIcons[i] = CreateFrame("Frame", nil, self.frame.ControlsFrame, "CharacterServicesBonusIconTemplate");
+		end
+		local arrow = self.frame.ControlsFrame.Arrows[i];
+		local bonusIcon = self.frame.ControlsFrame.BonusIcons[i];
+		arrow:SetPoint("RIGHT", _G["CharSelectCharacterButton"..i], "LEFT", -8, 8);
+		bonusIcon:SetPoint("LEFT", _G["CharSelectCharacterButton"..i.."ButtonTextName"], "RIGHT", -1, 0);
+		arrow:Hide();
+		bonusIcon:Hide();
+	end
+
+	CharacterSelect.selectedIndex = -1;
+	UpdateCharacterSelection(CharacterSelect);
+
+	local numEligible = 0;
+	self.hasVeteran = false;
+	replaceAllScripts();
+
+	for i = 1, numDisplayedCharacters do
+		local button = _G["CharSelectCharacterButton"..i];
+		_G["CharSelectPaidService"..i]:Hide();
+		local _, _, raceFilename, _, class, _, level, _, _, _, _, _, _, _, playerguid, _, _, _, boostInProgress, _, _, isTrialBoost, _, revokedCharacterUpgrade, vasServiceInProgress, _, _, isExpansionTrialCharacter, eraChoiceState = GetCharacterInfo(GetCharIDFromIndex(i+CHARACTER_LIST_OFFSET));
+		local canBoostCharacter = CanBoostCharacter(class, level, raceFilename, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter, eraChoiceState);
+
+		SetCharacterButtonEnabled(button, canBoostCharacter);
+
+		if (canBoostCharacter) then
+			self.frame.ControlsFrame.Arrows[i]:Show();
+			self.frame.ControlsFrame.BonusIcons[i]:SetShown(IsCharacterEligibleForVeteranBonus(level, isTrialBoost, revokedCharacterUpgrade));
+
+			button:SetScript("OnClick", function(button)
+				self:SaveResultInfo(button, playerguid);
+
+				-- The user entered a normal boost flow and selected a trial boost character, at this point
+				-- put the flow into the auto-select state.
+				local trialBoostFlowGuid = isTrialBoost and playerguid or nil;
+				CharacterUpgradeFlow:SetTrialBoostGuid(trialBoostFlowGuid);
+
+				CharacterSelectButton_OnClick(button);
+				CharacterServicesMaster_Update();
+			end)
+
+			-- Determine if this should auto-advance and cache off relevant information
+			-- NOTE: CharacterUpgradeCharacterSelectBlock always uses auto-advance, there's no "next"
+			-- button, so once a character is selected it has to advance automatically.
+			if CharacterUpgradeFlow:GetAutoSelectGuid() == playerguid then
+				self:SaveResultInfo(button, playerguid);
+			end
+		end
+	end
+
+	for i = 1, GetNumCharacters() do
+		local _, _, raceFilename, _, class, _, level, _, _, _, _, _, _, _, playerguid, _, _, _, boostInProgress, _, _, isTrialBoost, _, revokedCharacterUpgrade, vasServiceInProgress, _, _, isExpansionTrialCharacter, eraChoiceState = GetCharacterInfo(GetCharIDFromIndex(i));
+		if CanBoostCharacter(class, level, raceFilename, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter, eraChoiceState) then
+			if IsCharacterEligibleForVeteranBonus(level, isTrialBoost, revokedCharacterUpgrade) then
+				self.hasVeteran = true;
+			end
+			numEligible = numEligible + 1;
+		end
+	end
 
 	self.frame.ControlsFrame.BonusLabel:SetHeight(self.frame.ControlsFrame.BonusLabel.BonusText:GetHeight());
 	self.frame.ControlsFrame.BonusLabel:SetPoint("BOTTOM", CharSelectServicesFlowFrame, "BOTTOM", 10, 60);
-	self.frame.ControlsFrame.BonusLabel:SetShown(CharacterUpgradeFlow.hasVeteran);
+	self.frame.ControlsFrame.BonusLabel:SetShown(self.hasVeteran);
 
 	-- Setup the step option frames
 	self:ResetStepOptionFrames();
 
-	local hasEligibleBoostCharacter = CharacterServicesCharacterSelector:HasAnyEligibleCharacter();
+	local hasEligibleBoostCharacter = (numEligible > 0);
 	local canCreateCharacter = CanCreateCharacter();
 	local canShowCreateNewCharacterButton = canCreateCharacter and IsUsingValidProductForCreateNewCharacterBoost();
 	local canCreateTrialBoostCharacter = canCreateCharacter and (C_CharacterServices.IsTrialBoostEnabled() and IsUsingValidProductForTrialBoost(CharacterUpgradeFlow.data));
@@ -531,6 +885,9 @@ function CharacterUpgradeCharacterSelectBlock:Initialize(results)
 	self:SetOptionUsed(self.OPTION_INDEX_CREATE_TRIAL_CHARACTER_HINT, canCreateTrialBoostCharacter and not (hasEligibleBoostCharacter or canShowCreateNewCharacterButton));
 
 	self:LayoutOptionFrames();
+
+	-- Glowbox hides without eligible characters
+	self.frame.ControlsFrame.GlowBox:SetShown(hasEligibleBoostCharacter);
 
 	local canCreateBoostableCharacter = canCreateCharacter and (canShowCreateNewCharacterButton or canCreateTrialBoostCharacter);
 	local showBoostError = not (canCreateBoostableCharacter or hasEligibleBoostCharacter);
@@ -551,9 +908,9 @@ function CharacterUpgradeCharacterSelectBlock:GetPopupText()
 	local raceData = C_CharacterCreation.GetRaceDataByID(C_CharacterCreation.GetRaceIDFromName(raceFilename));
 
 	if GetCurrentRegionName() == "CN" then
-		return ReplaceGenderTokens(BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING_CN:format(raceData.name), gender+1);
+		return formatDescription(BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING_CN:format(raceData.name), gender+1);
 	else
-		return ReplaceGenderTokens(BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING:format(raceData.name), gender+1);
+		return formatDescription(BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING:format(raceData.name), gender+1);
 	end
 end
 
@@ -604,31 +961,49 @@ function CharacterUpgradeCharacterSelectBlock:FormatResult()
 			result.Label:SetText(CHARACTER_UPGRADE_PROFESSION_BOOST_RESULT_FORMAT:format(bonuses[i], CharacterUpgradeFlow.data.professionLevel));
 			result:Show();
 		end
-	elseif (CharacterUpgradeFlow.hasVeteran) then
+	elseif (self.hasVeteran) then
 		self.frame.NoBonusResult:Show();
 	end
 	return SELECT_CHARACTER_RESULTS_FORMAT:format(RAID_CLASS_COLORS[classFileName].colorStr, name, level, class);
 end
 
 function CharacterUpgradeCharacterSelectBlock:OnHide()
+	enableScroll(CharacterSelectCharacterFrame.scrollBar);
+
+	local num = math.min(GetNumCharacters(), MAX_CHARACTERS_DISPLAYED);
+
+	for i = 1, num do
+		local button = _G["CharSelectCharacterButton"..i];
+		resetScripts(button);
+		SetCharacterButtonEnabled(button, true);
+
+		if (button.padlock) then
+			button.padlock:Show();
+		end
+	end
+
+	UpdateCharacterList(true);
 	local index = self.lastSelectedIndex;
 	if (self:IsFinished()) then
 		index = self.index;
 	end
-
-	CharacterServicesCharacterSelector:ResetState(index);
+	if (index <= 0 or index > MAX_CHARACTERS_DISPLAYED) then return end;
+	CharacterSelect.selectedIndex = index;
+	local button = _G["CharSelectCharacterButton"..index];
+	CharacterSelectButton_OnClick(button);
 end
 
 function CharacterUpgradeCharacterSelectBlock:OnAdvance()
-	CharacterSelect_SetScrollEnabled(false);
-	CharacterServicesCharacterSelector:Hide();
+	disableScroll(CharacterSelectCharacterFrame.scrollBar);
 
 	local selectedButtonIndex = math.min(self.index, MAX_CHARACTERS_DISPLAYED);
 	local numDisplayedCharacters = math.min(GetNumCharacters(), MAX_CHARACTERS_DISPLAYED);
 
 	for buttonIndex = 1, numDisplayedCharacters do
+		_G["CharSelectPaidService"..buttonIndex]:Hide();
 		if (buttonIndex ~= selectedButtonIndex) then
-			CharacterSelect_SetCharacterButtonEnabled(buttonIndex, false);
+			local button = _G["CharSelectCharacterButton"..buttonIndex];
+			SetCharacterButtonEnabled(button, false);
 		end
 	end
 end
@@ -644,7 +1019,7 @@ end
 
 function CharacterUpgrade_SetupFlowForNewCharacter(characterType)
 	if characterType == Enum.CharacterCreateType.Boost then
-		CharacterUpgradeCharacterSelectBlock.createNum = GetNumCharacters();
+		CharacterUpgradeCharacterSelectBlock.createNum = GetNumCharactersActiveForEra();
 
 		if CharacterServicesMaster.flow then
 			CHARACTER_UPGRADE_CREATE_CHARACTER_DATA = CharacterServicesMaster.flow.data;
@@ -654,7 +1029,7 @@ end
 
 function CharacterUpgrade_BeginNewCharacterCreation(characterType)
 	CharacterUpgrade_SetupFlowForNewCharacter(characterType);
-	CharacterSelect_CreateNewCharacter(characterType);
+	CharacterSelect_CreateNewCharacter(characterType, false);
 end
 
 function CharacterUpgradeCreateCharacter_OnClick(self)
@@ -664,342 +1039,6 @@ end
 function CharacterUpgradeClassTrial_OnClick(self)
 	CharSelectServicesFlowFrame:Hide();
 	CharacterUpgrade_BeginNewCharacterCreation(Enum.CharacterCreateType.TrialBoost);
-end
-
--- There are currently no script overrides to recommended specs, add them here if necessary.
-local recommendedSpecOverride = {};
-
-function GetRecommendedSpecButton(ownerFrame, overrideSpecID)
-	-- There may be multiple recommended specs for now, so determine the best one based on class.
-	-- However, if there's an overrideSpec it wins all the time.
-	local recommendedSpecID = recommendedSpecOverride[ownerFrame.classFilename];
-	overrideSpecID = overrideSpecID or recommendedSpecID;
-
-	for _, specButton in ipairs(ownerFrame.SpecButtons) do
-		if overrideSpecID and (specButton:GetID() == overrideSpecID) then
-			return specButton;
-		elseif not overrideSpecID and specButton.isRecommended then
-			return specButton;
-		end
-	end
-end
-
-function ClickRecommendedSpecButton(ownerFrame, overrideSpecID)
-	local specButton = GetRecommendedSpecButton(ownerFrame, overrideSpecID);
-	if specButton then
-		specButton:Click();
-	end
-end
-
-local function createTooltipText(description, gender, isRecommended, isTrialBoost)
-	local tooltipText = ReplaceGenderTokens(description, gender);
-
-	if (not isRecommended) then
-		local warningText = CHARACTER_BOOST_RECOMMENDED_SPEC_ONLY;
-		if (isTrialBoost) then
-			warningText = CHARACTER_BOOST_RECOMMENDED_SPEC_ONLY_TRIAL_VERSION;
-		end
-
-		warningText = CreateColor(1, 0, 0, 1):WrapTextInColorCode(warningText);
-		tooltipText = CreateColor(.5, .5, .5, 1):WrapTextInColorCode(tooltipText)..warningText;
-	end
-
-	return tooltipText;
-end
-
--- Spec selection buttons are used in two locations during character creation at this point:
--- Boosts, and Class Trials
--- This data allows customization of button placement, hit insets, spec name truncation, etc...
--- Unused fields left in place as documentation for what will be referenced.
-
-local defaultSpecButtonLayoutData = {
-	initialAnchor = { point = "TOPLEFT", relativeKey = nil, relativePoint = "TOPLEFT", x = 83, y = -73 },
-	subsequentAnchor = { point = "TOP", relativePoint = "BOTTOM", x = 0, y = -35 },
-	buttonInsets = nil, -- numerically indexed, ordering matches SetHitInsets API
-	specNameWidth = nil,
-	specNameFont = nil,
-}
-
-local function CreateSpecButton(parent, buttonIndex, layoutData)
-	local frame = CreateFrame("CheckButton", nil, parent, "CharacterUpgradeSelectSpecRadioButtonTemplate");
-	local relativeFrame, anchorData;
-
-	if (buttonIndex == 1) then
-		anchorData = layoutData.initialAnchor;
-		relativeFrame = parent;
-	else
-		anchorData = layoutData.subsequentAnchor;
-		relativeFrame = parent.SpecButtons[buttonIndex - 1];
-	end
-
-	if (anchorData.relativeKey) then
-		relativeFrame = relativeFrame[anchorData.relativeKey];
-	end
-
-	frame:SetPoint(anchorData.point, relativeFrame, anchorData.relativePoint, anchorData.x, anchorData.y);
-
-	if (layoutData.buttonInsets) then
-		frame:SetHitRectInsets(unpack(layoutData.buttonInsets));
-	end
-
-	if (layoutData.specNameWidth) then
-		frame.SpecName:SetWidth(layoutData.specNameWidth);
-	end
-
-	if (layoutData.specNameFont) then
-		frame.SpecName:SetFontObject(layoutData.specNameFont);
-	end
-
-	return frame;
-end
-
-local function CharacterServices_IsCurrentSpecializationAllowed(classID, gender, currentSpecID)
-	for i = 1, 4 do
-		local specID, _, _, _, _, isRecommended, isAllowed = GetSpecializationInfoForClassID(classID, i, gender);
-		if specID == currentSpecID then
-			return isRecommended or isAllowed;
-		end
-	end
-
-	return false;
-end
-
-function CharacterServices_UpdateSpecializationButtons(classID, gender, parentFrame, owner, allowAllSpecs, isTrialBoost, currentSpecID)
-	local numSpecs = GetNumSpecializationsForClassID(classID);
-
-	if not parentFrame.SpecButtons then
-		parentFrame.SpecButtons = {}
-	end
-
-	local layoutData = parentFrame.layoutData or defaultSpecButtonLayoutData;
-
-	-- Examine all specs to determine which text to show for available specs
-	local availableSpecsToChoose = 0;
-
-	if allowAllSpecs then
-		availableSpecsToChoose = numSpecs;
-	else
-		for i = 1, 4 do
-			local specID, _, _, _, _, isRecommended, isAllowed = GetSpecializationInfoForClassID(classID, i, gender);
-
-			if isRecommended or isAllowed then
-				availableSpecsToChoose = availableSpecsToChoose + 1;
-			end
-		end
-	end
-
-	local hasActualChoice = (availableSpecsToChoose > 1);
-	local canChooseFromAllSpecs = allowAllSpecs or (hasActualChoice and availableSpecsToChoose == numSpecs);
-	local isCurrentSpecAllowed = canChooseFromAllSpecs or CharacterServices_IsCurrentSpecializationAllowed(classID, gender, currentSpecID);
-	local autoSelectedSpecID;
-
-	for i = 1, 4 do
-		if not parentFrame.SpecButtons[i] then
-			parentFrame.SpecButtons[i] = CreateSpecButton(parentFrame, i, layoutData);
-		end
-
-		local button = parentFrame.SpecButtons[i];
-		button.owner = owner;
-		button.isRecommended = nil;
-
-		if i <= numSpecs then
-			local specID, name, description, icon, role, isRecommended, isAllowed = GetSpecializationInfoForClassID(classID, i, gender + 1);
-			local allowed = allowAllSpecs or isAllowed or isRecommended;
-			local isCurrentSpec = specID == currentSpecID;
-
-			-- We prefer to show a player's current spec instead of a recommended spec. We should only show
-			-- the recommended spec if you're boosting a brand new character.
-			local showRecommendedLabel;
-			if isCurrentSpecAllowed then
-				showRecommendedLabel = isCurrentSpec;
-			else
-				showRecommendedLabel = isRecommended;
-			end
-
-			button:SetID(specID);
-			button.SpecIcon:SetTexture(icon);
-			button.SpecIcon:SetDesaturated(not allowed);
-			button.Frame:SetDesaturated(not allowed);
-			button.SpecName:SetText(name);
-			button.RoleIcon:SetTexCoord(GetTexCoordsForRole(role));
-			button.RoleIcon:SetDesaturated(not allowed);
-			button.RoleName:SetText(_G["ROLE_"..role]);
-			button:SetEnabled(allowed);
-			button.Recommended:SetShown(showRecommendedLabel);
-			button.isRecommended = isRecommended;
-
-			if showRecommendedLabel then
-				autoSelectedSpecID = specID;
-				if not hasActualChoice then
-					button.Recommended:SetText(CHAR_SPEC_AVAILABLE);
-				elseif isCurrentSpec then
-					button.Recommended:SetText(CHARACTER_UPGRADE_FLOW_CHAR_SPEC_CURRENT);
-				elseif isRecommended then
-					button.Recommended:SetText(CHAR_SPEC_RECOMMENEDED);
-				end
-			end
-
-			if allowed then
-				button.SpecName:SetTextColor(1, .82, 0, 1);
-			else
-				button.SpecName:SetTextColor(.5, .5, .5, 1);
-			end
-
-			if showRecommendedLabel then
-				button.SpecName:SetPoint("TOPLEFT", button.Frame, "TOPRIGHT", 6, -3);
-				button.RoleName:SetPoint("TOPLEFT", button.Recommended, "BOTTOMLEFT");
-			else
-				button.SpecName:SetPoint("TOPLEFT", button.Frame, "TOPRIGHT", 6, -8);
-				button.RoleName:SetPoint("TOPLEFT", button.SpecName, "BOTTOMLEFT");
-			end
-
-			button:SetChecked(false);
-			button:Show();
-			button.tooltipTitle = name;
-			button.tooltip = createTooltipText(description, gender, allowed, isTrialBoost);
-		else
-			button:Hide();
-		end
-	end
-
-	if owner.OnUpdateSpecButtons then
-		owner:OnUpdateSpecButtons(autoSelectedSpecID);
-	end
-end
-
-function CharacterUpgradeSpecSelectBlock:Initialize(results, wasFromRewind)
-	if not wasFromRewind then
-		self.selected = nil;
-	end
-
-	self.specButtonClickedCallback = CharacterServicesMaster_Update;
-
-	local _, _, _, _, classFilename, classID, experienceLevel, _, _, _, _, _, _, _, playerguid, _, _, gender, _, _, _, _, _, _, _, _, specID = GetCharacterInfo(results.charid);
-	self.classID = classID;
-	self.frame.ControlsFrame.classFilename = classFilename;
-
-	local isNewCharacter = experienceLevel < 10;
-	if isNewCharacter then
-		self.currentSpecID = nil;
-	else
-		self.currentSpecID = specID;
-	end
-
-	-- When boosting to level 100, prevent the selection of non-recommended specs, but still auto-select from
-	-- the limited number of specs that the user can choose from
-	local flags = CharacterUpgradeFlow.data.flags;
-	local restrictToRecommendedSpecs = bit.band(flags, Enum.CharacterServiceInfoFlag.RestrictToRecommendedSpecs) == Enum.CharacterServiceInfoFlag.RestrictToRecommendedSpecs;
-
-	CharacterServices_UpdateSpecializationButtons(classID, gender+1, self.frame.ControlsFrame, CharacterUpgradeSpecSelectBlock, not restrictToRecommendedSpecs, nil, self.currentSpecID);
-end
-
-function CharacterUpgradeSpecSelectBlock:SkipIf(results)
-	return CharacterUpgradeFlow:ShouldSkipSpecSelect();
-end
-
-function CharacterUpgradeSpecSelectBlock:OnUpdateSpecButtons(autoSelectedSpecID)
-	local overrideSpec = self.selected or autoSelectedSpecID;
-	if overrideSpec then
-		ClickRecommendedSpecButton(self.frame.ControlsFrame, overrideSpec);
-	end
-end
-
-function CharacterUpgradeSpecSelectBlock:IsFinished(wasFromRewind)
-	return not wasFromRewind and self.selected ~= nil;
-end
-
-function CharacterUpgradeSpecSelectBlock:GetResult()
-	return { spec = self.selected, classId = self.classID };
-end
-
-function CharacterUpgradeSpecSelectBlock:FormatResult()
-	return GetSpecializationNameForSpecID(self.selected);
-end
-
-function CharacterUpgradeSpecSelectBlock:ShouldShowPopup()
-	-- If it ever becomes possible to select non-recommended specs, then re-enable this.
-	--local role = select(5, GetSpecializationInfoForSpecID(self.selected));
-	--return role == "HEALER";
-	return false;
-end
-
-function CharacterUpgradeSpecSelectBlock:GetPopupText()
-	return string.format(BOOST_NOT_RECOMMEND_SPEC_WARNING, GetSpecializationNameForSpecID(self.selected));
-end
-
-function CharacterUpgradeSelectSpecRadioButton_OnClick(self, button, down)
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-
-	local owner = self.owner;
-
-	if owner then
-		if owner.selected == self:GetID() then
-			self:SetChecked(true);
-			return;
-		else
-			owner.selected = self:GetID();
-			self:SetChecked(true);
-		end
-
-		if owner.specButtonClickedCallback then
-			owner.specButtonClickedCallback();
-		end
-	end
-
-	for _, button in ipairs(self:GetParent().SpecButtons) do
-		if button:GetID() ~= self:GetID() then
-			button:SetChecked(false);
-		end
-	end
-end
-
-function CharacterUpgradeFactionSelectBlock:Initialize(results)
-	self.selected = nil;
-	self.SkipOnRewind = self:SkipIf(results);
-end
-
-function CharacterUpgradeFactionSelectBlock:IsFinished(wasFromRewind)
-	return not wasFromRewind and self.selected ~= nil;
-end
-
-function CharacterUpgradeFactionSelectBlock:GetResult()
-	return { faction = self.selected };
-end
-
-function CharacterUpgradeFactionSelectBlock:FormatResult()
-	return SELECT_FACTION_RESULTS_FORMAT:format(PLAYER_FACTION_COLORS_HEX[self.selected], FACTION_LABELS[self.selected]);
-end
-
-function CharacterUpgradeFactionSelectBlock:SkipIf(results)
-	return C_CharacterServices.GetFactionGroupByIndex(results.charid) ~= "Neutral";
-end
-
-function CharacterUpgradeFactionSelectBlock:OnSkip()
-	self.selected = nil;
-end
-
-function CharacterUpgradeSelectFactionFrame_OnLoad(self)
-	for _, button in ipairs(self.ControlsFrame.FactionButtons) do
-		button.FactionIcon:SetTexture(FACTION_LOGO_TEXTURES[button.factionID]);
-		button.FactionName:SetText(FACTION_LABELS[button.factionID]);
-	end
-end
-
-function CharacterUpgradeSelectFactionFrame_ClearChecked()
-	for _, button in ipairs(CharacterUpgradeSelectFactionFrame.ControlsFrame.FactionButtons) do
-		button:SetChecked(false);
-	end
-
-	CharacterUpgradeFactionSelectBlock.selected = nil;
-end
-
-function CharacterUpgradeSelectFactionRadioButton_OnClick(self)
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-
-	CharacterUpgradeSelectFactionFrame_ClearChecked();
-	self:SetChecked(true);
-	CharacterUpgradeFactionSelectBlock.selected = self.factionID;
-	CharacterServicesMaster_Update();
 end
 
 function CharacterUpgradeEndStep:Initialize(results)

@@ -53,7 +53,7 @@ local CurrencyConstants =
 			Fields =
 			{
 				{ Name = "CurrencyBUseTotalEarnedForEarned", Type = "CurrencyFlagsB", EnumValue = 1 },
-				{ Name = "CurrencyBShowQuestXPGainInTooltip", Type = "CurrencyFlagsB", EnumValue = 2 },
+				{ Name = "CurrencyBShowQuestXpGainInTooltip", Type = "CurrencyFlagsB", EnumValue = 2 },
 				{ Name = "CurrencyBNoNotificationMailOnOfflineProgress", Type = "CurrencyFlagsB", EnumValue = 4 },
 			},
 		},
@@ -138,6 +138,9 @@ local CurrencyConstants =
 				{ Name = "ACCOUNT_WIDE_HONOR_LEVEL_CURRENCY_ID", Type = "number", Value = 1586 },
 				{ Name = "CONQUEST_CURRENCY_ID", Type = "number", Value = 1602 },
 				{ Name = "HONOR_CURRENCY_ID", Type = "number", Value = 1792 },
+				{ Name = "CLASSIC_ARENA_POINTS_CURRENCY_ID", Type = "number", Value = 1900 },
+				{ Name = "CLASSIC_HONOR_CURRENCY_ID", Type = "number", Value = 1901 },
+				{ Name = "HONOR_PER_CURRENCY", Type = "number", Value = 10 },
 				{ Name = "ARTIFACT_KNOWLEDGE_CURRENCY_ID", Type = "number", Value = 1171 },
 				{ Name = "WAR_RESOURCES_CURRENCY_ID", Type = "number", Value = 1560 },
 				{ Name = "ECHOES_OF_NYALOTHA_CURRENCY_ID", Type = "number", Value = 1803 },

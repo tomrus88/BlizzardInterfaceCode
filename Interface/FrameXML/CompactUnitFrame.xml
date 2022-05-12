@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<Script file="CompactUnitFrame.lua"/>
-	<Button name="CompactAuraTemplate" virtual="true" enableMouse="false" registerForClicks="AnyDown">
+	<Button name="CompactAuraTemplate" virtual="true" enableMouse="false">
 		<Size>
 			<AbsDimension x="17" y="17"/>
 		</Size>
@@ -59,6 +59,7 @@
 					parent.debuffFrames = {};
 				end
 				tinsert(parent.debuffFrames, self);
+				self:RegisterForClicks("LeftButtonDown", "RightButtonUp");
 			</OnLoad>
 			<OnUpdate>
 				if ( GameTooltip:IsOwned(self) ) then
@@ -90,6 +91,7 @@
 					parent.buffFrames = {};
 				end
 				tinsert(parent.buffFrames, self);
+				self:RegisterForClicks("LeftButtonDown", "RightButtonUp");
 			</OnLoad>
 			<OnUpdate>
 				if ( GameTooltip:IsOwned(self) ) then
@@ -161,12 +163,12 @@
 				<FontString name="$parentName" inherits="GameFontHighlightSmall" parentKey="name" wordwrap="false"/>
 				<FontString name="$parentStatusText" inherits="GameFontDisable" parentKey="statusText"/>
 				<Texture name="$parentRoleIcon" hidden="true" parentKey="roleIcon"/>
-				<Texture name="$parentAggroHighlight" parentKey="aggroHighlight"/>
+				<!--<Texture name="$parentAggroHighlight" parentKey="aggroHighlight"/>-->
 			</Layer>
 			<Layer level="ARTWORK" textureSubLevel="1">
 				<Texture name="$parentMyHealAbsorb" parentKey="myHealAbsorb"/>
-				<Texture name="$parentMyHealAbsorbLeftShadow" parentKey="myHealAbsorbLeftShadow" file="Interface\RaidFrame\Absorb-Edge"/>
-				<Texture name="$parentMyHealAbsorbRightShadow" parentKey="myHealAbsorbRightShadow" file="Interface\RaidFrame\Absorb-Edge">
+				<Texture name="$parentMyHealAbsorbLeftShadow" parentKey="myHealAbsorbLeftShadow" file="Interface\RaidFrame\Absorb-Edge" hidden="true"/>
+				<Texture name="$parentMyHealAbsorbRightShadow" parentKey="myHealAbsorbRightShadow" file="Interface\RaidFrame\Absorb-Edge" hidden="true">
 					<TexCoords left="1" right="0" top="0" bottom="1"/>
 				</Texture>
 			</Layer>

@@ -1,3 +1,5 @@
+LOSS_OF_CONTROL_ACTIVE_INDEX = 1;
+
 CommentatorUnitFrameMixin = {};
 
 local CommentatorUnitFrameEvents =
@@ -81,20 +83,9 @@ function CommentatorUnitFrameMixin:Init(isAlignedLeft, playerData, teamIndex)
 		
 		self.ModelScene:Init(self.unitToken, self.guid, self.Circle);
 
-		self.role = GetSpecializationRoleByID(playerData.specialization);
-		local isRoleHealer = self.role == "HEALER";
-		local isRoleTank = self.role == "TANK"
-		if isRoleHealer or isRoleTank then
-			local useAtlasSize = true;
-			if isRoleHealer then
-				self.Role.Icon:SetAtlas("Icon-Healer", useAtlasSize);
-			elseif isRoleTank then
-				self.Role.Icon:SetAtlas("Icon-Tank", useAtlasSize);
-			end
-			self.Role:Show();
-		else
-			self.Role:Hide();
-		end
+		-- Spec omitted from BC commentator.
+		self.Role:Hide();
+
 		self:SetClass(select(2, UnitClass(self.unitToken)))
 
 		self:InitSpells();
@@ -137,9 +128,13 @@ function CommentatorUnitFrameMixin:OnEvent(event, ...)
 			self:InitSpells();
 		end
 	elseif event == "ARENA_CROWD_CONTROL_SPELL_UPDATE" then
-		local unitToken, spellID = ...;
+		local unitToken, spellID, itemID = ...;
 		if unitToken == self.unitToken then
-			self:SetCCRemoverIcon(spellID);
+			if itemID ~= 0 then
+				self:SetCCRemoverItemIcon(itemID);
+			else
+				self:SetCCRemoverSpellIcon(spellID);
+			end
 		end
 	elseif event == "LOSS_OF_CONTROL_COMMENTATOR_ADDED" then
 		local guid , index = ...;
@@ -152,6 +147,27 @@ function CommentatorUnitFrameMixin:OnEvent(event, ...)
 			self:ApplyLossOfControlAtIndex(LOSS_OF_CONTROL_ACTIVE_INDEX);
 		end
 	end
+end
+
+function CommentatorUnitFrameMixin:SetMinified(minified)
+	self.Name:ClearAllPoints();
+	if minified then
+		self.Name:SetPoint("TOPLEFT", self.Bars.HealthBar, "TOPLEFT");
+		self.Name:SetPoint("BOTTOMRIGHT", self.Bars.HealthBar, "BOTTOMRIGHT");
+	else
+		self.Name:SetPoint("TOPLEFT", self.Bars.HealthBar, "TOPLEFT", 0, 20);
+		self.Name:SetPoint("BOTTOMRIGHT", self.Bars.HealthBar, "BOTTOMRIGHT", 0, 45);
+	end
+
+	self.Bars.Overlay:SetAtlas(minified and "Metal-Bar-Battlegrounds" or "Metal-Bar");
+
+	self.Name:SetScale(minified and .75 or 1);
+	self.Name:SetAlpha(minified and .75 or 1);
+
+	self.Circle:SetShown(not minified);
+	self.DefensiveSpellTray:SetShown(not minified);
+	self.OffensiveSpellTray:SetShown(not minified);
+	self.DebuffSpellTray:SetShown(not minified);
 end
 
 function CommentatorUnitFrameMixin:OnSizeChanged()
@@ -239,7 +255,7 @@ end
 
 function CommentatorUnitFrameMixin:GetPlayerNameText()
 	if self.lifeState == LifeState.Dead then
-		return COMMENTATOR_UNITFRAME_DEAD_STR;
+		return self:GetPlayerName() .. " " .. COMMENTATOR_UNITFRAME_DEAD_STR;
 	elseif self.ccDisplayText and GetCVarBool("commentatorLossOfControlTextUnitFrame") then
 		return self.ccDisplayText;
 	else
@@ -368,22 +384,43 @@ function CommentatorUnitFrameMixin:SetSpellActive(trackedSpellID, isActive)
 	end
 end
 
-function CommentatorUnitFrameMixin:SetCCRemoverIcon(spellID)
-	self.CCRemover:SetShown(spellID > 0);
+function CommentatorUnitFrameMixin:SetCCRemoverSpellIcon(spellID)
+	local spellValid = spellID > 0;
+	self.CCRemover:SetShown(spellValid);
 
-	if spellID ~= self.CCRemover.Icon.spellID then
+	if spellValid then
 		local textureID = select(3, GetSpellInfo(spellID));
-		local icon = self.CCRemover.Icon;
-		icon.spellID = spellID;
+		self:SetCCRemoverIcon(textureID);
+	end
+end
+
+function CommentatorUnitFrameMixin:SetCCRemoverItemIcon(itemID)
+	local itemValid = itemID > 0;
+	self.CCRemover:SetShown(itemValid);
+
+	if itemValid then
+		local textureID = GetItemIcon(itemID);
+		self:SetCCRemoverIcon(textureID);
+	end
+end
+
+function CommentatorUnitFrameMixin:SetCCRemoverIcon(textureID)
+	local icon = self.CCRemover.Icon;
+	if textureID ~= icon.textureID then
+		icon.textureID = textureID;
 		icon:SetTexture(textureID);
 	end
 end
 
 function CommentatorUnitFrameMixin:UpdateCCRemover()
 	if self.unitToken then
-		local spellID, startTimeMs, durationMs = C_PvP.GetArenaCrowdControlInfo(self.unitToken);
+		local spellID, itemID, startTimeMs, durationMs = C_PvP.GetArenaCrowdControlInfo(self.unitToken);
 		if spellID then
-			self:SetCCRemoverIcon(spellID);
+			if(itemID ~= 0) then
+				self:SetCCRemoverItemIcon(itemID);
+			else
+				self:SetCCRemoverSpellIcon(spellID);
+			end
 			
 			if (startTimeMs ~= 0 and durationMs ~= 0) then
 				self.CCRemover.Cooldown:SetCooldown(startTimeMs / 1000.0, durationMs / 1000.0);

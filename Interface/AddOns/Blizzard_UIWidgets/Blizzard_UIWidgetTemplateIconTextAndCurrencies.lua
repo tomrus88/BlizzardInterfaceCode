@@ -13,15 +13,15 @@ local textureKitRegions = {
 	["Icon"] = "%s",
 }
 
-function UIWidgetTemplateIconTextAndCurrenciesMixin:Setup(widgetInfo, widgetContainer)
-	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo, widgetContainer);
+function UIWidgetTemplateIconTextAndCurrenciesMixin:Setup(widgetInfo)
+	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo);
 	self.currencyPool:ReleaseAll();
 
-	SetupTextureKitOnRegions(widgetInfo.textureKit, self, textureKitRegions);
+	SetupTextureKits(widgetInfo.textureKitID, self, textureKitRegions);
 	self.Text:SetText(widgetInfo.text);
 	local enabledState = widgetInfo.enabledState;
 	if widgetInfo.enabledState == Enum.WidgetEnabledState.Enabled then
-		enabledState = Enum.WidgetEnabledState.White;
+		enabledState = Enum.WidgetEnabledState.Highlight;
 	end
 	self.Text:SetEnabledState(enabledState);
 
@@ -36,8 +36,7 @@ function UIWidgetTemplateIconTextAndCurrenciesMixin:Setup(widgetInfo, widgetCont
 		local currencyFrame = self.currencyPool:Acquire();
 		currencyFrame:Show();
 
-		currencyFrame:Setup(widgetContainer, currencyInfo, enabledState);
-		currencyFrame:SetTooltipLocation(widgetInfo.tooltipLoc);
+		currencyFrame:Setup(currencyInfo, enabledState);
 
 		if previousCurrencyFrame then
 			currencyFrame:SetPoint("TOPLEFT", previousCurrencyFrame, "TOPRIGHT", 10, 0);
@@ -52,7 +51,7 @@ function UIWidgetTemplateIconTextAndCurrenciesMixin:Setup(widgetInfo, widgetCont
 	end
 
 	local descHeight = 0;
-	local showDescription = (widgetInfo.descriptionShownState == Enum.WidgetShownState.Shown) and (widgetInfo.description ~= "");
+	local showDescription = (widgetInfo.descriptionShownState == Enum.WidgetShownState.Shown) and widgetInfo.description;
 	if showDescription then
 		self.Description:SetText(widgetInfo.description);
 		self.Description:SetEnabledState(widgetInfo.descriptionEnabledState);

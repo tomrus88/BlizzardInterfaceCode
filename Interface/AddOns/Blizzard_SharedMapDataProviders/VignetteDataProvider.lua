@@ -1,9 +1,5 @@
 VignetteDataProviderMixin = CreateFromMixins(MapCanvasDataProviderMixin);
 
-function VignetteDataProviderMixin:GetPinTemplate()
-	return "VignettePinTemplate";
-end
-
 function VignetteDataProviderMixin:OnAdded(mapCanvas)
 	MapCanvasDataProviderMixin.OnAdded(self, mapCanvas);
 
@@ -12,13 +8,11 @@ end
 
 function VignetteDataProviderMixin:OnShow()
 	self:RegisterEvent("VIGNETTES_UPDATED");
-	EventRegistry:RegisterCallback("Supertracking.OnChanged", self.OnSuperTrackingChanged, self);
 	self.ticker = C_Timer.NewTicker(0, function() self:UpdatePinPositions() end);
 end
 
 function VignetteDataProviderMixin:OnHide()
 	self:UnregisterEvent("VIGNETTES_UPDATED");
-	EventRegistry:UnregisterCallback("Supertracking.OnChanged", self);
 	if self.ticker then
 		self.ticker:Cancel();
 		self.ticker = nil;
@@ -32,7 +26,7 @@ function VignetteDataProviderMixin:OnEvent(event, ...)
 end
 
 function VignetteDataProviderMixin:RemoveAllData()
-	self:GetMap():RemoveAllPinsByTemplate(self:GetPinTemplate());
+	self:GetMap():RemoveAllPinsByTemplate("VignettePinTemplate");
 	self:InitializeAllTrackingTables();
 end
 
@@ -43,29 +37,22 @@ function VignetteDataProviderMixin:InitializeAllTrackingTables()
 end
 
 function VignetteDataProviderMixin:RefreshAllData(fromOnShow)
-	local mapInfo = C_Map.GetMapInfo(self:GetMap():GetMapID());
-	if FlagsUtil.IsSet(mapInfo.flags, Enum.UIMapFlag.HideVignettes) then
-		self:RemoveAllData();
-		return;
-	end
-
 	local pinsToRemove = {};
 	for vignetteGUID, pin in pairs(self.vignetteGuidsToPins) do
 		pinsToRemove[vignetteGUID] = pin;
 	end
 
-	local pinTemplate = self:GetPinTemplate();
 	local vignetteGUIDs = C_VignetteInfo.GetVignettes();
+	local mapID = self:GetMap():GetMapID();
 	for i, vignetteGUID in ipairs(vignetteGUIDs) do
 		local vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID);
-		if self:ShouldShowVignette(vignetteInfo) then
+		if vignetteInfo and vignetteInfo.onWorldMap then
 			local existingPin = pinsToRemove[vignetteGUID];
 			if existingPin then
 				pinsToRemove[vignetteGUID] = nil;
 				existingPin:UpdateFogOfWar(vignetteInfo);
 			else
-				local pin = self:GetMap():AcquirePin(pinTemplate, vignetteGUID, vignetteInfo, self:GetMap():GetNumActivePinsByTemplate(pinTemplate));
-				pin.dataProvider = self;
+				local pin = self:GetMap():AcquirePin("VignettePinTemplate", vignetteGUID, vignetteInfo);
 				self.vignetteGuidsToPins[vignetteGUID] = pin;
 				if pin:IsUnique() then
 					self:AddUniquePin(pin);
@@ -80,17 +67,6 @@ function VignetteDataProviderMixin:RefreshAllData(fromOnShow)
 		end
 		self:GetMap():RemovePin(pin);
 		self.vignetteGuidsToPins[vignetteGUID] = nil;
-	end
-end
-
-function VignetteDataProviderMixin:ShouldShowVignette(vignetteInfo)
-	return vignetteInfo and vignetteInfo.onWorldMap;
-end
-
-function VignetteDataProviderMixin:OnSuperTrackingChanged()
-	local template = self:GetPinTemplate();
-	for pin in self:GetMap():EnumeratePinsByTemplate(template) do
-		pin:UpdateSupertrackedHighlight();
 	end
 end
 
@@ -151,13 +127,12 @@ function VignettePinMixin:OnLoad()
 	self:SetScalingLimits(1, 1.0, 1.2);
 end
 
-function VignettePinMixin:OnAcquired(vignetteGUID, vignetteInfo, frameLevelCount)
+function VignettePinMixin:OnAcquired(vignetteGUID, vignetteInfo)
 	self.vignetteGUID = vignetteGUID;
 	self.name = vignetteInfo.name;
-	self.hasTooltip = vignetteInfo.hasTooltip or vignetteInfo.type == Enum.VignetteType.PvPBounty;
+	self.hasTooltip = vignetteInfo.hasTooltip or vignetteInfo.type == Enum.VignetteType.PvpBounty;
 	self.isUnique = vignetteInfo.isUnique;
 	self.vignetteID = vignetteInfo.vignetteID;
-	self.widgetSetID = vignetteInfo.widgetSetID;
 
 	self:EnableMouse(self.hasTooltip);
 
@@ -176,9 +151,8 @@ function VignettePinMixin:OnAcquired(vignetteGUID, vignetteInfo, frameLevelCount
 	self.ShowAnim:Play();
 
 	self:UpdatePosition();
-	self:UpdateSupertrackedHighlight();
 
-	self:UseFrameLevelType("PIN_FRAME_LEVEL_VIGNETTE", frameLevelCount);
+	self:UseFrameLevelType("PIN_FRAME_LEVEL_VIGNETTE", self:GetMap():GetNumActivePinsByTemplate("VignettePinTemplate"));
 end
 
 function VignettePinMixin:OnReleased()
@@ -221,52 +195,47 @@ function VignettePinMixin:UpdateFogOfWar(vignetteInfo)
 end
 
 function VignettePinMixin:UpdatePosition(bestUniqueVignette)
-	local showPin = false;
+	if self:IsUnique() and not bestUniqueVignette then
+		self:Hide();
+		return;
+	end
+
 	local position = C_VignetteInfo.GetVignettePosition(self.vignetteGUID, self:GetMap():GetMapID());
 	if position then
 		self:SetPosition(position:GetXY());
-		showPin = not self:IsUnique() or bestUniqueVignette;
+		self:Show();
+	else
+		self:Hide();
 	end
-	
-	self:SetShown(showPin);
-end
-
-function VignettePinMixin:UpdateSupertrackedHighlight()
-	local highlight = (self:GetVignetteType() == Enum.VignetteType.Treasure) and QuestSuperTracking_ShouldHighlightTreasures(self:GetMap():GetMapID());
-	MapPinHighlight_CheckHighlightPin(highlight, self, self.Texture);
 end
 
 function VignettePinMixin:OnMouseEnter()
 	if self.hasTooltip then
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+		WorldMapTooltip:SetOwner(self, "ANCHOR_RIGHT");
 		self.UpdateTooltip = self.OnMouseEnter;
 
 		local hasValidTooltip = false;
 
-		if self:GetVignetteType() == Enum.VignetteType.Normal or self:GetVignetteType() == Enum.VignetteType.Treasure then
+		if self:GetVignetteType() == Enum.VignetteType.Normal then
 			hasValidTooltip = self:DisplayNormalTooltip();
-		elseif self:GetVignetteType() == Enum.VignetteType.PvPBounty then
+		elseif self:GetVignetteType() == Enum.VignetteType.PvpBounty then
 			hasValidTooltip = self:DisplayPvpBountyTooltip();
-		elseif self:GetVignetteType() == Enum.VignetteType.Torghast then
-			hasValidTooltip = self:DisplayTorghastTooltip();
 		end
 
-		if hasValidTooltip and self.widgetSetID then
-			GameTooltip_AddWidgetSet(GameTooltip, self.widgetSetID, self:GetWidgetSetVerticalPadding());
-		elseif not hasValidTooltip then
-			GameTooltip_SetTitle(GameTooltip, RETRIEVING_DATA);
+		if not hasValidTooltip then
+			GameTooltip_SetTitle(WorldMapTooltip, RETRIEVING_DATA);
 		end
 
-		GameTooltip:Show();
+		WorldMapTooltip:Show();
 	end
 end
 
 function VignettePinMixin:OnMouseLeave()
-	GameTooltip:Hide();
+	WorldMapTooltip:Hide();
 end
 
 function VignettePinMixin:DisplayNormalTooltip()
-	GameTooltip_SetTitle(GameTooltip, self:GetVignetteName());
+	GameTooltip_SetTitle(WorldMapTooltip, self:GetVignetteName());
 	return true;
 end
 
@@ -280,26 +249,12 @@ function VignettePinMixin:DisplayPvpBountyTooltip()
 		local classInfo = C_CreatureInfo.GetClassInfo(class);
 		local factionInfo = C_CreatureInfo.GetFactionInfo(race);
 
-		GameTooltip_SetTitle(GameTooltip, name, GetClassColorObj(classInfo.classFile));
-		GameTooltip_AddColoredLine(GameTooltip, factionInfo.name, GetFactionColor(factionInfo.groupTag));
-		GameTooltip_AddQuestRewardsToTooltip(GameTooltip, self:GetRewardQuestID(), TOOLTIP_QUEST_REWARDS_STYLE_PVP_BOUNTY);
+		GameTooltip_SetTitle(WorldMapTooltip, name, GetClassColorObj(classInfo.classFile));
+		GameTooltip_AddColoredLine(WorldMapTooltip, factionInfo.name, GetFactionColor(factionInfo.groupTag));
+		GameTooltip_AddQuestRewardsToTooltip(WorldMapTooltip, self:GetRewardQuestID(), TOOLTIP_QUEST_REWARDS_STYLE_PVP_BOUNTY);
 
 		return true;
 	end
 
 	return false;
-end
-
-function VignettePinMixin:DisplayTorghastTooltip()
-	SharedTooltip_SetBackdropStyle(GameTooltip, GAME_TOOLTIP_BACKDROP_STYLE_RUNEFORGE_LEGENDARY);
-	GameTooltip_SetTitle(GameTooltip, self:GetVignetteName());
-	return true;
-end
-
-function VignettePinMixin:GetWidgetSetVerticalPadding()
-	if self:GetVignetteType() == Enum.VignetteType.Torghast then
-		return 0;
-	else
-		return 10;
-	end
 end

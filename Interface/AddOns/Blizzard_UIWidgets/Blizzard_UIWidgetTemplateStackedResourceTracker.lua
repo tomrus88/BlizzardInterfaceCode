@@ -9,38 +9,39 @@ UIWidgetManager:RegisterWidgetVisTypeTemplate(Enum.UIWidgetVisualizationType.Sta
 
 UIWidgetTemplateStackedResourceTrackerMixin = CreateFromMixins(UIWidgetBaseTemplateMixin);
 
-function UIWidgetTemplateStackedResourceTrackerMixin:Setup(widgetInfo, widgetContainer)
-	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo, widgetContainer);
+local frameTextureKitRegions = {
+	["Frame"] = "%s-frame",
+}
+
+function UIWidgetTemplateStackedResourceTrackerMixin:Setup(widgetInfo)
+	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo);
 	self.resourcePool:ReleaseAll();
 
 	local previousResourceFrame;
-	local resourceWidth = 0;
-	local resourceHeight = 0;
 
 	for index, resourceInfo in ipairs(widgetInfo.resources) do
 		local resourceFrame = self.resourcePool:Acquire();
 		resourceFrame:Show();
 
-		resourceFrame:Setup(widgetContainer, resourceInfo);
-		resourceFrame:SetTooltipLocation(widgetInfo.tooltipLoc);
+		resourceFrame:Setup(resourceInfo);
 
 		if previousResourceFrame then
 			resourceFrame:SetPoint("TOPLEFT", previousResourceFrame, "BOTTOMLEFT", 0, -6);
-			resourceHeight = resourceHeight + resourceFrame:GetHeight() + 6;
 		else
-			resourceFrame:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0);
-			resourceHeight = resourceFrame:GetHeight();
+			resourceFrame:SetPoint("TOPLEFT", self.Frame, "TOPLEFT", 49, -38);
 		end
 
-		resourceFrame:SetOverrideNormalFontColor(self.fontColor);
-
-		resourceWidth = math.max(resourceWidth, resourceFrame:GetWidth());
+		if self.fontColor then
+			resourceFrame:SetFontColor(self.fontColor);
+		end
 
 		previousResourceFrame = resourceFrame;
 	end
+	
+	SetupTextureKits(widgetInfo.frameTextureKitID, self, frameTextureKitRegions, false, true);
 
-	self:SetWidth(resourceWidth);
-	self:SetHeight(resourceHeight);
+	self:SetWidth(self.Frame:GetWidth() + 45);
+	self:SetHeight(self.Frame:GetHeight());
 end
 
 function UIWidgetTemplateStackedResourceTrackerMixin:OnLoad()

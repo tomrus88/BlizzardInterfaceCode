@@ -57,17 +57,17 @@ function ArenaEnemyFrames_ResetCrowdControlCooldownData()
 end
 
 function ArenaEnemyFrames_OnShow(self)
-	DurabilityFrame:SetAlerts();
+	--DurabilityFrame:SetAlerts();
 	UIParent_ManageFramePositions();
 end
 
 function ArenaEnemyFrames_OnHide(self)	
-	DurabilityFrame:SetAlerts();
+	--DurabilityFrame:SetAlerts();
 	UIParent_ManageFramePositions();
 end
 
 function ArenaEnemyFrames_CheckEffectiveEnableState(self, cvarUpdate)
-	if (C_PvP.IsInBrawl() and not C_PvP.IsSoloShuffle()) then
+	if (C_PvP.IsInBrawl()) then
 		ArenaEnemyFrames_Disable(self);
 	else
 		if ( GetCVarBool("showArenaEnemyFrames") or cvarUpdate ) then
@@ -107,8 +107,8 @@ function ArenaEnemyFrame_OnLoad(self)
 			_G[prefix.."HealthBar"], _G[prefix.."HealthBarText"], 
 			_G[prefix.."ManaBar"], _G[prefix.."ManaBarText"], nil, nil, nil,
 			_G[prefix.."MyHealPredictionBar"], _G[prefix.."OtherHealPredictionBar"],
-			_G[prefix.."TotalAbsorbBar"], _G[prefix.."TotalAbsorbBarOverlay"], _G[prefix.."OverAbsorbGlow"],
-			_G[prefix.."OverHealAbsorbGlow"], _G[prefix.."HealAbsorbBar"], _G[prefix.."HealAbsorbBarLeftShadow"],
+			nil, nil, nil,
+			nil, _G[prefix.."HealAbsorbBar"], _G[prefix.."HealAbsorbBarLeftShadow"],
 			_G[prefix.."HealAbsorbBarRightShadow"]);
 	SetTextStatusBarTextZeroText(_G[prefix.."HealthBar"], DEAD);
 
@@ -157,15 +157,9 @@ function ArenaEnemyFrame_UpdatePlayer(self, useCVars)--At some points, we need t
 		self.classPortrait:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles");
 		self.classPortrait:SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]));
 	end
-	local specID = GetArenaOpponentSpec(id);
-	if (specID and specID > 0) then 
-		local _, _, _, specIcon = GetSpecializationInfoByID(specID);
-		self.specBorder:Show();
-		SetPortraitToTexture(self.specPortrait, specIcon);
-	else
-		self.specPortrait:SetTexture(nil);
-		self.specBorder:Hide();
-	end
+
+	self.specPortrait:SetTexture(nil);
+	self.specBorder:Hide();
 	
 	-- When not in an arena, show their faction icon (these are really flag carriers, not arena opponents)
 	local _, instanceType = IsInInstance();
@@ -254,28 +248,38 @@ function ArenaEnemyFrame_OnEvent(self, event, unit, ...)
 			ArenaEnemyFrame_UpdatePet(self);
 		elseif ( event == "UNIT_NAME_UPDATE" ) then
 			ArenaEnemyFrame_UpdatePlayer(self);
-		elseif ( event == "UNIT_MAXHEALTH" or event == "UNIT_HEAL_PREDICTION" or event == "UNIT_ABSORB_AMOUNT_CHANGED" or event == "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" ) then
-			UnitFrameHealPredictionBars_Update(self);
 		elseif ( event == "ARENA_COOLDOWNS_UPDATE" ) then
 			ArenaEnemyFrame_UpdateCrowdControl(self);
 		elseif ( event == "ARENA_CROWD_CONTROL_SPELL_UPDATE" ) then
-			local spellID = ...;
+			local unitTarget, spellID, itemID = ...;
 			if (spellID ~= self.CC.spellID) then
-				local spellTexture, spellTextureNoOverride = GetSpellTexture(spellID);
 				self.CC.spellID = spellID;
-				self.CC.Icon:SetTexture(spellTextureNoOverride);
+
+				if(itemID ~= 0) then
+					local itemTexture = GetItemIcon(itemID);
+					self.CC.Icon:SetTexture(itemTexture);
+				else
+					local spellTexture, spellTextureNoOverride = GetSpellTexture(spellID);
+					self.CC.Icon:SetTexture(spellTextureNoOverride);
+				end
 			end
 		end
 	end
 end
 
 function ArenaEnemyFrame_UpdateCrowdControl(self)
-	local spellID, startTime, duration = C_PvP.GetArenaCrowdControlInfo(self.unit);
+	local spellID, itemID, startTime, duration = C_PvP.GetArenaCrowdControlInfo(self.unit);
 	if (spellID) then
 		if (spellID ~= self.CC.spellID) then
-			local spellTexture, spellTextureNoOverride = GetSpellTexture(spellID);
 			self.CC.spellID = spellID;
-			self.CC.Icon:SetTexture(spellTextureNoOverride);
+
+			if(itemID ~= 0) then
+				local itemTexture = GetItemIcon(itemID);
+				self.CC.Icon:SetTexture(itemTexture);
+			else
+				local spellTexture, spellTextureNoOverride = GetSpellTexture(spellID);
+				self.CC.Icon:SetTexture(spellTextureNoOverride);
+			end
 		end
 		if (startTime ~= 0 and duration ~= 0) then
 			self.CC.Cooldown:SetCooldown(startTime/1000.0, duration/1000.0);
@@ -413,29 +417,13 @@ end
 --Arena preparation stuff, shows class and spec of opponents during countdown
 ------------------------------------------------------------------------------
 
-
-function ArenaPrepFrames_OnLoad(self)
-	self:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS");
-	local numOpps = GetNumArenaOpponentSpecs();
-	if (numOpps and numOpps > 0) then
-		ArenaPrepFrames_OnEvent(self, "ARENA_PREP_OPPONENT_SPECIALIZATIONS");
-	end
-end
-
-function ArenaPrepFrames_OnEvent(self, event, ...) --also called in OnLoad
-	if (event == "ARENA_PREP_OPPONENT_SPECIALIZATIONS") then
-		ArenaPrepFrames_UpdateFrames();
-		self:Show()
-	end
-end
-
 function ArenaPrepFrames_OnShow(self)
-	DurabilityFrame:SetAlerts();
+	--DurabilityFrame:SetAlerts();
 	UIParent_ManageFramePositions()
 end
 
 function ArenaPrepFrames_OnHide(self)
-	DurabilityFrame:SetAlerts();
+	--DurabilityFrame:SetAlerts();
 	UIParent_ManageFramePositions();
 end
 

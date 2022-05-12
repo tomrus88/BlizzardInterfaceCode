@@ -419,10 +419,30 @@ function TimeManagerClockButton_OnLoad(self)
 		TimeManager_StartCheckingAlarm();
 	end
 	self:RegisterForClicks("AnyUp");
+
+	TimeManagerClockButton_UpdateShowClockSetting();
+end
+
+function TimeManagerClockButton_UpdateShowClockSetting()
+	if ( GetCVar("showMinimapClock") == "1" ) then
+		TimeManagerClockButton:Show();
+		-- If the user is about to cancel an alarm, prepare to keep us shown.
+		TimeManagerClockButton.prevShown = true;
+	else
+		if (not TimeManagerClockButton.alarmFiring) then
+			TimeManagerClockButton:Hide();
+		end
+		-- If the user is about to cancel an alarm, prepare to hide us.
+		TimeManagerClockButton.prevShown = false;
+	end
 end
 
 function TimeManagerClockButton_Update()
-	TimeManagerClockTicker:SetText(GameTime_GetTime(false));
+	local currentText = TimeManagerClockTicker:GetText();
+	local newText = GameTime_GetTime(false);
+	if currentText ~= newText then
+		TimeManagerClockTicker:SetText(newText);
+	end
 end
 
 function TimeManagerClockButton_OnEnter(self)
@@ -753,4 +773,3 @@ function StopwatchPlayPauseButton_OnClick(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 	end
 end
-

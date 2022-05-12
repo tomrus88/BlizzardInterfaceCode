@@ -2,5 +2,5 @@
 ..\FrameXML\UI.xsd">
 	<Script file="AreaPOIDataProvider.lua"/>
 
-	<Frame name="AreaPOIPinTemplate" inherits="BaseHighlightableMapPoiPinTemplate" mixin="AreaPOIPinMixin" virtual="true" />
+	<Frame name="AreaPOIPinTemplate" inherits="BaseMapPoiPinTemplate" mixin="AreaPOIPinMixin" virtual="true" />
 </Ui>

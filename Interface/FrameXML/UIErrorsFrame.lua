@@ -11,7 +11,7 @@ end
 function UIErrorsMixin:OnEvent(event, ...)
 	if event == "SYSMSG" then
 		local message, r, g, b = ...;
-		self:CheckAddMessage(message, r, g, b, 1.0);
+		self:AddMessage(message, r, g, b, 1.0);
 	elseif event == "UI_INFO_MESSAGE" then
 		local messageType, message = ...;
 		self:TryDisplayMessage(messageType, message, YELLOW_FONT_COLOR:GetRGB());
@@ -72,9 +72,10 @@ local THROTTLED_MESSAGE_TYPES = {
 };
 
 local BLACK_LISTED_MESSAGE_TYPES = {
+	[LE_GAME_ERR_SPELL_FAILED_ANOTHER_IN_PROGRESS] = true,
+--[[
 	[LE_GAME_ERR_ABILITY_COOLDOWN] = true,
 	[LE_GAME_ERR_SPELL_COOLDOWN] = true,
-	[LE_GAME_ERR_SPELL_FAILED_ANOTHER_IN_PROGRESS] = true,
 
 	[LE_GAME_ERR_OUT_OF_HOLY_POWER] = true,
 	[LE_GAME_ERR_OUT_OF_POWER_DISPLAY] = true,
@@ -86,7 +87,7 @@ local BLACK_LISTED_MESSAGE_TYPES = {
 	[LE_GAME_ERR_OUT_OF_HEALTH] = true,
 	[LE_GAME_ERR_OUT_OF_RAGE] = true,
 	[LE_GAME_ERR_OUT_OF_ARCANE_CHARGES] = true,
-	[LE_GAME_ERR_OUT_OF_RANGE] = true,
+	--[LE_GAME_ERR_OUT_OF_RANGE] = true,
 	[LE_GAME_ERR_OUT_OF_ENERGY] = true,
 	[LE_GAME_ERR_OUT_OF_LUNAR_POWER] = true,
 	[LE_GAME_ERR_OUT_OF_RUNIC_POWER] = true,
@@ -94,6 +95,7 @@ local BLACK_LISTED_MESSAGE_TYPES = {
 	[LE_GAME_ERR_OUT_OF_RUNES] = true,
 	[LE_GAME_ERR_OUT_OF_FURY] = true,
 	[LE_GAME_ERR_OUT_OF_MAELSTROM] = true,
+]]
 };
 
 function UIErrorsMixin:FlashFontString(fontString)
@@ -134,7 +136,7 @@ function UIErrorsMixin:ShouldDisplayMessageType(messageType, message)
 end
 
 function UIErrorsMixin:TryDisplayMessage(messageType, message, r, g, b)
-	if not self:GetMessagesSuppressed() and self:ShouldDisplayMessageType(messageType, message) then
+	if self:ShouldDisplayMessageType(messageType, message) then
 		self:AddMessage(message, r, g, b, 1.0, messageType);
 
 		local errorStringId, soundKitID, voiceID = GetGameMessageInfo(messageType);
@@ -149,7 +151,7 @@ end
 local function AddExternalMessage(self, message, color)
 	if not self:TryFlashingExistingMessage(LE_GAME_ERR_SYSTEM, message) then
 		local r, g, b = color:GetRGB();
-		self:CheckAddMessage(message, r, g, b, 1.0, LE_GAME_ERR_SYSTEM);
+		self:AddMessage(message, r, g, b, 1.0, LE_GAME_ERR_SYSTEM);
 	end
 end
 
@@ -159,27 +161,4 @@ end
 
 function UIErrorsMixin:AddExternalWarningMessage(message)
 	AddExternalMessage(self, message, YELLOW_FONT_COLOR);
-end
-
-function UIErrorsMixin:SetMessagesSuppressed(messagesSuppressed)
-	self.messagesSuppressed = messagesSuppressed;
-end
-
-function UIErrorsMixin:GetMessagesSuppressed()
-	return self.messagesSuppressed;
-end
-
-function UIErrorsMixin:SuppressMessagesThisFrame()
-	if self:GetMessagesSuppressed() then
-		return;
-	end
-	
-	self:SetMessagesSuppressed(true);
-	C_Timer.After(0, GenerateClosure(self.SetMessagesSuppressed, self, false));
-end
-
-function UIErrorsMixin:CheckAddMessage(...)
-	if not self:GetMessagesSuppressed() then
-		self:AddMessage(...);
-	end
 end

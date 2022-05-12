@@ -185,20 +185,6 @@ local VoiceChat =
 			},
 		},
 		{
-			Name = "GetJoinClubVoiceChannelError",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "clubId", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "errorReason", Type = "VoiceChannelErrorReason", Nilable = true },
-			},
-		},
-		{
 			Name = "GetLocalPlayerActiveChannelMemberInfo",
 			Type = "Function",
 
@@ -1199,18 +1185,6 @@ local VoiceChat =
 			{
 				{ Name = "PushToTalk", Type = "CommunicationMode", EnumValue = 0 },
 				{ Name = "OpenMic", Type = "CommunicationMode", EnumValue = 1 },
-			},
-		},
-		{
-			Name = "VoiceChannelErrorReason",
-			Type = "Enumeration",
-			NumValues = 2,
-			MinValue = 0,
-			MaxValue = 1,
-			Fields =
-			{
-				{ Name = "Unknown", Type = "VoiceChannelErrorReason", EnumValue = 0 },
-				{ Name = "IsBattleNetChannel", Type = "VoiceChannelErrorReason", EnumValue = 1 },
 			},
 		},
 		{

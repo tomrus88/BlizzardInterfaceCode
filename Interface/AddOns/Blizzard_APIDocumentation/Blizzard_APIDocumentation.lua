@@ -13,8 +13,6 @@ function APIDocumentationMixin:OnLoad()
 		CopyAPI = 2,
 		OpenDump = 3,
 	};
-
-	DEFAULT_CHAT_FRAME:SetMaxLines(2000);
 end
 
 function APIDocumentationMixin:HandleSlashCommand(command)
@@ -126,12 +124,12 @@ function APIDocumentationMixin:OutputUsage()
 	self:WriteLine(self:GetIndentString() .. "/api <system name> search <api name>");
 	self:WriteLine(self:GetIndentString() .. "or");
 	self:WriteLine(self:GetIndentString() .. "/api <system name> s <api name>");
-	self:WriteLine(self:GetIndentString() .. "Example: /api artifactui search relic");
+	self:WriteLine(self:GetIndentString() .. "Example: /api item search bound");
 	self:WriteLine(" ");
 
 	self:WriteLine("List all API in a system");
 	self:WriteLine(self:GetIndentString() .. "/api <system name> list");
-	self:WriteLine(self:GetIndentString() .. "Example: /api artifactui list");
+	self:WriteLine(self:GetIndentString() .. "Example: /api item list");
 	self:WriteLine(" ");
 	self:WriteLine("All searches support Lua patterns.");
 end

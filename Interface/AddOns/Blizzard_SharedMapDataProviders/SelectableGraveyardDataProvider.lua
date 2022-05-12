@@ -79,7 +79,7 @@ function SelectableGraveyardPinMixin:OnMouseLeave()  -- override
 	GameTooltip:Hide();
 end
 
-function SelectableGraveyardPinMixin:OnMouseClickAction()
+function SelectableGraveyardPinMixin:OnClick()
 	if self.isGraveyardSelectable then
 		SetCemeteryPreference(self.graveyardID);
 	end

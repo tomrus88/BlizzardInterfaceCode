@@ -1,4 +1,0 @@
-## Title: Blizzard_TokenUI
-Blizzard_TokenUI.lua
-Blizzard_TokenUI.xml
-Localization.lua

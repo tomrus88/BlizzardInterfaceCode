@@ -9,29 +9,16 @@ function GameMenuFrame_OnShow(self)
 end
 
 function GameMenuFrame_UpdateVisibleButtons(self)
-	local height = 292;
+	local height = 272;
 	GameMenuButtonUIOptions:SetPoint("TOP", GameMenuButtonOptions, "BOTTOM", 0, -1);
 
-	local buttonToReanchor = GameMenuButtonWhatsNew;
-	local reanchorYOffset = -1;
-
-	if IsCharacterNewlyBoosted() or not C_SplashScreen.CanViewSplashScreen()  then
-		GameMenuButtonWhatsNew:Hide();
-		height = height - 20;
-		buttonToReanchor = GameMenuButtonOptions;
-		reanchorYOffset = -16;
-	else
-		GameMenuButtonWhatsNew:Show();
-		GameMenuButtonOptions:SetPoint("TOP", GameMenuButtonWhatsNew, "BOTTOM", 0, -16);
-	end
-
-	if ( C_StorePublic.IsEnabled() ) then
+	local storeIsRestricted = IsTrialAccount();
+	if ( C_StorePublic.IsEnabled() and C_StorePublic.HasPurchaseableProducts() and not storeIsRestricted ) then
 		height = height + 20;
 		GameMenuButtonStore:Show();
-		buttonToReanchor:SetPoint("TOP", GameMenuButtonStore, "BOTTOM", 0, reanchorYOffset);
 	else
 		GameMenuButtonStore:Hide();
-		buttonToReanchor:SetPoint("TOP", GameMenuButtonHelp, "BOTTOM", 0, reanchorYOffset);
+		GameMenuButtonOptions:SetPoint("TOP", GameMenuButtonHelp, "BOTTOM", 0, -16);
 	end
 
 	if ( not GameMenuButtonRatings:IsShown() and GetNumAddOns() == 0 ) then
@@ -52,7 +39,10 @@ function GameMenuFrame_UpdateVisibleButtons(self)
 end
 
 function GameMenuFrame_UpdateStoreButtonState(self)
-	if ( C_StorePublic.IsDisabledByParentalControls() ) then
+	if ( IsVeteranTrialAccount() ) then
+		self.disabledTooltip = ERR_RESTRICTED_ACCOUNT_TRIAL;
+		self:Disable();
+	elseif ( C_StorePublic.IsDisabledByParentalControls() ) then
 		self.disabledTooltip = BLIZZARD_STORE_ERROR_PARENTAL_CONTROLS;
 		self:Disable();
 	elseif ( Kiosk.IsEnabled() ) then

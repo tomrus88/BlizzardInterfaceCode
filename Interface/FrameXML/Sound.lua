@@ -2,32 +2,32 @@ SOUND_MASTERVOLUME_STEP = 0.1;
 
 function Sound_ToggleMusic()
 	if ( GetCVar("Sound_EnableAllSound") == "0" ) then
-		ActionStatus:DisplayMessage(SOUND_DISABLED);
+		ActionStatus_DisplayMessage(SOUND_DISABLED, true);
 	else
 		if ( GetCVar("Sound_EnableMusic") == "0" ) then
 			SetCVar("Sound_EnableMusic", 1);
-			ActionStatus:DisplayMessage(MUSIC_ENABLED)
+			ActionStatus_DisplayMessage(MUSIC_ENABLED, true)
 		else
 			SetCVar("Sound_EnableMusic", 0);
-			ActionStatus:DisplayMessage(MUSIC_DISABLED)
+			ActionStatus_DisplayMessage(MUSIC_DISABLED, true)
 		end
 	end
 end
 
 function Sound_ToggleSound()
 	if ( GetCVar("Sound_EnableAllSound") == "0" ) then
-		ActionStatus:DisplayMessage(SOUND_DISABLED);
+		ActionStatus_DisplayMessage(SOUND_DISABLED, true);
 	else
 		if ( GetCVar("Sound_EnableSFX") == "0" ) then
 			SetCVar("Sound_EnableSFX", 1);
 			SetCVar("Sound_EnableAmbience", 1);
 			SetCVar("Sound_EnableDialog", 1);
-			ActionStatus:DisplayMessage(SOUND_EFFECTS_ENABLED);
+			ActionStatus_DisplayMessage(SOUND_EFFECTS_ENABLED, true);
 		else
 			SetCVar("Sound_EnableSFX", 0);
 			SetCVar("Sound_EnableAmbience", 0);
 			SetCVar("Sound_EnableDialog", 0);
-			ActionStatus:DisplayMessage(SOUND_EFFECTS_DISABLED);
+			ActionStatus_DisplayMessage(SOUND_EFFECTS_DISABLED, true);
 		end
 	end
 end

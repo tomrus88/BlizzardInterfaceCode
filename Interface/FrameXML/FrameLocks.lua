@@ -23,26 +23,28 @@ local HIDE_MOST = {
 	MultiBarRight		= "hidden",
 	FocusFrame			= "hidden",
 	TemporaryEnchantFrame = "hidden",
-	ExtraAbilityContainer	= "hidden",
+	ZoneAbilityFrame	= "hidden",
 	OrderHallCommandBar	= "hidden",
-	TalentMicroButtonAlert	="hidden",
-	PVPMatchScoreboard = "hidden",
-	PVPMatchResults = "hidden",
+	WorldStateScoreFrame = "hidden",
 	UIWidgetTopCenterContainerFrame = "hidden",
 }
 
 --------Data on what locks exist and what frames are ruled by them--------
 FRAMELOCK_STATES = {
-	COMMENTATOR_SPECTATING_MODE = Mixin({
-		GeneralDockManager					= "hidden",
-		QuickJoinToastButton				= "hidden",
-		ChatFrameMenuButton					= "hidden",
-		CombatLogQuickButtonFrame 			= "hidden",
-		ArenaEnemyFrames 					= "hidden",
-		ChatFrame1							= "hidden",
-		ChatFrameChannelButton				= "hidden",
+	COMMENTATOR_SPECTATING_MODE = Mixin(
+	HIDE_MOST,
+	{
+		GeneralDockManager	= "hidden",
+		QuickJoinToastButton	= "hidden",
+		ChatFrameMenuButton	= "hidden",
+		CombatLogQuickButtonFrame = "hidden",
+		ArenaEnemyFrames = "hidden",
+		ChatFrame1			= "hidden",
+		ChatFrameChannelButton = "hidden",
+		UIWidgetTopCenterContainerFrame = "shown",
+		WorldStateScoreFrame = "",
 		--Additional chat frames are added to this list as they are created.
-	}, HIDE_MOST),
+	}),
 	PETBATTLES = HIDE_MOST,
 };
 

@@ -125,7 +125,6 @@ local Club =
 				{ Name = "allowedRedeemCount", Type = "number", Nilable = true, Documentation = { "Number of uses. nil means unlimited" } },
 				{ Name = "duration", Type = "number", Nilable = true, Documentation = { "Duration in seconds. nil never expires" } },
 				{ Name = "defaultStreamId", Type = "string", Nilable = true },
-				{ Name = "isCrossFaction", Type = "bool", Nilable = true },
 			},
 		},
 		{
@@ -178,20 +177,6 @@ local Club =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "ticketId", Type = "string", Nilable = false },
-			},
-		},
-		{
-			Name = "DoesCommunityHaveMembersOfTheOppositeFaction",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "clubId", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "hasMembersOfOppositeFaction", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -290,15 +275,6 @@ local Club =
 			},
 		},
 		{
-			Name = "GetClubCapacity",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "capacity", Type = "number", Nilable = false },
-			},
-		},
-		{
 			Name = "GetClubInfo",
 			Type = "Function",
 
@@ -310,20 +286,6 @@ local Club =
 			Returns =
 			{
 				{ Name = "info", Type = "ClubInfo", Nilable = true },
-			},
-		},
-		{
-			Name = "GetClubLimits",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "clubType", Type = "ClubType", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "clubLimits", Type = "ClubLimits", Nilable = false },
 			},
 		},
 		{
@@ -382,15 +344,6 @@ local Club =
 			Returns =
 			{
 				{ Name = "errorCode", Type = "string", Nilable = true },
-			},
-		},
-		{
-			Name = "GetGuildClubId",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "guildClubId", Type = "string", Nilable = true },
 			},
 		},
 		{
@@ -462,22 +415,6 @@ local Club =
 			Returns =
 			{
 				{ Name = "invitations", Type = "table", InnerType = "ClubSelfInvitationInfo", Nilable = false },
-			},
-		},
-		{
-			Name = "GetLastTicketResponse",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "ticket", Type = "string", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "error", Type = "ClubErrorType", Nilable = false },
-				{ Name = "info", Type = "ClubInfo", Nilable = true },
-				{ Name = "showError", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -809,16 +746,6 @@ local Club =
 			},
 		},
 		{
-			Name = "SendCharacterInvitation",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "clubId", Type = "string", Nilable = false },
-				{ Name = "character", Type = "string", Nilable = false },
-			},
-		},
-		{
 			Name = "SendInvitation",
 			Type = "Function",
 			Documentation = { "Check the canSendInvitation privilege." },
@@ -892,6 +819,15 @@ local Club =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "settings", Type = "table", InnerType = "ClubStreamNotificationSetting", Nilable = false },
+			},
+		},
+		{
+			Name = "SetCommunityID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "communityID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -1213,7 +1149,9 @@ local Club =
 			LiteralName = "CLUB_TICKET_RECEIVED",
 			Payload =
 			{
+				{ Name = "error", Type = "ClubErrorType", Nilable = false },
 				{ Name = "ticket", Type = "string", Nilable = false },
+				{ Name = "info", Type = "ClubInfo", Nilable = true },
 			},
 		},
 		{
@@ -1473,9 +1411,9 @@ local Club =
 		{
 			Name = "ValidateNameResult",
 			Type = "Enumeration",
-			NumValues = 18,
+			NumValues = 17,
 			MinValue = 0,
-			MaxValue = 17,
+			MaxValue = 16,
 			Fields =
 			{
 				{ Name = "NameSuccess", Type = "ValidateNameResult", EnumValue = 0 },
@@ -1495,7 +1433,6 @@ local Club =
 				{ Name = "NameRussianConsecutiveSilentCharacters", Type = "ValidateNameResult", EnumValue = 14 },
 				{ Name = "NameRussianSilentCharacterAtBeginningOrEnd", Type = "ValidateNameResult", EnumValue = 15 },
 				{ Name = "NameDeclensionDoesntMatchBaseName", Type = "ValidateNameResult", EnumValue = 16 },
-				{ Name = "NameSpacesDisallowed", Type = "ValidateNameResult", EnumValue = 17 },
 			},
 		},
 		{
@@ -1514,7 +1451,6 @@ local Club =
 				{ Name = "favoriteTimeStamp", Type = "number", Nilable = true },
 				{ Name = "joinTime", Type = "number", Nilable = true },
 				{ Name = "socialQueueingEnabled", Type = "bool", Nilable = true },
-				{ Name = "crossFaction", Type = "bool", Nilable = true },
 			},
 		},
 		{
@@ -1536,14 +1472,6 @@ local Club =
 				{ Name = "invitationId", Type = "string", Nilable = false },
 				{ Name = "isMyInvitation", Type = "bool", Nilable = false },
 				{ Name = "invitee", Type = "ClubMemberInfo", Nilable = false },
-			},
-		},
-		{
-			Name = "ClubLimits",
-			Type = "Structure",
-			Fields =
-			{
-				{ Name = "maximumNumberOfStreams", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -1579,8 +1507,6 @@ local Club =
 				{ Name = "guildRank", Type = "string", Nilable = true },
 				{ Name = "guildRankOrder", Type = "number", Nilable = true },
 				{ Name = "isRemoteChat", Type = "bool", Nilable = true },
-				{ Name = "overallDungeonScore", Type = "number", Nilable = true },
-				{ Name = "faction", Type = "PvPFaction", Nilable = true },
 			},
 		},
 		{

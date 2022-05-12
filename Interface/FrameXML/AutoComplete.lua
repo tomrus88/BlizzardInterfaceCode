@@ -9,7 +9,7 @@ AUTOCOMPLETE_FLAG_INTERACTED_WITH = 0x00000010;
 AUTOCOMPLETE_FLAG_ONLINE = 			0x00000020;
 AUTO_COMPLETE_IN_AOI = 				0x00000040;
 AUTO_COMPLETE_ACCOUNT_CHARACTER =	0x00000080;
-AUTO_COMPLETE_RECENT_PLAYER		=	0x00000100;
+AUTO_COMPLETE_NON_LOCAL_REALM =		0x00000100;
 AUTOCOMPLETE_FLAG_ALL =				0xffffffff;
 
 AUTOCOMPLETE_LIST_TEMPLATES = {
@@ -113,7 +113,8 @@ local AUTOCOMPLETE_LIST = AUTOCOMPLETE_LIST;
 	AUTOCOMPLETE_LIST.CALENDAREVENT		= AUTOCOMPLETE_LIST_TEMPLATES.KNOWN;
 	AUTOCOMPLETE_LIST.IGNORE			= AUTOCOMPLETE_LIST_TEMPLATES.NOT_FRIEND;
 	AUTOCOMPLETE_LIST.LOOT_MASTER		= AUTOCOMPLETE_LIST_TEMPLATES.IN_GROUP;
-	AUTOCOMPLETE_LIST.WARGAME			= AUTOCOMPLETE_LIST_TEMPLATES.BNET_NOT_IN_PARTY;
+	-- If we want this, need to resolve K-String shenanigans and then update ChatEditAutoComplete.
+	-- AUTOCOMPLETE_LIST.WARGAME			= AUTOCOMPLETE_LIST_TEMPLATES.BNET_NOT_IN_PARTY;
 	AUTOCOMPLETE_LIST.COMMUNITY			= AUTOCOMPLETE_LIST_TEMPLATES.ALL_OTHER_CHARS;
 
 AUTOCOMPLETE_COLOR_KEYS = 
@@ -365,13 +366,13 @@ function AutoCompleteEditBox_OnTextChanged(self, userInput)
 end
 
 function AutoCompleteEditBox_OnKeyDown(self, key)
-	if ( key == "BACKSPACE" ) then
+	if ( key == "BACKSPACE" or key == "DELETE" ) then
 		self.disallowAutoComplete = true;
 	end
 end
 
 function AutoCompleteEditBox_OnKeyUp(self, key)
-	if ( key == "BACKSPACE" ) then
+	if ( key == "BACKSPACE" or key == "DELETE" ) then
 		self.disallowAutoComplete = false;
 	end
 end
@@ -405,7 +406,6 @@ function AutoCompleteEditBox_OnChar(self)
 end
 
 function AutoCompleteEditBox_OnEditFocusLost(self)
-	self:HighlightText(0, 0);
 	AutoComplete_HideIfAttachedTo(self);
 end
 
@@ -437,7 +437,7 @@ function AutoCompleteButton_OnClick(self)
 	
 	autoComplete:Hide();
 	
-	if ( editBox.customAutoCompleteFunction ~= nil and editBox.customAutoCompleteFunction(editBox, newText, self.nameInfo, name) ) then
+	if ( editBox.customAutoCompleteFunction ~= nil and editBox.customAutoCompleteFunction(editBox, newText, self.nameInfo) ) then
 		return;
 	end
 	

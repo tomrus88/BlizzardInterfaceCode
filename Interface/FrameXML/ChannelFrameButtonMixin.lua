@@ -1,11 +1,8 @@
 ChannelFrameButtonMixin = {};
 
 function ToggleChannelFrame()
-	local wasShown = ChannelFrame:IsShown();
+	PlaySound(SOUNDKIT.IG_CHAT_EMOTE_BUTTON);
 	ChannelFrame:Toggle();
-	if ChannelFrame:IsShown() ~= wasShown then
-		PlaySound(SOUNDKIT.IG_CHAT_EMOTE_BUTTON);
-	end
 end
 
 function ChannelFrameButtonMixin:OnLoad()
@@ -20,28 +17,27 @@ function ChannelFrameButtonMixin:OnLoad()
 	self:AddStateAtlas(false, "chatframe-button-icon-voicechat");
 	self:AddStateAtlas(true, "chatframe-button-icon-headset");
 
-	self:SetTooltipFunction(function(state)
+	--[[self:SetTooltipFunction(function(state)
 		return MicroButtonTooltipText(CHAT_CHANNELS, "TOGGLECHATTAB");
-	end);
+	end);]]
 
 	self:RegisterStateUpdateEvent("VOICE_CHAT_CHANNEL_ACTIVATED");
 	self:RegisterStateUpdateEvent("VOICE_CHAT_CHANNEL_DEACTIVATED");
 	self:UpdateVisibleState();
 
-	self:RegisterEvent("GROUP_FORMED");
-	self:RegisterEvent("GROUP_JOINED");
-	self:RegisterEvent("GROUP_LEFT");
+	self:RegisterEvent("VOICE_CHAT_CHANNEL_JOINED");
 end
 
 function ChannelFrameButtonMixin:OnEvent(event, ...)
 	PropertyBindingMixin.OnEvent(self, event, ...);
 
-	if event == "GROUP_FORMED" or event == "GROUP_JOINED" or event == "GROUP_LEFT" then
-		self:OnGroupStatusChanged();
+	if event == "VOICE_CHAT_CHANNEL_JOINED" then
+		self:OnVoiceChannelJoined(...);
 	end
 end
 
-function ChannelFrameButtonMixin:OnGroupStatusChanged()
+function ChannelFrameButtonMixin:OnVoiceChannelJoined(statusCode, voiceChannelID, channelType, clubId, streamId)
+	ChannelFrame:MarkDirty("CheckShowTutorial");
 	if ChannelFrame:ShouldShowTutorial() then
 		UIFrameFlash(self.Flash, 1.0, 1.0, -1, false, 0, 0);
 	end

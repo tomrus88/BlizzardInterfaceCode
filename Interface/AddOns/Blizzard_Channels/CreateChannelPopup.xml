@@ -24,7 +24,10 @@
 		<DisabledFont style="GameFontDisableSmall"/>
 	</Button>
 
-	<Frame name="CreateChannelPopup" mixin="CreateChannelPopupMixin" parent="UIParent" frameStrata="DIALOG" hidden="true" enableKeyboard="true" enableMouse="true">
+	<Frame name="CreateChannelPopup" inherits="BackdropTemplate" mixin="CreateChannelPopupMixin" parent="UIParent" frameStrata="DIALOG" hidden="true" enableKeyboard="true" enableMouse="true">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+		</KeyValues>
 		<Size x="212" y="200"/>
 		<Layers>
 			<Layer level="BORDER">
@@ -51,7 +54,6 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame parentKey="BG" inherits="DialogBorderTemplate"/>
 			<EditBox parentKey="Name" autoFocus="true" inherits="CreateChannelPopupEditBoxTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="23" y="-60"/>
@@ -125,7 +127,7 @@
 			</Button>
 		</Frames>
 		<Scripts>
-			<OnLoad method="OnLoad"/>
+			<OnLoad inherit="prepend" method="OnLoad"/>
 			<OnHide method="OnHide"/>
 		</Scripts>
 	</Frame>

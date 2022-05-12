@@ -1,91 +1,104 @@
+local tabInfo = {};
 
-function InspectTalentFrame_OnLoad(self)
-	self:RegisterEvent("INSPECT_READY");
-	self:RegisterEvent("PLAYER_TARGET_CHANGED");
-end
-
-function InspectTalentFrame_OnEvent(self, event, unit)
-	if ( not InspectFrame:IsShown() ) then
-		return;
+function InspectTalentFrameSpentPoints_OnEnter(self)
+	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+	GameTooltip:AddLine(TALENT_POINTS, 1, 1, 1);
+	for _, entry in ipairs(tabInfo) do
+		GameTooltip:AddDoubleLine(entry[1], entry[3], nil, nil, nil, 1, 1, 1);
 	end
-
-	if (event == "INSPECT_READY" and InspectFrame.unit and (UnitGUID(InspectFrame.unit) == unit)) then
-		InspectTalentFrameTalents_OnShow(self.InspectTalents);
-		InspectTalentFrameSpec_OnShow(self.InspectSpec);
-	end
-end
-
-function InspectTalentFrame_OnShow(self)
-	ButtonFrameTemplate_HideButtonBar(InspectFrame);
-end
-
---------------------------------------------------------------------------------
-------------------  Specialization Button Functions     ---------------------------
---------------------------------------------------------------------------------
-function InspectTalentFrameSpec_OnShow(self)
-	local spec = nil;
-	local sex = nil;
-	if(INSPECTED_UNIT ~= nil) then
-		spec = GetInspectSpecialization(INSPECTED_UNIT);
-		sex = UnitSex(INSPECTED_UNIT);
-	end
-	if(spec ~= nil and spec > 0 and sex ~= nil) then
-		local role1 = GetSpecializationRoleByID(spec);
-		if(role1 ~= nil) then
-			local id, name, description, icon = GetSpecializationInfoByID(spec, sex);
-			self.specIcon:Show();
-			SetPortraitToTexture(self.specIcon, icon);
-			self.specName:SetText(name);
-			self.roleIcon:Show();
-			self.roleName:SetText(_G[role1]);
-			self.roleIcon:SetTexCoord(GetTexCoordsForRole(role1));
-			self.tooltip = description;
-		end
-	else
-		InspectTalentFrameSpec_OnClear(self);
-	end
-end
-
-function InspectTalentFrameSpec_OnClear(self)
-	self.specName:SetText("");
-	self.specIcon:Hide();
-	self.roleName:SetText("");
-	self.roleIcon:Hide();
-end
-
-function InspectTalentFrameSpec_OnEnter(self)
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 28, -18);
-	GameTooltip:AddLine(self.tooltip, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
-	GameTooltip:SetMinimumWidth(300, true);
+	
 	GameTooltip:Show();
 end
 
-function InspectTalentFrameSpec_OnLeave(self)
-	GameTooltip:SetMinimumWidth(0, false);
-	GameTooltip:Hide();
-end
-
---------------------------------------------------------------------------------
-------------------  Talent Button Functions     ---------------------------
---------------------------------------------------------------------------------
-function InspectTalentFrameTalents_OnLoad(self)
-	self.inspect = true;
-end
-
-function InspectTalentFrameTalents_OnShow(self)
-	self.talentGroup = GetActiveSpecGroup(true);
-	TalentFrame_Update(self, INSPECTED_UNIT);
+function InspectTalentFrameTalent_OnEvent(self, event, ...)
+	if ( GameTooltip:IsOwned(self) ) then
+		GameTooltip:SetTalent(InspectTalentFrame.currentSelectedTab, self:GetID(), InspectTalentFrame.inspect);
+	end
 end
 
 function InspectTalentFrameTalent_OnEnter(self)
-	local classDisplayName, class, classID = UnitClass(INSPECTED_UNIT);
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");	
-	GameTooltip:SetTalent(self:GetID(),true, self.talentGroup, INSPECTED_UNIT, classID);
+	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+	GameTooltip:SetTalent(InspectTalentFrame.currentSelectedTab, self:GetID(), InspectTalentFrame.inspect);
+	self.UpdateTooltip = InspectTalentFrameTalent_OnEnter;
 end
 
-function InspectTalentFrameTalent_OnClick(self)
-	if ( IsModifiedClick("CHATLINK") ) then
-		local _, _, classID = UnitClass(INSPECTED_UNIT);
-		ChatEdit_InsertLink(GetTalentLink(self:GetID()));
+function InspectTalentFrame_SetupTabs()
+	local numTabs = GetNumTalentTabs(InspectTalentFrame.inspect);
+	for i=#tabInfo, 1, -1 do
+		tremove(tabInfo, i);
+	end
+	for i=1, MAX_TALENT_TABS do
+		tab = getglobal("InspectTalentFrameTab"..(i));
+		if ( tab ) then
+			if ( i <= numTabs ) then
+				--GetTalentTabInfo return values: 1 - Tree name, 2 - Tree icon, 3 - Points Spent, 4 - Long Tree name
+				tabInfo[i] = {GetTalentTabInfo(i, InspectTalentFrame.inspect)};
+				if ( (i) == PanelTemplates_GetSelectedTab(InspectTalentFrame) ) then
+					-- If tab is the selected tab set the points spent info
+					getglobal("InspectTalentFrameSpentPoints"):SetText(format(MASTERY_POINTS_SPENT, tabInfo[i][1]).." "..HIGHLIGHT_FONT_COLOR_CODE..tabInfo[i][3]..FONT_COLOR_CODE_CLOSE);
+					InspectTalentFrame.pointsSpent = tabInfo[i][3];
+				end
+				tab:SetText(tabInfo[i][1]);
+				PanelTemplates_TabResize(tab, -10);
+				tab:Show();
+			else
+				tab:Hide();
+			end
+		end
 	end
 end
+
+function InspectTalentFrame_Update(self)
+	InspectTalentFrame_SetupTabs();
+	PanelTemplates_UpdateTabs(InspectFrame);
+	InspectTalentFrame.currentSelectedTab = PanelTemplates_GetSelectedTab(InspectTalentFrame)
+end
+
+function InspectTalentFrame_Refresh(self)
+	InspectTalentFrame.unit = InspectFrame.unit;
+	TalentFrame_Update(InspectTalentFrame);
+end
+
+function InspectTalentFrame_OnLoad(self)
+	self.updateFunction = InspectTalentFrame_Update;
+	self.inspect = true;
+
+	TalentFrame_Load(InspectTalentFrame);
+
+	for i=1, MAX_NUM_TALENTS do
+		button = getglobal("InspectTalentFrameTalent"..i);
+		if ( button ) then
+			button.talentButton_OnEvent = InspectTalentFrameTalent_OnEvent;
+			button.talentButton_OnClick = InspectTalentFrameTalent_OnClick;
+			button.talentButton_OnEnter = InspectTalentFrameTalent_OnEnter;
+		end
+	end
+	PanelTemplates_SetNumTabs(self, 3);
+	InspectTalentFrame.selectedTab = 1;
+	PanelTemplates_UpdateTabs(self);
+	InspectTalentFrame:SetScript("OnEvent", function(...) InspectTalentFrame_OnEvent(...) end);
+end
+
+function  InspectTalentFrame_OnShow(self)
+	InspectTalentFrame:RegisterEvent("INSPECT_READY");
+	InspectTalentFrame_Refresh();
+end
+
+function  InspectTalentFrame_OnHide(self)
+	InspectTalentFrame:UnregisterEvent("INSPECT_READY");
+end
+
+function InspectTalentFrame_OnEvent(self, event, ...)
+	if ( event == "INSPECT_READY" ) then
+		InspectTalentFrame_Refresh();
+	end
+end
+
+function InspectTalentFrameDownArrow_OnClick(self)
+	local parent = self:GetParent();
+	parent:SetValue(parent:GetValue() + (parent:GetHeight() / 2));
+	PlaySound(SOUNDKIT.U_CHAT_SCROLL_BUTTON);
+	UIFrameFlashStop(InspectTalentFrameScrollButtonOverlay);
+end
+
+

@@ -41,8 +41,8 @@ function KioskSessionFinishedDialogMixin:OnLoad()
 	self:RegisterEvent("KIOSK_SESSION_EXPIRED");
 
 	self.Dialog.Title:SetText(KIOSK_SESSION_EXPIRED_TITLE);
-	self.Dialog.SubTitle:SetText("Shadowlands");
-	self.Dialog.Body:SetText(KIOSK_SESSION_EXPIRED_BODY);
+	self.Dialog.SubTitle:SetText("Dire Maul");
+	--self.Dialog.Body:SetText(KIOSK_SESSION_EXPIRED_BODY);
 end
 
 function KioskSessionFinishedDialogMixin:OnEvent(event, ...)

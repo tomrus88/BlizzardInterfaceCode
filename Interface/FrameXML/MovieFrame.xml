@@ -18,7 +18,10 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame parentKey="CloseDialog">
+			<Frame parentKey="CloseDialog" inherits="BackdropTemplate">
+				<KeyValues>
+					<KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+				</KeyValues>
 				<Size x="320" y="84"/>
 				<Anchors>
 					<Anchor point="CENTER"/>
@@ -34,15 +37,14 @@
 					</Layer>
 				</Layers>
 				<Frames>
-					<Frame parentKey="Border" inherits="DialogBorderTemplate"/>
 					<Button parentKey="ConfirmButton" inherits="CinematicDialogButtonTemplate" text="YES">
 						<Anchors>
 							<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" x="-6" y="16"/>
 						</Anchors>
 						<Scripts>
 							<OnClick>
-                				MovieFrame_OnMovieFinished(self:GetParent():GetParent());
-              				</OnClick>
+                MovieFrame_OnMovieFinished(self:GetParent():GetParent());
+              </OnClick>
 						</Scripts>
 					</Button>
 					<Button parentKey="ResumeButton" inherits="CinematicDialogButtonTemplate" text="NO">

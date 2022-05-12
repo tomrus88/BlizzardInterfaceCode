@@ -56,8 +56,8 @@
 							<Anchors>
 								<Anchor point="CENTER" y="-2"/>
 							</Anchors>
+							<Color r="1" g="1" b="1"/>
 						</FontString>
-						<Color r="1" g="1" b="1"/>
 					</Layer>
 				</Layers>
 			</Frame>
@@ -75,7 +75,8 @@
 						</Texture>
 					</Layer>
 					<Layer level="OVERLAY">
-						<Texture parentKey="Icon" atlas="Healing_Red" useAtlasSize="true">
+						<Texture parentKey="Icon">
+						<!--<Texture parentKey="Icon" atlas="Healing_Red" useAtlasSize="true">-->
 							<Anchors>
 								<Anchor point="CENTER"/>
 							</Anchors>

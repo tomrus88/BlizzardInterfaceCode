@@ -6,14 +6,14 @@ function MapCanvasDetailLayerMixin:OnLoad()
 	self.textureLoadGroup = CreateFromMixins(TextureLoadingGroupMixin);
 end
 
-function MapCanvasDetailLayerMixin:SetMapAndLayer(mapID, layerIndex, mapCanvas)
+function MapCanvasDetailLayerMixin:SetMapAndLayer(mapID, layerIndex)
 	local mapArtID = C_Map.GetMapArtID(mapID) -- phased map art may be different for the same mapID
 	if self.mapID ~= mapID or self.mapArtID ~= mapArtID or self.layerIndex ~= layerIndex then
 		self.mapID = mapID;
 		self.mapArtID = mapArtID;
 		self.layerIndex = layerIndex;
 
-		self:RefreshDetailTiles(mapCanvas);
+		self:RefreshDetailTiles();
 	end
 end
 
@@ -43,7 +43,7 @@ function MapCanvasDetailLayerMixin:GetGlobalAlpha()
 	return self.globalAlpha or 1;
 end
 
-function MapCanvasDetailLayerMixin:RefreshDetailTiles(mapCanvas)
+function MapCanvasDetailLayerMixin:RefreshDetailTiles()
 	self.detailTilePool:ReleaseAll();
 	self.textureLoadGroup:Reset();
 	self.isWaitingForLoad = true;
@@ -54,34 +54,20 @@ function MapCanvasDetailLayerMixin:RefreshDetailTiles(mapCanvas)
 	local numDetailTilesCols = math.ceil(layerInfo.layerWidth / layerInfo.tileWidth);
 	local textures = C_Map.GetMapArtLayerTextures(self.mapID, self.layerIndex);
 
-	local prevRowDetailTile;
-	local prevColDetailTile;
 	for tileCol = 1, numDetailTilesCols do
 		for tileRow = 1, numDetailTilesRows do
-			if tileRow == 1 then
-				prevRowDetailTile = nil;
-			end
 			local detailTile = self.detailTilePool:Acquire();
-			mapCanvas:AddMaskableTexture(detailTile);
 			self.textureLoadGroup:AddTexture(detailTile);
 			local textureIndex = (tileRow - 1) * numDetailTilesCols + tileCol;
 			detailTile:SetTexture(textures[textureIndex], nil, nil, "TRILINEAR");
+
+			local offsetX = math.floor(layerInfo.tileWidth * (tileCol - 1));
+			local offsetY = math.floor(layerInfo.tileHeight * (tileRow - 1));
+
 			detailTile:ClearAllPoints();
-			if prevRowDetailTile then
-				detailTile:SetPoint("TOPLEFT", prevRowDetailTile, "BOTTOMLEFT");
-			else
-				if prevColDetailTile then
-					detailTile:SetPoint("TOPLEFT", prevColDetailTile, "TOPRIGHT");
-				else
-					detailTile:SetPoint("TOPLEFT", self);
-				end
-			end
+			detailTile:SetPoint("TOPLEFT", self, "TOPLEFT", offsetX, -offsetY);
 			detailTile:SetDrawLayer("BACKGROUND", -8 + self.layerIndex);
 			detailTile:Show();
-			prevRowDetailTile = detailTile;
-			if tileRow == 1 then
-				prevColDetailTile = detailTile;
-			end
 		end
 	end
 

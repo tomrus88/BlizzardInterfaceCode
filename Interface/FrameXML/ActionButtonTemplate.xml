@@ -38,9 +38,9 @@
 			<Layer level="ARTWORK" textureSubLevel="2">
 				<Texture name="$parentFlyoutArrow" inherits="ActionBarFlyoutButton-ArrowUp" parentKey="FlyoutArrow" hidden="true"/>
 				<FontString name="$parentHotKey" inherits="NumberFontNormalSmallGray" parentKey="HotKey" justifyH="RIGHT">
-					<Size x="32" y="10"/>
+					<Size x="36" y="10"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" x="3" y="-3"/>
+						<Anchor point="TOPLEFT" x="-2" y="-2"/>
 					</Anchors>
 				</FontString>
 				<FontString name="$parentCount" inherits="NumberFontNormal" parentKey="Count" justifyH="RIGHT">
@@ -82,11 +82,6 @@
 						<Anchor point="CENTER" x="0" y="0"/>
 					</Anchors>
 				</Texture>
-				<Texture parentKey="LevelLinkLockIcon" atlas="QuestSharing-Padlock" useAtlasSize="true" hidden="true">
-					<Anchors>
-						<Anchor point="CENTER"/>
-					</Anchors>
-				</Texture>
 			</Layer>
 		</Layers>
 		<Animations>
@@ -113,9 +108,15 @@
 			</Cooldown>
 		</Frames>
 		<NormalTexture name="$parentNormalTexture" parentKey="NormalTexture" file="Interface\Buttons\UI-Quickslot2">
+			<Size>
+				<AbsDimension x="66" y="66"/>
+			</Size>
 			<Anchors>
-				<Anchor point="TOPLEFT" x="-15" y="15"/>
-				<Anchor point="BOTTOMRIGHT" x="15" y="-15"/>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="-1"/>
+					</Offset>
+				</Anchor>
 			</Anchors>
 		</NormalTexture>
 		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>

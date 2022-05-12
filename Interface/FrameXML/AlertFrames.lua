@@ -106,9 +106,6 @@ end
 
 function AlertFrameQueueMixin:OnFrameHide(frame)
 	self.alertFramePool:Release(frame);
-	if frame.OnRelease then
-		frame:OnRelease();
-	end
 end
 
 function AlertFrameQueueMixin:AddAlert(...)
@@ -263,12 +260,10 @@ function AlertContainerMixin:OnLoad()
 	self.shouldQueueAlertsFlags = {
 		playerEnteredWorld = false,
 		variablesLoaded = false,
-		firstFrameRendered = false;
 	};
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("VARIABLES_LOADED");
-	self:RegisterEvent("FIRST_FRAME_RENDERED");
 end
 
 function AlertContainerMixin:OnEvent(event, ...)
@@ -276,8 +271,6 @@ function AlertContainerMixin:OnEvent(event, ...)
 		self:SetPlayerEnteredWorld();
 	elseif event == "VARIABLES_LOADED" then
 		self:SetVariablesLoaded();
-	elseif event == "FIRST_FRAME_RENDERED" then
-		self:SetFirstFrameRendered();
 	end
 end
 
@@ -301,12 +294,6 @@ end
 function AlertContainerMixin:SetVariablesLoaded()
 	self:UnregisterEvent("VARIABLES_LOADED");
 	self:SetEnabledFlag("variablesLoaded", true);
-end
-
-function AlertContainerMixin:SetFirstFrameRendered()
-	self:UnregisterEvent("FIRST_FRAME_RENDERED");
-	-- The first frame immediately after a load can take a long time and miss alert frames, so we enable this flag the frame after
-	C_Timer.After(0, GenerateClosure(self.SetEnabledFlag, self, "firstFrameRendered", true));
 end
 
 function AlertContainerMixin:SetAlertsEnabled(enabled, reason)
@@ -430,46 +417,7 @@ AlertFrameMixin = {};
 function AlertFrameMixin:OnLoad()
 	AlertContainerMixin.OnLoad(self);
 
-	self:RegisterEvent("ACHIEVEMENT_EARNED");
-	self:RegisterEvent("CRITERIA_EARNED");
-	self:RegisterEvent("LFG_COMPLETION_REWARD");
-	self:RegisterEvent("SCENARIO_COMPLETED");
-	self:RegisterEvent("LOOT_ITEM_ROLL_WON");
-	self:RegisterEvent("SHOW_LOOT_TOAST");
-	self:RegisterEvent("SHOW_LOOT_TOAST_UPGRADE");
-	self:RegisterEvent("SHOW_PVP_FACTION_LOOT_TOAST");
-	self:RegisterEvent("SHOW_RATED_PVP_REWARD_TOAST");
-	self:RegisterEvent("PET_BATTLE_CLOSE");
-	self:RegisterEvent("ENTITLEMENT_DELIVERED");
-	self:RegisterEvent("RAF_ENTITLEMENT_DELIVERED");
-	self:RegisterEvent("GARRISON_BUILDING_ACTIVATABLE");
-    self:RegisterEvent("GARRISON_TALENT_COMPLETE");
-	self:RegisterEvent("GARRISON_MISSION_FINISHED");
-	self:RegisterEvent("GARRISON_FOLLOWER_ADDED");
-	self:RegisterEvent("GARRISON_RANDOM_MISSION_ADDED");
-	self:RegisterEvent("NEW_RECIPE_LEARNED");
-	self:RegisterEvent("SHOW_LOOT_TOAST_LEGENDARY_LOOTED");
-	self:RegisterEvent("AZERITE_EMPOWERED_ITEM_LOOTED");
-	self:RegisterEvent("QUEST_TURNED_IN");
-	self:RegisterEvent("QUEST_LOOT_RECEIVED");
-	self:RegisterEvent("NEW_PET_ADDED");
-	self:RegisterEvent("NEW_MOUNT_ADDED");
-	self:RegisterEvent("NEW_TOY_ADDED");
-	self:RegisterEvent("NEW_RUNEFORGE_POWER_ADDED");
-	self:RegisterEvent("TRANSMOG_COSMETIC_COLLECTION_SOURCE_ADDED");
-end
-
-function CreateContinuableContainerForLFGRewards()
-	local continuableContainer = ContinuableContainer:Create();
-	local rewardCount = select(10, GetLFGCompletionReward());
-	for i = 1, rewardCount or 0 do
-		local _, _, _, _, _, _, id, objectType = GetLFGCompletionRewardItem(i);
-		if objectType == "item" then
-			local item = Item:CreateFromItemID(id);
-			continuableContainer:AddContinuable(item);
-		end
-	end
-	return continuableContainer;
+	self:RegisterEvent("STORE_PRODUCT_DELIVERED");
 end
 
 function AlertFrameMixin:OnEvent(event, ...)
@@ -500,22 +448,12 @@ function AlertFrameMixin:OnEvent(event, ...)
 			local scenarioType = select(10, C_Scenario.GetInfo());
 			if scenarioType ~= LE_SCENARIO_TYPE_LEGION_INVASION then
 				if (not self:ShouldSupressDungeonOrScenarioAlert()) then 
-					local continuableContainer = CreateContinuableContainerForLFGRewards();
-					if continuableContainer then
-						continuableContainer:ContinueOnLoad(function()
-							ScenarioAlertSystem:AddAlert(self:BuildScenarioRewardData());
-						end);
-					end
+					ScenarioAlertSystem:AddAlert(self:BuildScenarioRewardData());
 				end
 			end
 		else
 			if (not self:ShouldSupressDungeonOrScenarioAlert()) then 
-				local continuableContainer = CreateContinuableContainerForLFGRewards();
-				if continuableContainer then
-					continuableContainer:ContinueOnLoad(function()
-						DungeonCompletionAlertSystem:AddAlert(self:BuildLFGRewardData());
-					end);
-				end
+				DungeonCompletionAlertSystem:AddAlert(self:BuildLFGRewardData());
 			end
 		end
 	elseif ( event == "SCENARIO_COMPLETED" ) then
@@ -532,9 +470,9 @@ function AlertFrameMixin:OnEvent(event, ...)
 		local itemLink, quantity, rollType, roll, isUpgraded = ...;
 		LootAlertSystem:AddAlert(itemLink, quantity, rollType, roll, nil, nil, nil, nil, nil, isUpgraded);
 	elseif ( event == "SHOW_LOOT_TOAST" ) then
-		local typeIdentifier, itemLink, quantity, specID, sex, isPersonal, lootSource, lessAwesome, isUpgraded, isCorrupted = ...;
+		local typeIdentifier, itemLink, quantity, specID, sex, isPersonal, lootSource, lessAwesome, isUpgraded = ...;
 		if ( typeIdentifier == "item" ) then
-			LootAlertSystem:AddAlert(itemLink, quantity, nil, nil, specID, nil, nil, nil, lessAwesome, isUpgraded, isCorrupted);
+			LootAlertSystem:AddAlert(itemLink, quantity, nil, nil, specID, nil, nil, nil, lessAwesome, isUpgraded);
 		elseif ( typeIdentifier == "money" ) then
 			MoneyWonAlertSystem:AddAlert(quantity);
 		elseif ( isPersonal and (typeIdentifier == "currency") ) then
@@ -566,10 +504,8 @@ function AlertFrameMixin:OnEvent(event, ...)
 		LootUpgradeAlertSystem:AddAlert(itemLink, quantity, specID, baseQuality, nil, nil, lessAwesome);
 	elseif ( event == "PET_BATTLE_CLOSE" ) then
 		AchievementAlertSystem:CheckQueuedAlerts();
-	elseif ( event == "ENTITLEMENT_DELIVERED" ) then
-		EntitlementDeliveredAlertSystem:AddAlert(...);
-	elseif ( event == "RAF_ENTITLEMENT_DELIVERED" ) then
-		RafRewardDeliveredAlertSystem:AddAlert(...);
+	elseif ( event == "STORE_PRODUCT_DELIVERED" ) then
+		StorePurchaseAlertSystem:AddAlert(...);
 	elseif ( event == "GARRISON_BUILDING_ACTIVATABLE" ) then
 		local buildingName, garrisonType = ...;
 		if ( garrisonType == C_Garrison.GetLandingPageGarrisonType() ) then
@@ -580,7 +516,7 @@ function AlertFrameMixin:OnEvent(event, ...)
     	local garrisonType, doAlert = ...;
     	if ( doAlert ) then
 			local talentID = C_Garrison.GetCompleteTalent(garrisonType);
-			local talent = C_Garrison.GetTalentInfo(talentID);
+			local talent = C_Garrison.GetTalent(talentID);
 	        GarrisonTalentAlertSystem:AddAlert(garrisonType, talent);
 		end
 	elseif ( event == "GARRISON_MISSION_FINISHED" ) then
@@ -599,7 +535,7 @@ function AlertFrameMixin:OnEvent(event, ...)
 
 					local missionInfo = C_Garrison.GetBasicMissionInfo(missionID);
 
-					if ( followerTypeID == Enum.GarrisonFollowerType.FollowerType_6_2 ) then
+					if ( followerTypeID == LE_FOLLOWER_TYPE_SHIPYARD_6_2 ) then
 						GarrisonShipMissionAlertSystem:AddAlert(missionInfo);
 					else
 						GarrisonMissionAlertSystem:AddAlert(missionInfo);
@@ -608,10 +544,10 @@ function AlertFrameMixin:OnEvent(event, ...)
 			end
 		end
 	elseif ( event == "GARRISON_FOLLOWER_ADDED" ) then
-		local followerID, name, class, level, quality, isUpgraded, textureKit, followerType = ...;
+		local followerID, name, class, level, quality, isUpgraded, texPrefix, followerType = ...;
 		local followerInfo = C_Garrison.GetFollowerInfo(followerID);
-		if (followerType == Enum.GarrisonFollowerType.FollowerType_6_2) then
-			GarrisonShipFollowerAlertSystem:AddAlert(followerID, name, class, textureKit, level, quality, isUpgraded, followerInfo);
+		if (followerType == LE_FOLLOWER_TYPE_SHIPYARD_6_2) then
+			GarrisonShipFollowerAlertSystem:AddAlert(followerID, name, class, texPrefix, level, quality, isUpgraded, followerInfo);
 		else
 			GarrisonFollowerAlertSystem:AddAlert(followerID, name, level, quality, isUpgraded, followerInfo);
 		end
@@ -647,15 +583,6 @@ function AlertFrameMixin:OnEvent(event, ...)
 			-- May be invasion reward
 			InvasionAlertSystem:AddCoalesceData(questID, rewardItemLink, texture);
 		end
-	elseif ( event == "NEW_TOY_ADDED") then
-		local toyID = ...;
-		NewToyAlertSystem:AddAlert(toyID);
-	elseif ( event == "NEW_RUNEFORGE_POWER_ADDED") then
-		local powerID = ...;
-		NewRuneforgePowerAlertSystem:AddAlert(powerID);
-	elseif ( event == "TRANSMOG_COSMETIC_COLLECTION_SOURCE_ADDED") then
-		local itemModifiedAppearanceID = ...;
-		NewCosmeticAlertFrameSystem:AddAlert(itemModifiedAppearanceID);
 	end
 end
 
@@ -703,7 +630,7 @@ function AlertFrameMixin:BuildScenarioRewardData()
 end
 
 function AlertFrameMixin:BuildQuestData(questID)
-	local taskName, factionID, capped, displayAsObjective = C_TaskQuest.GetQuestInfoByQuestID(questID);
+	local taskName = C_TaskQuest.GetQuestInfoByQuestID(questID);
 
 	local questData =
 	{
@@ -712,7 +639,6 @@ function AlertFrameMixin:BuildQuestData(questID)
 		taskName = taskName,
 		money = GetQuestLogRewardMoney(questID),
 		xp = GetQuestLogRewardXP(questID),
-		displayAsObjective = displayAsObjective,
 	};
 
 	local currencyRewardCount = GetNumQuestLogRewardCurrencies(questID);

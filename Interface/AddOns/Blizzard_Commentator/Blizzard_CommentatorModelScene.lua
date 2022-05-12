@@ -75,7 +75,7 @@ function CommentatorModelSceneMixin:UpdateModelScene()
 		else
 			self:FinishModelSceneEffect(MODEL_SCENE_OFFENSIVE_EFFECT_AURA);
 		end
-
+		
 		if defensive then
 			self:AddModelSceneEffect(MODEL_SCENE_DEFENSIVE_EFFECT_AURA);
 		else

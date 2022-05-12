@@ -44,13 +44,13 @@ local QuestConstants =
 			},
 		},
 		{
-			Name = "QuestWatchConsts",
+			Name = "QuestWatchConsts_Classic",
 			Type = "Constants",
 			Values =
 			{
-				{ Name = "MAX_QUEST_WATCHES", Type = "number", Value = 25 },
-				{ Name = "MAX_WORLD_QUEST_WATCHES_AUTOMATIC", Type = "number", Value = 1 },
-				{ Name = "MAX_WORLD_QUEST_WATCHES_MANUAL", Type = "number", Value = 5 },
+				{ Name = "MAX_QUEST_WATCHES", Type = "number", Value = 5 },
+				{ Name = "MAX_WORLD_QUEST_WATCHES", Type = "number", Value = 1 },
+				{ Name = "MAX_WORLD_QUEST_HARD_WATCHES", Type = "number", Value = 5 },
 			},
 		},
 	},

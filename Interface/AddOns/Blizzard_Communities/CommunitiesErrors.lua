@@ -82,8 +82,6 @@ local errorStrings =
 	[Enum.ClubErrorType.ErrorClubTicketCountAtMax] = "ERROR_CLUB_TICKET_COUNT_AT_MAX",
 	[Enum.ClubErrorType.ErrorClubTicketNoSuchTicket] = "ERROR_CLUB_TICKET_NO_SUCH_TICKET",
 	[Enum.ClubErrorType.ErrorClubTicketHasConsumedAllowedRedeemCount] = "ERROR_CLUB_TICKET_HAS_CONSUMED_ALLOWED_REDEEM_COUNT",
-	[Enum.ClubErrorType.ErrorClubDoesntAllowCrossFaction] = "ERROR_CLUB_DOESNT_ALLOW_CROSS_FACTION",
-	[Enum.ClubErrorType.ErrorClubEditHasCrossFactionMembers] = "COMMUNITIES_SETTING_CROSS_FACTION_TOOLTIP_ERROR",
 };
 
 local clubRemovedStrings = 
@@ -104,16 +102,8 @@ end
 
 function GetCommunitiesErrorString(action, error, clubType)
 	local actionCodeString, errorCodeString;
-	if clubType ~= Enum.ClubType.BattleNet then
-		actionCodeString = GetActionString(action, true);
-		errorCodeString = GetErrorString(error, true);
-	end
-	if not actionCodeString then
-		actionCodeString = GetActionString(action, false);
-	end
-	if not errorCodeString then
-		errorCodeString = GetErrorString(error, false);
-	end
+	actionCodeString = GetActionString(action, false);
+	errorCodeString = GetErrorString(error, false);
 	if actionCodeString then
 		return actionCodeString:format(errorCodeString or "");
 	end

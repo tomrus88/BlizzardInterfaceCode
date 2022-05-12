@@ -17,7 +17,7 @@ local UIDropDownMenu_SetSelectedValue = UIDropDownMenu_SetSelectedValue
 if ( InGlue() ) then
 	AddonDialogTypes = { };
 	HasShownAddonOutOfDateDialog = false;
-
+	
 	AddonDialogTypes["ADDONS_OUT_OF_DATE"] = {
 		text = ADDONS_OUT_OF_DATE,
 		button1 = DISABLE_ADDONS,
@@ -36,7 +36,6 @@ if ( InGlue() ) then
 		button2 = CANCEL,
 		OnAccept = function()
 			SetAddonVersionCheck(false);
-			CharacterSelect_CheckDialogStates();
 		end,
 		OnCancel = function()
 			AddonDialog_Show("ADDONS_OUT_OF_DATE");
@@ -49,7 +48,6 @@ if ( InGlue() ) then
 		button2 = CANCEL,
 		OnAccept = function()
 			AddonList_DisableOutOfDate();
-			CharacterSelect_CheckDialogStates();
 		end,
 		OnCancel = function()
 			AddonDialog_Show("ADDONS_OUT_OF_DATE");
@@ -118,20 +116,24 @@ if ( InGlue() ) then
 	end
 
 	AddonTooltip = GlueTooltip
+	UIDropDownMenu_Initialize = GlueDropDownMenu_Initialize
+	UIDropDownMenu_AddButton = GlueDropDownMenu_AddButton
+	UIDropDownMenu_CreateInfo = GlueDropDownMenu_CreateInfo
+	UIDropDownMenu_GetSelectedValue = GlueDropDownMenu_GetSelectedValue
+	UIDropDownMenu_SetSelectedValue = GlueDropDownMenu_SetSelectedValue
 
-	function TryShowAddonDialog()
-		-- Check to see if any of them are out of date and not disabled
-		if not GlueAnnouncementDialog:IsShown() and IsAddonVersionCheckEnabled() and AddonList_HasOutOfDate() and not HasShownAddonOutOfDateDialog then
-			AddonDialog_Show("ADDONS_OUT_OF_DATE");
-			HasShownAddonOutOfDateDialog = true;
-			return true;
-		end
-
-		return false;
-	end
-
-	function UpdateAddonButton()
+	function UpdateAddonButton(checkVersion)
 		if ( GetNumAddOns() > 0 ) then
+			-- Check to see if any of them are out of date and not disabled
+			if ( checkVersion and IsAddonVersionCheckEnabled() and AddonList_HasOutOfDate() and not HasShownAddonOutOfDateDialog ) then
+				AddonDialog_Show("ADDONS_OUT_OF_DATE");
+				HasShownAddonOutOfDateDialog = true;
+			end
+			if ( AddonList_HasNewVersion() ) then
+				CharacterSelectAddonsButtonGlow:Show();
+			else
+				CharacterSelectAddonsButtonGlow:Hide();
+			end
 			CharacterSelectAddonsButton:Show();
 		else
 			CharacterSelectAddonsButton:Hide();
@@ -195,19 +197,32 @@ function AddonList_OnLoad(self)
 
 	self.offset = 0;
 
+	local template;
 	if ( InGlue() ) then
 		self:SetParent(GlueParent)
 		AddonDialog:SetParent(GlueParent)
 		AddonDialog:SetFrameStrata("DIALOG")
 		AddonDialogButton1:SetScript("OnClick", AddonDialog_OnClick);
 		AddonDialogButton2:SetScript("OnClick", AddonDialog_OnClick);
+		local bg = CreateFrame("Frame", "AddonListBackground", GlueParent)
+		bg:SetFrameStrata("HIGH")
+		bg:EnableMouse(true)
+		bg:SetAllPoints()
+		bg:Hide()
+		local tex = bg:CreateTexture()
+		tex:SetColorTexture(0, 0, 0, 0.6)
+		tex:SetDrawLayer("BACKGROUND")
+		tex:SetPoint("TOPLEFT")
+		tex:SetPoint("BOTTOMRIGHT")
 		self:EnableKeyboard(true)
 		self:SetScript("OnKeyDown", AddonList_OnKeyDown)
 		self:SetFrameStrata("DIALOG")
+		template = "GlueDropDownMenuTemplate"
 	else
 		AddonDialog = nil;
 		self:SetParent(UIParent);
 		self:SetFrameStrata("HIGH");
+		template = "UIDropDownMenuTemplate"
 		self.startStatus = {};
 		self.shouldReload = false;
 		self.outOfDate = IsAddonVersionCheckEnabled() and AddonList_HasOutOfDate();
@@ -219,7 +234,7 @@ function AddonList_OnLoad(self)
 			end
 		end
 	end
-	local drop = CreateFrame("Frame", "AddonCharacterDropDown", self, "UIDropDownMenuTemplate")
+	local drop = CreateFrame("Frame", "AddonCharacterDropDown", self, template)
 	drop:SetPoint("TOPLEFT", 0, -30)
 	UIDropDownMenu_Initialize(drop, AddonListCharacterDropDown_Initialize);
 	UIDropDownMenu_SetSelectedValue(drop, true);
@@ -338,8 +353,8 @@ function AddonList_Update()
 			end
 
 			if ( not InGlue() ) then
-				if ( enabled ~= AddonList.startStatus[addonIndex] and reason ~= "DEP_DISABLED" or
-					(reason ~= "INTERFACE_VERSION" and tContains(AddonList.outOfDateIndexes, addonIndex)) or
+				if ( enabled ~= AddonList.startStatus[addonIndex] and reason ~= "DEP_DISABLED" or 
+					(reason ~= "INTERFACE_VERSION" and tContains(AddonList.outOfDateIndexes, addonIndex)) or 
 					(reason == "INTERFACE_VERSION" and not tContains(AddonList.outOfDateIndexes, addonIndex))) then
 					if ( enabled ) then
 						-- special case for loadable on demand addons
@@ -377,7 +392,7 @@ function AddonList_Update()
 	end
 end
 
-function AddonList_OnKeyDown(self, key)
+function AddonList_OnKeyDown(key)
 	if ( key == "ESCAPE" ) then
 		AddonList_OnCancel();
 	elseif ( key == "ENTER" ) then
@@ -462,9 +477,9 @@ function AddonListScrollFrame_OnVerticalScroll(self, offset)
 	end
 end
 
-function AddonList_OnShow(self)
+function AddonList_OnShow()
 	if ( InGlue() ) then
-		GlueParent_AddModalFrame(self);
+		AddonListBackground:Show()
 	end
 	UIDropDownMenu_Initialize(AddonCharacterDropDown, AddonListCharacterDropDown_Initialize);
 	UIDropDownMenu_SetSelectedValue( AddonCharacterDropDown, UIDropDownMenu_GetSelectedValue(AddonCharacterDropDown) );
@@ -473,7 +488,7 @@ end
 
 function AddonList_OnHide(self)
 	if ( InGlue() ) then
-		GlueParent_RemoveModalFrame(self);
+		AddonListBackground:Hide()
 	end
 	if ( self.save ) then
 		SaveAddOns();
@@ -519,7 +534,7 @@ function AddonList_DisableOutOfDate()
 		end
 		local enabled = (GetAddOnEnableState(character , i) > 0);
 		if ( enabled and not loadable and reason == "INTERFACE_VERSION" ) then
-			DisableAddOn(i, true);
+			DisableAddOn(i, true);			
 		end
 	end
 	SaveAddOns();
@@ -579,7 +594,11 @@ end
 
 function AddonTooltip_Update(owner)
 	local name, title, notes, _, _, security = GetAddOnInfo(owner:GetID());
-	AddonTooltip:ClearLines();
+	if ( InGlue() ) then
+		AddonTooltip:Clear()
+	else
+		AddonTooltip:ClearLines();
+	end
 	if ( security == "BANNED" ) then
 		AddonTooltip:SetText(ADDON_BANNED_TOOLTIP);
 	else

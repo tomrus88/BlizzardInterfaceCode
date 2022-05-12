@@ -94,12 +94,12 @@ KioskModeSplashMixin = {}
 function KioskModeSplashMixin:OnLoad()
 	self.autoEnterWorld = false;
 	self.mode = nil;
-
-	self.NewExpansionButton.Text:SetText("Enter Bastion");
+	SetLoginScreenModel(KioskBackgroundModel);
 end
 
 function KioskModeSplashMixin:OnShow()
 	self.mode = nil;
+	SetGameLogo(self.UI.GameLogo);
 end
 
 function KioskModeSplashMixin:SetMode(mode)
@@ -112,6 +112,18 @@ end
 
 function KioskModeSplashMixin:GetMode()
 	return KioskModeSplash.mode;
+end
+
+function KioskModeSplashMixin:GetRaceList()
+	if (not kioskModeData or not kioskModeData[KioskModeSplash.mode]) then
+		return;
+	end
+
+	if (C_CharacterCreation.GetCurrentRaceMode() == Enum.CharacterCreateRaceMode.Normal) then
+		return kioskModeData[KioskModeSplash.mode].races;
+	else
+		return kioskModeData[KioskModeSplash.mode].alliedRaces;
+	end
 end
 
 function KioskModeSplashMixin:GetIDForSelection(type, selection)
@@ -142,15 +154,7 @@ function NewCharacterButtonMixin:OnClick(button, down)
 	KioskModeSplashMixin:StartSession();
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-	KioskModeSplashMixin:SetMode("newcharacter");
-end
+ 	KioskModeSplashMixin:SetMode("highlevel");
 
-NewExpansionButtonMixin = {}
-
-function NewExpansionButtonMixin:OnClick(button, down)
-	KioskModeSplashMixin:StartSession();
-
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-	KioskModeSplashMixin:SetMode("highlevel");
 	GlueParent_SetScreen("charcreate");
 end

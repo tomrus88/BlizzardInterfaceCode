@@ -79,7 +79,10 @@
 		<HighlightFont style="GameFontHighlightSmall"/>
 	</Button>
 	
-	<Frame name="CommunitiesEditStreamDialogTemplate" frameStrata="DIALOG" mixin="CommunitiesEditStreamDialogMixin" virtual="true">
+	<Frame name="CommunitiesEditStreamDialogTemplate" inherits="BackdropTemplate" frameStrata="DIALOG" mixin="CommunitiesEditStreamDialogMixin" virtual="true">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_DARK_DIALOG_32_32" type="global"/>
+		</KeyValues>
 		<Size x="350" y="320"/>
 		<Layers>
 			<Layer level="ARTWORK">
@@ -106,7 +109,6 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame parentKey="BG" inherits="DialogBorderDarkTemplate"/>
 			<EditBox parentKey="NameEdit" inherits="InputBoxTemplate" autoFocus="false" letters="30">
 				<Size x="0" y="30"/>
 				<Anchors>
@@ -171,7 +173,7 @@
 			</Button>
 		</Frames>
 		<Scripts>
-			<OnLoad method="OnLoad"/>
+			<OnLoad inherit="prepend" method="OnLoad"/>
 			<OnShow method="OnShow"/>
 		</Scripts>
 	</Frame>
@@ -291,7 +293,7 @@
 		</Scripts>
 	</Frame>
 	
-	<DropDownToggleButton name="AddToChatButtonTemplate" inherits="UIMenuButtonStretchTemplate" mixin="CommunitiesAddToChatMixin" virtual="true">
+	<Button name="AddToChatButtonTemplate" inherits="UIMenuButtonStretchTemplate" mixin="CommunitiesAddToChatMixin" virtual="true">
 		<Layers>
 			<Layer level="ARTWORK" textureSubLevel="1">
 				<Texture file="Interface\Buttons\SquareButtonTextures" parentKey="icon">
@@ -320,9 +322,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
-			<OnMouseDown method="OnMouseDown"/>
+			<OnClick method="OnClick"/>
 		</Scripts>
-	</DropDownToggleButton>
+	</Button>
 		
 	<Frame name="StreamDropDownMenuTemplate" inherits="UIDropDownMenuTemplate" mixin="CommunitiesStreamDropDownMixin" virtual="true">
 		<Size x="40" y="28"/>

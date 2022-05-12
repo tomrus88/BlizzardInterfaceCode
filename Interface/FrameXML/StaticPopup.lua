@@ -102,6 +102,20 @@ StaticPopupDialogs["ERROR_CINEMATIC"] = {
 	hideOnEscape = 1,
 }
 
+StaticPopupDialogs["ERR_SOR_STARTING_EXPERIENCE_INCOMPLETE"] = {
+	text = ERR_SOR_STARTING_EXPERIENCE_INCOMPLETE,
+	button1 = OKAY,
+	button2 = nil,
+	timeout = 0,
+	OnAccept = function()
+	end,
+	OnCancel = function()
+	end,
+	whileDead = 1,
+	hideOnEscape = 1,
+	showAlert = 1,
+}
+
 StaticPopupDialogs["CONFIRM_DELETE_EQUIPMENT_SET"] = {
 	text = CONFIRM_DELETE_EQUIPMENT_SET,
 	button1 = YES,
@@ -240,37 +254,16 @@ StaticPopupDialogs["MAC_OPEN_UNIVERSAL_ACCESS"] = {
 		ShowUIPanel(MacOptionsFrame);
 	end,
 	OnShow = function(self)
-		self.text:SetFormattedText(MAC_OPEN_UNIVERSAL_ACCESS1090, MacOptions_GetGameBundleName());
-	end,
-	showAlert = 1,
-	timeout = 0,
-	exclusive = 0,
-	hideOnEscape = false,
-	whileDead = 1,
-}
-
-StaticPopupDialogs["MAC_OPEN_INPUT_MONITORING"] = {
-	text = MAC_OPEN_UNIVERSAL_ACCESS,
-	button1 = YES,
-	button2 = NO,
-	OnAccept = function ()
-		MacOptions_OpenInputMonitoring();
-		ShowUIPanel(MacOptionsFrame);
-	end,
-	OnCancel = function()
-		ShowUIPanel(MacOptionsFrame);
-	end,
-	OnShow = function(self)
-		if (MacOptions_HasNewStyleInputMonitoring()) then
-			self.text:SetFormattedText(MAC_INPUT_MONITORING1015, MacOptions_GetGameBundleName());
+		if (MacOptions_HasNewStyleUniversalAccess() and MAC_OPEN_UNIVERSAL_ACCESS1090 ~= nil) then
+			self.text:SetFormattedText(MAC_OPEN_UNIVERSAL_ACCESS1090, MacOptions_GetGameBundleName());
 		else
-			self.text:SetFormattedText(MAC_INPUT_MONITORING1014, MacOptions_GetGameBundleName());
+			self.text:SetText(MAC_OPEN_UNIVERSAL_ACCESS);
 		end
 	end,
 	showAlert = 1,
 	timeout = 0,
-	exclusive = 0,
-	hideOnEscape = false,
+	exclusive = 1,
+	hideOnEscape = 1,
 	whileDead = 1,
 }
 
@@ -317,32 +310,16 @@ StaticPopupDialogs["CONFIRM_PURCHASE_NONREFUNDABLE_ITEM"] = {
 	hasItemFrame = 1,
 }
 
-StaticPopupDialogs["CONFIRM_PURCHASE_ITEM_DELAYED"] = {
-	text = "",
-	button1 = YES,
-	button2 = NO,
-	OnAccept = function(self)
-		BuyMerchantItem(MerchantFrame.itemIndex, MerchantFrame.count);
-	end,
-	OnShow = function(self, data)
-		self.text:SetText(data.confirmationText);
-	end,
-	timeout = 0,
-	hideOnEscape = 1,
-	showAlert = 1,
-	hasItemFrame = 1,
-	acceptDelay = 5,
-}
-
 StaticPopupDialogs["CONFIRM_UPGRADE_ITEM"] = {
 	text = CONFIRM_UPGRADE_ITEM,
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function()
-		ItemUpgradeFrame:OnConfirm();
+		UpgradeItem();
+		PlaySound(SOUNDKIT.UI_REFORGING_REFORGE);
 	end,
 	OnCancel = function()
-		ItemUpgradeFrame:Update();
+		ItemUpgradeFrame_Update();
 	end,
 	OnShow = function()
 
@@ -353,7 +330,6 @@ StaticPopupDialogs["CONFIRM_UPGRADE_ITEM"] = {
 	timeout = 0,
 	hideOnEscape = 1,
 	hasItemFrame = 1,
-	compactItemFrame = true,
 }
 
 StaticPopupDialogs["CONFIRM_REFUND_TOKEN_ITEM"] = {
@@ -649,6 +625,102 @@ StaticPopupDialogs["CONFIRM_GUILD_DISBAND"] = {
 	hideOnEscape = 1,
 };
 
+StaticPopupDialogs["ADD_TEAMMEMBER"] = {
+	text = ADD_TEAMMEMBER_LABEL,
+	button1 = INVITE,
+	button2 = CANCEL,
+	hasEditBox = 1,
+	autoCompleteParams = AUTOCOMPLETE_LIST.TEAM_INVITE,
+	maxLetters = 77,
+	OnAccept = function(self)
+		ArenaTeamInviteByName(PVPTeamDetails.team, self.editBox:GetText());
+	end,
+	OnShow = function(self)
+		self.editBox:SetFocus();
+	end,
+	OnHide = function(self)
+		ChatEdit_FocusActiveWindow();
+		self.editBox:SetText("");
+	end,
+	EditBoxOnEnterPressed = function(self)
+		local parent = self:GetParent();
+		ArenaTeamInviteByName(PVPTeamDetails.team, parent.editBox:GetText());
+		parent:Hide();
+	end,
+	EditBoxOnEscapePressed = function(self)
+		self:GetParent():Hide();
+	end,
+	timeout = 0,
+	exclusive = 1,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
+StaticPopupDialogs["CONFIRM_TEAM_DISBAND"] = {
+	text = CONFIRM_TEAM_DISBAND,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	OnAccept = function (self)
+		ArenaTeamDisband(self.data);
+	end,
+	OnCancel = function (self)
+	end,
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
+StaticPopupDialogs["CONFIRM_TEAM_LEAVE"] = {
+	text = CONFIRM_TEAM_LEAVE,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	OnAccept = function(self)
+		ArenaTeamLeave(self.data);
+	end,
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
+StaticPopupDialogs["CONFIRM_TEAM_PROMOTE"] = {
+	text = CONFIRM_TEAM_PROMOTE,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	OnAccept = function(self, team, name)
+		ArenaTeamSetLeaderByName(self.data, name);
+	end,
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
+StaticPopupDialogs["CONFIRM_TEAM_KICK"] = {
+	text = CONFIRM_TEAM_KICK,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	OnAccept = function(self, team, name)
+		ArenaTeamUninviteByName(self.data, name);
+	end,
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
+StaticPopupDialogs["ARENA_TEAM_INVITE"] = {
+	text = ARENA_TEAM_INVITATION,
+	button1 = ACCEPT,
+	button2 = DECLINE,
+	OnAccept = function(self)
+		AcceptArenaTeam();
+	end,
+	OnCancel = function(self)
+		DeclineArenaTeam();
+	end,
+	timeout = STATICPOPUP_TIMEOUT,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
 StaticPopupDialogs["CONFIRM_BUY_BANK_SLOT"] = {
 	text = CONFIRM_BUY_BANK_SLOT,
 	button1 = YES,
@@ -704,16 +776,8 @@ StaticPopupDialogs["CONFIRM_LOOT_DISTRIBUTION"] = {
 
 StaticPopupDialogs["CONFIRM_BATTLEFIELD_ENTRY"] = {
 	text = CONFIRM_BATTLEFIELD_ENTRY,
-	button1 = ENTER_LFG,
-	button2 = LEAVE_QUEUE,
-	OnShow = function(self, data)
-		local status, mapName, teamSize, registeredMatch = GetBattlefieldStatus(data);
-		if ( teamSize == 0 ) then
-			self.button2:Enable();
-		else
-			self.button2:Disable();
-		end
-	end,
+	button1 = ENTER_BATTLE,
+	button2 = HIDE,
 	OnAccept = function(self, data)
 		if ( not AcceptBattlefieldPort(data, true) ) then
 			return 1;
@@ -722,19 +786,12 @@ StaticPopupDialogs["CONFIRM_BATTLEFIELD_ENTRY"] = {
 			StaticPopup_Hide( "DEATH" );
 		end
 	end,
-	OnCancel = function(self, data)
-		if ( not AcceptBattlefieldPort(data, false) ) then	--Actually declines the battlefield port.
-			return 1;
-		end
-	end,
 	timeout = 0,
 	whileDead = 1,
 	hideOnEscape = 1,
 	noCancelOnEscape = 1,
 	noCancelOnReuse = 1,
-	multiple = 1,
-	closeButton = 1,
-	closeButtonIsHide = 1,
+	multiple = 1
 };
 
 StaticPopupDialogs["BFMGR_CONFIRM_WORLD_PVP_QUEUED"] = {
@@ -920,6 +977,34 @@ StaticPopupDialogs["RENAME_GUILD"] = {
 	hideOnEscape = 1
 };
 
+StaticPopupDialogs["RENAME_ARENA_TEAM"] = {
+	text = RENAME_ARENA_TEAM_LABEL,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	hasEditBox = 1,
+	maxLetters = 24,
+	OnAccept = function(self)
+		local text = self.editBox:GetText();
+		RenamePetition(text);
+	end,
+	EditBoxOnEnterPressed = function(self)
+		local text = self:GetParent().editBox:GetText();
+		RenamePetition(text);
+		self:GetParent():Hide();
+	end,
+	OnShow = function(self)
+		self.editBox:SetFocus();
+	end,
+	OnHide = function(self)
+		ChatEdit_FocusActiveWindow();
+		self.editBox:SetText("");
+	end,
+	timeout = 0,
+	exclusive = 1,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
 StaticPopupDialogs["HELP_TICKET_QUEUE_DISABLED"] = {
 	text = HELP_TICKET_QUEUE_DISABLED,
 	button1 = OKAY,
@@ -1016,11 +1101,8 @@ StaticPopupDialogs["CONFIRM_REPORT_BATTLEPET_NAME"] = {
 	text = REPORT_BATTLEPET_NAME_CONFIRMATION,
 	button1 = ACCEPT,
 	button2 = CANCEL,
-	OnShow = function(self)
-		self.reportToken = C_ReportSystem.InitiateReportPlayer(PLAYER_REPORT_TYPE_BAD_BATTLEPET_NAME);
-	end,
 	OnAccept = function(self)
-		C_ReportSystem.SendReportPlayer(self.reportToken);
+		C_ChatInfo.ReportPlayer(PLAYER_REPORT_TYPE_BAD_BATTLEPET_NAME);
 	end,
 	timeout = 0,
 	whileDead = 1,
@@ -1032,11 +1114,8 @@ StaticPopupDialogs["CONFIRM_REPORT_PET_NAME"] = {
 	text = REPORT_PET_NAME_CONFIRMATION,
 	button1 = ACCEPT,
 	button2 = CANCEL,
-	OnShow = function(self)
-		self.reportToken = C_ReportSystem.InitiateReportPlayer(PLAYER_REPORT_TYPE_BAD_PET_NAME);
-	end,
 	OnAccept = function(self)
-		C_ReportSystem.SendReportPlayer(self.reportToken);
+		C_ChatInfo.ReportPlayer(PLAYER_REPORT_TYPE_BAD_PET_NAME);
 	end,
 	timeout = 0,
 	whileDead = 1,
@@ -1198,7 +1277,7 @@ StaticPopupDialogs["RESET_CHAT"] = {
 	OnAccept = function(self)
 		FCF_ResetChatWindows();
 		if ( ChatConfigFrame:IsShown() ) then
-			ChatConfig_ResetChatSettings();
+			ChatConfig_UpdateChatSettings();
 		end
 	end,
 	timeout = 0,
@@ -1228,49 +1307,20 @@ StaticPopupDialogs["DEATH"] = {
 	button1 = DEATH_RELEASE,
 	button2 = USE_SOULSTONE,	-- rez option 1
 	button3 = USE_SOULSTONE,	-- rez option 2
-	button4 = DEATH_RECAP,
 	selectCallbackByIndex = true,
 	OnShow = function(self)
 		self.timeleft = GetReleaseTimeRemaining();
+		self.resyncTime = 0; -- Timer so that we don't call GetReleaseTimeRemaining too frequently.
 
-		if ( IsActiveBattlefieldArena() and not C_PvP.IsInBrawl() ) then
-			self.text:SetText(DEATH_RELEASE_SPECTATOR);
-		elseif ( self.timeleft == -1 ) then
+		if ( self.timeleft == -1 ) then
 			self.text:SetText(DEATH_RELEASE_NOTIMER);
 		end
-		if ( not self.UpdateRecapButton ) then
-			self.UpdateRecapButton = function( self )
-				if ( DeathRecap_HasEvents() ) then
-					self.button4:Enable();
-					self.button4:SetScript("OnEnter", nil );
-					self.button4:SetScript("OnLeave", nil);
-				else
-					self.button4:Disable();
-					self.button4:SetMotionScriptsWhileDisabled(true);
-					self.button4:SetScript("OnEnter", function(self)
-						GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT");
-						GameTooltip:SetText(DEATH_RECAP_UNAVAILABLE);
-						GameTooltip:Show();
-					end );
-					self.button4:SetScript("OnLeave", GameTooltip_Hide);
-				end
-			end
-		end
-
-		self:UpdateRecapButton();
 	end,
 	OnHide = function(self)
 		self.button2.option = nil;
 		self.button3.option = nil;
-		self.button4:SetScript("OnEnter", nil );
-		self.button4:SetScript("OnLeave", nil);
-		self.button4:SetMotionScriptsWhileDisabled(false);
 	end,
 	OnButton1 = function(self)
-		if ( IsActiveBattlefieldArena() and not C_PvP.IsInBrawl() ) then
-			local info = ChatTypeInfo["SYSTEM"];
-			DEFAULT_CHAT_FRAME:AddMessage(ARENA_SPECTATOR, info.r, info.g, info.b, info.id);
-		end
 		RepopMe();
 		if ( CannotBeResurrected() ) then
 			return 1
@@ -1282,11 +1332,13 @@ StaticPopupDialogs["DEATH"] = {
 	OnButton3 = function(self, data, reason)
 		return OnResurrectButtonClick(self.button3.option, reason);
 	end,
-	OnButton4 = function()
-		OpenDeathRecapUI();
-		return true;
-	end,
 	OnUpdate = function(self, elapsed)
+		self.resyncTime = self.resyncTime - elapsed;
+		if (self.resyncTime <= 0) then
+			self.timeleft = GetReleaseTimeRemaining();
+			self.resyncTime = 5;
+		end
+
 		if ( IsFalling() and not IsOutOfBounds()) then
 			self.button1:Disable();
 			self.button2:Disable();
@@ -1300,14 +1352,10 @@ StaticPopupDialogs["DEATH"] = {
 			self.button1:SetEnabled(false);
 			self.button1:SetText(DEATH_RELEASE);
 		else
-			local hasNoReleaseAura, noReleaseDuration, hasUntilCancelledDuration = HasNoReleaseAura();
+			local hasNoReleaseAura, noReleaseDuration = HasNoReleaseAura();
 			self.button1:SetEnabled(not hasNoReleaseAura);
 			if ( hasNoReleaseAura ) then
-				if hasUntilCancelledDuration then
-					self.button1:SetText(DEATH_RELEASE);
-				else
-					self.button1:SetText(math.floor(noReleaseDuration));
-				end
+				self.button1:SetText(math.floor(noReleaseDuration));
 			else
 				self.button1:SetText(DEATH_RELEASE);
 			end
@@ -1342,10 +1390,6 @@ StaticPopupDialogs["DEATH"] = {
 			self.button3.option = option2;
 			self.button3:SetEnabled(option2.canUse);
 		end
-
-		if ( self.UpdateRecapButton) then
-			self:UpdateRecapButton();
-		end
 	end,
 	DisplayButton2 = function(self)
 		local option1, option2 = GetSelfResurrectDialogOptions();
@@ -1363,7 +1407,8 @@ StaticPopupDialogs["DEATH"] = {
 	noCancelOnReuse = 1,
 	hideOnEscape = false,
 	noCloseOnAlt = true,
-	cancels = "RECOVER_CORPSE"
+	cancels = "RECOVER_CORPSE",
+	timeoutInformationalOnly = 1,
 };
 StaticPopupDialogs["RESURRECT"] = {
 	StartDelay = GetCorpseRecoveryDelay,
@@ -1567,11 +1612,9 @@ StaticPopupDialogs["GROUP_INVITE_CONFIRMATION"] = {
 
 			GameTooltip:AddLine(characterLine, HIGHLIGHT_FONT_COLOR:GetRGB());
 			GameTooltip:AddLine(itemLevelLine, HIGHLIGHT_FONT_COLOR:GetRGB());
-			GameTooltip_SetTooltipWaitingForData(GameTooltip, false);
 		else
 			self.nextUpdateTime = timeNow + .5;
 			GameTooltip:SetText(RETRIEVING_DATA, RED_FONT_COLOR:GetRGB());
-			GameTooltip_SetTooltipWaitingForData(GameTooltip, true);
 		end
 
 		GameTooltip:Show();
@@ -1583,11 +1626,6 @@ StaticPopupDialogs["GROUP_INVITE_CONFIRMATION"] = {
 		end
 	end,
 	OnHyperlinkEnter = function(self, link, text, region, boundsLeft, boundsBottom, boundsWidth, boundsHeight)
-		local linkType = string.match(link, '(.-):');
-		if ( linkType ~= "player" ) then
-			return;
-		end
-
 		self.linkRegion = region;
 		self.linkText = text;
 		self.nextUpdateTime = GetTime();
@@ -1600,6 +1638,20 @@ StaticPopupDialogs["GROUP_INVITE_CONFIRMATION"] = {
 		GameTooltip:Hide();
 	end,
 	whileDead = 1,
+};
+StaticPopupDialogs["GUILD_INVITE"] = {
+	text = GUILD_INVITATION,
+	button1 = ACCEPT,
+	button2 = DECLINE,
+	OnAccept = function()
+		AcceptGuild();
+	end,
+	OnCancel = function()
+		DeclineGuild();
+	end,
+	timeout = 60,
+	whileDead = 1,
+	hideOnEscape = 1
 };
 StaticPopupDialogs["CHAT_CHANNEL_INVITE"] = {
 	text = CHAT_INVITE_NOTICE_POPUP,
@@ -1656,6 +1708,74 @@ StaticPopupDialogs["CHAT_CHANNEL_INVITE"] = {
 	whileDead = 1,
 	hideOnEscape = 1,
 };
+
+StaticPopupDialogs["LEVEL_GRANT_PROPOSED"] = {
+	text = LEVEL_GRANT,
+	button1 = ACCEPT,
+	button2 = DECLINE,
+	sound = SOUNDKIT.IG_PLAYER_INVITE,
+	OnAccept = function(self)
+		AcceptLevelGrant();
+	end,
+	OnCancel = function(self)
+		DeclineLevelGrant();
+	end,
+	OnHide = function()
+		DeclineLevelGrant();
+	end,
+	timeout = STATICPOPUP_TIMEOUT,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
+do
+	local warningSeenBefore = false;
+	StaticPopupDialogs["LEVEL_GRANT_PROPOSED_ALLIED_RACE"] = {
+		text = LEVEL_GRANT_ALLIED_RACE,
+		button1 = ACCEPT,
+		button2 = DECLINE,
+		sound = SOUNDKIT.IG_PLAYER_INVITE,
+		OnAccept = function(self)
+			AcceptLevelGrant();
+		end,
+		OnCancel = function(self)
+			if (self.ticker) then
+				self.ticker:Cancel();
+				self.ticker = nil;
+			end
+			DeclineLevelGrant();
+		end,
+		OnShow = function(self)
+			if (not warningSeenBefore) then
+				self.button1:Disable();
+				self.timeLeft = 3;
+				self.button1:SetText(self.timeLeft);
+				self.ticker = C_Timer.NewTicker(1, function()
+					self.timeLeft = self.timeLeft - 1;
+					self.button1:SetText(self.timeLeft);
+					if (self.timeLeft <= 0) then
+						self.ticker:Cancel();
+						self.ticker = nil;
+						self.button1:SetText(OKAY);
+						self.button1:Enable();
+						warningSeenBefore = true;
+					end
+				end);
+			end
+		end,
+		OnHide = function(self)
+			if (self.ticker) then
+				self.ticker:Cancel();
+				self.ticker = nil;
+			end
+			DeclineLevelGrant();
+		end,
+		showAlert = 1,
+		timeout = STATICPOPUP_TIMEOUT,
+		whileDead = 1,
+		hideOnEscape = 1
+	};
+end
 
 StaticPopupDialogs["BN_BLOCK_FAILED_TOO_MANY_RID"] = {
 	text = BN_BLOCK_FAILED_TOO_MANY_RID,
@@ -1894,42 +2014,6 @@ StaticPopupDialogs["CONFIRM_AZERITE_EMPOWERED_RESPEC"] = {
 	hasMoneyFrame = 1,
 };
 
-StaticPopupDialogs["CONFIRM_AZERITE_EMPOWERED_RESPEC_EXPENSIVE"] = {
-	text = CONFIRM_AZERITE_EMPOWERED_ITEM_RESPEC_EXPENSIVE,
-	button1 = YES,
-	button2 = NO,
-	OnAccept = function(self, data)
-		PlaySound(SOUNDKIT.UI_80_AZERITEARMOR_REFORGE);
-		C_AzeriteEmpoweredItem.ConfirmAzeriteEmpoweredItemRespec(data.empoweredItemLocation);
-	end,
-	OnShow = function(self, data)
-		self.button1:Disable();
-		self.button2:Enable();
-		self.editBox:SetFocus();
-	end,
-	OnHide = function(self)
-		ChatEdit_FocusActiveWindow();
-		self.editBox:SetText("");
-	end,
-	EditBoxOnEnterPressed = function(self)
-		if ( self:GetParent().button1:IsEnabled() ) then
-			self:GetParent().button1:Click();
-		end
-	end,
-	EditBoxOnTextChanged = function (self)
-		StaticPopup_StandardConfirmationTextHandler(self, CONFIRM_AZERITE_EMPOWERED_RESPEC_STRING);
-	end,
-	EditBoxOnEscapePressed = function(self)
-		self:GetParent():Hide();
-	end,
-
-	timeout = 0,
-	exclusive = 1,
-	showAlert = 1,
-	hideOnEscape = 1,
-	hasEditBox = 1,
-	maxLetters = 32,
-};
 
 StaticPopupDialogs["DELETE_ITEM"] = {
 	text = DELETE_ITEM,
@@ -2002,14 +2086,6 @@ StaticPopupDialogs["DELETE_GOOD_ITEM"] = {
 	hasEditBox = 1,
 	maxLetters = 32,
 	OnShow = function(self)
-		local itemLocation = C_Cursor.GetCursorItem();
-		if itemLocation and C_Item.DoesItemExist(itemLocation) and C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItem(itemLocation) then
-			local msg = C_SpellBook.ContainsAnyDisenchantSpell() and DELETE_AZERITE_SCRAPPABLE_OR_DISENCHANTABLE_ITEM or DELETE_AZERITE_SCRAPPABLE_ITEM;
-			local itemName = self.text.text_arg1;
-			local azeriteIconMarkup = CreateTextureMarkup("Interface\\Icons\\INV_AzeriteDebuff",64,64,16,16,0,1,0,1,0,-2);
-			self.text:SetText(string.format(msg, itemName, azeriteIconMarkup));
-		end
-
 		self.button1:Disable();
 		self.button2:Enable();
 		self.editBox:SetFocus();
@@ -2018,22 +2094,6 @@ StaticPopupDialogs["DELETE_GOOD_ITEM"] = {
 		ChatEdit_FocusActiveWindow();
 		self.editBox:SetText("");
 		MerchantFrame_ResetRefundItem();
-		if GameTooltip:GetOwner() == self then
-			GameTooltip:Hide();
-		end
-	end,
-	OnHyperlinkEnter = function(self, link, text, region, boundsLeft, boundsBottom, boundsWidth, boundsHeight)
-		GameTooltip:SetOwner(self, "ANCHOR_PRESERVE");
-		GameTooltip:ClearAllPoints();
-		local cursorClearance = 30;
-		GameTooltip:SetPoint("TOPLEFT", region, "BOTTOMLEFT", boundsLeft, boundsBottom - cursorClearance);
-		GameTooltip:SetHyperlink(link);
-	end,
-	OnHyperlinkLeave = function(self)
-		GameTooltip:Hide();
-	end,
-	OnHyperlinkClick = function(self, link, text, button)
-		GameTooltip:Hide();
 	end,
 	EditBoxOnEnterPressed = function(self)
 		if ( self:GetParent().button1:IsEnabled() ) then
@@ -2042,7 +2102,12 @@ StaticPopupDialogs["DELETE_GOOD_ITEM"] = {
 		end
 	end,
 	EditBoxOnTextChanged = function (self)
-		StaticPopup_StandardConfirmationTextHandler(self, DELETE_ITEM_CONFIRM_STRING);
+		local parent = self:GetParent();
+		if ( strupper(parent.editBox:GetText()) ==  DELETE_ITEM_CONFIRM_STRING ) then
+			parent.button1:Enable();
+		else
+			parent.button1:Disable();
+		end
 	end,
 	EditBoxOnEscapePressed = function(self)
 		self:GetParent():Hide();
@@ -2088,7 +2153,12 @@ StaticPopupDialogs["DELETE_GOOD_QUEST_ITEM"] = {
 		end
 	end,
 	EditBoxOnTextChanged = function (self)
-		StaticPopup_StandardConfirmationTextHandler(self, DELETE_ITEM_CONFIRM_STRING);
+		local parent = self:GetParent();
+		if ( strupper(parent.editBox:GetText()) ==  DELETE_ITEM_CONFIRM_STRING ) then
+			parent.button1:Enable();
+		else
+			parent.button1:Disable();
+		end
 	end,
 	EditBoxOnEscapePressed = function(self)
 		self:GetParent():Hide();
@@ -2140,10 +2210,7 @@ StaticPopupDialogs["ABANDON_QUEST"] = {
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self)
-		C_QuestLog.AbandonQuest();
-		if ( QuestLogPopupDetailFrame:IsShown() ) then
-			HideUIPanel(QuestLogPopupDetailFrame);
-		end
+		AbandonQuest();
 		PlaySound(SOUNDKIT.IG_QUEST_LOG_ABANDON_QUEST);
 	end,
 	timeout = 0,
@@ -2156,10 +2223,7 @@ StaticPopupDialogs["ABANDON_QUEST_WITH_ITEMS"] = {
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self)
-		C_QuestLog.AbandonQuest();
-		if ( QuestLogPopupDetailFrame:IsShown() ) then
-			HideUIPanel(QuestLogPopupDetailFrame);
-		end
+		AbandonQuest();
 		PlaySound(SOUNDKIT.IG_QUEST_LOG_ABANDON_QUEST);
 	end,
 	timeout = 0,
@@ -2249,9 +2313,9 @@ StaticPopupDialogs["SET_BNFRIENDNOTE"] = {
 		BNSetFriendNote(FriendsFrame.NotesID, self.editBox:GetText());
 	end,
 	OnShow = function(self)
-		local accountInfo = C_BattleNet.GetAccountInfoByID(FriendsFrame.NotesID);
-		if accountInfo and accountInfo.note ~= "" then
-			self.editBox:SetText(accountInfo.note);
+		local bnetIDAccount, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText = BNGetFriendInfoByID(FriendsFrame.NotesID);
+		if ( noteText ) then
+			self.editBox:SetText(noteText);
 		end
 		self.editBox:SetFocus();
 	end,
@@ -2317,11 +2381,7 @@ StaticPopupDialogs["CONFIRM_REMOVE_COMMUNITY_MEMBER"] = {
 		C_Club.KickMember(data.clubId, data.memberId);
 	end,
 	OnShow = function(self, data)
-		if data.clubType == Enum.ClubType.Character then
-			self.text:SetText(CONFIRM_REMOVE_CHARACTER_COMMUNITY_MEMBER_LABEL:format(data.name));
-		else
-			self.text:SetText(CONFIRM_REMOVE_COMMUNITY_MEMBER_LABEL:format(data.name));
-		end
+		self.text:SetText(CONFIRM_REMOVE_COMMUNITY_MEMBER_LABEL:format(data.name));
 	end,
 	timeout = 0,
 	exclusive = 1,
@@ -2354,13 +2414,8 @@ StaticPopupDialogs["CONFIRM_LEAVE_AND_DESTROY_COMMUNITY"] = {
 	button1 = ACCEPT,
 	button2 = CANCEL,
 	OnShow = function(self, clubInfo)
-		if clubInfo.clubType == Enum.ClubType.Character then
-			self.text:SetText(CONFIRM_LEAVE_AND_DESTROY_CHARACTER_COMMUNITY);
-			self.SubText:SetText(CONFIRM_LEAVE_AND_DESTROY_CHARACTER_COMMUNITY_SUBTEXT);
-		else
-			self.text:SetText(CONFIRM_LEAVE_AND_DESTROY_COMMUNITY);
-			self.SubText:SetText(CONFIRM_LEAVE_AND_DESTROY_COMMUNITY_SUBTEXT);
-		end
+		self.text:SetText(CONFIRM_LEAVE_AND_DESTROY_COMMUNITY);
+		self.SubText:SetText(CONFIRM_LEAVE_AND_DESTROY_COMMUNITY_SUBTEXT);
 	end,
 	OnAccept = function(self, clubInfo)
 		C_Club.DestroyClub(clubInfo.clubId);
@@ -2377,13 +2432,8 @@ StaticPopupDialogs["CONFIRM_LEAVE_COMMUNITY"] = {
 	button1 = ACCEPT,
 	button2 = CANCEL,
 	OnShow = function(self, clubInfo)
-		if clubInfo.clubType == Enum.ClubType.Character then
-			self.text:SetText(CONFIRM_LEAVE_CHARACTER_COMMUNITY);
-			self.SubText:SetFormattedText(CONFIRM_LEAVE_CHARACTER_COMMUNITY_SUBTEXT, clubInfo.name);
-		else
-			self.text:SetText(CONFIRM_LEAVE_COMMUNITY);
-			self.SubText:SetFormattedText(CONFIRM_LEAVE_COMMUNITY_SUBTEXT, clubInfo.name);
-		end
+		self.text:SetText(CONFIRM_LEAVE_COMMUNITY);
+		self.SubText:SetFormattedText(CONFIRM_LEAVE_COMMUNITY_SUBTEXT, clubInfo.name);
 	end,
 	OnAccept = function(self, clubInfo)
 		C_Club.LeaveClub(clubInfo.clubId);
@@ -2409,11 +2459,7 @@ StaticPopupDialogs["CONFIRM_DESTROY_COMMUNITY"] = {
 	hasEditBox = 1,
 	maxLetters = 32,
 	OnShow = function(self, clubInfo)
-		if clubInfo.clubType == Enum.ClubType.BattleNet then
-			self.text:SetText(CONFIRM_DESTROY_COMMUNITY:format(clubInfo.name));
-		else
-			self.text:SetText(CONFIRM_DESTROY_CHARACTER_COMMUNITY:format(clubInfo.name));
-		end
+		self.text:SetText(CONFIRM_DESTROY_COMMUNITY:format(clubInfo.name));
 
 		self.button1:Disable();
 		self.button2:Enable();
@@ -2431,7 +2477,12 @@ StaticPopupDialogs["CONFIRM_DESTROY_COMMUNITY"] = {
 		end
 	end,
 	EditBoxOnTextChanged = function (self)
-		StaticPopup_StandardConfirmationTextHandler(self, COMMUNITIES_DELETE_CONFIRM_STRING);
+		local parent = self:GetParent();
+		if ( strupper(parent.editBox:GetText()) ==  DELETE_ITEM_CONFIRM_STRING ) then
+			parent.button1:Enable();
+		else
+			parent.button1:Disable();
+		end
 	end,
 	EditBoxOnEscapePressed = function(self)
 		self:GetParent():Hide();
@@ -2471,15 +2522,6 @@ StaticPopupDialogs["ADD_IGNORE"] = {
 	whileDead = 1,
 	hideOnEscape = 1
 };
-
-local function ClubInviteDisabledOnEnter(self)
-	if(not self:IsEnabled()) then
-		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT");
-		GameTooltip_AddColoredLine(GameTooltip, CLUB_FINDER_MAX_MEMBER_COUNT_HIT, RED_FONT_COLOR, true);
-		GameTooltip:Show();
-	end
-end
-
 StaticPopupDialogs["ADD_GUILDMEMBER"] = {
 	text = ADD_GUILDMEMBER_LABEL,
 	button1 = ACCEPT,
@@ -2491,53 +2533,17 @@ StaticPopupDialogs["ADD_GUILDMEMBER"] = {
 	OnAccept = function(self)
 		GuildInvite(self.editBox:GetText());
 	end,
-	OnShow = function(self, data)
+	OnShow = function(self)
 		self.editBox:SetFocus();
-
-		self.button1:SetMotionScriptsWhileDisabled(true);
-		self.button1:SetScript("OnEnter", function(self)
-			ClubInviteDisabledOnEnter(self);
-		end );
-		self.button1:SetScript("OnLeave", GameTooltip_Hide);
-		if (self.extraButton) then
-			self.extraButton:SetMotionScriptsWhileDisabled(true);
-			self.extraButton:SetScript("OnEnter", function(self)
-				ClubInviteDisabledOnEnter(self);
-			end );
-			self.extraButton:SetScript("OnLeave", GameTooltip_Hide);
-		end
-		local clubInfo = C_Club.GetClubInfo(data.clubId);
-		if(clubInfo and clubInfo.memberCount and clubInfo.memberCount >= C_Club.GetClubCapacity()) then
-			self.button1:Disable();
-			if (self.extraButton) then
-				self.extraButton:Disable();
-			end
-		else
-			self.button1:Enable();
-			if (self.extraButton) then
-				self.extraButton:Enable();
-			end
-		end
 	end,
 	OnHide = function(self)
 		ChatEdit_FocusActiveWindow();
 		self.editBox:SetText("");
-		self.button1:SetScript("OnEnter", nil );
-		self.button1:SetScript("OnLeave", nil);
-		if (self.extraButton) then
-			self.extraButton:SetScript("OnEnter", nil );
-			self.extraButton:SetScript("OnLeave", nil);
-		end
 	end,
 	EditBoxOnEnterPressed = function(self)
 		local parent = self:GetParent();
-		local invitee = parent.editBox:GetText();
-		if invitee == "" then
-			ChatFrame_OpenChat("");
-		else
-			GuildInvite(invitee);
-			parent:Hide();
-		end
+		GuildInvite(parent.editBox:GetText());
+		parent:Hide();
 	end,
 	EditBoxOnEscapePressed = function(self)
 		self:GetParent():Hide();
@@ -2547,26 +2553,43 @@ StaticPopupDialogs["ADD_GUILDMEMBER"] = {
 	whileDead = 1,
 	hideOnEscape = 1
 };
-
-StaticPopupDialogs["ADD_GUILDMEMBER_WITH_FINDER_LINK"] = Mixin({
-	extraButton = CLUB_FINDER_LINK_POST_IN_CHAT,
-	OnExtraButton = function(self, data)
-		local clubInfo = ClubFinderGetCurrentClubListingInfo(data.clubId);
-		if (clubInfo) then
-			local link = GetClubFinderLink(clubInfo.clubFinderGUID, clubInfo.name);
-			if not ChatEdit_InsertLink(link) then
-				ChatFrame_OpenChat(link);
-			end
-		end
+StaticPopupDialogs["ADD_RAIDMEMBER"] = {
+	text = ADD_RAIDMEMBER_LABEL,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	hasEditBox = 1,
+	autoCompleteSource = GetAutoCompleteResults,
+	autoCompleteArgs = { AUTOCOMPLETE_LIST.INVITE.include, AUTOCOMPLETE_LIST.INVITE.exclude },
+	maxLetters = 77,
+	OnAccept = function(self)
+		InviteToGroup(self.editBox:GetText());
 	end,
-}, StaticPopupDialogs["ADD_GUILDMEMBER"]);
-
+	OnShow = function(self)
+		self.editBox:SetFocus();
+	end,
+	OnHide = function(self)
+		ChatEdit_FocusActiveWindow();
+		self.editBox:SetText("");
+	end,
+	EditBoxOnEnterPressed = function(self)
+		local parent = self:GetParent();
+		InviteToGroup(parent.editBox:GetText());
+		parent:Hide();
+	end,
+	EditBoxOnEscapePressed = function(self)
+		self:GetParent():Hide();
+	end,
+	timeout = 0,
+	exclusive = 1,
+	hideOnEscape = 1
+};
 StaticPopupDialogs["CONVERT_TO_RAID"] = {
 	text = CONVERT_TO_RAID_LABEL,
 	button1 = CONVERT,
 	button2 = CANCEL,
 	OnAccept = function(self, data)
-		C_PartyInfo.ConfirmInviteUnit(data);
+		ConvertToRaid();
+		InviteUnit(data);
 	end,
 	timeout = 0,
 	exclusive = 1,
@@ -2578,7 +2601,7 @@ StaticPopupDialogs["LFG_LIST_AUTO_ACCEPT_CONVERT_TO_RAID"] = {
 	button1 = CONVERT,
 	button2 = CANCEL,
 	OnAccept = function(self, data)
-		C_PartyInfo.ConfirmConvertToRaid();
+		ConvertToRaid();
 	end,
 	timeout = 0,
 	exclusive = 1,
@@ -2589,25 +2612,85 @@ StaticPopupDialogs["REMOVE_GUILDMEMBER"] = {
 	text = format(REMOVE_GUILDMEMBER_LABEL, "XXX"),
 	button1 = YES,
 	button2 = NO,
-	OnAccept = function(self, data)
-		if data then
-			C_GuildInfo.RemoveFromGuild(data.guid);
-			if CommunitiesFrame then
-				CommunitiesFrame:CloseGuildMemberDetailFrame();
-			end
-		else
-			GuildUninvite(GuildFrame.selectedName);
-			if GuildMemberDetailFrame then
-				GuildMemberDetailFrame:Hide();
-			end
+	OnAccept = function(self)
+		GuildUninvite(GuildFrame.selectedName);
+		if GuildMemberDetailFrame then
+			GuildMemberDetailFrame:Hide();
 		end
 	end,
-	OnShow = function(self, data)
-		if data then
-			self.text:SetFormattedText(REMOVE_GUILDMEMBER_LABEL, data.name);
-		else
-			self.text:SetText(GuildFrame.selectedName);
-		end
+	OnShow = function(self)
+		self.text:SetFormattedText(REMOVE_GUILDMEMBER_LABEL, Ambiguate(GuildFrame.selectedName, "guild"));
+	end,
+	timeout = 0,
+	exclusive = 1,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+StaticPopupDialogs["ADD_GUILDRANK"] = {
+	text = ADD_GUILDRANK_LABEL,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	hasEditBox = 1,
+	maxLetters = 15,
+	OnAccept = function(self)
+		GuildControlAddRank(self.editBox:GetText());
+		GuildControlSetRank(UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown));
+		UIDropDownMenu_SetSelectedID(GuildControlPopupFrameDropDown, UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown));
+		GuildControlPopupFrameEditBox:SetText(GuildControlGetRankName(UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown)));
+		GuildControlCheckboxUpdate(C_GuildInfo.GuildControlGetRankFlags(UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown)));
+		CloseDropDownMenus();
+	end,
+	OnShow = function(self)
+		self.editBox:SetFocus();
+	end,
+	OnHide = function(self)
+		ChatEdit_FocusActiveWindow();
+		self.editBox:SetText("");
+	end,
+	EditBoxOnEnterPressed = function(self)
+		local parent = self:GetParent();
+		GuildControlAddRank(parent.editBox:GetText());
+		GuildControlSetRank(UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown));
+		UIDropDownMenu_SetSelectedID(GuildControlPopupFrameDropDown, UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown));
+		GuildControlPopupFrameEditBox:SetText(GuildControlGetRankName(UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown)));
+		GuildControlCheckboxUpdate(C_GuildInfo.GuildControlGetRankFlags(UIDropDownMenu_GetSelectedID(GuildControlPopupFrameDropDown)));
+		CloseDropDownMenus();
+		parent:Hide();
+	end,
+	EditBoxOnEscapePressed = function(self)
+		self:GetParent():Hide();
+	end,
+	timeout = 0,
+	exclusive = 1,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+StaticPopupDialogs["SET_GUILDMOTD"] = {
+	text = SET_GUILDMOTD_LABEL,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	hasEditBox = 1,
+	maxLetters = 128,
+	wide = true,
+	editBoxWidth = 350,
+	OnAccept = function(self)
+		GuildSetMOTD(self.editBox:GetText());
+	end,
+	OnShow = function(self)
+		self.editBox:SetText(GetGuildRosterMOTD());
+		self.editBox:SetFocus();
+	end,
+	OnHide = function(self)
+		ChatEdit_FocusActiveWindow();
+		self.editBox:SetText("");
+	end,
+	EditBoxOnEnterPressed = function(self)
+		local parent = self:GetParent();
+		GuildSetMOTD(parent.editBox:GetText());
+		parent:Hide();
+	end,
+	EditBoxOnEscapePressed = function(self)
+		self:GetParent():Hide();
 	end,
 	timeout = 0,
 	exclusive = 1,
@@ -2620,7 +2703,8 @@ StaticPopupDialogs["SET_GUILDPLAYERNOTE"] = {
 	button2 = CANCEL,
 	hasEditBox = 1,
 	maxLetters = 31,
-	editBoxWidth = 260,
+	wide = true,
+	editBoxWidth = 350,
 	OnAccept = function(self)
 		GuildRosterSetPublicNote(GetGuildRosterSelection(), self.editBox:GetText());
 	end,
@@ -2652,7 +2736,8 @@ StaticPopupDialogs["SET_GUILDOFFICERNOTE"] = {
 	button2 = CANCEL,
 	hasEditBox = 1,
 	maxLetters = 31,
-	editBoxWidth = 260,
+	wide = true,
+	editBoxWidth = 350,
 	OnAccept = function(self)
 		GuildRosterSetOfficerNote(GetGuildRosterSelection(), self.editBox:GetText());
 	end,
@@ -2828,11 +2913,11 @@ StaticPopupDialogs["XP_LOSS"] = {
 	OnUpdate = function(self, elapsed)
 		if ( not CheckSpiritHealerDist() ) then
 			self:Hide();
-			C_GossipInfo.CloseGossip();
+			CloseGossip();
 		end
 	end,
 	OnCancel = function(self)
-		C_GossipInfo.CloseGossip();
+		CloseGossip();
 	end,
 	timeout = 0,
 	exclusive = 1,
@@ -2840,7 +2925,62 @@ StaticPopupDialogs["XP_LOSS"] = {
 	showAlert = 1,
 	hideOnEscape = 1
 };
-
+StaticPopupDialogs["XP_LOSS_NO_DURABILITY"] = {
+	text = CONFIRM_XP_LOSS_NO_DURABILITY,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	OnAccept = function(self, data)
+		if ( data ) then
+			self.text:SetFormattedText(CONFIRM_XP_LOSS_AGAIN_NO_DURABILITY, data);
+			self.data = nil;
+			return 1;
+		else
+			AcceptXPLoss();
+		end
+	end,
+	OnUpdate = function(self, elapsed)
+		if ( not CheckSpiritHealerDist() ) then
+			self:Hide();
+			CloseGossip();
+		end
+	end,
+	OnCancel = function(self)
+		CloseGossip();
+	end,
+	timeout = 0,
+	exclusive = 1,
+	whileDead = 1,
+	showAlert = 1,
+	hideOnEscape = 1
+};
+StaticPopupDialogs["XP_LOSS_NO_SICKNESS"] = {
+	text = CONFIRM_XP_LOSS_NO_SICKNESS,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	OnAccept = function(self, data)
+		if ( data ) then
+			self.text:SetText(CONFIRM_XP_LOSS_AGAIN_NO_SICKNESS);
+			self.data = nil;
+			return 1;
+		else
+			AcceptXPLoss();
+		end
+	end,
+	OnUpdate = function(self, dialog)
+		if ( not CheckSpiritHealerDist() ) then
+			self:Hide();
+			CloseGossip();
+		end
+	end,
+	OnCancel = function(self)
+		CloseGossip();
+	end,
+	timeout = 0,
+	exclusive = 1,
+	whileDead = 1,
+	showAlert = 1,
+	hideOnEscape = 1
+};
 StaticPopupDialogs["XP_LOSS_NO_SICKNESS_NO_DURABILITY"] = {
 	text = CONFIRM_XP_LOSS_NO_SICKNESS_NO_DURABILITY,
 	button1 = ACCEPT,
@@ -2851,11 +2991,11 @@ StaticPopupDialogs["XP_LOSS_NO_SICKNESS_NO_DURABILITY"] = {
 	OnUpdate = function(self, dialog)
 		if ( not CheckSpiritHealerDist() ) then
 			self:Hide();
-			C_GossipInfo.CloseGossip();
+			CloseGossip();
 		end
 	end,
 	OnCancel = function(self)
-		C_GossipInfo.CloseGossip();
+		CloseGossip();
 	end,
 	timeout = 0,
 	exclusive = 1,
@@ -2917,18 +3057,6 @@ StaticPopupDialogs["BIND_ENCHANT"] = {
 	button2 = CANCEL,
 	OnAccept = function(self)
 		BindEnchant();
-	end,
-	timeout = 0,
-	exclusive = 1,
-	showAlert = 1,
-	hideOnEscape = 1
-};
-StaticPopupDialogs["BIND_SOCKET"] = {
-	text = ACTION_WILL_BIND_ITEM,
-	button1 = OKAY,
-	button2 = CANCEL,
-	OnAccept = function(self)
-		C_ItemSocketInfo.CompleteSocketing();
 	end,
 	timeout = 0,
 	exclusive = 1,
@@ -3050,7 +3178,8 @@ StaticPopupDialogs["INSTANCE_BOOT"] = {
 	timeout = 0,
 	whileDead = 1,
 	interruptCinematic = 1,
-	notClosableByLogout = 1
+	notClosableByLogout = 1,
+	height = 85
 };
 StaticPopupDialogs["GARRISON_BOOT"] = {
 	text = GARRISON_BOOT_TIMER,
@@ -3174,6 +3303,23 @@ StaticPopupDialogs["CONFIRM_TALENT_WIPE"] = {
 	OnCancel = function(self)
 		if ( PlayerTalentFrame ) then
 			HideUIPanel(PlayerTalentFrame);
+		end
+	end,
+	hasMoneyFrame = 1,
+	exclusive = 1,
+	timeout = 0,
+	hideOnEscape = 1
+};
+StaticPopupDialogs["CONFIRM_PET_UNLEARN"] = {
+	text = CONFIRM_PET_UNLEARN,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	OnAccept = function(self)
+		ConfirmPetUnlearn();
+	end,
+	OnUpdate = function(self, elapsed)
+		if ( not CheckTalentMasterDist() ) then
+			self:Hide();
 		end
 	end,
 	hasMoneyFrame = 1,
@@ -3306,7 +3452,7 @@ StaticPopupDialogs["GOSSIP_CONFIRM"] = {
 	button1 = ACCEPT,
 	button2 = CANCEL,
 	OnAccept = function(self, data)
-		C_GossipInfo.SelectOption(data, "", true);
+		SelectGossipOption(data, "", true);
 	end,
 	hasMoneyFrame = 1,
 	timeout = 0,
@@ -3319,7 +3465,7 @@ StaticPopupDialogs["GOSSIP_ENTER_CODE"] = {
 	button2 = CANCEL,
 	hasEditBox = 1,
 	OnAccept = function(self, data)
-		C_GossipInfo.SelectOption(data, self.editBox:GetText(), true);
+		SelectGossipOption(data, self.editBox:GetText(), true);
 	end,
 	OnShow = function(self)
 		self.editBox:SetFocus();
@@ -3330,7 +3476,7 @@ StaticPopupDialogs["GOSSIP_ENTER_CODE"] = {
 	end,
 	EditBoxOnEnterPressed = function(self, data)
 		local parent = self:GetParent();
-		C_GossipInfo.SelectOption(data, parent.editBox:GetText());
+		SelectGossipOption(data, parent.editBox:GetText());
 		parent:Hide();
 	end,
 	EditBoxOnEscapePressed = function(self)
@@ -3492,7 +3638,11 @@ StaticPopupDialogs["VOTE_BOOT_REASON_REQUIRED"] = {
 		parent:Hide();
 	end,
 	EditBoxOnTextChanged = function(self)
-		StaticPopup_StandardNonEmptyTextHandler(self);
+		if ( strtrim(self:GetText()) == "" ) then
+			self:GetParent().button1:Disable();
+		else
+			self:GetParent().button1:Enable();
+		end
 	end,
 	OnShow = function(self)
 		self.button1:Disable();
@@ -3849,7 +3999,12 @@ StaticPopupDialogs["NAME_TRANSMOG_OUTFIT"] = {
 		end
 	end,
 	EditBoxOnTextChanged = function (self)
-		StaticPopup_StandardNonEmptyTextHandler(self);
+		local parent = self:GetParent();
+		if ( parent.editBox:GetText() ~= "" ) then
+			parent.button1:Enable();
+		else
+			parent.button1:Disable();
+		end
 	end,
 	EditBoxOnEscapePressed = function(self)
 		self:GetParent():Hide();
@@ -3860,9 +4015,9 @@ StaticPopupDialogs["CONFIRM_OVERWRITE_TRANSMOG_OUTFIT"] = {
 	text = TRANSMOG_OUTFIT_CONFIRM_OVERWRITE,
 	button1 = YES,
 	button2 = NO,
-	OnAccept = function (self) WardrobeOutfitFrame:OverwriteOutfit(self.data.outfitID) end,
+	OnAccept = function (self) WardrobeOutfitFrame:SaveOutfit(self.data) end,
 	OnCancel = function (self)
-		local name = self.data.name;
+		local name = self.data;
 		self:Hide();
 		local dialog = StaticPopup_Show("NAME_TRANSMOG_OUTFIT");
 		if ( dialog ) then
@@ -3926,10 +4081,10 @@ StaticPopupDialogs["TRANSMOG_APPLY_WARNING"] = {
 	button1 = OKAY,
 	button2 = CANCEL,
 	OnAccept = function(self)
-		return WardrobeTransmogFrame:ApplyPending(self.data.warningIndex);
+		return WardrobeTransmogFrame_ApplyPending(self.data.warningIndex);
 	end,
 	OnHide = function()
-		WardrobeTransmogFrame:UpdateApplyButton();
+		WardrobeTransmogFrame_UpdateApplyButton();
 	end,
 	timeout = 0,
 	hideOnEscape = 1,
@@ -4000,40 +4155,6 @@ StaticPopupDialogs["PREMADE_GROUP_SEARCH_DELIST_WARNING"] = {
 	hideOnEscape = 1,
 }
 
-StaticPopupDialogs["PREMADE_GROUP_LEADER_CHANGE_DELIST_WARNING"] = {
-	text = GROUP_FINDER_DELIST_WARNING_TITLE,
-	subText = GROUP_FINDER_DELIST_WARNING_SUBTEXT,
-	button1 = LIST_MY_GROUP,
-	button2 = GROUP_FINDER_DESLIST_WARNING_EDIT_LISTING,
-	button3 = UNLIST_MY_GROUP,
-
-	OnAccept = function(self)
-		self.delistOnHide = false;
-	end,
-
-	OnCancel = function(self, data, reason)
-		if(reason ~= "timeout") then
-			LFGListUtil_OpenBestWindow(true);
-			self.delistOnHide = false;
-		end
-	end,
-
-	OnHide = function(self)
-		if  (C_LFGList.HasActiveEntryInfo() and self.delistOnHide) then
-			C_LFGList.RemoveListing();
-		end
-	end,
-
-	OnShow = function(self, data)
-		self.text:SetText(GROUP_FINDER_DELIST_WARNING_TITLE:format(data.listingTitle));
-		self.timeleft = data.delistTime;
-		self.delistOnHide = true;
-	end,
-
-	whileDead = 1,
-	showAlert = 1,
-}
-
 StaticPopupDialogs["PREMADE_GROUP_INSECURE_SEARCH"] = {
 	text = PREMADE_GROUP_INSECURE_SEARCH,
 	button1 = YES,
@@ -4053,21 +4174,14 @@ StaticPopupDialogs["BACKPACK_INCREASE_SIZE"] = {
 	OnAccept = function(self)
 		LoadURLIndex(41);
 	end,
-	wide = true,
-	timeout = 0,
-	whileDead = 0,
-}
-StaticPopupDialogs["GROUP_FINDER_AUTHENTICATOR_POPUP"] = {
-	text = GROUP_FINDER_AUTHENTICATOR_POPUP_DESC,
-	button1 = ACTIVATE,
-	button2 = CANCEL,
-	OnAccept = function(self)
-		LoadURLIndex(41);
+	OnHide = function(self)
+		ContainerFrame_SetBackpackForceExtended(false);
 	end,
 	wide = true,
 	timeout = 0,
 	whileDead = 0,
 }
+
 StaticPopupDialogs["CLIENT_INVENTORY_FULL_OVERFLOW"] = {
 	text = BACKPACK_AUTHENTICATOR_FULL_INVENTORY,
 	button1 = OKAY,
@@ -4086,53 +4200,17 @@ StaticPopupDialogs["AUCTION_HOUSE_DEPRECATED"] = {
 	showAlert = 1,
 }
 
-StaticPopupDialogs["LEAVING_TUTORIAL_AREA"] = {
-	text = "",
-	button1 = "",
-	button2 = NPE_ABANDON_LEAVE_TUTORIAL,
-	OnButton1 = function(self)
-		C_Tutorial.ReturnToTutorialArea();
-	end,
-	OnButton2 = function(self)
-		C_Tutorial.AbandonTutorialArea();
-	end,
-	OnShow = function(self)
-		if UnitFactionGroup("player") == "Horde" then
-			self.button1:SetText(NPE_ABANDON_H_RETURN);
-			self.text:SetText(NPE_ABANDON_H_WARNING);
-		else
-			self.button1:SetText(NPE_ABANDON_A_RETURN);
-			self.text:SetText(NPE_ABANDON_A_WARNING);
-		end
-	end,
-	selectCallbackByIndex = true,
-};
-
 local function InviteToClub(clubId, text)
-	local clubInfo = C_Club.GetClubInfo(clubId);
-	local isBattleNetClub = clubInfo.clubType == Enum.ClubType.BattleNet;
-	if isBattleNetClub then
-		local invitationCandidates = C_Club.GetInvitationCandidates(nil, nil, nil, nil, clubId);
-		for i, candidate in ipairs(invitationCandidates) do
-			if candidate.name == text then
-				C_Club.SendInvitation(clubId, candidate.memberId);
-				return;
-			end
+	local invitationCandidates = C_Club.GetInvitationCandidates(nil, nil, nil, nil, clubId);
+	for i, candidate in ipairs(invitationCandidates) do
+		if candidate.name == text then
+			C_Club.SendInvitation(clubId, candidate.memberId);
+			return;
 		end
-		local errorStr = ERROR_CLUB_ACTION_INVITE_MEMBER:format(ERROR_CLUB_MUST_BE_BNET_FRIEND);
-		UIErrorsFrame:AddMessage(errorStr, RED_FONT_COLOR:GetRGB());
-	else
-		C_Club.SendCharacterInvitation(clubId, text);
 	end
+	local errorStr = ERROR_CLUB_ACTION_INVITE_MEMBER:format(ERROR_CLUB_MUST_BE_BNET_FRIEND);
+	UIErrorsFrame:AddMessage(errorStr, RED_FONT_COLOR:GetRGB());
 end
-
-StaticPopupDialogs["CLUB_FINDER_ENABLED_DISABLED"] = {
-	text = CLUB_FINDER_ENABLE_DISABLE_MESSAGE,
-	button1 = OKAY,
-	whileDead = 1,
-	showAlert = 1,
-	hideOnEscape = 1,
-}
 
 StaticPopupDialogs["INVITE_COMMUNITY_MEMBER"] = {
 	text = INVITE_COMMUNITY_MEMBER_POPUP_INVITE_TEXT,
@@ -4154,51 +4232,13 @@ StaticPopupDialogs["INVITE_COMMUNITY_MEMBER"] = {
 	autoCompleteArgs = {}, -- set dynamically below.
 	OnShow = function(self, data)
 		self.editBox:SetFocus();
-
-		local clubInfo = C_Club.GetClubInfo(data.clubId);
-		if clubInfo.clubType == Enum.ClubType.BattleNet then
-			AutoCompleteEditBox_SetAutoCompleteSource(self.editBox, C_Club.GetInvitationCandidates, data.clubId);
-			self.SubText:SetText(INVITE_COMMUNITY_MEMBER_POPUP_INVITE_SUB_TEXT_BNET_FRIEND);
-			self.editBox.Instructions:SetText(INVITE_COMMUNITY_MEMBER_POPUP_INVITE_EDITBOX_INSTRUCTIONS);
-		else
-			AutoCompleteEditBox_SetAutoCompleteSource(self.editBox, GetAutoCompleteResults, AUTOCOMPLETE_LIST.COMMUNITY.include, AUTOCOMPLETE_LIST.COMMUNITY.exclude);
-			self.SubText:SetText(INVITE_COMMUNITY_MEMBER_POPUP_INVITE_SUB_TEXT_CHARACTER);
-			self.editBox.Instructions:SetText("");
-		end
-		self.button1:SetMotionScriptsWhileDisabled(true);
-		self.button1:SetScript("OnEnter", function(self)
-			ClubInviteDisabledOnEnter(self);
-		end );
-		self.button1:SetScript("OnLeave", GameTooltip_Hide);
-		if (self.extraButton) then
-			self.extraButton:SetMotionScriptsWhileDisabled(true);
-			self.extraButton:SetScript("OnEnter", function(self)
-				ClubInviteDisabledOnEnter(self);
-			end );
-			self.extraButton:SetScript("OnLeave", GameTooltip_Hide);
-		end
-
-		if(clubInfo and clubInfo.memberCount and clubInfo.memberCount >= C_Club.GetClubCapacity()) then
-			self.button1:Disable();
-			if (self.extraButton) then
-				self.extraButton:Disable();
-			end
-		else
-			self.button1:Enable();
-			if (self.extraButton) then
-				self.extraButton:Enable();
-			end
-		end
+		AutoCompleteEditBox_SetAutoCompleteSource(self.editBox, C_Club.GetInvitationCandidates, data.clubId);
+		self.SubText:SetText(INVITE_COMMUNITY_MEMBER_POPUP_INVITE_SUB_TEXT_BNET_FRIEND);
+		self.editBox.Instructions:SetText(INVITE_COMMUNITY_MEMBER_POPUP_INVITE_EDITBOX_INSTRUCTIONS);
 	end,
 	OnHide = function(self)
 		ChatEdit_FocusActiveWindow();
 		self.editBox:SetText("");
-		self.button1:SetScript("OnEnter", nil );
-		self.button1:SetScript("OnLeave", nil);
-		if (self.extraButton) then
-			self.extraButton:SetScript("OnEnter", nil );
-			self.extraButton:SetScript("OnLeave", nil);
-		end
 	end,
 	EditBoxOnEnterPressed = function(self)
 		self:GetParent().button1:Click();
@@ -4211,48 +4251,49 @@ StaticPopupDialogs["INVITE_COMMUNITY_MEMBER"] = {
 
 StaticPopupDialogs["INVITE_COMMUNITY_MEMBER_WITH_INVITE_LINK"] = Mixin({
 	extraButton = INVITE_COMMUNITY_MEMBER_POPUP_OPEN_INVITE_MANAGER,
-
 	OnExtraButton = function(self, data)
 		CommunitiesTicketManagerDialog_Open(data.clubId, data.streamId);
 	end,
 }, StaticPopupDialogs["INVITE_COMMUNITY_MEMBER"]);
 
-StaticPopupDialogs["CONFIRM_RAF_REMOVE_RECRUIT"] = {
-	text = RAF_REMOVE_RECRUIT_CONFIRM,
-	button1 = YES,
-	button2 = NO,
-	OnAccept = function(self, data)
-		C_RecruitAFriend.RemoveRAFRecruit(data);
-	end,
-	timeout = 0,
-	whileDead = 1,
-	exclusive = 1,
-	showAlert = 1,
-	hideOnEscape = 1,
-	hasEditBox = 1,
-	maxLetters = 32,
-	OnShow = function(self)
-		self.button1:Disable();
-		self.button2:Enable();
-		self.editBox:SetFocus();
-	end,
-	OnHide = function(self)
-		ChatEdit_FocusActiveWindow();
-		self.editBox:SetText("");
-	end,
-	EditBoxOnEnterPressed = function(self, data)
-		if ( self:GetParent().button1:IsEnabled() ) then
-			C_RecruitAFriend.RemoveRAFRecruit(data);
-			self:GetParent():Hide();
-		end
-	end,
-	EditBoxOnTextChanged = function (self)
-		StaticPopup_StandardConfirmationTextHandler(self, REMOVE_RECRUIT_CONFIRM_STRING);
-	end,
-	EditBoxOnEscapePressed = function(self)
-		self:GetParent():Hide();
-	end
-};
+do
+	local warningSeenBefore = false;
+	StaticPopupDialogs["RAF_GRANT_LEVEL_ALLIED_RACE"] = {
+		text = LEVEL_GRANT_ALLIED_RACE_WARNING,
+		button1 = OKAY,
+		button2 = CANCEL,
+		OnAccept = function(self)
+			GrantLevel(self.data);
+		end,
+		OnShow = function(self)
+			if (not warningSeenBefore) then
+				self.button1:Disable();
+				self.timeLeft = 3;
+				self.button1:SetText(self.timeLeft);
+				self.ticker = C_Timer.NewTicker(1, function()
+					self.timeLeft = self.timeLeft - 1;
+					self.button1:SetText(self.timeLeft);
+					if (self.timeLeft <= 0) then
+						self.ticker:Cancel();
+						self.ticker = nil;
+						self.button1:SetText(OKAY);
+						self.button1:Enable();
+						warningSeenBefore = true;
+					end
+				end);
+			end
+		end,
+		OnHide = function(self)
+			if (self.ticker) then
+				self.ticker:Cancel();
+				self.ticker = nil;
+			end
+		end,
+		showAlert = 1,
+		whileDead = 0,
+		hideOnEscape = 1,
+	}
+end
 
 StaticPopupDialogs["REGIONAL_CHAT_DISABLED"] = {
 	text = REGIONAL_RESTRICT_CHAT_DIALOG_TITLE,
@@ -4268,8 +4309,9 @@ StaticPopupDialogs["REGIONAL_CHAT_DISABLED"] = {
 		C_SocialRestrictions.AcknowledgeRegionalChatDisabled();
 	end,
 	timeout = 0,
-	hideOnEscape = false,
+	hideOnEscape = 0,
 	exclusive = 1,
+	wide = true,
 };
 
 StaticPopupDialogs["CHAT_CONFIG_DISABLE_CHAT"] = {
@@ -4282,6 +4324,7 @@ StaticPopupDialogs["CHAT_CONFIG_DISABLE_CHAT"] = {
 		ChatConfigFrame_OnChatDisabledChanged(disabled);
 	end,
 	timeout = 0,
+	hideOnEscape = 0,
 	exclusive = 1,
 };
 
@@ -4299,15 +4342,6 @@ function StaticPopup_FindVisible(which, data)
 	return nil;
 end
 
-function StaticPopup_Visible(which)
-	for index = 1, STATICPOPUP_NUMDIALOGS, 1 do
-		local frame = _G["StaticPopup"..index];
-		if( frame:IsShown() and (frame.which == which) ) then
-			return frame:GetName(), frame;
-		end
-	end
-	return nil;
-end
 
 function StaticPopup_Resize(dialog, which)
 	local info = StaticPopupDialogs[which];
@@ -4326,7 +4360,12 @@ function StaticPopup_Resize(dialog, which)
 	if ( info.verticalButtonLayout ) then
 		width = width + 30;
 	else
-		if (info.showAlert or info.showAlertGear or info.closeButton or info.wide) then
+		if ( dialog.numButtons == 4 ) then
+			width = 574;
+		elseif ( dialog.numButtons == 3 ) then
+			width = 440;
+		elseif (info.showAlert or info.showAlertGear or info.closeButton or info.wide) then
+			-- Widen
 			width = 420;
 		elseif ( info.editBoxWidth and info.editBoxWidth > 260 ) then
 			width = width + (info.editBoxWidth - 260);
@@ -4334,105 +4373,51 @@ function StaticPopup_Resize(dialog, which)
 			width = 375;
 		end
 	end
-
-	-- Ensure that the dialog can contain the buttons, regardless of the configuration.
-	local button2 = _G[dialog:GetName().."Button2"];
-	local button3 = _G[dialog:GetName().."Button3"];
-	local button4 = _G[dialog:GetName().."Button4"];
-	local buttons = {button1, button2, button3, button4};
-	local outerMargin = 60;
-	local buttonMinWidth = outerMargin;
-	for index, button in ipairs(buttons) do
-		if button:IsShown() then
-			buttonMinWidth = buttonMinWidth + button:GetWidth();
-		end
-	end
-	width = max(width, buttonMinWidth);
-
 	if ( dialog.insertedFrame ) then
 		width = max(width, dialog.insertedFrame:GetWidth());
 	end
-	if ( width > maxWidthSoFar ) then
+	if ( width > maxWidthSoFar )  then
 		dialog:SetWidth(width);
 		dialog.maxWidthSoFar = width;
 	end
 
-	if ( info.wideText ) then
-		dialog.text:SetWidth(360);
-		dialog.SubText:SetWidth(360);
+	if (info.height) then
+		dialog:SetHeight(info.height);
+		dialog.maxHeightSoFar = info.height;
 	else
-		dialog.text:SetWidth(290);
-		dialog.SubText:SetWidth(290);
-	end
-
-	-- Slightly reducing width to prevent the text from feeling cramped
-	if ( info.normalSizedSubText and not info.wideText ) then
-		local currentWidth = dialog.SubText:GetWidth();
-		dialog.SubText:SetWidth(currentWidth - 20);
-	end
-
-	local height = 32 + text:GetHeight() + 2;
-	if ( info.extraButton ) then
-		height = height + 40 + extraButton:GetHeight();
-	end
-	if ( not info.nobuttons ) then
-		height = height + 6 + button1:GetHeight();
-	end
-	if ( info.hasEditBox ) then
-		height = height + 8 + editBox:GetHeight();
-	elseif ( info.hasMoneyFrame ) then
-		height = height + 16;
-	elseif ( info.hasMoneyInputFrame ) then
-		height = height + 22;
-	end
-	if ( dialog.insertedFrame ) then
-		height = height + dialog.insertedFrame:GetHeight();
-	end
-	if ( info.hasItemFrame ) then
-		if ( info.compactItemFrame ) then
-			height = height + 44;
-		else
+		local height = 32 + text:GetHeight() + 2;
+		if ( info.extraButton ) then
+			height = height + 40 + extraButton:GetHeight();
+		end
+		if ( not info.nobuttons ) then
+			height = height + 6 + button1:GetHeight();
+		end
+		if ( info.hasEditBox ) then
+			height = height + 8 + editBox:GetHeight();
+		elseif ( info.hasMoneyFrame ) then
+			height = height + 16;
+		elseif ( info.hasMoneyInputFrame ) then
+			height = height + 22;
+		end
+		if ( dialog.insertedFrame ) then
+			height = height + dialog.insertedFrame:GetHeight();
+		end
+		if ( info.hasItemFrame ) then
 			height = height + 64;
 		end
-	end
-	if ( dialog.SubText:IsShown() ) then
-		height = height + dialog.SubText:GetHeight() + 8;
-		-- Adding a bit more vertical space to prevent the text from feeling cramped 
-		if ( info.normalSizedSubText and info.compactItemFrame) then
-			height = height + 18;
+		if ( dialog.SubText:IsShown() ) then
+			height = height + dialog.SubText:GetHeight() + 8;
+		end
+
+		if ( info.verticalButtonLayout ) then
+			height = height + 16 + (26 * (dialog.numButtons - 1));
+		end
+
+		if ( height > maxHeightSoFar ) then
+			dialog:SetHeight(height);
+			dialog.maxHeightSoFar = height;
 		end
 	end
-
-	if ( info.verticalButtonLayout ) then
-		height = height + 16 + (26 * (dialog.numButtons - 1));
-	end
-
-	if ( height > maxHeightSoFar ) then
-		dialog:SetHeight(height);
-		dialog.maxHeightSoFar = height;
-	end
-end
-
-function StaticPopup_ShowNotification(systemPrefix, notificationType, message)
-	local staticPopupToken = (systemPrefix or "NOTIFICATION_")..(notificationType or "GENERIC");
-
-	if StaticPopupDialogs[staticPopupToken] == nil then
-		StaticPopupDialogs[staticPopupToken] = {
-			text = "",
-			
-			OnShow = function(self, popupMessage)
-				self.text:SetText(popupMessage);
-			end,
-
-			button1 = OKAY,
-			timeout = 0,
-			whileDead = 1,
-		};
-	end
-
-	local text_arg1 = nil;
-	local text_arg2 = nil;
-	StaticPopup_Show(staticPopupToken, text_arg1, text_arg2, message);
 end
 
 local tempButtonLocs = {};	--So we don't make a new table each time.
@@ -4555,7 +4540,7 @@ function StaticPopup_Show(which, text_arg1, text_arg2, data, insertedFrame)
 
 	dialog.maxHeightSoFar, dialog.maxWidthSoFar = 0, 0;
 	local bottomSpace = info.extraButton ~= nil and (dialog.extraButton:GetHeight() + 60) or 16;
-
+	
 	-- Set the text of the dialog
 	local text = _G[dialog:GetName().."Text"];
 	if ( (which == "DEATH") or
@@ -4574,30 +4559,16 @@ function StaticPopup_Show(which, text_arg1, text_arg2, data, insertedFrame)
 		 (which == "BFMGR_INVITED_TO_ENTER") or
 		 (which == "AREA_SPIRIT_HEAL") or
 		 (which == "CONFIRM_REMOVE_COMMUNITY_MEMBER") or
-		 (which == "CONFIRM_DESTROY_COMMUNITY_STREAM") or
-		 (which == "CONFIRM_RUNEFORGE_LEGENDARY_CRAFT") or
-		 (which == "ANIMA_DIVERSION_CONFIRM_CHANNEL")) then
+		 (which == "CONFIRM_DESTROY_COMMUNITY_STREAM") ) then
 		text:SetText(" ");	-- The text will be filled in later.
 		text.text_arg1 = text_arg1;
 		text.text_arg2 = text_arg2;
-	elseif (which == "PREMADE_GROUP_LEADER_CHANGE_DELIST_WARNING") then
-		dialog.SubText:SetText(" ");	-- The text will be filled in later.
-		dialog.SubText.text_arg1 = text_arg1;
-		dialog.SubText.text_arg2 = text_arg2;
 	elseif ( which == "BILLING_NAG" ) then
 		text:SetFormattedText(info.text, text_arg1, MINUTES);
 	elseif ( which == "SPELL_CONFIRMATION_PROMPT" or which == "SPELL_CONFIRMATION_WARNING" ) then
 		text:SetText(text_arg1);
 		info.text = text_arg1;
 		info.timeout = text_arg2;
-	elseif ( which == "CONFIRM_AZERITE_EMPOWERED_RESPEC_EXPENSIVE" ) then
-		local separateThousands = true;
-		local goldDisplay = GetMoneyString(data.respecCost, separateThousands);
-		text:SetFormattedText(info.text, goldDisplay, text_arg1, CONFIRM_AZERITE_EMPOWERED_RESPEC_STRING);
-	elseif  ( which == "BUYOUT_AUCTION_EXPENSIVE" ) then
-		local separateThousands = true;
-		local goldDisplay = GetMoneyString(text_arg1, separateThousands);
-		text:SetFormattedText(info.text, goldDisplay, BUYOUT_AUCTION_CONFIRMATION_STRING);
 	else
 		text:SetFormattedText(info.text, text_arg1, text_arg2);
 		text.text_arg1 = text_arg1;
@@ -4639,7 +4610,7 @@ function StaticPopup_Show(which, text_arg1, text_arg2, data, insertedFrame)
 		else
 			editBox:SetWidth(130);
 		end
-
+		
 		editBox:ClearAllPoints();
 		editBox:SetPoint("BOTTOM", 0, 29 + bottomSpace);
 	else
@@ -4669,36 +4640,15 @@ function StaticPopup_Show(which, text_arg1, text_arg2, data, insertedFrame)
 		_G[dialog:GetName().."MoneyInputFrame"]:Hide();
 	end
 
-	dialog.ItemFrame:ClearAllPoints();
-	dialog.SubText:ClearAllPoints();
-	local itemFrameXOffset = -60;
-	local itemFrameYOffset = -6;
-	local subTextSpacingYOffset = info.normalSizedSubText and -18 or -6;
-	if ( info.itemFrameAboveSubtext and info.hasItemFrame and info.subText ) then
-		dialog.ItemFrame:SetPoint("TOP", dialog.text, "BOTTOM", itemFrameXOffset, itemFrameYOffset);
-		-- Other components (like the moneyFrame) can be anchored under subtext so we anchor to the item frame instead of the bottom of the window.
-		dialog.SubText:SetPoint("TOP", dialog.ItemFrame, "BOTTOM", -itemFrameXOffset, subTextSpacingYOffset);
-	else
-		dialog.ItemFrame:SetPoint("BOTTOM", itemFrameXOffset, bottomSpace + 29);
-		dialog.SubText:SetPoint("TOP", dialog.text, "BOTTOM", 0, subTextSpacingYOffset);
-	end
-
 	dialog.ItemFrame.itemID = nil;
 	-- Show or hide item button
 	if ( info.hasItemFrame ) then
 		dialog.ItemFrame:Show();
 		if ( data and type(data) == "table" ) then
-			dialog.ItemFrame:SetCustomOnEnter(data.itemFrameOnEnter);
-
-			local itemFrameCallback = data.itemFrameCallback;
-			if ( itemFrameCallback ) then
-				itemFrameCallback(dialog.ItemFrame);
-			else
-				if ( data.useLinkForItemInfo ) then
-					dialog.ItemFrame:RetrieveInfo(data);
-				end
-				dialog.ItemFrame:DisplayInfo(data.link, data.name, data.color, data.texture, data.count);
+			if ( data.useLinkForItemInfo ) then
+				StaticPopupItemFrame_RetrieveInfo(dialog.ItemFrame, data);
 			end
+			StaticPopupItemFrame_DisplayInfo(dialog.ItemFrame, data.link, data.name, data.color, data.texture, data.count);
 		end
 	else
 		dialog.ItemFrame:Hide();
@@ -4712,7 +4662,6 @@ function StaticPopup_Show(which, text_arg1, text_arg2, data, insertedFrame)
 	dialog.enterClicksFirstButton = info.enterClicksFirstButton;
 	dialog.insertedFrame = insertedFrame;
 	if ( info.subText ) then
-		dialog.SubText:SetFontObject(info.normalSizedSubText and "GameFontNormal" or "GameFontNormalSmall");
 		dialog.SubText:SetText(info.subText);
 		dialog.SubText:Show();
 	else
@@ -4746,78 +4695,73 @@ function StaticPopup_Show(which, text_arg1, text_arg2, data, insertedFrame)
 	local button3 = _G[dialog:GetName().."Button3"];
 	local button4 = _G[dialog:GetName().."Button4"];
 
-	local buttons = {button1, button2, button3, button4};
-	for index, button in ipairs_reverse(buttons) do
-		button:SetText(info["button"..index]);
-		button:Hide();
-		button:SetWidth(1);
-		button:ClearAllPoints();
-		button.PulseAnim:Stop();
+	do	--If there is any recursion in this block, we may get errors (tempButtonLocs is static). If you have to recurse, we'll have to create a new table each time.
+		assert(#tempButtonLocs == 0);	--If this fails, we're recursing. (See the table.wipe at the end of the block)
+
+		tinsert(tempButtonLocs, button1);
+		tinsert(tempButtonLocs, button2);
+		tinsert(tempButtonLocs, button3);
+		tinsert(tempButtonLocs, button4);
+
+		for i=#tempButtonLocs, 1, -1 do
+			--Do this stuff before we move it. (This is why we go back-to-front)
+			tempButtonLocs[i]:SetText(info["button"..i]);
+			tempButtonLocs[i]:Hide();
+			tempButtonLocs[i]:ClearAllPoints();
+			tempButtonLocs[i].PulseAnim:Stop();
+			--Now we possibly remove it.
+			if ( not (info["button"..i] and ( not info["DisplayButton"..i] or info["DisplayButton"..i](dialog))) ) then
+				tremove(tempButtonLocs, i);
+			end
+		end
+
+		local numButtons = #tempButtonLocs;
+		--Save off the number of buttons.
+		dialog.numButtons = numButtons;
+
+		if numButtons > 0 then
+			tempButtonLocs[1]:ClearAllPoints();
+			if ( info.verticalButtonLayout ) then
+				tempButtonLocs[1]:SetPoint("TOP", dialog.text, "BOTTOM", 0, -16);
+			else
+				if ( numButtons == 4 ) then
+					tempButtonLocs[1]:SetPoint("BOTTOMRIGHT", dialog, "BOTTOM", -139, bottomSpace);
+				elseif ( numButtons == 3 ) then
+					tempButtonLocs[1]:SetPoint("BOTTOMRIGHT", dialog, "BOTTOM", -72, bottomSpace);
+				elseif ( numButtons == 2 ) then
+					tempButtonLocs[1]:SetPoint("BOTTOMRIGHT", dialog, "BOTTOM", -6, bottomSpace);
+				elseif ( numButtons == 1 ) then
+					tempButtonLocs[1]:SetPoint("BOTTOM", dialog, "BOTTOM", 0, bottomSpace);
+				end
+			end
+		end
+
+		for i=1, numButtons do
+			if ( i > 1 ) then
+				tempButtonLocs[i]:ClearAllPoints();
+				if info.verticalButtonLayout then
+					tempButtonLocs[i]:SetPoint("TOP", tempButtonLocs[i-1], "BOTTOM", 0, -6);
+				else
+					tempButtonLocs[i]:SetPoint("LEFT", tempButtonLocs[i-1], "RIGHT", 13, 0);
+				end
+			end
+
+			local width = tempButtonLocs[i]:GetTextWidth();
+			if ( width > 110 ) then
+				tempButtonLocs[i]:SetWidth(width + 20);
+			else
+				tempButtonLocs[i]:SetWidth(120);
+			end
+			if (info["button"..i.."Pulse"]) then
+				tempButtonLocs[i].PulseAnim:Play();
+			end
+			tempButtonLocs[i]:Enable();
+			tempButtonLocs[i]:Show();
+		end
+
+		table.wipe(tempButtonLocs);
+	end
 	
-		if not (info["button"..index] and ( not info["DisplayButton"..index] or info["DisplayButton"..index](dialog))) then
-			table.remove(buttons, index);
-		end
-	end
-
-	dialog.numButtons = #buttons;
-
-	local buttonTextMargin = 20;
-	local minButtonWidth = 120;
-	local maxButtonWidth = minButtonWidth;
-	for index, button in ipairs(buttons) do
-		local buttonWidth = button:GetTextWidth() + buttonTextMargin;
-		maxButtonWidth = math.max(maxButtonWidth, buttonWidth);
-	end
-
-	local function InitButton(button, index)
-		if info[string.format("button%dPulse", index)] then
-			button.PulseAnim:Play();
-		end
-		button:Enable();
-		button:Show();
-	end
-
-	-- Button layout logic depends on the width of the dialog, so this needs to be resized to account
-	-- for any configuration options first. It will be resized again after the buttons have been arranged.
-	StaticPopup_Resize(dialog, which);
-
-	local buttonPadding = 10;
-	local minButtonWidth = 120;
-	local totalButtonPadding = (#buttons - 1) * buttonPadding;
-	local totalButtonWidth = #buttons * maxButtonWidth;
-	local totalWidth;
-	local uncondensedTotalWidth = totalButtonWidth + totalButtonPadding;
-	if uncondensedTotalWidth < dialog:GetWidth() then
-		for index, button in ipairs(buttons) do
-			button:SetWidth(maxButtonWidth);
-			InitButton(button, index);
-		end
-		totalWidth = uncondensedTotalWidth; 
-	else
-		totalWidth = totalButtonPadding;
-		for index, button in ipairs(buttons) do
-			local buttonWidth = math.max(minButtonWidth, button:GetTextWidth()) + buttonTextMargin;
-			button:SetWidth(buttonWidth);
-			totalWidth = totalWidth + buttonWidth; 
-			InitButton(button, index);
-		end
-	end
-
-	if #buttons > 0 then
-		if info.verticalButtonLayout then
-			buttons[1]:SetPoint("TOP", dialog.text, "BOTTOM", 0, -16);
-			for index = 2, #buttons do
-				buttons[index]:SetPoint("TOP", buttons[index-1], "BOTTOM", 0, -6);
-			end
-		else
-			local offset = totalWidth / 2;
-			buttons[1]:SetPoint("BOTTOMLEFT", dialog, "BOTTOM", -offset, bottomSpace);
-			for index = 2, #buttons do
-				buttons[index]:SetPoint("BOTTOMLEFT", buttons[index-1], "BOTTOMRIGHT", buttonPadding, 0);
-			end
-		end
-	end
-
 	if info.extraButton then
 		local extraButton = dialog.extraButton;
 		extraButton:Show();
@@ -4866,12 +4810,8 @@ function StaticPopup_Show(which, text_arg1, text_arg2, data, insertedFrame)
 		else
 			button1:Disable();
 		end
-	elseif info.acceptDelay then
-		dialog.acceptDelay = info.acceptDelay;
-		button1:Disable();
 	else
 		dialog.startDelay = nil;
-		dialog.acceptDelay = nil;
 		button1:Enable();
 	end
 
@@ -4905,9 +4845,6 @@ function StaticPopup_Hide(which, data)
 	end
 end
 
-local SpellConfirmationFormatter = CreateFromMixins(SecondsFormatterMixin);
-SpellConfirmationFormatter:Init(0, SecondsFormatter.Abbreviation.None, true, true);
-
 function StaticPopup_OnUpdate(dialog, elapsed)
 	if ( dialog.timeleft > 0 ) then
 		local which = dialog.which;
@@ -4936,16 +4873,14 @@ function StaticPopup_OnUpdate(dialog, elapsed)
 			 (which == "CONFIRM_SUMMON_STARTING_AREA") or
 			 (which == "BFMGR_INVITED_TO_ENTER") or
 			 (which == "AREA_SPIRIT_HEAL") or
-			 (which == "SPELL_CONFIRMATION_PROMPT") or
-			 (which == "PREMADE_GROUP_LEADER_CHANGE_DELIST_WARNING") or
-			 (which == "ANIMA_DIVERSION_CONFIRM_CHANNEL")) then
+			 (which == "SPELL_CONFIRMATION_PROMPT") ) then
 			local text = _G[dialog:GetName().."Text"];
 			timeleft = ceil(timeleft);
 			if ( (which == "INSTANCE_BOOT") or (which == "GARRISON_BOOT") ) then
 				if ( timeleft < 60 ) then
-					text:SetFormattedText(StaticPopupDialogs[which].text, timeleft, SECONDS);
+					text:SetFormattedText(StaticPopupDialogs[which].text, GetBindLocation(), timeleft, SECONDS);
 				else
-					text:SetFormattedText(StaticPopupDialogs[which].text, ceil(timeleft / 60), MINUTES);
+					text:SetFormattedText(StaticPopupDialogs[which].text, GetBindLocation(), ceil(timeleft / 60), MINUTES);
 				end
 			elseif ( which == "CONFIRM_SUMMON" or which == "CONFIRM_SUMMON_SCENARIO" or which == "CONFIRM_SUMMON_STARTING_AREA" ) then
 				if ( timeleft < 60 ) then
@@ -4960,14 +4895,13 @@ function StaticPopup_OnUpdate(dialog, elapsed)
 					text:SetFormattedText(StaticPopupDialogs[which].text, text.text_arg1, ceil(timeleft / 60), MINUTES);
 				end
 			elseif ( which == "SPELL_CONFIRMATION_PROMPT") then
-				local time = SpellConfirmationFormatter:Format(timeleft);
-				text:SetText(StaticPopupDialogs[which].text .. " " ..TIME_REMAINING .. " " .. time);
-			elseif (which == "PREMADE_GROUP_LEADER_CHANGE_DELIST_WARNING") then
-				dialog.SubText:SetText(StaticPopupDialogs[which].subText:format(SecondsToTime(timeleft)));
-			elseif (which == "ANIMA_DIVERSION_CONFIRM_CHANNEL") then
-				local formatterOutput = WorldQuestsSecondsFormatter:Format(timeleft);
-				local formattedTime = BONUS_OBJECTIVE_TIME_LEFT:format(formatterOutput);
-				text:SetFormattedText(StaticPopupDialogs[which].text, text.text_arg1, formattedTime);
+				local time = "";
+				if ( timeleft < 60 ) then
+					text:SetFormattedText(ERR_SPELL_FAILED_S, timeleft, SECONDS);
+				else
+					text:SetFormattedText(ERR_SPELL_FAILED_S, ceil(timeleft / 60), MINUTES);
+				end
+				text:SetText(StaticPopupDialogs[which].text .. " " ..TIME_REMAINING .. text:GetText());
 			else
 				if ( timeleft < 60 ) then
 					text:SetFormattedText(StaticPopupDialogs[which].text, timeleft, SECONDS);
@@ -5009,23 +4943,6 @@ function StaticPopup_OnUpdate(dialog, elapsed)
 				end
 			end
 			StaticPopup_Resize(dialog, which);
-		end
-	end
-
-	if dialog.acceptDelay then
-		dialog.acceptDelay = dialog.acceptDelay - elapsed;
-		if dialog.acceptDelay <= 0 then
-			dialog.button1:Enable();
-			local info = StaticPopupDialogs[dialog.which];
-			dialog.button1:SetText(info.button1);
-			dialog.acceptDelay = nil;
-
-			if info.OnAcceptDelayExpired ~= nil then
-				info.OnAcceptDelayExpired(dialog, dialog.data);
-			end
-		else
-			dialog.button1:Disable();
-			dialog.button1:SetText(math.ceil(dialog.acceptDelay));
 		end
 	end
 
@@ -5241,6 +5158,16 @@ function StaticPopup_OnKeyDown(self, key)
 	end
 end
 
+function StaticPopup_Visible(which)
+	for index = 1, STATICPOPUP_NUMDIALOGS, 1 do
+		local frame = _G["StaticPopup"..index];
+		if( frame:IsShown() and (frame.which == which) ) then
+			return frame:GetName(), frame;
+		end
+	end
+	return nil;
+end
+
 function StaticPopup_EscapePressed()
 	local closed = nil;
 	for _, frame in pairs(StaticPopup_DisplayedFrames) do
@@ -5274,7 +5201,7 @@ function StaticPopup_SetUpAnchor(dialog, idx)
 	if ( lastFrame ) then
 		dialog:SetPoint("TOP", lastFrame, "BOTTOM", 0, 0);
 	else
-		dialog:SetPoint("TOP", UIParent, "TOP", 0, dialog.topOffset or -135);
+		dialog:SetPoint("TOP", UIParent, "TOP", 0, -135);
 	end
 end
 
@@ -5346,16 +5273,6 @@ function StaticPopup_OnEvent(self)
 	StaticPopup_Resize(self, self.which);
 end
 
-function StaticPopup_StandardConfirmationTextHandler(self, expectedText)
-	local parent = self:GetParent();
-	parent.button1:SetEnabled(ConfirmationEditBoxMatches(parent.editBox, expectedText));
-end
-
-function StaticPopup_StandardNonEmptyTextHandler(self)
-	local parent = self:GetParent();
-	parent.button1:SetEnabled(UserEditBoxNonEmpty(parent.editBox));
-end
-
 function StaticPopup_HideExclusive()
 	for _, frame in pairs(StaticPopup_DisplayedFrames) do
 		if ( frame:IsShown() and frame.exclusive ) then
@@ -5374,43 +5291,18 @@ function StaticPopup_HideExclusive()
 	end
 end
 
-
-StaticPopupItemFrameMixin = {};
-
-function StaticPopupItemFrameMixin:OnLoad()
-	self:GetParent().itemFrame = self;
-	self:RegisterEvent("GET_ITEM_INFO_RECEIVED");
-end
-
-function StaticPopupItemFrameMixin:OnEvent(event, ...)
+function StaticPopupItemFrame_OnEvent(self, event, ...)
 	if ( event == "GET_ITEM_INFO_RECEIVED" ) then
 		local itemID = ...;
 		if ( itemID == self.itemID ) then
 			local data = self:GetParent().data;
-			self:RetrieveInfo(data);
-			self:DisplayInfo(data.link, data.name, data.color, data.texture, data.count);
+			StaticPopupItemFrame_RetrieveInfo(self, data);
+			StaticPopupItemFrame_DisplayInfo(self, data.link, data.name, data.color, data.texture, data.count);
 		end
 	end
 end
 
-function StaticPopupItemFrameMixin:OnEnter()
-	if ( self.customOnEnter ) then
-		self.customOnEnter(self);
-	elseif ( self.link ) then
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-		GameTooltip:SetHyperlink(self.link);
-	end
-end
-
-function StaticPopupItemFrameMixin:OnLeave()
-	GameTooltip:Hide();
-end
-
-function StaticPopupItemFrameMixin:SetCustomOnEnter(customOnEnter)
-	self.customOnEnter = customOnEnter;
-end
-
-function StaticPopupItemFrameMixin:RetrieveInfo(data)
+function StaticPopupItemFrame_RetrieveInfo(self, data)
 	local itemName, _, itemQuality, _, _, _, _, _, _, texture = GetItemInfo(data.link);
 	if ( itemName ) then
 		data.name = itemName;
@@ -5427,7 +5319,7 @@ function StaticPopupItemFrameMixin:RetrieveInfo(data)
 	end
 end
 
-function StaticPopupItemFrameMixin:DisplayInfo(link, name, color, texture, count)
+function StaticPopupItemFrame_DisplayInfo(self, link, name, color, texture, count)
 	self.link = link;
 	_G[self:GetName().."IconTexture"]:SetTexture(texture);
 	local nameText = _G[self:GetName().."Text"];

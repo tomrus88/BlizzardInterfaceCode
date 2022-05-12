@@ -131,7 +131,7 @@
 					</Layer>
 				</Layers>
 			</Frame>
-			<Frame parentKey="CCRemover" frameLevel="12" >
+			<Frame parentKey="CCRemover" hidden="true" frameLevel="12" >
 				<Size x="42" y="42"/>
 				<Anchors>
 					<Anchor point="CENTER" relativeKey="$parent.Circle" relativePoint="BOTTOMRIGHT" x="-30" y="21"/>
