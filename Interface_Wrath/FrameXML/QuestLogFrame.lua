@@ -208,6 +208,7 @@ function QuestLog_Update(self)
 				end
 				questLogTitle:SetHighlightTexture("Interface\\Buttons\\UI-PlusButton-Hilight");
 				questNumGroupMates:SetText("");
+				questTitleTag:Hide();
 				questCheck:Hide();
 			else
 				questLogTitle:SetText("  "..questLogTitleText);
@@ -272,7 +273,7 @@ function QuestLog_Update(self)
 				end
 			else
 				-- TODO do logic for  watching
-				-- questTitleTag:SetText("");
+				questTitleTag:SetText("");
 				-- -- Reset to max text width
 				-- if ( questNormalText:GetWidth() > 275 ) then
 				-- 	questNormalText:SetWidth(260);
@@ -430,7 +431,7 @@ function QuestLogTitleButton_OnEnter(self)
 end
 
 function QuestLogTitleButton_OnLeave(self)
-	if ( self:GetID() ~= GetQuestLogSelection() - HybridScrollFrame_GetOffset(QuestLogListScrollFrame)) then
+	if ( self:GetID() ~= GetQuestLogSelection()) then
 		local name = self:GetName();
 		self.tag:SetTextColor(self.r, self.g, self.b);
 		self.groupMates:SetTextColor(self.r, self.g, self.b);
@@ -440,10 +441,15 @@ end
 
 function QuestLog_UpdatePartyInfoTooltip(self)
 	local index = self:GetID();
+	local questName = tostring(self:GetText());
+	local questID = GetQuestIDFromLogIndex(index);
 	local numPartyMembers = GetNumSubgroupMembers();
+
 	if ( numPartyMembers == 0 or self.isHeader ) then
+		EventRegistry:TriggerEvent("QuestLogFrame.MouseOver", self, questName, questID, false);
 		return;
 	end
+	EventRegistry:TriggerEvent("QuestLogFrame.MouseOver", self, questName, questID, true);
 	GameTooltip_SetDefaultAnchor(GameTooltip, self);
 	
 	local questLogTitleText = GetQuestLogTitle(index);
@@ -834,3 +840,24 @@ function QuestLogListScrollFrame_OnLoad(self)
 	HybridScrollFrame_CreateButtons(self, "QuestLogTitleButtonTemplate");
 end
 
+--
+-- QuestLogFrameTrackButton
+--
+local function _QuestLog_ToggleQuestWatch(questIndex)
+	if ( IsQuestWatched(questIndex) ) then
+		RemoveQuestWatch(questIndex);
+		WatchFrame_Update();
+	else
+		if ( GetNumQuestWatches() >= MAX_WATCHABLE_QUESTS ) then -- Check this first though it's less likely, otherwise they could make the frame bigger and be disappointed
+			UIErrorsFrame:AddMessage(format(QUEST_WATCH_TOO_MANY, MAX_WATCHABLE_QUESTS), 1.0, 0.1, 0.1, 1.0);
+			return;
+		end
+		AddQuestWatch(questIndex);
+		WatchFrame_Update();
+	end
+end
+
+function QuestLogFrameTrackButton_OnClick(self)
+	_QuestLog_ToggleQuestWatch(GetQuestLogSelection());
+	QuestLog_Update();
+end

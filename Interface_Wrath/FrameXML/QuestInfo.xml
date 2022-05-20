@@ -369,6 +369,23 @@
 					</Layer>
 				</Layers>
 			</Frame>
+			<Frame parentKey="TalentFrame" name="QuestInfoTalentFrame">
+				<Size x="280" y="20"/>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString parentKey="ReceiveText" inherits="QuestFont" text="BONUS_TALENTS">
+							<Anchors>
+								<Anchor point="LEFT" x="0" y="0"/>
+							</Anchors>
+						</FontString>
+						<FontString parentKey="ValueText" inherits="NumberFontNormalLarge" justifyH="LEFT">
+							<Anchors>
+								<Anchor point="LEFT" relativeKey="$parent.ReceiveText" relativePoint="RIGHT" x="15" y="0"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
 			<Button parentKey="ArtifactXPFrame" inherits="LargeItemButtonTemplate" hidden="true">
 				<Layers>
 					<Layer level="BORDER">
@@ -553,6 +570,7 @@
 				</Scripts>
 			</Button>
 			<Button parentKey="TitleFrame" inherits="SmallItemButtonTemplate"/>
+			<Button parentKey="TalentFrame" inherits="SmallItemButtonTemplate" hidden="true"/>
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -567,6 +585,7 @@
 				self.XPFrame.Name:SetFontObject("NumberFontNormal");
 				self.ArtifactXPFrame.Name:SetFontObject("NumberFontNormal");
 				self.TitleFrame.Icon:SetTexture("Interface\\Icons\\INV_Misc_Note_02");
+				self.TalentFrame.Name:SetFontObject("NumberFontNormal");
 			</OnLoad>
 		</Scripts>
 	</Frame>

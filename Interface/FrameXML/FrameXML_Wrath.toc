@@ -159,7 +159,7 @@ MacOptionsPanel.xml
 AudioOptionsFrame.xml
 AudioOptionsPanels.xml
 InterfaceOptionsFrame.xml
-..\..\Interface_TBC\FrameXML\InterfaceOptionsPanels.xml
+..\..\Interface_Wrath\FrameXML\InterfaceOptionsPanels.xml
 ..\SharedXML\AddonList.xml
 AlertFrameIntrinsic.xml
 AlertFrames.xml

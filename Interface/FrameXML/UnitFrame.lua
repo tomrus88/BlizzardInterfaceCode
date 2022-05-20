@@ -772,8 +772,9 @@ function UnitFrame_UpdateThreatIndicator(indicator, numericIndicator, unit)
 					if ( isTanking ) then
 						display = UnitThreatPercentageOfLead(indicator.feedbackUnit, indicator.unit);
 					end
-					display = min(display, MAX_DISPLAYED_THREAT_PERCENT);
+
 					if ( display and display ~= 0 ) then
+						display = min(display, MAX_DISPLAYED_THREAT_PERCENT);
 						numericIndicator.text:SetText(format("%1.0f", display).."%");
 						numericIndicator.bg:SetVertexColor(GetThreatStatusColor(status));
 						numericIndicator:Show();

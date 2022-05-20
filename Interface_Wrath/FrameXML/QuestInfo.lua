@@ -103,6 +103,7 @@ function QuestInfo_Display(template, parentFrame, acceptButton, material, mapVie
 		QuestInfoRewardsFrame.ItemReceiveText:SetTextColor(textColor[1], textColor[2], textColor[3]);
 		QuestInfoRewardsFrame.PlayerTitleText:SetTextColor(textColor[1], textColor[2], textColor[3]);
 		QuestInfoRewardsFrame.XPFrame.ReceiveText:SetTextColor(textColor[1], textColor[2], textColor[3]);
+		QuestInfoRewardsFrame.TalentFrame.ReceiveText:SetTextColor(textColor[1], textColor[2], textColor[3]);
 
 		QuestInfoRewardsFrame.spellHeaderPool.textR, QuestInfoRewardsFrame.spellHeaderPool.textG, QuestInfoRewardsFrame.spellHeaderPool.textB = textColor[1], textColor[2], textColor[3];
 	end
@@ -436,6 +437,7 @@ function QuestInfo_ShowRewards()
 	local artifactCategory;
 	local honor = 0;
 	local playerTitle;
+	local talents = 0;
 	local totalHeight = 0;
 	local numSpellRewards = 0;
 	local rewardsFrame = QuestInfoFrame.rewardsFrame;
@@ -451,10 +453,11 @@ function QuestInfo_ShowRewards()
 		money = GetQuestLogRewardMoney();
 		--skillName, skillIcon, skillPoints = GetQuestLogRewardSkillPoints();
 		-- Don't show XP rewards in Classic.
-		xp = 0; -- GetQuestLogRewardXP();
+		xp = GetQuestLogRewardXP();
 		--artifactXP, artifactCategory = GetQuestLogRewardArtifactXP();
 		honor = GetQuestLogRewardHonor();
 		playerTitle = GetQuestLogRewardTitle();
+		talents = GetQuestLogRewardTalents();
 		--ProcessQuestLogRewardFactions();
 		--numSpellRewards = GetNumQuestLogRewardSpells();
 		spellGetter = GetQuestLogRewardSpell;
@@ -465,11 +468,11 @@ function QuestInfo_ShowRewards()
 		numQuestCurrencies = 0;--GetNumRewardCurrencies();
 		money = GetRewardMoney();
 		skillName, skillIcon, skillPoints = 0, 0, 0;--GetRewardSkillPoints();
-		-- Don't show XP rewards in Classic.
-		xp = 0; --GetRewardXP();
+		xp = GetRewardXP();
 		artifactXP, artifactCategory = 0, nil;--GetRewardArtifactXP();
 		honor = 0;--GetRewardHonor();
 		playerTitle = nil;--GetRewardTitle();
+		talents = GetRewardTalentPoints();
 		numSpellRewards = GetNumRewardSpells();
 		spellGetter = GetRewardSpell;
 	end
@@ -485,7 +488,7 @@ function QuestInfo_ShowRewards()
 	end
 
 	local totalRewards = numQuestRewards + numQuestChoices + numQuestCurrencies;
-	if ( totalRewards == 0 and money == 0 and xp == 0 and not playerTitle and numQuestSpellRewards == 0 and artifactXP == 0 ) then
+	if ( totalRewards == 0 and money == 0 and xp == 0 and not playerTitle and talents == 0 and numQuestSpellRewards == 0 and artifactXP == 0 ) then
 		rewardsFrame:Hide();
 		return nil;
 	end
@@ -673,7 +676,7 @@ function QuestInfo_ShowRewards()
 	end
 
 	-- Setup mandatory rewards
-	if ( numQuestRewards > 0 or numQuestCurrencies > 0 or money > 0 or xp > 0 ) then
+	if ( numQuestRewards > 0 or numQuestCurrencies > 0 or money > 0 or xp > 0 or talents > 0 ) then
 		-- receive text, will either say "You will receive" or "You will also receive"
 		local questItemReceiveText = rewardsFrame.ItemReceiveText;
 		if ( numQuestChoices > 0 or numQuestSpellRewards > 0 or playerTitle ) then
@@ -723,6 +726,11 @@ function QuestInfo_ShowRewards()
 				lastFrame = rewardsFrame.XPFrame;
 				totalHeight = totalHeight + rewardsFrame.XPFrame:GetHeight() + REWARDS_SECTION_OFFSET;
 			end
+		end
+		-- Talent Point rewards
+		if ( QuestInfo_ToggleRewardElement(rewardsFrame.TalentFrame, talents, lastFrame) ) then
+			lastFrame = rewardsFrame.TalentFrame;
+			totalHeight = totalHeight + rewardsFrame.TalentFrame:GetHeight() + REWARDS_SECTION_OFFSET;
 		end
 		-- Skill Point rewards
 		if ( QuestInfo_ToggleRewardElement(rewardsFrame.SkillPointFrame, skillPoints, lastFrame) ) then
@@ -801,7 +809,7 @@ function QuestInfo_ShowRewards()
 				currencyID = GetQuestCurrencyID(questItem.type, i);
 			end
 			if (name and texture and numItems) then
-				name, texture, numItems, quality = CurrencyContainerUtil.GetCurrencyContainerInfo(currencyID, numItems, name, texture, quality); 
+				name, texture, numItems, quality = CurrencyContainerUtil.GetCurrencyContainerInfo(currencyID, numItems, name, texture, quality);
 				questItem:SetID(i)
 				questItem:Show();
 				-- For the tooltip
@@ -862,6 +870,7 @@ function QuestInfo_ShowRewards()
 		rewardsFrame.XPFrame:Hide();
 		rewardsFrame.SkillPointFrame:Hide();
         rewardsFrame.HonorFrame:Hide();
+		rewardsFrame.TalentFrame:Hide();
 	end
 
 	-- deselect item
