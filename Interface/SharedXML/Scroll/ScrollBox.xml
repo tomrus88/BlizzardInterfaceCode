@@ -5,6 +5,7 @@
 	<Script file="ScrollBoxView.lua"/>
 	<Script file="ScrollBoxListView.lua"/>
 	<Script file="ScrollBoxLinearView.lua"/>
+	<Script file="ScrollBoxTreeView.lua"/>
 	<Script file="ScrollBoxGridView.lua"/>
 	<Script file="ScrollBox.lua"/>
 	
