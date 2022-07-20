@@ -268,6 +268,7 @@ local TradeSkillUI =
 			Arguments =
 			{
 				{ Name = "recipeSpellID", Type = "number", Nilable = false },
+				{ Name = "reagents", Type = "table", InnerType = "CraftingReagentInfo", Nilable = true },
 			},
 
 			Returns =

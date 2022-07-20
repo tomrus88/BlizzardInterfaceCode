@@ -30,6 +30,19 @@ local SimpleAnimGroupAPI =
 			},
 		},
 		{
+			Name = "GetAnimationSpeedMultiplier",
+			Type = "Function",
+
+			Arguments =
+			{
+			},
+
+			Returns =
+			{
+				{ Name = "animationSpeedMultiplier", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetAnimations",
 			Type = "Function",
 
@@ -233,6 +246,15 @@ local SimpleAnimGroupAPI =
 			{
 				{ Name = "reverse", Type = "bool", Nilable = false, Default = false },
 				{ Name = "offset", Type = "number", Nilable = false, Default = 0 },
+			},
+		},
+		{
+			Name = "SetAnimationSpeedMultiplier",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "animationSpeedMultiplier", Type = "number", Nilable = false },
 			},
 		},
 		{

@@ -65,6 +65,15 @@ local ProfessionSpecUI =
 			},
 		},
 		{
+			Name = "GetDefaultSpecSkillLine",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "defaultSpecSkillLine", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetDescriptionForPath",
 			Type = "Function",
 
@@ -161,6 +170,15 @@ local ProfessionSpecUI =
 			Returns =
 			{
 				{ Name = "specTabIDs", Type = "table", InnerType = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "GetSpecTabInfo",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "specTabInfo", Type = "SpecializationTabInfo", Nilable = false },
 			},
 		},
 		{
@@ -293,17 +311,12 @@ local ProfessionSpecUI =
 			},
 		},
 		{
-			Name = "ShouldShowSpecForSkillLine",
+			Name = "ShouldShowSpecTab",
 			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "skillLineID", Type = "number", Nilable = false },
-			},
 
 			Returns =
 			{
-				{ Name = "shouldShow", Type = "bool", Nilable = false },
+				{ Name = "showSpecTab", Type = "bool", Nilable = false },
 			},
 		},
 		{

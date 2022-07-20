@@ -38,6 +38,10 @@ local SharedTraits =
 			},
 		},
 		{
+			Name = "CloseTraitSystemInteraction",
+			Type = "Function",
+		},
+		{
 			Name = "CommitConfig",
 			Type = "Function",
 
@@ -78,6 +82,20 @@ local SharedTraits =
 			Returns =
 			{
 				{ Name = "condInfo", Type = "TraitCondInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "GetConfigIDBySystemID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "systemID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "configID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -424,6 +442,20 @@ local SharedTraits =
 			{
 				{ Name = "nodeEntryID", Type = "number", Nilable = false },
 			},
+		},
+		{
+			Name = "TraitSystemInteractionStarted",
+			Type = "Event",
+			LiteralName = "TRAIT_SYSTEM_INTERACTION_STARTED",
+			Payload =
+			{
+				{ Name = "systemID", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "TraitSystemNpcClosed",
+			Type = "Event",
+			LiteralName = "TRAIT_SYSTEM_NPC_CLOSED",
 		},
 		{
 			Name = "TraitTreeChanged",

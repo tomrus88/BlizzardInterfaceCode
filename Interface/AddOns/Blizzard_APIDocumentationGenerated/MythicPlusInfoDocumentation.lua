@@ -36,6 +36,15 @@ local MythicPlusInfo =
 			},
 		},
 		{
+			Name = "GetCurrentUIDisplaySeason",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "seasonID", Type = "number", Nilable = true },
+			},
+		},
+		{
 			Name = "GetLastWeeklyBestInformation",
 			Type = "Function",
 

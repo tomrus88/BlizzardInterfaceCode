@@ -29,13 +29,14 @@ local ProfessionSpecConstants =
 		{
 			Name = "ProfessionsSpecTabState",
 			Type = "Enumeration",
-			NumValues = 2,
+			NumValues = 3,
 			MinValue = 0,
-			MaxValue = 1,
+			MaxValue = 2,
 			Fields =
 			{
 				{ Name = "Locked", Type = "ProfessionsSpecTabState", EnumValue = 0 },
 				{ Name = "Unlocked", Type = "ProfessionsSpecTabState", EnumValue = 1 },
+				{ Name = "Unlockable", Type = "ProfessionsSpecTabState", EnumValue = 2 },
 			},
 		},
 	},

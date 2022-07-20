@@ -281,6 +281,40 @@ local ItemConstants =
 			},
 		},
 		{
+			Name = "ItemSubclassDisplay",
+			Type = "Enumeration",
+			NumValues = 3,
+			MinValue = 1,
+			MaxValue = 4,
+			Fields =
+			{
+				{ Name = "HideSubclassInTooltips", Type = "ItemSubclassDisplay", EnumValue = 1 },
+				{ Name = "HideSubclassInAuction", Type = "ItemSubclassDisplay", EnumValue = 2 },
+				{ Name = "ShowItemCount", Type = "ItemSubclassDisplay", EnumValue = 4 },
+			},
+		},
+		{
+			Name = "ItemSubclassFlag",
+			Type = "Enumeration",
+			NumValues = 11,
+			MinValue = 1,
+			MaxValue = 1024,
+			Fields =
+			{
+				{ Name = "WeaponsubclassCanparry", Type = "ItemSubclassFlag", EnumValue = 1 },
+				{ Name = "WeaponsubclassSetfingerseq", Type = "ItemSubclassFlag", EnumValue = 2 },
+				{ Name = "WeaponsubclassIsunarmed", Type = "ItemSubclassFlag", EnumValue = 4 },
+				{ Name = "WeaponsubclassIsrifle", Type = "ItemSubclassFlag", EnumValue = 8 },
+				{ Name = "WeaponsubclassIsthrown", Type = "ItemSubclassFlag", EnumValue = 16 },
+				{ Name = "WeaponsubclassRighthandRanged", Type = "ItemSubclassFlag", EnumValue = 32 },
+				{ Name = "ItemsubclassQuivernotrequired", Type = "ItemSubclassFlag", EnumValue = 64 },
+				{ Name = "WeaponsubclassRanged", Type = "ItemSubclassFlag", EnumValue = 128 },
+				{ Name = "WeaponsubclassDeprecatedReuseMe", Type = "ItemSubclassFlag", EnumValue = 256 },
+				{ Name = "ItemsubclassUsesInvtype", Type = "ItemSubclassFlag", EnumValue = 512 },
+				{ Name = "ArmorsubclassLfgscalingarmor", Type = "ItemSubclassFlag", EnumValue = 1024 },
+			},
+		},
+		{
 			Name = "ItemWeaponSubclass",
 			Type = "Enumeration",
 			NumValues = 21,

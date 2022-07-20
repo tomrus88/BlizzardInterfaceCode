@@ -43,9 +43,9 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeActionBarSetting",
 			Type = "Enumeration",
-			NumValues = 9,
+			NumValues = 10,
 			MinValue = 0,
-			MaxValue = 8,
+			MaxValue = 9,
 			Fields =
 			{
 				{ Name = "Orientation", Type = "EditModeActionBarSetting", EnumValue = 0 },
@@ -57,6 +57,7 @@ local EditModeManagerShared =
 				{ Name = "HideBarArt", Type = "EditModeActionBarSetting", EnumValue = 6 },
 				{ Name = "SnapToSide", Type = "EditModeActionBarSetting", EnumValue = 7 },
 				{ Name = "HideBarScrolling", Type = "EditModeActionBarSetting", EnumValue = 8 },
+				{ Name = "AlwaysShowButtons", Type = "EditModeActionBarSetting", EnumValue = 9 },
 			},
 		},
 		{

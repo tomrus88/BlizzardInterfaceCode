@@ -77,6 +77,7 @@ local TradeSkillUITypes =
 				{ Name = "bonusStatValue", Type = "number", Nilable = false },
 				{ Name = "ratingDescription", Type = "string", Nilable = false },
 				{ Name = "ratingPct", Type = "number", Nilable = false },
+				{ Name = "bonusRatingPct", Type = "number", Nilable = false },
 			},
 		},
 		{

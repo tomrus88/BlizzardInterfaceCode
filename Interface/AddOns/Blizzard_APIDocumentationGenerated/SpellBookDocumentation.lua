@@ -44,6 +44,23 @@ local SpellBook =
 			},
 		},
 		{
+			Name = "GetOverrideSpell",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "spellID", Type = "number", Nilable = false },
+				{ Name = "spec", Type = "number", Nilable = false, Default = 0 },
+				{ Name = "onlyKnown", Type = "bool", Nilable = false, Default = true },
+				{ Name = "ignoreOverrideSpellID", Type = "number", Nilable = false, Default = 0 },
+			},
+
+			Returns =
+			{
+				{ Name = "overrideSpellID", Type = "number", Nilable = false, Documentation = { "Returns the spellID passed in if there is no override" } },
+			},
+		},
+		{
 			Name = "GetSkillLineIndexByID",
 			Type = "Function",
 

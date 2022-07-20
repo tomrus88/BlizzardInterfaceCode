@@ -27,9 +27,9 @@ local CurrencyConstants_Mainline =
 		{
 			Name = "CurrencySource",
 			Type = "Enumeration",
-			NumValues = 55,
+			NumValues = 57,
 			MinValue = 0,
-			MaxValue = 54,
+			MaxValue = 56,
 			Fields =
 			{
 				{ Name = "ConvertOldItem", Type = "CurrencySource", EnumValue = 0 },
@@ -85,8 +85,10 @@ local CurrencyConstants_Mainline =
 				{ Name = "Transmogrify", Type = "CurrencySource", EnumValue = 50 },
 				{ Name = "AuctionDeposit", Type = "CurrencySource", EnumValue = 51 },
 				{ Name = "PlayerTrait", Type = "CurrencySource", EnumValue = 52 },
-				{ Name = "RenownRepGain", Type = "CurrencySource", EnumValue = 53 },
-				{ Name = "Last", Type = "CurrencySource", EnumValue = 54 },
+				{ Name = "PhBuffer_53", Type = "CurrencySource", EnumValue = 53 },
+				{ Name = "PhBuffer_54", Type = "CurrencySource", EnumValue = 54 },
+				{ Name = "RenownRepGain", Type = "CurrencySource", EnumValue = 55 },
+				{ Name = "Last", Type = "CurrencySource", EnumValue = 56 },
 			},
 		},
 	},
