@@ -222,6 +222,7 @@ SkillFrame.xml
 ..\..\Interface_Wrath\FrameXML\WatchFrame.xml
 ..\..\Interface_TBC\FrameXML\MerchantFrame.xml
 TradeFrame.xml
+..\..\Interface_Wrath\FrameXML\ContainerFrame_Wrath.lua
 ContainerFrame.xml
 LootFrame.xml
 ItemTextFrame.xml

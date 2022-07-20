@@ -88,6 +88,7 @@ UIPanelWindows["TaxiFrame"] =					{ area = "left",			pushable = 0, 		xoffset = -
 UIPanelWindows["ItemTextFrame"] =				{ area = "left",			pushable = 0, 		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	whileDead = 1 };
 UIPanelWindows["ArenaFrame"] =					{ area = "left",			pushable = 0,		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	whileDead = 1 };
 UIPanelWindows["LFGParentFrame"] =				{ area = "left",			pushable = 0,		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	whileDead = 1 };
+UIPanelWindows["PVPParentFrame"] =				{ area = "left",			pushable = 0,		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	whileDead = 1 };
 
 -- Frames NOT using the new Templates
 UIPanelWindows["CinematicFrame"] =				{ area = "full",			pushable = 0, 		xoffset = -16, 		yoffset = 12,	whileDead = 1 };
