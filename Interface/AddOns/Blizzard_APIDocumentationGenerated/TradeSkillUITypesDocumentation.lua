@@ -122,6 +122,18 @@ local TradeSkillUITypes =
 				{ Name = "quantity", Type = "number", Nilable = false },
 			},
 		},
+		{
+			Name = "GatheringOperationBonusStatInfo",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "bonusStatName", Type = "string", Nilable = false },
+				{ Name = "bonusStatValue", Type = "number", Nilable = false },
+				{ Name = "ratingDescription", Type = "string", Nilable = false },
+				{ Name = "ratingPct", Type = "number", Nilable = false },
+				{ Name = "bonusRatingPct", Type = "number", Nilable = false },
+			},
+		},
 	},
 };
 

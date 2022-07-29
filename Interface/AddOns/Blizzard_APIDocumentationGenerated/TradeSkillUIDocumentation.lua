@@ -216,6 +216,21 @@ local TradeSkillUI =
 			},
 		},
 		{
+			Name = "GetReagentDifficultyText",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "craftingReagentIndex", Type = "number", Nilable = false },
+				{ Name = "craftingReagents", Type = "table", InnerType = "CraftingReagentInfo", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "bonusText", Type = "string", Nilable = false },
+			},
+		},
+		{
 			Name = "GetReagentSlotStatus",
 			Type = "Function",
 

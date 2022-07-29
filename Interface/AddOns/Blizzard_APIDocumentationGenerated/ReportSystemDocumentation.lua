@@ -121,6 +121,7 @@ local ReportSystem =
 			Payload =
 			{
 				{ Name = "success", Type = "bool", Nilable = false },
+				{ Name = "reportType", Type = "ReportType", Nilable = false },
 			},
 		},
 	},

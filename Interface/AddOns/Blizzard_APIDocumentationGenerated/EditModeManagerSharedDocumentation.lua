@@ -61,6 +61,23 @@ local EditModeManagerShared =
 			},
 		},
 		{
+			Name = "EditModeActionBarSystemIndices",
+			Type = "Enumeration",
+			NumValues = 7,
+			MinValue = 1,
+			MaxValue = 12,
+			Fields =
+			{
+				{ Name = "MainBar", Type = "EditModeActionBarSystemIndices", EnumValue = 1 },
+				{ Name = "Bar2", Type = "EditModeActionBarSystemIndices", EnumValue = 2 },
+				{ Name = "Bar3", Type = "EditModeActionBarSystemIndices", EnumValue = 3 },
+				{ Name = "RightBar1", Type = "EditModeActionBarSystemIndices", EnumValue = 4 },
+				{ Name = "RightBar2", Type = "EditModeActionBarSystemIndices", EnumValue = 5 },
+				{ Name = "StanceBar", Type = "EditModeActionBarSystemIndices", EnumValue = 11 },
+				{ Name = "PetActionBar", Type = "EditModeActionBarSystemIndices", EnumValue = 12 },
+			},
+		},
+		{
 			Name = "EditModeCastBarSetting",
 			Type = "Enumeration",
 			NumValues = 1,
@@ -123,14 +140,52 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeSystem",
 			Type = "Enumeration",
-			NumValues = 3,
+			NumValues = 4,
 			MinValue = 0,
-			MaxValue = 2,
+			MaxValue = 3,
 			Fields =
 			{
 				{ Name = "ActionBar", Type = "EditModeSystem", EnumValue = 0 },
 				{ Name = "CastBar", Type = "EditModeSystem", EnumValue = 1 },
 				{ Name = "Minimap", Type = "EditModeSystem", EnumValue = 2 },
+				{ Name = "UnitFrame", Type = "EditModeSystem", EnumValue = 3 },
+			},
+		},
+		{
+			Name = "EditModeUnitFrameSetting",
+			Type = "Enumeration",
+			NumValues = 4,
+			MinValue = 0,
+			MaxValue = 3,
+			Fields =
+			{
+				{ Name = "HidePortrait", Type = "EditModeUnitFrameSetting", EnumValue = 0 },
+				{ Name = "CastBarUnderneath", Type = "EditModeUnitFrameSetting", EnumValue = 1 },
+				{ Name = "BuffsOnTop", Type = "EditModeUnitFrameSetting", EnumValue = 2 },
+				{ Name = "UseLargerFrame", Type = "EditModeUnitFrameSetting", EnumValue = 3 },
+			},
+		},
+		{
+			Name = "EditModeUnitFrameSystemIndices",
+			Type = "Enumeration",
+			NumValues = 3,
+			MinValue = 1,
+			MaxValue = 3,
+			Fields =
+			{
+				{ Name = "Player", Type = "EditModeUnitFrameSystemIndices", EnumValue = 1 },
+				{ Name = "Target", Type = "EditModeUnitFrameSystemIndices", EnumValue = 2 },
+				{ Name = "Focus", Type = "EditModeUnitFrameSystemIndices", EnumValue = 3 },
+			},
+		},
+		{
+			Name = "EditModeConsts",
+			Type = "Constants",
+			Values =
+			{
+				{ Name = "EditModeDefaultGridSpacing", Type = "number", Value = 40 },
+				{ Name = "EditModeMinGridSpacing", Type = "number", Value = 20 },
+				{ Name = "EditModeMaxGridSpacing", Type = "number", Value = 80 },
 			},
 		},
 	},

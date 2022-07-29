@@ -93,6 +93,24 @@ local EditModeManager =
 				{ Name = "activeLayout", Type = "number", Nilable = false },
 			},
 		},
+		{
+			Name = "SetGridShown",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "gridShown", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "SetGridSpacing",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "gridSpacing", Type = "number", Nilable = false },
+			},
+		},
 	},
 
 	Events =
@@ -130,6 +148,8 @@ local EditModeManager =
 			{
 				{ Name = "layouts", Type = "table", InnerType = "EditModeLayoutInfo", Nilable = false },
 				{ Name = "activeLayout", Type = "number", Nilable = false },
+				{ Name = "gridShown", Type = "bool", Nilable = false },
+				{ Name = "gridSpacing", Type = "number", Nilable = false },
 			},
 		},
 		{

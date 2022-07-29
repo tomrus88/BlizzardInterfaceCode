@@ -539,6 +539,7 @@ local LFGListInfo =
 				{ Name = "isPvpActivity", Type = "bool", Nilable = false },
 				{ Name = "isMythicActivity", Type = "bool", Nilable = false },
 				{ Name = "allowCrossFaction", Type = "bool", Nilable = false },
+				{ Name = "useDungeonRoleExpectations", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -603,6 +604,7 @@ local LFGListInfo =
 				{ Name = "voiceChat", Type = "string", Nilable = false },
 				{ Name = "requiredItemLevel", Type = "number", Nilable = false },
 				{ Name = "requiredHonorLevel", Type = "number", Nilable = false },
+				{ Name = "hasSelf", Type = "bool", Nilable = false },
 				{ Name = "numMembers", Type = "number", Nilable = false },
 				{ Name = "numBNetFriends", Type = "number", Nilable = false },
 				{ Name = "numCharFriends", Type = "number", Nilable = false },

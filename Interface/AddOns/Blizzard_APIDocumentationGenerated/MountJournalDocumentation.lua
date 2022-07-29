@@ -56,6 +56,15 @@ local MountJournal =
 			},
 		},
 		{
+			Name = "GetCollectedDragonridingMounts",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "mountIDs", Type = "table", InnerType = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetCollectedFilterSetting",
 			Type = "Function",
 
@@ -120,6 +129,7 @@ local MountJournal =
 				{ Name = "shouldHideOnChar", Type = "bool", Nilable = false },
 				{ Name = "isCollected", Type = "bool", Nilable = false },
 				{ Name = "mountID", Type = "number", Nilable = false },
+				{ Name = "isForDragonriding", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -242,6 +252,7 @@ local MountJournal =
 				{ Name = "shouldHideOnChar", Type = "bool", Nilable = false },
 				{ Name = "isCollected", Type = "bool", Nilable = false },
 				{ Name = "mountID", Type = "number", Nilable = false },
+				{ Name = "isForDragonriding", Type = "bool", Nilable = false },
 			},
 		},
 		{

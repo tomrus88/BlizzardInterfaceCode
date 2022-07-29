@@ -77,9 +77,9 @@ local UIEventToastManager =
 		{
 			Name = "EventToastEventType",
 			Type = "Enumeration",
-			NumValues = 22,
+			NumValues = 23,
 			MinValue = 0,
-			MaxValue = 21,
+			MaxValue = 22,
 			Fields =
 			{
 				{ Name = "LevelUp", Type = "EventToastEventType", EnumValue = 0 },
@@ -104,6 +104,7 @@ local UIEventToastManager =
 				{ Name = "CriteriaUpdated", Type = "EventToastEventType", EnumValue = 19 },
 				{ Name = "PvPTierUpdate", Type = "EventToastEventType", EnumValue = 20 },
 				{ Name = "SpellLearned", Type = "EventToastEventType", EnumValue = 21 },
+				{ Name = "TreasureItem", Type = "EventToastEventType", EnumValue = 22 },
 			},
 		},
 		{

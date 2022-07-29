@@ -102,28 +102,15 @@ local TraitConstants =
 		{
 			Name = "TraitConfigType",
 			Type = "Enumeration",
-			NumValues = 3,
-			MinValue = 0,
-			MaxValue = 2,
-			Fields =
-			{
-				{ Name = "Invalid", Type = "TraitConfigType", EnumValue = 0 },
-				{ Name = "Combat", Type = "TraitConfigType", EnumValue = 1 },
-				{ Name = "Profession", Type = "TraitConfigType", EnumValue = 2 },
-			},
-		},
-		{
-			Name = "TraitCostDefinitionType",
-			Type = "Enumeration",
 			NumValues = 4,
 			MinValue = 0,
 			MaxValue = 3,
 			Fields =
 			{
-				{ Name = "PrimaryCurrency", Type = "TraitCostDefinitionType", EnumValue = 0 },
-				{ Name = "SecondaryCurrency", Type = "TraitCostDefinitionType", EnumValue = 1 },
-				{ Name = "Item", Type = "TraitCostDefinitionType", EnumValue = 2 },
-				{ Name = "Gold", Type = "TraitCostDefinitionType", EnumValue = 3 },
+				{ Name = "Invalid", Type = "TraitConfigType", EnumValue = 0 },
+				{ Name = "Combat", Type = "TraitConfigType", EnumValue = 1 },
+				{ Name = "Profession", Type = "TraitConfigType", EnumValue = 2 },
+				{ Name = "Generic", Type = "TraitConfigType", EnumValue = 3 },
 			},
 		},
 		{
