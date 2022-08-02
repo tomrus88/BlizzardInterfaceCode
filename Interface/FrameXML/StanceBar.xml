@@ -12,7 +12,7 @@
 	</CheckButton>
 	
 	<Frame name="StanceBar" parent="UIParent" inherits="EditModeActionBarTemplate" mixin="StanceBarMixin" enableMouse="true" hidden="true">
-		<Size x="29" y="32"/>
+		<Size x="30" y="30"/>
 		<Anchors>
 			<Anchor point="BOTTOM"/>
 		</Anchors>

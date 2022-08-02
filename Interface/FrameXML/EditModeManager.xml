@@ -586,6 +586,14 @@
 									<Anchor point="TOPLEFT" relativeKey="$parent.StanceBar" relativePoint="BOTTOMLEFT"/>
 								</Anchors>
 							</Frame>
+							<Frame parentKey="PossessActionBar" inherits="EditModeCheckButtonTemplate">
+								<KeyValues>
+									<KeyValue key="labelText" value="HUD_EDIT_MODE_POSSESS_ACTION_BAR_LABEL" type="global"/>
+								</KeyValues>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeKey="$parent.PetActionBar" relativePoint="BOTTOMLEFT"/>
+								</Anchors>
+							</Frame>
 						</Frames>
 					</Frame>
 					<Frame parentKey="Expander" inherits="ResizeLayoutFrame">

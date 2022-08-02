@@ -1,6 +1,7 @@
 DragonflightLandingOverlayMixin = {};
 
 local DRAGONRIDING_INTRO_QUEST_ID = 68798;
+local DRAGONRIDING_TRAIT_SYSTEM_ID = 1;
 
 local minimapDisplayInfo = { 
 	["normalAtlas"] = "legionmission-landingbutton-druid-up",
@@ -87,5 +88,8 @@ function DragonridingPanelTalentButtonMixin:OnMouseUp()
 end
 
 function DragonridingPanelTalentButtonMixin:OnClick()
-	-- Trigger Dragonriding talents here!
+	GenericTraitUI_LoadUI();
+
+	GenericTraitFrame:SetSystemID(DRAGONRIDING_TRAIT_SYSTEM_ID);
+	ShowUIPanel(GenericTraitFrame);
 end

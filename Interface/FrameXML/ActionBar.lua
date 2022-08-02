@@ -20,14 +20,19 @@ function ActionBarMixin:ActionBar_OnLoad()
             name = "StanceButton"..i;
         elseif (self == PetActionBar) then
             name = "PetActionButton"..i;
+        elseif (self == PossessActionBar) then
+            name = "PossessButton"..i;
         else
             name = self:GetName().."Button"..i;
         end
 
 		local actionButton = CreateFrame("CheckButton", name, self, self.buttonTemplate, i);
-        actionButton.commandName = self.commandNamePrefix.."BUTTON"..i;
         actionButton.index = i;
         actionButton.isLastActionButton = i == self.numButtons;
+
+        if (self.commandNamePrefix) then
+            actionButton.commandName = self.commandNamePrefix.."BUTTON"..i;
+        end
 
         self.actionButtons[#self.actionButtons + 1] = actionButton;
         self.buttonsAndSpacers[#self.buttonsAndSpacers + 1] = actionButton;

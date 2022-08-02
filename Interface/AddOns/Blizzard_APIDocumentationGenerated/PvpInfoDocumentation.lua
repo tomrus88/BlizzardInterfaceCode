@@ -479,6 +479,15 @@ local PvpInfo =
 			},
 		},
 		{
+			Name = "GetRatedSoloShuffleMinItemLevel",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "minItemLevel", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetRewardItemLevelsByTierEnum",
 			Type = "Function",
 

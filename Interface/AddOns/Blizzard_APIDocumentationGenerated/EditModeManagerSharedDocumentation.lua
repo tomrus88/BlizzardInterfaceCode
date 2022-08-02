@@ -43,9 +43,9 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeAccountSetting",
 			Type = "Enumeration",
-			NumValues = 6,
+			NumValues = 7,
 			MinValue = 0,
-			MaxValue = 5,
+			MaxValue = 6,
 			Fields =
 			{
 				{ Name = "ShowGrid", Type = "EditModeAccountSetting", EnumValue = 0 },
@@ -54,6 +54,7 @@ local EditModeManagerShared =
 				{ Name = "ShowTargetAndFocus", Type = "EditModeAccountSetting", EnumValue = 3 },
 				{ Name = "ShowStanceBar", Type = "EditModeAccountSetting", EnumValue = 4 },
 				{ Name = "ShowPetActionBar", Type = "EditModeAccountSetting", EnumValue = 5 },
+				{ Name = "ShowPossessActionBar", Type = "EditModeAccountSetting", EnumValue = 6 },
 			},
 		},
 		{
@@ -79,9 +80,9 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeActionBarSystemIndices",
 			Type = "Enumeration",
-			NumValues = 7,
+			NumValues = 8,
 			MinValue = 1,
-			MaxValue = 12,
+			MaxValue = 13,
 			Fields =
 			{
 				{ Name = "MainBar", Type = "EditModeActionBarSystemIndices", EnumValue = 1 },
@@ -91,6 +92,7 @@ local EditModeManagerShared =
 				{ Name = "RightBar2", Type = "EditModeActionBarSystemIndices", EnumValue = 5 },
 				{ Name = "StanceBar", Type = "EditModeActionBarSystemIndices", EnumValue = 11 },
 				{ Name = "PetActionBar", Type = "EditModeActionBarSystemIndices", EnumValue = 12 },
+				{ Name = "PossessActionBar", Type = "EditModeActionBarSystemIndices", EnumValue = 13 },
 			},
 		},
 		{

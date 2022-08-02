@@ -83,7 +83,7 @@ function ActionBarController_OnEvent(self, event, ...)
 	
 	--possess
 	if ( event == "UPDATE_POSSESS_BAR" ) then
-		PossessBar_Update();
+		PossessActionBar:Update();
 		StanceBar:Update();
 	end
 	
@@ -124,7 +124,7 @@ function ActionBarController_OnEvent(self, event, ...)
 end
 
 function ActionBarController_UpdateAll(force)
-	PossessBar_Update();
+	PossessActionBar:Update();
 	StanceBar:Update();
 	CURRENT_ACTION_BAR_STATE = LE_ACTIONBAR_STATE_MAIN;
 

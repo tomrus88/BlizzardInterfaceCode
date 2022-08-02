@@ -425,37 +425,38 @@ function EditModeManagerFrameMixin:UpdateRightAnchoredActionBarScales()
 	MultiBarLeft:SetScaleIfRightAnchored(scale);
 end
 
-local function UpdateBottomAnchoredActionBar(bar, previousBar)
-	if (not bar) then
-		return;
-	end
-
-	local point, relativeTo, relativePoint, offsetX, offsetY = bar:GetPoint(1);
-	if EditModeUtil:IsBottomAnchoredActionBar(relativeTo) then
-		local topMostBottomAnchoredBar = nil;
-		if previousBar and previousBar:IsShown() and previousBar:IsCurrentlyBottomAnchored() then
-			topMostBottomAnchoredBar = previousBar;
-		elseif MultiBar2_IsVisible() and MultiBarBottomRight:IsCurrentlyBottomAnchored() then
-			topMostBottomAnchoredBar = MultiBarBottomRight;
-		elseif MultiBar1_IsVisible() and MultiBarBottomLeft:IsCurrentlyBottomAnchored() then
-			topMostBottomAnchoredBar = MultiBarBottomLeft;
-		elseif MainMenuBar:IsCurrentlyBottomAnchored() then
-			topMostBottomAnchoredBar = MainMenuBar;
-		end
-
-		if topMostBottomAnchoredBar and relativeTo ~= topMostBottomAnchoredBar then
-			bar:SetPoint("BOTTOMLEFT", topMostBottomAnchoredBar, "TOPLEFT", 0, 5);
-			EditModeManagerFrame:OnSystemPositionChange(bar);
-		end
-	end
-end
-
 function EditModeManagerFrameMixin:UpdateBottomAnchoredActionBarHeight(includeMainMenuBar)
 	self.bottomAnchoredActionBarHeight =  EditModeUtil:GetBottomActionBarHeight(includeMainMenuBar);
 
-	-- Update stance and pet bar anchoring since if other bottom bars changed we may wanna change those bars too
-	UpdateBottomAnchoredActionBar(StanceBar);
-	UpdateBottomAnchoredActionBar(PetActionBar, StanceBar);
+	-- Update bottom anchoring bars which show on top of other bars since if other bottom bars changed we may wanna change those bars too
+	local bottomAnchoredActionBarsToUpdate = { StanceBar, PetActionBar, PossessActionBar};
+
+	local topMostBottomAnchoredBar = nil;
+	if MultiBar2_IsVisible() and MultiBarBottomRight:IsCurrentlyBottomAnchored() then
+		topMostBottomAnchoredBar = MultiBarBottomRight;
+	elseif MultiBar1_IsVisible() and MultiBarBottomLeft:IsCurrentlyBottomAnchored() then
+		topMostBottomAnchoredBar = MultiBarBottomLeft;
+	elseif MainMenuBar:IsCurrentlyBottomAnchored() then
+		topMostBottomAnchoredBar = MainMenuBar;
+	end
+
+	for index, bar in ipairs(bottomAnchoredActionBarsToUpdate) do
+		if (bar and bar:IsShown()) then
+			-- Only update bar's anchor if it was already bottom anchored
+			local point, relativeTo, relativePoint, offsetX, offsetY = bar:GetPoint(1);
+			if EditModeUtil:IsBottomAnchoredActionBar(relativeTo) then
+				if topMostBottomAnchoredBar and relativeTo ~= topMostBottomAnchoredBar then
+					bar:SetPoint("BOTTOMLEFT", topMostBottomAnchoredBar, "TOPLEFT", 0, 5);
+					EditModeManagerFrame:OnSystemPositionChange(bar);
+				end
+
+				if bar:IsCurrentlyBottomAnchored() then
+					-- This bar is now the new topmost bar
+					topMostBottomAnchoredBar = bar;
+				end
+			end
+		end
+	end
 
 	UIParent_ManageFramePositions();
 end
@@ -637,6 +638,7 @@ function EditModeManagerFrameMixin:InitializeAccountSettings()
 	self.AccountSettings:SetTargetAndFocusShown(self:GetAccountSettingValueBool(Enum.EditModeAccountSetting.ShowTargetAndFocus));
 	self.AccountSettings:SetActionBarShown(StanceBar, self:GetAccountSettingValueBool(Enum.EditModeAccountSetting.ShowStanceBar));
 	self.AccountSettings:SetActionBarShown(PetActionBar, self:GetAccountSettingValueBool(Enum.EditModeAccountSetting.ShowPetActionBar));
+	self.AccountSettings:SetActionBarShown(PossessActionBar, self:GetAccountSettingValueBool(Enum.EditModeAccountSetting.ShowPossessActionBar));
 end
 
 function EditModeManagerFrameMixin:OnAccountSettingChanged(changedSetting, newValue)
@@ -1740,7 +1742,7 @@ function EditModeActionBarSystemMixin:IsCurrentlyBottomAnchored()
 		return false;
 	end
 
-	if (self == StanceBar or self == PetActionBar) then
+	if (self == StanceBar or self == PetActionBar or self == PossessActionBar) then
 		local point, relativeTo, relativePoint, offsetX, offsetY = self:GetPoint(1);
 		return relativeTo and relativeTo.IsCurrentlyBottomAnchored and relativeTo:IsCurrentlyBottomAnchored();
 	end
@@ -2012,7 +2014,8 @@ function EditModeActionBarSystemMixin:AddExtraButtons(extraButtonPool)
 	quickKeybindModeButton:Show();
 
 	if self.systemIndex ~= Enum.EditModeActionBarSystemIndices.StanceBar
-		and self.systemIndex ~= Enum.EditModeActionBarSystemIndices.PetActionBar then
+		and self.systemIndex ~= Enum.EditModeActionBarSystemIndices.PetActionBar
+		and self.systemIndex ~= Enum.EditModeActionBarSystemIndices.PossessActionBar then
 		local actionBarSettingsButton = extraButtonPool:Acquire();
 		actionBarSettingsButton.layoutIndex = 4;
 		actionBarSettingsButton:SetText(HUD_EDIT_MODE_ACTION_BAR_SETTINGS);
@@ -2303,6 +2306,11 @@ function EditModeAccountSettingsMixin:OnLoad()
 		self:SetActionBarShown(PetActionBar, isChecked, isUserInput);
 	end
 	self.Settings.PetActionBar:SetCallback(onPetActionBarCheckboxChecked);
+
+	local function onPossessActionBarCheckboxChecked(isChecked, isUserInput)
+		self:SetActionBarShown(PossessActionBar, isChecked, isUserInput);
+	end
+	self.Settings.PossessActionBar:SetCallback(onPossessActionBarCheckboxChecked);
 end
 
 function EditModeAccountSettingsMixin:OnEditModeEnter()
@@ -2320,6 +2328,7 @@ function EditModeAccountSettingsMixin:OnEditModeEnter()
 	end
 	SetupActionBar(StanceBar);
 	SetupActionBar(PetActionBar);
+	SetupActionBar(PossessActionBar);
 end
 
 function EditModeAccountSettingsMixin:OnEditModeExit()
@@ -2327,6 +2336,7 @@ function EditModeAccountSettingsMixin:OnEditModeExit()
 	self:ResetTargetAndFocus(clearSavedTargetAndFocus);
 	self:ResetActionBarShown(StanceBar);
 	self:ResetActionBarShown(PetActionBar);
+	self:ResetActionBarShown(PossessActionBar);
 end
 
 function EditModeAccountSettingsMixin:ResetTargetAndFocus(clearSavedTargetAndFocus)
@@ -2391,6 +2401,12 @@ function EditModeAccountSettingsMixin:RefreshActionBarShown(bar)
 	else
 		self:ResetActionBarShown(bar);
 	end
+
+	if EditModeUtil:IsBottomAnchoredActionBar(bar) then
+		EditModeManagerFrame:UpdateBottomAnchoredActionBarHeight();
+	elseif EditModeUtil:IsRightAnchoredActionBar(bar) then
+		EditModeManagerFrame:UpdateRightAnchoredActionBarWidth();
+	end
 end
 
 function EditModeAccountSettingsMixin:SetActionBarShown(bar, shown, isUserInput)
@@ -2431,7 +2447,8 @@ function EditModeUtil:IsBottomAnchoredActionBar(systemFrame)
 		or (systemFrame == MultiBarBottomLeft)
 		or (systemFrame == MainMenuBar)
 		or (systemFrame == StanceBar)
-		or (systemFrame == PetActionBar);
+		or (systemFrame == PetActionBar)
+		or (systemFrame == PossessActionBar);
 end
 
 function EditModeUtil:GetRightActionBarWidth()
@@ -2456,6 +2473,7 @@ function EditModeUtil:GetBottomActionBarHeight(includeMainMenuBar)
 	actionBarHeight = actionBarHeight + MultiBarBottomRight:GetBottomAnchoredHeight();
 	actionBarHeight = actionBarHeight + StanceBar:GetBottomAnchoredHeight();
 	actionBarHeight = actionBarHeight + (PetActionBar and PetActionBar:GetBottomAnchoredHeight() or 0);
+	actionBarHeight = actionBarHeight + PossessActionBar:GetBottomAnchoredHeight();
 	return actionBarHeight;
 end
 
