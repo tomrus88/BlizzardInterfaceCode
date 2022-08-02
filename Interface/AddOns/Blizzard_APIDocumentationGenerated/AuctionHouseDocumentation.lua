@@ -1094,6 +1094,15 @@ local AuctionHouse =
 			LiteralName = "AUCTION_HOUSE_POST_WARNING",
 		},
 		{
+			Name = "AuctionHousePurchaseCompleted",
+			Type = "Event",
+			LiteralName = "AUCTION_HOUSE_PURCHASE_COMPLETED",
+			Payload =
+			{
+				{ Name = "auctionID", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "AuctionHousePurchaseDeliveryDelayUpdate",
 			Type = "Event",
 			LiteralName = "AUCTION_HOUSE_PURCHASE_DELIVERY_DELAY_UPDATE",

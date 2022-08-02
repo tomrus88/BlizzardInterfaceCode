@@ -49,12 +49,21 @@ local EditModeManager =
 			},
 		},
 		{
-			Name = "GetEditModeInfo",
+			Name = "GetAccountSettings",
 			Type = "Function",
 
 			Returns =
 			{
-				{ Name = "layoutInfo", Type = "EditModeInfo", Nilable = false },
+				{ Name = "accountSettings", Type = "table", InnerType = "EditModeSettingInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "GetLayouts",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "layoutInfo", Type = "EditModeLayouts", Nilable = false },
 			},
 		},
 		{
@@ -76,12 +85,22 @@ local EditModeManager =
 			},
 		},
 		{
-			Name = "SaveEditModeInfo",
+			Name = "SaveLayouts",
 			Type = "Function",
 
 			Arguments =
 			{
-				{ Name = "saveInfo", Type = "EditModeInfo", Nilable = false },
+				{ Name = "saveInfo", Type = "EditModeLayouts", Nilable = false },
+			},
+		},
+		{
+			Name = "SetAccountSetting",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "setting", Type = "EditModeAccountSetting", Nilable = false },
+				{ Name = "value", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -93,35 +112,17 @@ local EditModeManager =
 				{ Name = "activeLayout", Type = "number", Nilable = false },
 			},
 		},
-		{
-			Name = "SetGridShown",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "gridShown", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "SetGridSpacing",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "gridSpacing", Type = "number", Nilable = false },
-			},
-		},
 	},
 
 	Events =
 	{
 		{
-			Name = "EditModeDataUpdated",
+			Name = "EditModeLayoutsUpdated",
 			Type = "Event",
-			LiteralName = "EDIT_MODE_DATA_UPDATED",
+			LiteralName = "EDIT_MODE_LAYOUTS_UPDATED",
 			Payload =
 			{
-				{ Name = "layoutInfo", Type = "EditModeInfo", Nilable = false },
+				{ Name = "layoutInfo", Type = "EditModeLayouts", Nilable = false },
 				{ Name = "fromServer", Type = "bool", Nilable = false },
 			},
 		},
@@ -142,17 +143,6 @@ local EditModeManager =
 			},
 		},
 		{
-			Name = "EditModeInfo",
-			Type = "Structure",
-			Fields =
-			{
-				{ Name = "layouts", Type = "table", InnerType = "EditModeLayoutInfo", Nilable = false },
-				{ Name = "activeLayout", Type = "number", Nilable = false },
-				{ Name = "gridShown", Type = "bool", Nilable = false },
-				{ Name = "gridSpacing", Type = "number", Nilable = false },
-			},
-		},
-		{
 			Name = "EditModeLayoutInfo",
 			Type = "Structure",
 			Fields =
@@ -160,6 +150,15 @@ local EditModeManager =
 				{ Name = "layoutName", Type = "string", Nilable = false },
 				{ Name = "layoutType", Type = "EditModeLayoutType", Nilable = false },
 				{ Name = "systems", Type = "table", InnerType = "EditModeSystemInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "EditModeLayouts",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "layouts", Type = "table", InnerType = "EditModeLayoutInfo", Nilable = false },
+				{ Name = "activeLayout", Type = "number", Nilable = false },
 			},
 		},
 		{

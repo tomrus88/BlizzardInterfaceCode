@@ -150,15 +150,6 @@ local TradeSkillUI =
 			},
 		},
 		{
-			Name = "GetProfessionGearShown",
-			Type = "Function",
-
-			Returns =
-			{
-				{ Name = "shown", Type = "bool", Nilable = false },
-			},
-		},
-		{
 			Name = "GetProfessionInfoBySkillLineID",
 			Type = "Function",
 
@@ -468,15 +459,6 @@ local TradeSkillUI =
 			Arguments =
 			{
 				{ Name = "skillLineID", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "SetProfessionGearShown",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "shown", Type = "bool", Nilable = false },
 			},
 		},
 		{

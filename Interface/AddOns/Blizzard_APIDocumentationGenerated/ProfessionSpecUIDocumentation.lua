@@ -337,6 +337,16 @@ local ProfessionSpecUI =
 
 	Events =
 	{
+		{
+			Name = "SkillLineSpecsUnlocked",
+			Type = "Event",
+			LiteralName = "SKILL_LINE_SPECS_UNLOCKED",
+			Payload =
+			{
+				{ Name = "skillLineID", Type = "number", Nilable = false },
+				{ Name = "tradeSkillID", Type = "number", Nilable = false },
+			},
+		},
 	},
 
 	Tables =

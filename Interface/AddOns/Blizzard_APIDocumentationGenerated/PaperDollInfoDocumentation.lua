@@ -202,6 +202,15 @@ local PaperDollInfo =
 			},
 		},
 		{
+			Name = "ProfessionEquipmentChanged",
+			Type = "Event",
+			LiteralName = "PROFESSION_EQUIPMENT_CHANGED",
+			Payload =
+			{
+				{ Name = "skillLineID", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "PvpPowerUpdate",
 			Type = "Event",
 			LiteralName = "PVP_POWER_UPDATE",

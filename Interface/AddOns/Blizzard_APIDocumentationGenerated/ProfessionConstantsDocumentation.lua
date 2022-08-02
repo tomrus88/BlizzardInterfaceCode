@@ -43,9 +43,9 @@ local ProfessionConstants =
 		{
 			Name = "ProfessionEffect",
 			Type = "Enumeration",
-			NumValues = 24,
+			NumValues = 25,
 			MinValue = 0,
-			MaxValue = 23,
+			MaxValue = 24,
 			Fields =
 			{
 				{ Name = "Skill", Type = "ProfessionEffect", EnumValue = 0 },
@@ -72,6 +72,7 @@ local ProfessionConstants =
 				{ Name = "ModCraftReductionQuantity", Type = "ProfessionEffect", EnumValue = 21 },
 				{ Name = "DecreaseDifficulty", Type = "ProfessionEffect", EnumValue = 22 },
 				{ Name = "IncreaseDifficulty", Type = "ProfessionEffect", EnumValue = 23 },
+				{ Name = "ModSkillGain", Type = "ProfessionEffect", EnumValue = 24 },
 			},
 		},
 		{

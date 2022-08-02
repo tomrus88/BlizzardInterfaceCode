@@ -808,6 +808,11 @@ local PvpInfo =
 			LiteralName = "ARENA_SEASON_WORLD_STATE",
 		},
 		{
+			Name = "BattlefieldAutoQueue",
+			Type = "Event",
+			LiteralName = "BATTLEFIELD_AUTO_QUEUE",
+		},
+		{
 			Name = "BattlefieldQueueTimeout",
 			Type = "Event",
 			LiteralName = "BATTLEFIELD_QUEUE_TIMEOUT",

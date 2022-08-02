@@ -41,6 +41,22 @@ local EditModeManagerShared =
 			},
 		},
 		{
+			Name = "EditModeAccountSetting",
+			Type = "Enumeration",
+			NumValues = 6,
+			MinValue = 0,
+			MaxValue = 5,
+			Fields =
+			{
+				{ Name = "ShowGrid", Type = "EditModeAccountSetting", EnumValue = 0 },
+				{ Name = "GridSpacing", Type = "EditModeAccountSetting", EnumValue = 1 },
+				{ Name = "SettingsExpanded", Type = "EditModeAccountSetting", EnumValue = 2 },
+				{ Name = "ShowTargetAndFocus", Type = "EditModeAccountSetting", EnumValue = 3 },
+				{ Name = "ShowStanceBar", Type = "EditModeAccountSetting", EnumValue = 4 },
+				{ Name = "ShowPetActionBar", Type = "EditModeAccountSetting", EnumValue = 5 },
+			},
+		},
+		{
 			Name = "EditModeActionBarSetting",
 			Type = "Enumeration",
 			NumValues = 10,
