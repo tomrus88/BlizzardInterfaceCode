@@ -130,6 +130,7 @@ local ProfessionConstants =
 				{ Name = "CLASSIC_PROFESSION_PARENT_TIER_INDEX", Type = "number", Value = 4 },
 				{ Name = "RUNEFORGING_SKILL_LINE_ID", Type = "number", Value = 960 },
 				{ Name = "RUNEFORGING_ROOT_CATEGORY_ID", Type = "number", Value = 210 },
+				{ Name = "MAX_CRAFTING_REAGENT_SLOTS", Type = "number", Value = 12 },
 			},
 		},
 	},

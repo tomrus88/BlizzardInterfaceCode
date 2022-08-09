@@ -43,9 +43,9 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeAccountSetting",
 			Type = "Enumeration",
-			NumValues = 7,
+			NumValues = 9,
 			MinValue = 0,
-			MaxValue = 6,
+			MaxValue = 8,
 			Fields =
 			{
 				{ Name = "ShowGrid", Type = "EditModeAccountSetting", EnumValue = 0 },
@@ -55,6 +55,8 @@ local EditModeManagerShared =
 				{ Name = "ShowStanceBar", Type = "EditModeAccountSetting", EnumValue = 4 },
 				{ Name = "ShowPetActionBar", Type = "EditModeAccountSetting", EnumValue = 5 },
 				{ Name = "ShowPossessActionBar", Type = "EditModeAccountSetting", EnumValue = 6 },
+				{ Name = "ShowCastBar", Type = "EditModeAccountSetting", EnumValue = 7 },
+				{ Name = "ShowEncounterBar", Type = "EditModeAccountSetting", EnumValue = 8 },
 			},
 		},
 		{
@@ -98,12 +100,13 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeCastBarSetting",
 			Type = "Enumeration",
-			NumValues = 1,
+			NumValues = 2,
 			MinValue = 0,
-			MaxValue = 0,
+			MaxValue = 1,
 			Fields =
 			{
 				{ Name = "BarSize", Type = "EditModeCastBarSetting", EnumValue = 0 },
+				{ Name = "LockToPlayerFrame", Type = "EditModeCastBarSetting", EnumValue = 1 },
 			},
 		},
 		{
@@ -158,15 +161,16 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeSystem",
 			Type = "Enumeration",
-			NumValues = 4,
+			NumValues = 5,
 			MinValue = 0,
-			MaxValue = 3,
+			MaxValue = 4,
 			Fields =
 			{
 				{ Name = "ActionBar", Type = "EditModeSystem", EnumValue = 0 },
 				{ Name = "CastBar", Type = "EditModeSystem", EnumValue = 1 },
 				{ Name = "Minimap", Type = "EditModeSystem", EnumValue = 2 },
 				{ Name = "UnitFrame", Type = "EditModeSystem", EnumValue = 3 },
+				{ Name = "EncounterBar", Type = "EditModeSystem", EnumValue = 4 },
 			},
 		},
 		{

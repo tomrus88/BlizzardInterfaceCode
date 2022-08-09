@@ -69,6 +69,19 @@ local TradeSkillUITypes =
 			},
 		},
 		{
+			Name = "TradeskillSlotDataType",
+			Type = "Enumeration",
+			NumValues = 3,
+			MinValue = 1,
+			MaxValue = 3,
+			Fields =
+			{
+				{ Name = "Reagent", Type = "TradeskillSlotDataType", EnumValue = 1 },
+				{ Name = "ModifiedReagent", Type = "TradeskillSlotDataType", EnumValue = 2 },
+				{ Name = "Currency", Type = "TradeskillSlotDataType", EnumValue = 3 },
+			},
+		},
+		{
 			Name = "CraftingOperationBonusStatInfo",
 			Type = "Structure",
 			Fields =
@@ -108,8 +121,8 @@ local TradeSkillUITypes =
 				{ Name = "reagentType", Type = "CraftingReagentType", Nilable = false },
 				{ Name = "quantityRequired", Type = "number", Nilable = false },
 				{ Name = "slotInfo", Type = "CraftingReagentSlotInfo", Nilable = true },
-				{ Name = "reagentSlotIndex", Type = "number", Nilable = true },
-				{ Name = "mcrSlotIndex", Type = "number", Nilable = true },
+				{ Name = "dataSlotType", Type = "TradeskillSlotDataType", Nilable = false, Default = "Reagent" },
+				{ Name = "dataSlotIndex", Type = "number", Nilable = false },
 				{ Name = "slotIndex", Type = "number", Nilable = false },
 			},
 		},

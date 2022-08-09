@@ -172,7 +172,7 @@ local Item =
 
 			Returns =
 			{
-				{ Name = "itemGuid", Type = "string", Nilable = false },
+				{ Name = "itemGUID", Type = "string", Nilable = false },
 			},
 		},
 		{
@@ -187,6 +187,20 @@ local Item =
 			Returns =
 			{
 				{ Name = "itemID", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "GetItemIDByGUID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemGUID", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "itemID", Type = "number", Nilable = true },
 			},
 		},
 		{
@@ -257,6 +271,20 @@ local Item =
 			Returns =
 			{
 				{ Name = "itemLink", Type = "string", Nilable = true },
+			},
+		},
+		{
+			Name = "GetItemLocation",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemGUID", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = true },
 			},
 		},
 		{
@@ -530,6 +558,20 @@ local Item =
 			Returns =
 			{
 				{ Name = "isCached", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsItemGUIDInInventory",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemGUID", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "valid", Type = "bool", Nilable = false },
 			},
 		},
 		{

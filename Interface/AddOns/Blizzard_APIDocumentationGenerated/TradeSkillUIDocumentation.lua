@@ -141,6 +141,34 @@ local TradeSkillUI =
 			},
 		},
 		{
+			Name = "GetItemSlotModifications",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemGUID", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "slotMods", Type = "table", InnerType = "CraftingItemSlotModification", Nilable = false },
+			},
+		},
+		{
+			Name = "GetOriginalCraftRecipeID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemGUID", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "recipeID", Type = "number", Nilable = true },
+			},
+		},
+		{
 			Name = "GetProfessionChildSkillLineID",
 			Type = "Function",
 
@@ -244,7 +272,7 @@ local TradeSkillUI =
 			Arguments =
 			{
 				{ Name = "recipeID", Type = "number", Nilable = false },
-				{ Name = "reagentSlotIndex", Type = "number", Nilable = false },
+				{ Name = "dataSlotIndex", Type = "number", Nilable = false },
 			},
 
 			Returns =
@@ -289,7 +317,7 @@ local TradeSkillUI =
 			Arguments =
 			{
 				{ Name = "recipeID", Type = "number", Nilable = false },
-				{ Name = "mcrSlotIndex", Type = "number", Nilable = false },
+				{ Name = "dataSlotIndex", Type = "number", Nilable = false },
 				{ Name = "qualityIndex", Type = "number", Nilable = false },
 			},
 
@@ -314,6 +342,7 @@ local TradeSkillUI =
 			Arguments =
 			{
 				{ Name = "recipeSpellID", Type = "number", Nilable = false },
+				{ Name = "isRecraft", Type = "bool", Nilable = false },
 				{ Name = "recipeLevel", Type = "number", Nilable = true },
 			},
 
@@ -332,6 +361,20 @@ local TradeSkillUI =
 			},
 		},
 		{
+			Name = "GetRecraftItems",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "recipeID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "items", Type = "table", InnerType = "string", Nilable = false },
+			},
+		},
+		{
 			Name = "GetSalvagableItemIDs",
 			Type = "Function",
 
@@ -343,6 +386,15 @@ local TradeSkillUI =
 			Returns =
 			{
 				{ Name = "itemIDs", Type = "table", InnerType = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "GetShowUnlearned",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "flag", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -366,6 +418,21 @@ local TradeSkillUI =
 			Returns =
 			{
 				{ Name = "hasRecipesTracked", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsItemRecraftCandidate",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+				{ Name = "recipeID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "result", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -453,6 +520,21 @@ local TradeSkillUI =
 			},
 		},
 		{
+			Name = "RecraftRecipe",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemGUID", Type = "string", Nilable = false },
+				{ Name = "craftingReagents", Type = "table", InnerType = "CraftingReagentInfo", Nilable = true },
+			},
+
+			Returns =
+			{
+				{ Name = "result", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "SetProfessionChildSkillLineID",
 			Type = "Function",
 
@@ -469,6 +551,15 @@ local TradeSkillUI =
 			{
 				{ Name = "recipeID", Type = "number", Nilable = false },
 				{ Name = "tracked", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "SetShowUnlearned",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "flag", Type = "bool", Nilable = false },
 			},
 		},
 	},
@@ -558,6 +649,15 @@ local TradeSkillUI =
 			Payload =
 			{
 				{ Name = "data", Type = "CraftingItemResultData", Nilable = false },
+			},
+		},
+		{
+			Name = "TradeSkillItemUpdate",
+			Type = "Event",
+			LiteralName = "TRADE_SKILL_ITEM_UPDATE",
+			Payload =
+			{
+				{ Name = "itemGUID", Type = "string", Nilable = false },
 			},
 		},
 		{

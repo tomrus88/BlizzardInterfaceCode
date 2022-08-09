@@ -55,6 +55,21 @@ local ClassTalents =
 			},
 		},
 		{
+			Name = "IsConfigReady",
+			Type = "Function",
+			Documentation = { "New configs may or may not be ready to load immediately after creation" },
+
+			Arguments =
+			{
+				{ Name = "configID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "isReady", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "LoadConfig",
 			Type = "Function",
 
@@ -66,7 +81,7 @@ local ClassTalents =
 
 			Returns =
 			{
-				{ Name = "result", Type = "bool", Nilable = false },
+				{ Name = "result", Type = "LoadConfigResult", Nilable = false },
 			},
 		},
 		{
@@ -114,6 +129,19 @@ local ClassTalents =
 
 	Tables =
 	{
+		{
+			Name = "LoadConfigResult",
+			Type = "Enumeration",
+			NumValues = 3,
+			MinValue = 0,
+			MaxValue = 2,
+			Fields =
+			{
+				{ Name = "Error", Type = "LoadConfigResult", EnumValue = 0 },
+				{ Name = "NoChangesNecessary", Type = "LoadConfigResult", EnumValue = 1 },
+				{ Name = "LoadInProgress", Type = "LoadConfigResult", EnumValue = 2 },
+			},
+		},
 	},
 };
 

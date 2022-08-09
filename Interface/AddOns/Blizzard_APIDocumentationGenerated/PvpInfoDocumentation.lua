@@ -488,6 +488,18 @@ local PvpInfo =
 			},
 		},
 		{
+			Name = "GetRatedSoloShuffleRewards",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "honor", Type = "number", Nilable = false },
+				{ Name = "experience", Type = "number", Nilable = false },
+				{ Name = "itemRewards", Type = "table", InnerType = "BattlefieldItemReward", Nilable = true },
+				{ Name = "currencyRewards", Type = "table", InnerType = "BattlefieldCurrencyReward", Nilable = true },
+			},
+		},
+		{
 			Name = "GetRewardItemLevelsByTierEnum",
 			Type = "Function",
 
@@ -822,6 +834,11 @@ local PvpInfo =
 			LiteralName = "BATTLEFIELD_AUTO_QUEUE",
 		},
 		{
+			Name = "BattlefieldAutoQueueEject",
+			Type = "Event",
+			LiteralName = "BATTLEFIELD_AUTO_QUEUE_EJECT",
+		},
+		{
 			Name = "BattlefieldQueueTimeout",
 			Type = "Event",
 			LiteralName = "BATTLEFIELD_QUEUE_TIMEOUT",
@@ -972,6 +989,7 @@ local PvpInfo =
 				{ Name = "wargameBattlegrounds", Type = "bool", Nilable = false },
 				{ Name = "ratedBattlegrounds", Type = "bool", Nilable = false },
 				{ Name = "ratedArenas", Type = "bool", Nilable = false },
+				{ Name = "ratedSoloShuffle", Type = "bool", Nilable = false },
 			},
 		},
 		{

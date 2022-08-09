@@ -277,6 +277,22 @@ local Unit =
 			},
 		},
 		{
+			Name = "UnitCursor",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "unit", Type = "string", Nilable = false },
+				{ Name = "style", Type = "CursorStyle", Nilable = true },
+				{ Name = "includeLowPriority", Type = "bool", Nilable = true },
+			},
+
+			Returns =
+			{
+				{ Name = "texture", Type = "number", Nilable = true },
+			},
+		},
+		{
 			Name = "UnitInPartyShard",
 			Type = "Function",
 
@@ -771,6 +787,21 @@ local Unit =
 			Name = "PlayerRegenEnabled",
 			Type = "Event",
 			LiteralName = "PLAYER_REGEN_ENABLED",
+		},
+		{
+			Name = "PlayerSoftEnemyChanged",
+			Type = "Event",
+			LiteralName = "PLAYER_SOFT_ENEMY_CHANGED",
+		},
+		{
+			Name = "PlayerSoftFriendChanged",
+			Type = "Event",
+			LiteralName = "PLAYER_SOFT_FRIEND_CHANGED",
+		},
+		{
+			Name = "PlayerSoftInteractChanged",
+			Type = "Event",
+			LiteralName = "PLAYER_SOFT_INTERACT_CHANGED",
 		},
 		{
 			Name = "PlayerSpecializationChanged",

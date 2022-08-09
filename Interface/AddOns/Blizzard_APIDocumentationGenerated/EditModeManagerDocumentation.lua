@@ -140,6 +140,7 @@ local EditModeManager =
 				{ Name = "relativePoint", Type = "FramePoint", Nilable = false },
 				{ Name = "offsetX", Type = "number", Nilable = false },
 				{ Name = "offsetY", Type = "number", Nilable = false },
+				{ Name = "isDefaultPosition", Type = "bool", Nilable = false },
 			},
 		},
 		{
