@@ -1052,6 +1052,11 @@ local PvpInfo =
 				{ Name = "tournamentRules", Type = "bool", Nilable = false },
 			},
 		},
+		{
+			Name = "WorldPvpQueue",
+			Type = "Event",
+			LiteralName = "WORLD_PVP_QUEUE",
+		},
 	},
 
 	Tables =

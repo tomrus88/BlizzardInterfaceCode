@@ -261,16 +261,6 @@ local ContributionCollector =
 			},
 		},
 		{
-			Name = "ContributionCollectorClose",
-			Type = "Event",
-			LiteralName = "CONTRIBUTION_COLLECTOR_CLOSE",
-		},
-		{
-			Name = "ContributionCollectorOpen",
-			Type = "Event",
-			LiteralName = "CONTRIBUTION_COLLECTOR_OPEN",
-		},
-		{
 			Name = "ContributionCollectorPending",
 			Type = "Event",
 			LiteralName = "CONTRIBUTION_COLLECTOR_PENDING",

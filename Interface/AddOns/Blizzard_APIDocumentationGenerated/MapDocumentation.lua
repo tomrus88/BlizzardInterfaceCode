@@ -506,11 +506,6 @@ local Map =
 			LiteralName = "USER_WAYPOINT_UPDATED",
 		},
 		{
-			Name = "WorldMapClose",
-			Type = "Event",
-			LiteralName = "WORLD_MAP_CLOSE",
-		},
-		{
 			Name = "WorldMapOpen",
 			Type = "Event",
 			LiteralName = "WORLD_MAP_OPEN",

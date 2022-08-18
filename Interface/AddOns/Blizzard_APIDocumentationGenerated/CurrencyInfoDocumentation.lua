@@ -85,6 +85,20 @@ local CurrencyInfo =
 			},
 		},
 		{
+			Name = "GetCurrencyDescription",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "type", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "description", Type = "string", Nilable = false },
+			},
+		},
+		{
 			Name = "GetCurrencyIDFromLink",
 			Type = "Function",
 

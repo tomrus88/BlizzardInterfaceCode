@@ -100,12 +100,12 @@ local SharedTraits =
 			},
 		},
 		{
-			Name = "GetConfigIDBySystemID",
+			Name = "GetConfigIDByTreeID",
 			Type = "Function",
 
 			Arguments =
 			{
-				{ Name = "systemID", Type = "number", Nilable = false },
+				{ Name = "treeID", Type = "number", Nilable = false },
 			},
 
 			Returns =
@@ -482,7 +482,7 @@ local SharedTraits =
 			LiteralName = "TRAIT_SYSTEM_INTERACTION_STARTED",
 			Payload =
 			{
-				{ Name = "systemID", Type = "number", Nilable = false },
+				{ Name = "treeID", Type = "number", Nilable = false },
 			},
 		},
 		{

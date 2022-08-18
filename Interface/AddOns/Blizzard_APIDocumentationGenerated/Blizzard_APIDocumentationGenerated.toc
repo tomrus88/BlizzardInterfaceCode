@@ -77,6 +77,7 @@ PetInfoDocumentation.lua
 PetJournalInfoDocumentation.lua
 PlatformDocumentation.lua
 PlayerInfoDocumentation.lua
+PlayerInteractionManagerDocumentation.lua
 PlayerLocationDocumentation.lua
 PvpInfoDocumentation.lua
 QuestLineInfoDocumentation.lua
@@ -203,6 +204,7 @@ LevelLinkDocumentation.lua
 LevelSquishDocumentation.lua
 LootJournalDocumentation.lua
 LoreTextDocumentation.lua
+MajorFactionsDocumentation.lua
 MapDocumentation.lua
 MountJournalDocumentation.lua
 MythicPlusInfoDocumentation.lua
@@ -252,6 +254,7 @@ DamageConstantsDocumentation.lua
 EditModeManagerSharedDocumentation.lua
 GamePadConstDocumentation.lua
 GarrisonConstantsDocumentation.lua
+GossipConstantsDocumentation.lua
 GuildInfoSharedDocumentation.lua
 InputConstantsDocumentation.lua
 ItemConstantsDocumentation.lua
@@ -265,6 +268,7 @@ PVPMgrConstantsDocumentation.lua
 PetBattleConstantsDocumentation.lua
 PetScalingConstantsDocumentation.lua
 PlayerDocumentation.lua
+PlayerInteractionManagerConstantsDocumentation.lua
 PlayerMentorshipConstantsDocumentation.lua
 ProfessionConstantsDocumentation.lua
 PvPFactionConstantsDocumentation.lua
@@ -301,6 +305,7 @@ CurrencyConstants_MainlineDocumentation.lua
 GarrisonSharedDocumentation.lua
 ItemConstants_MainlineDocumentation.lua
 LegendaryCraftingTypesDocumentation.lua
+MajorFactionsConstantsDocumentation.lua
 MythicPlusInfoSharedDocumentation.lua
 ProfessionSpecConstantsDocumentation.lua
 QuestConstants_MainlineDocumentation.lua

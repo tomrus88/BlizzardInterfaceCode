@@ -1,34 +1,58 @@
 CraftingQualityStatLine = EnumUtil.MakeEnum("Difficulty", "Skill");
 
+local detailsPanelTitles =
+{
+	[Professions.ProfessionType.Crafting] = PROFESSIONS_CRAFTING_DETAILS_HEADER,
+	[Professions.ProfessionType.Gathering] = PROFESSIONS_GATHERING_DETAILS_HEADER,
+};
+
 local statLineLabels =
 {
-	[CraftingQualityStatLine.Difficulty] = PROFESSIONS_CRAFTING_STAT_DIFFICULTY,
-	[CraftingQualityStatLine.Skill] = PROFESSIONS_CRAFTING_STAT_SKILL,
+	[Professions.ProfessionType.Crafting] =
+	{
+		[CraftingQualityStatLine.Difficulty] = PROFESSIONS_CRAFTING_STAT_DIFFICULTY,
+		[CraftingQualityStatLine.Skill] = PROFESSIONS_CRAFTING_STAT_SKILL,
+	},
+	[Professions.ProfessionType.Gathering] =
+	{
+		[CraftingQualityStatLine.Difficulty] = PROFESSIONS_GATHERING_STAT_DIFFICULTY,
+		[CraftingQualityStatLine.Skill] = PROFESSIONS_GATHERING_STAT_SKILL,
+	},
 };
 
 local statLineDescriptions =
 {
-	[CraftingQualityStatLine.Difficulty] = PROFESSIONS_CRAFTING_STAT_DIFFICULTY_DESCRIPTION,
-	[CraftingQualityStatLine.Skill] = PROFESSIONS_CRAFTING_STAT_SKILL_DESCRIPTION,
+	[Professions.ProfessionType.Crafting] =
+	{
+		[CraftingQualityStatLine.Difficulty] = PROFESSIONS_CRAFTING_STAT_DIFFICULTY_DESCRIPTION,
+		[CraftingQualityStatLine.Skill] = PROFESSIONS_CRAFTING_STAT_SKILL_DESCRIPTION,
+	},
+	[Professions.ProfessionType.Gathering] =
+	{
+		[CraftingQualityStatLine.Difficulty] = PROFESSIONS_GATHERING_STAT_DIFFICULTY_DESCRIPTION,
+		[CraftingQualityStatLine.Skill] = PROFESSIONS_GATHERING_STAT_SKILL_DESCRIPTION,
+	},
 };
 
 ProfessionsCrafterDetailsStatLineMixin = {};
 
-function ProfessionsCrafterDetailsStatLineMixin:OnLoad()
-	if self.statLineType ~= nil then
-		self:SetLabel(statLineLabels[self.statLineType]);
+function ProfessionsCrafterDetailsStatLineMixin:SetProfessionType(professionType)
+	self.professionType = professionType;
+	if professionType and self.statLineType ~= nil then
+		self:SetLabel(statLineLabels[self.professionType][self.statLineType]);
 	end
 end
 
 function ProfessionsCrafterDetailsStatLineMixin:OnEnter()
 	-- Overriden for bonus stat lines
-	if self.statLineType ~= nil and self.baseValue ~= nil then
+	if self.statLineType ~= nil and self.professionType ~= nil and self.baseValue ~= nil then
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 		GameTooltip:ClearLines();
-		GameTooltip_AddColoredDoubleLine(GameTooltip, statLineLabels[self.statLineType], 
-													  PROFESSIONS_CRAFTING_STAT_QUANTITY_TT_FMT:format(self.baseValue + self.bonusValue, self.baseValue, self.bonusValue),
+		local statString = self.bonusValue and PROFESSIONS_CRAFTING_STAT_QUANTITY_TT_FMT:format(self.baseValue + self.bonusValue, self.baseValue, self.bonusValue) or PROFESSIONS_CRAFTING_STAT_NO_BONUS_TT_FMT:format(self.baseValue);
+		GameTooltip_AddColoredDoubleLine(GameTooltip, statLineLabels[self.professionType][self.statLineType], 
+													  statString,
 													  HIGHLIGHT_FONT_COLOR, HIGHLIGHT_FONT_COLOR);
-		GameTooltip_AddNormalLine(GameTooltip, statLineDescriptions[self.statLineType]);
+		GameTooltip_AddNormalLine(GameTooltip, statLineDescriptions[self.professionType][self.statLineType]);
 		GameTooltip:Show();
 	end
 end
@@ -68,7 +92,6 @@ ProfessionsRecipeCrafterDetailsMixin = {};
 function ProfessionsRecipeCrafterDetailsMixin:OnLoad()
 	self.statLinePool = CreateFramePool("FRAME", self.StatLines, "ProfessionsCrafterDetailsStatLineTemplate");
 
-	self.Label:SetText(PROFESSIONS_CRAFTING_DETAILS_HEADER);
 	self.FinishingReagentSlotContainer.Label:SetText(PROFESSIONS_CRAFTING_FINISHING_HEADER);
 
 	self.QualityMeter.Center:SetScript("OnEnter", function(fill)
@@ -219,11 +242,13 @@ function ProfessionsRecipeCrafterDetailsMixin:SetTransaction(transaction)
 	self.transaction = transaction;
 end
 
-function ProfessionsRecipeCrafterDetailsMixin:SetStats(operationInfo, supportsQualities)
+function ProfessionsRecipeCrafterDetailsMixin:SetStats(operationInfo, supportsQualities, isGatheringRecipe)
 	if self.recipeInfo == nil or operationInfo == nil then
 		return;
 	end
 
+	local professionType = isGatheringRecipe and Professions.ProfessionType.Gathering or Professions.ProfessionType.Crafting;
+	self.Label:SetText(detailsPanelTitles[professionType]);
 	self.operationInfo = operationInfo;
 
 	self.statLinePool:ReleaseAll();
@@ -232,12 +257,16 @@ function ProfessionsRecipeCrafterDetailsMixin:SetStats(operationInfo, supportsQu
 	self.QualityMeter.Center.Fill.Flare2:SetAlpha(0);
 
 	self.QualityMeter:SetShown(supportsQualities);
-	self.StatLines.DifficultyStatLine:SetShown(supportsQualities);
-	self.StatLines.SkillStatLine:SetShown(supportsQualities);
+	self.StatLines.DifficultyStatLine:SetShown(supportsQualities or isGatheringRecipe);
+	self.StatLines.DifficultyStatLine:SetProfessionType(professionType);
+	self.StatLines.SkillStatLine:SetShown(supportsQualities or isGatheringRecipe);
+	self.StatLines.SkillStatLine:SetProfessionType(professionType);
+	if supportsQualities or isGatheringRecipe then
+		self.StatLines.DifficultyStatLine:SetValue(isGatheringRecipe and operationInfo.maxDifficulty or operationInfo.baseDifficulty, operationInfo.bonusDifficulty);
+		self.StatLines.SkillStatLine:SetValue(operationInfo.baseSkill, operationInfo.bonusSkill);
+	end
 	if supportsQualities then
 		self.QualityMeter:SetQuality(operationInfo.quality, self.recipeInfo.maxQuality);
-		self.StatLines.DifficultyStatLine:SetValue(operationInfo.baseDifficulty, operationInfo.bonusDifficulty);
-		self.StatLines.SkillStatLine:SetValue(operationInfo.baseSkill, operationInfo.bonusSkill);
 	end
 
 	local nextStatLineIndex = 3;

@@ -99,11 +99,6 @@ local ItemInteractionUI =
 			LiteralName = "ITEM_INTERACTION_CHARGE_INFO_UPDATED",
 		},
 		{
-			Name = "ItemInteractionClose",
-			Type = "Event",
-			LiteralName = "ITEM_INTERACTION_CLOSE",
-		},
-		{
 			Name = "ItemInteractionItemSelectionUpdated",
 			Type = "Event",
 			LiteralName = "ITEM_INTERACTION_ITEM_SELECTION_UPDATED",
@@ -111,11 +106,6 @@ local ItemInteractionUI =
 			{
 				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = true },
 			},
-		},
-		{
-			Name = "ItemInteractionOpen",
-			Type = "Event",
-			LiteralName = "ITEM_INTERACTION_OPEN",
 		},
 	},
 

@@ -63,6 +63,10 @@ local SimpleTextureBaseAPI =
 
 			Arguments =
 			{
+			},
+
+			Returns =
+			{
 				{ Name = "radians", Type = "number", Nilable = false },
 				{ Name = "normalizedRotationPoint", Type = "table", Mixin = "Vector2DMixin", Nilable = false },
 			},

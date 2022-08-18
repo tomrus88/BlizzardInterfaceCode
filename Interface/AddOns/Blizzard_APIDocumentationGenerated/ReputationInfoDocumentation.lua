@@ -39,7 +39,30 @@ local ReputationInfo =
 			},
 		},
 		{
+			Name = "IsMajorFaction",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "factionID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "isMajorFaction", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "RequestFactionParagonPreloadRewardData",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "factionID", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "SetWatchedFaction",
 			Type = "Function",
 
 			Arguments =

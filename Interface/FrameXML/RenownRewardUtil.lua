@@ -1,6 +1,6 @@
-CovenantUtil = {};
+RenownRewardUtil = {};
 
-function CovenantUtil.GetRenownRewardDisplayData(rewardInfo, onItemUpdateCallback)
+function RenownRewardUtil.GetRenownRewardDisplayData(rewardInfo, onItemUpdateCallback)
 	if rewardInfo.itemID then
 		local item = Item:CreateFromItemID(rewardInfo.itemID);
 		local icon, name;
@@ -49,12 +49,12 @@ function CovenantUtil.GetRenownRewardDisplayData(rewardInfo, onItemUpdateCallbac
 	end
 end
 
-function CovenantUtil.GetUnformattedRenownRewardInfo(rewardInfo, onItemUpdateCallback)
-	local icon, name, formatString, description = CovenantUtil.GetRenownRewardDisplayData(rewardInfo, onItemUpdateCallback);
+function RenownRewardUtil.GetUnformattedRenownRewardInfo(rewardInfo, onItemUpdateCallback)
+	local icon, name, formatString, description = RenownRewardUtil.GetRenownRewardDisplayData(rewardInfo, onItemUpdateCallback);
 	return (rewardInfo.icon or icon), (name or rewardInfo.name), formatString, (rewardInfo.description or description);
 end
 
-function CovenantUtil.GetRenownRewardInfo(rewardInfo, onItemUpdateCallback)
-	local icon, name, formatString, description = CovenantUtil.GetUnformattedRenownRewardInfo(rewardInfo, onItemUpdateCallback);
+function RenownRewardUtil.GetRenownRewardInfo(rewardInfo, onItemUpdateCallback)
+	local icon, name, formatString, description = RenownRewardUtil.GetUnformattedRenownRewardInfo(rewardInfo, onItemUpdateCallback);
 	return icon, name and formatString and formatString:format(name) or name, description;
 end

@@ -7,10 +7,6 @@ local AlliedRacesFrame =
 	Functions =
 	{
 		{
-			Name = "ClearAlliedRaceDetailsGiver",
-			Type = "Function",
-		},
-		{
 			Name = "GetAllRacialAbilitiesFromID",
 			Type = "Function",
 

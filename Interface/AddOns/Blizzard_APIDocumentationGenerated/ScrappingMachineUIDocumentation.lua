@@ -82,15 +82,6 @@ local ScrappingMachineUI =
 			Type = "Function",
 		},
 		{
-			Name = "SetScrappingMachine",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "gameObject", Type = "string", Nilable = false },
-			},
-		},
-		{
 			Name = "ValidateScrappingList",
 			Type = "Function",
 		},
@@ -98,11 +89,6 @@ local ScrappingMachineUI =
 
 	Events =
 	{
-		{
-			Name = "ScrappingMachineClose",
-			Type = "Event",
-			LiteralName = "SCRAPPING_MACHINE_CLOSE",
-		},
 		{
 			Name = "ScrappingMachineItemRemovedOrCancelled",
 			Type = "Event",
@@ -121,11 +107,6 @@ local ScrappingMachineUI =
 			Name = "ScrappingMachineScrappingFinished",
 			Type = "Event",
 			LiteralName = "SCRAPPING_MACHINE_SCRAPPING_FINISHED",
-		},
-		{
-			Name = "ScrappingMachineShow",
-			Type = "Event",
-			LiteralName = "SCRAPPING_MACHINE_SHOW",
 		},
 	},
 

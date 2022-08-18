@@ -225,6 +225,21 @@ local ProfessionSpecUI =
 			},
 		},
 		{
+			Name = "GetStateForPerk",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "perkID", Type = "number", Nilable = false },
+				{ Name = "configID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "state", Type = "ProfessionsSpecPerkState", Nilable = false },
+			},
+		},
+		{
 			Name = "GetStateForTab",
 			Type = "Function",
 
@@ -293,21 +308,6 @@ local ProfessionSpecUI =
 			Returns =
 			{
 				{ Name = "unspentPoints", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "PerkIsEarned",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "perkID", Type = "number", Nilable = false },
-				{ Name = "configID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "isEarned", Type = "bool", Nilable = false },
 			},
 		},
 		{

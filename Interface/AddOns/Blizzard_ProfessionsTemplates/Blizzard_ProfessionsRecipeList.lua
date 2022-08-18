@@ -49,7 +49,7 @@ function ProfessionsRecipeListMixin:OnLoad()
 					if buttonName == "LeftButton" then
 						if IsModifiedClick() then
 							local link = C_TradeSkillUI.GetRecipeLink(elementData.recipeInfo.recipeID);
-							if not HandleModifiedItemClick(link) and IsModifiedClick("RECIPEWATCHTOGGLE") then
+							if not HandleModifiedItemClick(link) and IsModifiedClick("RECIPEWATCHTOGGLE") and Professions.CanTrackRecipe(elementData.recipeInfo) then
 								local tracked = C_TradeSkillUI.IsRecipeTracked(elementData.recipeInfo.recipeID);
 								C_TradeSkillUI.SetRecipeTracked(elementData.recipeInfo.recipeID, not tracked);
 							end
@@ -57,7 +57,11 @@ function ProfessionsRecipeListMixin:OnLoad()
 							self.selectionBehavior:Select(button);
 						end
 					elseif buttonName == "RightButton" then
-						ToggleDropDownMenu(1, elementData.recipeInfo, self.ContextMenu, "cursor");
+						-- If additional context menu options are added, move this
+						-- public view check to the dropdown initializer.
+						if elementData.recipeInfo.learned and Professions.InLocalCraftingMode() then
+							ToggleDropDownMenu(1, elementData.recipeInfo, self.ContextMenu, "cursor");
+						end
 					end
 				end);
 
@@ -122,29 +126,18 @@ function ProfessionsRecipeListMixin:InitContextMenu(dropDown, level)
 	local info = UIDropDownMenu_CreateInfo();
 	info.notCheckable = true;
 	
-	if recipeInfo.learned and Professions.InLocalCraftingMode() then
-		local currentlyFavorite = C_TradeSkillUI.IsRecipeFavorite(recipeInfo.recipeID);
-		info.text = currentlyFavorite and PROFESSIONS_UNFAVORITE or PROFESSIONS_FAVORITE;
-		info.func = GenerateClosure(C_TradeSkillUI.SetRecipeFavorite, recipeInfo.recipeID, not currentlyFavorite);
-		UIDropDownMenu_AddButton(info, level);
-	end
+	local currentlyFavorite = C_TradeSkillUI.IsRecipeFavorite(recipeInfo.recipeID);
+	info.text = currentlyFavorite and BATTLE_PET_UNFAVORITE or BATTLE_PET_FAVORITE;
+	info.func = GenerateClosure(C_TradeSkillUI.SetRecipeFavorite, recipeInfo.recipeID, not currentlyFavorite);
 
-	local tracked = C_TradeSkillUI.IsRecipeTracked(recipeInfo.recipeID);
-	info.text = tracked and PROFESSIONS_UNTRACK_RECIPE or PROFESSIONS_TRACK_RECIPE;
-	info.func = GenerateClosure(C_TradeSkillUI.SetRecipeTracked, recipeInfo.recipeID, not tracked);
 	UIDropDownMenu_AddButton(info, level);
 end
 
-function ProfessionsRecipeListMixin:SelectRecipe(recipeInfo, scrollToRecipe)
-	local elementData = self.selectionBehavior:SelectElementDataByPredicate(function(node)
+function ProfessionsRecipeListMixin:SelectRecipe(recipeInfo)
+	self.selectionBehavior:SelectElementDataByPredicate(function(node)
 		local data = node:GetData();
 		return data.recipeInfo and data.recipeInfo.recipeID == recipeInfo.recipeID and data.recipeInfo.favoritesInstance == recipeInfo.favoritesInstance;
 	end);
-
-	if scrollToRecipe then
-		self.ScrollBox:ScrollToElementData(elementData, ScrollBoxConstants.AlignCenter, ScrollBoxConstants.NoScrollInterpolation);
-	end
-	return elementData;
 end
 
 ProfessionsRecipeListCategoryMixin = {};
@@ -236,42 +229,40 @@ function ProfessionsRecipeListRecipeMixin:Init(node)
 
 		self.LockedIcon:Show();
 		table.insert(rightFrames, self.LockedIcon);
-	else
-		if recipeInfo.numSkillUps > 0 and not C_TradeSkillUI.IsTradeSkillGuild() and not C_TradeSkillUI.IsNPCCrafting() then
-			local skillUpAtlas;
-			local xOfs = -3;
-			local yOfs = 0;
-			if recipeInfo.relativeDifficulty == Enum.TradeskillRelativeDifficulty.Easy then
-				skillUpAtlas = "Professions-Icon-Skill-Low";
-			elseif recipeInfo.relativeDifficulty == Enum.TradeskillRelativeDifficulty.Medium then
-				skillUpAtlas = "Professions-Icon-Skill-Medium";
-			elseif recipeInfo.relativeDifficulty == Enum.TradeskillRelativeDifficulty.Optimal then
-				skillUpAtlas = "Professions-Icon-Skill-High";
-				yOfs = 1;
-			end
+	elseif not C_TradeSkillUI.IsTradeSkillGuild() and not C_TradeSkillUI.IsNPCCrafting() then
+		local skillUpAtlas;
+		local xOfs = -3;
+		local yOfs = 0;
+		if recipeInfo.relativeDifficulty == Enum.TradeskillRelativeDifficulty.Easy then
+			skillUpAtlas = "Professions-Icon-Skill-Low";
+		elseif recipeInfo.relativeDifficulty == Enum.TradeskillRelativeDifficulty.Medium then
+			skillUpAtlas = "Professions-Icon-Skill-Medium";
+		elseif recipeInfo.relativeDifficulty == Enum.TradeskillRelativeDifficulty.Optimal then
+			skillUpAtlas = "Professions-Icon-Skill-High";
+			yOfs = 1;
+		end
 
-			if skillUpAtlas then
-				self.SkillUps:ClearAllPoints();
-				self.SkillUps:SetPoint("LEFT", self, "LEFT", xOfs, yOfs);
+		if skillUpAtlas then
+			self.SkillUps:ClearAllPoints();
+			self.SkillUps:SetPoint("LEFT", self, "LEFT", xOfs, yOfs);
 
-				self.SkillUps.Icon:SetAtlas(skillUpAtlas, TextureKitConstants.UseAtlasSize);
-				self.SkillUps:SetScript("OnClick", OnClick);
-				local multipleSkillUps = recipeInfo.numSkillUps > 1;
-				self.SkillUps.Text:SetShown(multipleSkillUps);
-				if multipleSkillUps then
-					self.SkillUps.Text:SetText(recipeInfo.numSkillUps);
-					self.SkillUps.Text:SetVertexColor(DifficultyColors[recipeInfo.relativeDifficulty]:GetRGB());
-					self.SkillUps:SetScript("OnEnter", function()
-						self:OnEnter();
-						GameTooltip:SetOwner(self.SkillUps, "ANCHOR_RIGHT");
-						GameTooltip_AddNormalLine(GameTooltip, SKILLUP_TOOLTIP:format(self.SkillUps.Text:GetText()));
-						GameTooltip:Show();
-					end);
-				else
-					self.SkillUps:SetScript("OnEnter", nil);
-				end
-				self.SkillUps:Show();
+			self.SkillUps.Icon:SetAtlas(skillUpAtlas, TextureKitConstants.UseAtlasSize);
+			self.SkillUps:SetScript("OnClick", OnClick);
+			local multipleSkillUps = recipeInfo.numSkillUps > 1;
+			self.SkillUps.Text:SetShown(multipleSkillUps);
+			if multipleSkillUps then
+				self.SkillUps.Text:SetText(recipeInfo.numSkillUps);
+				self.SkillUps.Text:SetVertexColor(DifficultyColors[recipeInfo.relativeDifficulty]:GetRGB());
+				self.SkillUps:SetScript("OnEnter", function()
+					self:OnEnter();
+					GameTooltip:SetOwner(self.SkillUps, "ANCHOR_RIGHT");
+					GameTooltip_AddNormalLine(GameTooltip, SKILLUP_TOOLTIP:format(self.SkillUps.Text:GetText()));
+					GameTooltip:Show();
+				end);
+			else
+				self.SkillUps:SetScript("OnEnter", nil);
 			end
+			self.SkillUps:Show();
 		end
 	end
 

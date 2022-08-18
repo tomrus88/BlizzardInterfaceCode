@@ -46,16 +46,6 @@ local ChromieTimeUI =
 
 	Events =
 	{
-		{
-			Name = "ChromieTimeClose",
-			Type = "Event",
-			LiteralName = "CHROMIE_TIME_CLOSE",
-		},
-		{
-			Name = "ChromieTimeOpen",
-			Type = "Event",
-			LiteralName = "CHROMIE_TIME_OPEN",
-		},
 	},
 
 	Tables =

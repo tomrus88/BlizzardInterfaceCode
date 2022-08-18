@@ -11,9 +11,6 @@ function ProfessionsRecraftSlotMixin:Init(transaction)
 	end
 	self.continuableContainer = ContinuableContainer:Create();
 	
-	self.InputSlot:SetScript("OnLeave", GameTooltip_Hide);
-	self.OutputSlot:SetScript("OnLeave", GameTooltip_Hide);
-	
 	local function OnItemsLoaded()
 		local itemGUID = transaction:GetRecraftAllocation();
 		local item = ItemUtil.TransformItemGUIDToItem(itemGUID);

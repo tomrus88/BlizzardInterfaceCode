@@ -27,6 +27,19 @@ local ProfessionSpecConstants =
 			},
 		},
 		{
+			Name = "ProfessionsSpecPerkState",
+			Type = "Enumeration",
+			NumValues = 3,
+			MinValue = 0,
+			MaxValue = 2,
+			Fields =
+			{
+				{ Name = "Unearned", Type = "ProfessionsSpecPerkState", EnumValue = 0 },
+				{ Name = "Pending", Type = "ProfessionsSpecPerkState", EnumValue = 1 },
+				{ Name = "Earned", Type = "ProfessionsSpecPerkState", EnumValue = 2 },
+			},
+		},
+		{
 			Name = "ProfessionsSpecTabState",
 			Type = "Enumeration",
 			NumValues = 3,

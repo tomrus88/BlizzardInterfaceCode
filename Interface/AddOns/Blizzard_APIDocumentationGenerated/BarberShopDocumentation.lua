@@ -65,6 +65,15 @@ local BarberShop =
 			},
 		},
 		{
+			Name = "GetViewingChrModel",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "chrModelID", Type = "number", Nilable = true },
+			},
+		},
+		{
 			Name = "HasAnyChanges",
 			Type = "Function",
 

@@ -7,14 +7,6 @@ local TradeSkillUI =
 	Functions =
 	{
 		{
-			Name = "CloseCraftingOrders",
-			Type = "Function",
-		},
-		{
-			Name = "CloseCustomerOrders",
-			Type = "Function",
-		},
-		{
 			Name = "CloseTradeSkill",
 			Type = "Function",
 		},
@@ -124,6 +116,20 @@ local TradeSkillUI =
 			Returns =
 			{
 				{ Name = "itemID", Type = "number", Nilable = true },
+			},
+		},
+		{
+			Name = "GetGatheringOperationInfo",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "recipeID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "info", Type = "GatheringOperationInfo", Nilable = true },
 			},
 		},
 		{
@@ -389,6 +395,15 @@ local TradeSkillUI =
 			},
 		},
 		{
+			Name = "GetShowLearned",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "flag", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "GetShowUnlearned",
 			Type = "Function",
 
@@ -520,6 +535,20 @@ local TradeSkillUI =
 			},
 		},
 		{
+			Name = "RecipeCanBeRecrafted",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "recipeID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "recraftable", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "RecraftRecipe",
 			Type = "Function",
 
@@ -554,6 +583,15 @@ local TradeSkillUI =
 			},
 		},
 		{
+			Name = "SetShowLearned",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "flag", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "SetShowUnlearned",
 			Type = "Function",
 
@@ -578,19 +616,9 @@ local TradeSkillUI =
 			},
 		},
 		{
-			Name = "ObliterumForgeClose",
-			Type = "Event",
-			LiteralName = "OBLITERUM_FORGE_CLOSE",
-		},
-		{
 			Name = "ObliterumForgePendingItemChanged",
 			Type = "Event",
 			LiteralName = "OBLITERUM_FORGE_PENDING_ITEM_CHANGED",
-		},
-		{
-			Name = "ObliterumForgeShow",
-			Type = "Event",
-			LiteralName = "OBLITERUM_FORGE_SHOW",
 		},
 		{
 			Name = "OpenRecipeResponse",

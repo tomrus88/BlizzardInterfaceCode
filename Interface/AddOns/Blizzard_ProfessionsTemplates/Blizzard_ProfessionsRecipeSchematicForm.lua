@@ -142,6 +142,15 @@ function ProfessionsRecipeSchematicFormMixin:OnEvent(event, ...)
 	end
 end
 
+function ProfessionsRecipeSchematicFormMixin:GetRecipeOperationInfo()
+	local recipeInfo = self.currentRecipeInfo;
+	if recipeInfo.isGatheringRecipe then
+		return C_TradeSkillUI.GetGatheringOperationInfo(recipeInfo.recipeID);
+	else
+		return C_TradeSkillUI.GetCraftingOperationInfo(recipeInfo.recipeID, self.transaction:CreateCraftingReagentInfoTbl());
+	end
+end
+
 function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo)
 	local stride = 1;
 	local xPadding = 0;
@@ -162,6 +171,7 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo)
 	self.QualityDialog:Close();
 
 	self.currentRecipeInfo = recipeInfo;
+	self.Details:SetRecipeInfo(recipeInfo);
 
 	local hasRecipe = recipeInfo ~= nil;
 
@@ -231,27 +241,7 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo)
 		end
 	end
 
-	local function CanTrack(transaction)
-		if isRecipeInfoRecraft then
-			return false;
-		end
-
-		if not Professions.InLocalCraftingMode() then
-			return false;
-		end
-
-		if C_TradeSkillUI.IsRuneforging() then
-			return false;
-		end
-
-		if self.transaction:IsRecipeType(Enum.TradeskillRecipeType.Salvage) then
-			return false; 
-		end
-
-		return true;
-	end
-
-	self.TrackRecipeCheckBox:SetShown(CanTrack());
+	self.TrackRecipeCheckBox:SetShown(Professions.CanTrackRecipe(recipeInfo));
 	self.TrackRecipeCheckBox:SetChecked(C_TradeSkillUI.IsRecipeTracked(recipeInfo.recipeID));
 
 	local learned = recipeInfo.learned;
@@ -373,6 +363,7 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo)
 		end
 
 		Professions.SetupOutputIcon(self.OutputIcon, self.transaction, outputItemInfo);
+		self.OutputIcon.Count:SetShown(not recipeInfo.isGatheringRecipe);
 	end);
 
 	self.OutputIcon:SetScript("OnEnter", function()
@@ -455,6 +446,7 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo)
 		if not self.recraftSlot then
 			self.recraftSlot = CreateFrame("FRAME", nil, self, "ProfessionsReagentRecraftTemplate");
 			self.recraftSlot:SetPoint("TOPLEFT", self.RecraftingOutputText, "BOTTOMLEFT", 0, -30);
+			table.insert(self.recipeInfoFrames, self.recraftSlot);
 		end
 		self.recraftSlot:Show();
 		self.recraftSlot:Init(self.transaction);
@@ -804,17 +796,23 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo)
 	end
 
 	local professionLearned = C_TradeSkillUI.GetChildProfessionInfo().skillLevel > 0;
-	local operationInfo = professionLearned and C_TradeSkillUI.GetCraftingOperationInfo(self.currentRecipeInfo.recipeID, self.transaction:CreateCraftingReagentInfoTbl()) or nil;
+	local operationInfo = professionLearned and self:GetRecipeOperationInfo() or nil;
 	local finishingSlots = self:GetSlotsByReagentType(Enum.CraftingReagentType.Finishing);
 	local hasFinishingSlots = finishingSlots ~= nil;
-	if professionLearned and Professions.InLocalCraftingMode() and recipeInfo.supportsCraftingStats and ((operationInfo ~= nil and #operationInfo.bonusStats > 0) or recipeInfo.supportsQualities or hasFinishingSlots) then
+	if professionLearned and Professions.InLocalCraftingMode() and recipeInfo.supportsCraftingStats and ((operationInfo ~= nil and #operationInfo.bonusStats > 0) or recipeInfo.supportsQualities or recipeInfo.isGatheringRecipe or hasFinishingSlots) then
 		Professions.LayoutFinishingSlots(finishingSlots, self.Details.FinishingReagentSlotContainer);
+
+		self.Details:ClearAllPoints();
+		if recipeInfo.isGatheringRecipe then
+			self.Details:SetPoint("TOPLEFT", self.Description, "BOTTOMLEFT", 0, -30);
+		else
+			self.Details:SetPoint("TOPRIGHT", self, "TOPRIGHT", -20, -85);
+		end
 		
 		self.Details:SetOutputItemName(recipeInfo.name);
 		self.Details.FinishingReagentSlotContainer:SetShown(hasFinishingSlots);
-		self.Details:SetRecipeInfo(recipeInfo);
 		
-		if not self.transaction:IsRecipeType(Enum.TradeskillRecipeType.Salvage) then
+		if not self.transaction:IsRecipeType(Enum.TradeskillRecipeType.Salvage) and not recipeInfo.isGatheringRecipe then
 			self.AllocateBestQualityCheckBox:Show();
 			self.AllocateBestQualityCheckBox:SetChecked(Professions.ShouldAllocateBestQualityReagents());
 		else
@@ -843,8 +841,8 @@ end
 
 function ProfessionsRecipeSchematicFormMixin:UpdateDetailsStats()
 	if self.currentRecipeInfo ~= nil and self.Details:IsShown() then
-		local operationInfo = C_TradeSkillUI.GetCraftingOperationInfo(self.currentRecipeInfo.recipeID, self.transaction:CreateCraftingReagentInfoTbl());
-		self.Details:SetStats(operationInfo, self.currentRecipeInfo.supportsQualities);
+		local operationInfo = self:GetRecipeOperationInfo();
+		self.Details:SetStats(operationInfo, self.currentRecipeInfo.supportsQualities, self.currentRecipeInfo.isGatheringRecipe);
 	end
 end
 

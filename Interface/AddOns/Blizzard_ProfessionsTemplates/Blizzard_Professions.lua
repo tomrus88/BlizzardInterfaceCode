@@ -3,6 +3,7 @@ Professions = {};
 
 Professions.ReagentInputMode = EnumUtil.MakeEnum("Fixed", "Quality", "Any");
 Professions.ReagentContents = EnumUtil.MakeEnum("None", "Partial", "All");
+Professions.ProfessionType = EnumUtil.MakeEnum("Crafting", "Gathering");
 
 -- See native CraftingReagent
 function Professions.CreateCraftingReagent(itemID, currencyID)
@@ -304,18 +305,27 @@ function Professions.GetQuantitiesAllocated(transaction, reagentSlotSchematic)
 end
 
 function Professions.SetupQualityReagentTooltip(slot, transaction)
-	GameTooltip:SetQualityReagentSlotItemByID(slot.Button:GetItemID());
+	local itemID = slot.Button:GetItemID();
+	if itemID then
+		GameTooltip:SetQualityReagentSlotItemByID(slot.Button:GetItemID());
 
-	if not slot:IsUnallocatable() then
-		GameTooltip_AddBlankLineToTooltip(GameTooltip);
+		if not slot:IsUnallocatable() then
+			GameTooltip_AddBlankLineToTooltip(GameTooltip);
 
-		local quantities = Professions.GetQuantitiesAllocated(transaction, slot:GetReagentSlotSchematic());
-		GameTooltip_AddNormalLine(GameTooltip, PROFESSIONS_ALLOCATIONS_TOOLTIP:format(
-			quantities[1], CreateAtlasMarkupWithAtlasSize("Professions-Icon-Quality-Tier1-Small"), 
-			quantities[2], CreateAtlasMarkupWithAtlasSize("Professions-Icon-Quality-Tier2-Small"),  
-			quantities[3], CreateAtlasMarkupWithAtlasSize("Professions-Icon-Quality-Tier3-Small")));
-		
-		GameTooltip_AddInstructionLine(GameTooltip, BASIC_REAGENT_TOOLTIP_CLICK_TO_ALLOCATE);
+			local quantities = Professions.GetQuantitiesAllocated(transaction, slot:GetReagentSlotSchematic());
+			local slotsAllocated = AccumulateOp(quantities, function(quantity)
+				return math.min(quantity, 1);
+			end);
+
+			if slotsAllocated > 1 then
+				GameTooltip_AddNormalLine(GameTooltip, PROFESSIONS_ALLOCATIONS_TOOLTIP:format(
+					quantities[1], CreateAtlasMarkupWithAtlasSize("Professions-Icon-Quality-Tier1-Small"), 
+					quantities[2], CreateAtlasMarkupWithAtlasSize("Professions-Icon-Quality-Tier2-Small"),  
+					quantities[3], CreateAtlasMarkupWithAtlasSize("Professions-Icon-Quality-Tier3-Small")));
+			end
+			
+			GameTooltip_AddInstructionLine(GameTooltip, BASIC_REAGENT_TOOLTIP_CLICK_TO_ALLOCATE);
+		end
 	end
 end
 
@@ -324,7 +334,7 @@ function Professions.SetupOptionalReagentTooltip(slot, recipeID, reagentType, sl
 	if itemID then
 		local item = Item:CreateFromItemID(itemID);
 		local colorData = item:GetItemQualityColor();
-		GameTooltip_SetTitle(GameTooltip, item:GetItemName(), colorData.color);
+		GameTooltip_SetTitle(GameTooltip, item:GetItemName(), colorData.color, false);
 	
 		Professions.AddCommonOptionalTooltipInfo(item, GameTooltip, recipeID);
 
@@ -337,7 +347,7 @@ function Professions.SetupOptionalReagentTooltip(slot, recipeID, reagentType, sl
 		end
 	else
 		local title = (reagentType == Enum.CraftingReagentType.Finishing) and FINISHING_REAGENT_TOOLTIP_TITLE:format(slotText) or EMPTY_OPTIONAL_REAGENT_TOOLTIP_TITLE;
-		GameTooltip_SetTitle(GameTooltip, title);
+		GameTooltip_SetTitle(GameTooltip, title, nil, false);
 		local instruction = (reagentType == Enum.CraftingReagentType.Finishing) and FINISHING_REAGENT_TOOLTIP_CLICK_TO_ADD or OPTIONAL_REAGENT_TOOLTIP_CLICK_TO_ADD;
 		GameTooltip_AddInstructionLine(GameTooltip, instruction);
 	end
@@ -690,7 +700,7 @@ function Professions.IsUsingDefaultFilters()
 	local newestKnownProfessionInfo = Professions.GetNewestKnownProfessionInfo()
 	local isDefaultSkillLine = newestKnownProfessionInfo == nil or C_TradeSkillUI.GetChildProfessionInfo().professionID == Professions.GetNewestKnownProfessionInfo().professionID;
 	return showAllRecipes and isDefaultSkillLine and not C_TradeSkillUI.AreAnyInventorySlotsFiltered() and 
-		not C_TradeSkillUI.AnyRecipeCategoriesFiltered() and Professions.AreAllSourcesUnfiltered() and not C_TradeSkillUI.GetShowUnlearned();
+		not C_TradeSkillUI.AnyRecipeCategoriesFiltered() and Professions.AreAllSourcesUnfiltered() and not C_TradeSkillUI.GetShowUnlearned() and C_TradeSkillUI.GetShowLearned();
 end
 
 function Professions.SetAllSourcesFiltered(filtered)
@@ -723,6 +733,7 @@ function Professions.AreAllSourcesUnfiltered()
 end
 
 function Professions.SetDefaultFilters()
+	C_TradeSkillUI.SetShowLearned(true);
 	C_TradeSkillUI.SetShowUnlearned(false);
 	C_TradeSkillUI.SetOnlyShowMakeableRecipes(false);
 	C_TradeSkillUI.SetOnlyShowSkillUpRecipes(false);
@@ -759,6 +770,12 @@ function Professions.InitFilterMenu(dropdown, level, onUpdate)
 	filterSystem.onUpdate = onUpdate;
 	filterSystem.filters = 
 	{
+		{
+			type = FilterComponent.Checkbox,
+			text = PROFESSION_RECIPES_SHOW_LEARNED,
+			set = C_TradeSkillUI.SetShowLearned,
+			isSet = C_TradeSkillUI.GetShowLearned
+		},
 		{
 			type = FilterComponent.Checkbox,
 			text = PROFESSION_RECIPES_SHOW_UNLEARNED,
@@ -836,7 +853,7 @@ function Professions.InitFilterMenu(dropdown, level, onUpdate)
 				set = C_TradeSkillUI.SetOnlyShowSkillUpRecipes, 
 				isSet = C_TradeSkillUI.GetOnlyShowSkillUpRecipes,
 			};
-			table.insert(filterSystem.filters, 2, onlyShowSkillUpRecipes);
+			table.insert(filterSystem.filters, 3, onlyShowSkillUpRecipes);
 		end
 	end
 
@@ -925,9 +942,9 @@ function Professions.LayoutReagentSlots(reagentSlots, reagentsContainer, optiona
 		end
 		optionalReagentsContainer:SetShown(optionalShown);
 		if divider then
-		divider:SetShown(optionalShown);
+			divider:SetShown(optionalShown);
+		end
 	end
-end
 end
 
 function Professions.LayoutFinishingSlots(finishingSlots, finishingSlotContainer)
@@ -947,8 +964,44 @@ function Professions.LayoutFinishingSlots(finishingSlots, finishingSlotContainer
 	end
 end
 
+local kitSpecifiers = tInvert(Enum.Profession);
+function Professions.GetAtlasKitSpecifier(professionInfo)
+	return professionInfo and professionInfo.profession and kitSpecifiers[professionInfo.profession];
+end
+
 function Professions.GetProfessionBackgroundAtlas(professionInfo)
-	local stylizedAtlasName = professionInfo ~= nil and professionInfo.parentProfessionName ~= nil and ("Professions-Recipe-Background-%s"):format(professionInfo.parentProfessionName);
+	local kitSpecifier = Professions.GetAtlasKitSpecifier(professionInfo);
+	local stylizedAtlasName = kitSpecifier ~= nil and ("Professions-Recipe-Background-%s"):format(kitSpecifier);
 	local stylizedInfo = stylizedAtlasName and C_Texture.GetAtlasInfo(stylizedAtlasName);
 	return stylizedInfo and stylizedAtlasName or "Professions-Recipe-Background";
+end
+
+function Professions.CanTrackRecipe(recipeInfo)
+	if recipeInfo.isRecraft then
+		return false;
+	end
+
+	if not Professions.InLocalCraftingMode() then
+		return false;
+	end
+
+	if C_TradeSkillUI.IsRuneforging() then
+		return false;
+	end
+
+	if recipeInfo.isSalvageRecipe or recipeInfo.isDummyRecipe or recipeInfo.isGatheringRecipe then
+		return false;
+	end
+
+	return true;
+end
+
+function Professions.GetProfessionType(professionInfo)
+	local profession = professionInfo.profession;
+
+	if profession == Enum.Profession.Mining or profession == Enum.Profession.Herbalism or profession == Enum.Profession.Skinning or profession == Enum.Profession.Fishing then
+		return Professions.ProfessionType.Gathering;
+	end
+
+	return Professions.ProfessionType.Crafting;
 end

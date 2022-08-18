@@ -327,6 +327,16 @@ local CooldownFrameAPI =
 			},
 		},
 		{
+			Name = "SetTexCoordRange",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "low", Type = "table", Mixin = "Vector2DMixin", Nilable = false },
+				{ Name = "high", Type = "table", Mixin = "Vector2DMixin", Nilable = false },
+			},
+		},
+		{
 			Name = "SetUseCircularEdge",
 			Type = "Function",
 

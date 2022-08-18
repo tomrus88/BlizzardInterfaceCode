@@ -132,14 +132,15 @@ local ClassTalents =
 		{
 			Name = "LoadConfigResult",
 			Type = "Enumeration",
-			NumValues = 3,
+			NumValues = 4,
 			MinValue = 0,
-			MaxValue = 2,
+			MaxValue = 3,
 			Fields =
 			{
 				{ Name = "Error", Type = "LoadConfigResult", EnumValue = 0 },
 				{ Name = "NoChangesNecessary", Type = "LoadConfigResult", EnumValue = 1 },
 				{ Name = "LoadInProgress", Type = "LoadConfigResult", EnumValue = 2 },
+				{ Name = "Ready", Type = "LoadConfigResult", EnumValue = 3 },
 			},
 		},
 	},

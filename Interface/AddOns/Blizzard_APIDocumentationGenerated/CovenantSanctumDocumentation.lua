@@ -157,26 +157,6 @@ local CovenantSanctum =
 			LiteralName = "COVENANT_RENOWN_CATCH_UP_STATE_UPDATE",
 		},
 		{
-			Name = "CovenantRenownInteractionEnded",
-			Type = "Event",
-			LiteralName = "COVENANT_RENOWN_INTERACTION_ENDED",
-		},
-		{
-			Name = "CovenantRenownInteractionStarted",
-			Type = "Event",
-			LiteralName = "COVENANT_RENOWN_INTERACTION_STARTED",
-		},
-		{
-			Name = "CovenantSanctumInteractionEnded",
-			Type = "Event",
-			LiteralName = "COVENANT_SANCTUM_INTERACTION_ENDED",
-		},
-		{
-			Name = "CovenantSanctumInteractionStarted",
-			Type = "Event",
-			LiteralName = "COVENANT_SANCTUM_INTERACTION_STARTED",
-		},
-		{
 			Name = "CovenantSanctumRenownLevelChanged",
 			Type = "Event",
 			LiteralName = "COVENANT_SANCTUM_RENOWN_LEVEL_CHANGED",

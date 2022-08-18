@@ -11,10 +11,10 @@
 					<Anchor point="LEFT" x="10" y="0"/>
 				</Anchors>
 				<Layers>
-					<Layer level="OVERLAY">
+					<Layer level="OVERLAY" textureSubLevel="7">
 						<Texture parentKey="QualityOverlay">
 							<Anchors>
-								<Anchor point="TOPLEFT" y="-2"/>
+								<Anchor point="TOPLEFT" x="-3" y="2"/>
 							</Anchors>
 						</Texture>
 

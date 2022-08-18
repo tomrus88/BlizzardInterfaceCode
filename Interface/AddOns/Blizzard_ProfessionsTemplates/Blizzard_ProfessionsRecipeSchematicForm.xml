@@ -108,7 +108,7 @@
 				<Size x="150" y="16"/>
 				<Layers>
 					<Layer level="OVERLAY">
-						<FontString parentKey="Text" inherits="GameFontNormal" justifyH="LEFT" text="Recipe unlearned">
+						<FontString parentKey="Text" inherits="GameFontNormal" justifyH="LEFT" text="PROFESSIONS_RECIPE_UNLEARNED">
 							<Anchors>
 								<Anchor point="LEFT"/>
 							</Anchors>
@@ -151,7 +151,7 @@
 					</Anchors>
 				</FontString>
 
-				<FontString parentKey="RecraftingDescription" inherits="GameFontHighlight" text="PROFESSIONS_RECRAFT_RECIPE_INSTRUCTION" justifyV="TOP" justifyH="LEFT">
+				<FontString parentKey="RecraftingDescription" inherits="GameFontHighlight" text="PROFESSIONS_RECRAFT_RECIPE_INSTRUCTION" justifyV="TOP" justifyH="LEFT" parentArray="recipeInfoFrames">
 					<Size x="280" y="72"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" x="28" y="-250"/>

@@ -5,9 +5,9 @@ local TraitConstants =
 		{
 			Name = "NodeOpFailureReason",
 			Type = "Enumeration",
-			NumValues = 24,
+			NumValues = 25,
 			MinValue = 0,
-			MaxValue = 23,
+			MaxValue = 24,
 			Fields =
 			{
 				{ Name = "None", Type = "NodeOpFailureReason", EnumValue = 0 },
@@ -34,6 +34,7 @@ local TraitConstants =
 				{ Name = "WrongTreeID", Type = "NodeOpFailureReason", EnumValue = 21 },
 				{ Name = "LevelTooLow", Type = "NodeOpFailureReason", EnumValue = 22 },
 				{ Name = "TreeFlaggedNoRefund", Type = "NodeOpFailureReason", EnumValue = 23 },
+				{ Name = "NodeNeverPurchasable", Type = "NodeOpFailureReason", EnumValue = 24 },
 			},
 		},
 		{
@@ -191,12 +192,13 @@ local TraitConstants =
 		{
 			Name = "TraitNodeFlag",
 			Type = "Enumeration",
-			NumValues = 1,
+			NumValues = 2,
 			MinValue = 1,
-			MaxValue = 1,
+			MaxValue = 2,
 			Fields =
 			{
 				{ Name = "ShowMultipleIcons", Type = "TraitNodeFlag", EnumValue = 1 },
+				{ Name = "NeverPurchasable", Type = "TraitNodeFlag", EnumValue = 2 },
 			},
 		},
 		{

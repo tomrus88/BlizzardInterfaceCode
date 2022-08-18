@@ -43,9 +43,9 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeAccountSetting",
 			Type = "Enumeration",
-			NumValues = 9,
+			NumValues = 10,
 			MinValue = 0,
-			MaxValue = 8,
+			MaxValue = 9,
 			Fields =
 			{
 				{ Name = "ShowGrid", Type = "EditModeAccountSetting", EnumValue = 0 },
@@ -57,6 +57,7 @@ local EditModeManagerShared =
 				{ Name = "ShowPossessActionBar", Type = "EditModeAccountSetting", EnumValue = 6 },
 				{ Name = "ShowCastBar", Type = "EditModeAccountSetting", EnumValue = 7 },
 				{ Name = "ShowEncounterBar", Type = "EditModeAccountSetting", EnumValue = 8 },
+				{ Name = "ShowExtraAbilities", Type = "EditModeAccountSetting", EnumValue = 9 },
 			},
 		},
 		{
@@ -161,9 +162,9 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeSystem",
 			Type = "Enumeration",
-			NumValues = 5,
+			NumValues = 6,
 			MinValue = 0,
-			MaxValue = 4,
+			MaxValue = 5,
 			Fields =
 			{
 				{ Name = "ActionBar", Type = "EditModeSystem", EnumValue = 0 },
@@ -171,6 +172,7 @@ local EditModeManagerShared =
 				{ Name = "Minimap", Type = "EditModeSystem", EnumValue = 2 },
 				{ Name = "UnitFrame", Type = "EditModeSystem", EnumValue = 3 },
 				{ Name = "EncounterBar", Type = "EditModeSystem", EnumValue = 4 },
+				{ Name = "ExtraAbilities", Type = "EditModeSystem", EnumValue = 5 },
 			},
 		},
 		{
@@ -208,6 +210,7 @@ local EditModeManagerShared =
 				{ Name = "EditModeDefaultGridSpacing", Type = "number", Value = 40 },
 				{ Name = "EditModeMinGridSpacing", Type = "number", Value = 20 },
 				{ Name = "EditModeMaxGridSpacing", Type = "number", Value = 80 },
+				{ Name = "EditModeMaxLayoutsPerType", Type = "number", Value = 5 },
 			},
 		},
 	},

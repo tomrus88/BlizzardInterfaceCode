@@ -156,19 +156,9 @@ local WeeklyRewards =
 	Events =
 	{
 		{
-			Name = "WeeklyRewardsHide",
-			Type = "Event",
-			LiteralName = "WEEKLY_REWARDS_HIDE",
-		},
-		{
 			Name = "WeeklyRewardsItemChanged",
 			Type = "Event",
 			LiteralName = "WEEKLY_REWARDS_ITEM_CHANGED",
-		},
-		{
-			Name = "WeeklyRewardsShow",
-			Type = "Event",
-			LiteralName = "WEEKLY_REWARDS_SHOW",
 		},
 		{
 			Name = "WeeklyRewardsUpdate",

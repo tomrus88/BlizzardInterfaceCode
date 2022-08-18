@@ -5,9 +5,9 @@ local MinimapConstants =
 		{
 			Name = "MinimapTrackingFilter",
 			Type = "Enumeration",
-			NumValues = 21,
+			NumValues = 22,
 			MinValue = 0,
-			MaxValue = 524288,
+			MaxValue = 1048576,
 			Fields =
 			{
 				{ Name = "Unfiltered", Type = "MinimapTrackingFilter", EnumValue = 0 },
@@ -31,6 +31,7 @@ local MinimapConstants =
 				{ Name = "Digsites", Type = "MinimapTrackingFilter", EnumValue = 131072 },
 				{ Name = "Barber", Type = "MinimapTrackingFilter", EnumValue = 262144 },
 				{ Name = "ItemUpgrade", Type = "MinimapTrackingFilter", EnumValue = 524288 },
+				{ Name = "VendorPoison", Type = "MinimapTrackingFilter", EnumValue = 1048576 },
 			},
 		},
 	},
