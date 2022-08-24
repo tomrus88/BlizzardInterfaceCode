@@ -518,6 +518,25 @@ local UIWidgetManager =
 			},
 		},
 		{
+			Name = "SpellDisplayBorderColor",
+			Type = "Enumeration",
+			NumValues = 9,
+			MinValue = 0,
+			MaxValue = 8,
+			Fields =
+			{
+				{ Name = "None", Type = "SpellDisplayBorderColor", EnumValue = 0 },
+				{ Name = "Black", Type = "SpellDisplayBorderColor", EnumValue = 1 },
+				{ Name = "White", Type = "SpellDisplayBorderColor", EnumValue = 2 },
+				{ Name = "Red", Type = "SpellDisplayBorderColor", EnumValue = 3 },
+				{ Name = "Yellow", Type = "SpellDisplayBorderColor", EnumValue = 4 },
+				{ Name = "Orange", Type = "SpellDisplayBorderColor", EnumValue = 5 },
+				{ Name = "Purple", Type = "SpellDisplayBorderColor", EnumValue = 6 },
+				{ Name = "Green", Type = "SpellDisplayBorderColor", EnumValue = 7 },
+				{ Name = "Blue", Type = "SpellDisplayBorderColor", EnumValue = 8 },
+			},
+		},
+		{
 			Name = "SpellDisplayIconDisplayType",
 			Type = "Enumeration",
 			NumValues = 4,
@@ -1472,6 +1491,7 @@ local UIWidgetManager =
 				{ Name = "iconSizeType", Type = "SpellDisplayIconSizeType", Nilable = false },
 				{ Name = "iconDisplayType", Type = "SpellDisplayIconDisplayType", Nilable = false },
 				{ Name = "textShownState", Type = "SpellDisplayTextShownStateType", Nilable = false },
+				{ Name = "borderColor", Type = "SpellDisplayBorderColor", Nilable = false },
 				{ Name = "textFontType", Type = "UIWidgetFontType", Nilable = false },
 				{ Name = "textSizeType", Type = "UIWidgetTextSizeType", Nilable = false },
 				{ Name = "hAlignType", Type = "WidgetTextHorizontalAlignmentType", Nilable = false },

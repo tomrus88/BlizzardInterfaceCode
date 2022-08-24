@@ -67,6 +67,10 @@ local EditModeManager =
 			},
 		},
 		{
+			Name = "OnEditModeExit",
+			Type = "Function",
+		},
+		{
 			Name = "OnLayoutAdded",
 			Type = "Function",
 

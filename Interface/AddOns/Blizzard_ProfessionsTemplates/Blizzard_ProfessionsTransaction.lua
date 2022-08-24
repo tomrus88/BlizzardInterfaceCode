@@ -230,6 +230,8 @@ function ProfessionsRecipeTransactionMixin:GenerateExpectedItemModifications()
 		modification.itemID = 0;
 	end
 
+	self:ClearExemptedReagents();
+
 	for slotIndex, reagentSlotSchematic in ipairs(self.recipeSchematic.reagentSlotSchematics) do
 		if CanReagentSlotBeItemModification(reagentSlotSchematic) then
 			local modification = modsCopy[reagentSlotSchematic.dataSlotIndex];
@@ -239,6 +241,8 @@ function ProfessionsRecipeTransactionMixin:GenerateExpectedItemModifications()
 			if allocs then
 				local reagent = allocs:GetReagent();
 				modification.itemID = reagent.itemID;
+				local dataSlotIndex = reagentSlotSchematic.dataSlotIndex;
+				self:SetExemptedReagent(reagent, dataSlotIndex);
 			else
 				modification.itemID = 0;
 			end
@@ -256,7 +260,8 @@ function ProfessionsRecipeTransactionMixin:SanitizeAllocationsInternal(index, al
 			-- If the allocation is a current or pending item modification in recrafting
 			-- then we don't discard it -- it needs to remain in the allocation list
 			-- because it currently represents a "no change" operation.
-			if not self:IsModificationAllocated(reagent, index) then
+
+			if not self:IsModificationAllocated(reagent, index) and self:IsReagentSanizationExempt(reagent) then
 				local owned = Professions.GetReagentQuantityInPossession(reagent);
 				local quantity = allocs:GetQuantity();
 				if owned < quantity then
@@ -269,6 +274,27 @@ function ProfessionsRecipeTransactionMixin:SanitizeAllocationsInternal(index, al
 	if not valid then
 		allocations:Clear();
 	end
+end
+
+function ProfessionsRecipeTransactionMixin:IsReagentSanizationExempt(reagent)
+	if self.exemptedReagents then
+		if self.exemptedReagents[reagent.itemID] then
+			return false;
+		end
+	end
+	return true;
+end
+
+function ProfessionsRecipeTransactionMixin:SetExemptedReagent(reagent, dataSlotIndex)
+	if not self.exemptedReagents then
+		self.exemptedReagents = {};
+	end
+
+	self.exemptedReagents[reagent.itemID] = dataSlotIndex;
+end
+
+function ProfessionsRecipeTransactionMixin:ClearExemptedReagents()
+	self.exemptedReagents = nil;
 end
 
 function ProfessionsRecipeTransactionMixin:SanitizeOptionalAllocations()
@@ -367,9 +393,20 @@ end
 function ProfessionsRecipeTransactionMixin:CacheItemModifications()
 	if self.recraftItemGUID then
 		self.recraftItemMods = C_TradeSkillUI.GetItemSlotModifications(self.recraftItemGUID);
+		if not self.recraftExpectedItemMods then
+			self:ClearExemptedReagents();
+			for dataSlotIndex, modification in ipairs(self.recraftItemMods) do
+				local reagent = Professions.CreateCraftingReagentByItemID(modification.itemID);
+				self:SetExemptedReagent(reagent, dataSlotIndex);
+			end
+		end
 	else
 		self.recraftItemMods = nil;
 	end
+end
+
+function ProfessionsRecipeTransactionMixin:GetRecraftItemMods()
+	return self.recraftItemMods;
 end
 
 function ProfessionsRecipeTransactionMixin:GetRecraftAllocation()

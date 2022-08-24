@@ -38,6 +38,21 @@ local TradeSkillUI =
 			},
 		},
 		{
+			Name = "DoesRecraftingRecipeAcceptItem",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+				{ Name = "recipeID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "result", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "GetAllProfessionTradeSkillLines",
 			Type = "Function",
 
@@ -71,6 +86,21 @@ local TradeSkillUI =
 			Returns =
 			{
 				{ Name = "infos", Type = "table", InnerType = "ProfessionInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "GetCraftableCount",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "recipeSpellID", Type = "number", Nilable = false },
+				{ Name = "recipeLevel", Type = "number", Nilable = true },
+			},
+
+			Returns =
+			{
+				{ Name = "numAvailable", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -130,6 +160,20 @@ local TradeSkillUI =
 			Returns =
 			{
 				{ Name = "info", Type = "GatheringOperationInfo", Nilable = true },
+			},
+		},
+		{
+			Name = "GetItemCraftedQualityByItemInfo",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "quality", Type = "number", Nilable = true },
 			},
 		},
 		{
@@ -436,21 +480,6 @@ local TradeSkillUI =
 			},
 		},
 		{
-			Name = "IsItemRecraftCandidate",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
-				{ Name = "recipeID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "result", Type = "bool", Nilable = false },
-			},
-		},
-		{
 			Name = "IsNPCCrafting",
 			Type = "Function",
 
@@ -605,6 +634,11 @@ local TradeSkillUI =
 	Events =
 	{
 		{
+			Name = "CraftingDetailsUpdate",
+			Type = "Event",
+			LiteralName = "CRAFTING_DETAILS_UPDATE",
+		},
+		{
 			Name = "NewRecipeLearned",
 			Type = "Event",
 			LiteralName = "NEW_RECIPE_LEARNED",
@@ -704,14 +738,14 @@ local TradeSkillUI =
 			LiteralName = "TRADE_SKILL_SHOW",
 		},
 		{
+			Name = "UpdateTradeskillCastComplete",
+			Type = "Event",
+			LiteralName = "UPDATE_TRADESKILL_CAST_COMPLETE",
+		},
+		{
 			Name = "UpdateTradeskillRecast",
 			Type = "Event",
 			LiteralName = "UPDATE_TRADESKILL_RECAST",
-		},
-		{
-			Name = "UpdateTradeskillRecastReady",
-			Type = "Event",
-			LiteralName = "UPDATE_TRADESKILL_RECAST_READY",
 		},
 	},
 

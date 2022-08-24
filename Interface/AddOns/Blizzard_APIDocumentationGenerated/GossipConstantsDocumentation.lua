@@ -5,9 +5,9 @@ local GossipConstants =
 		{
 			Name = "GossipNpcOption",
 			Type = "Enumeration",
-			NumValues = 53,
+			NumValues = 54,
 			MinValue = 0,
-			MaxValue = 52,
+			MaxValue = 53,
 			Fields =
 			{
 				{ Name = "None", Type = "GossipNpcOption", EnumValue = 0 },
@@ -63,6 +63,7 @@ local GossipConstants =
 				{ Name = "ProfessionsCustomerOrder", Type = "GossipNpcOption", EnumValue = 50 },
 				{ Name = "TraitSystem", Type = "GossipNpcOption", EnumValue = 51 },
 				{ Name = "BarbersChoice", Type = "GossipNpcOption", EnumValue = 52 },
+				{ Name = "MajorFactionRenown", Type = "GossipNpcOption", EnumValue = 53 },
 			},
 		},
 		{

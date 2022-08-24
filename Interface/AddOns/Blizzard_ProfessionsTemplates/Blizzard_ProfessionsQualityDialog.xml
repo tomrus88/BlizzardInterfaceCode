@@ -6,6 +6,9 @@
 		<Size x="100" y="75"/>
 		<Frames>
 			<ItemButton parentKey="Button" inherits="ProfessionsReagentButtonTemplate">
+				<KeyValues>
+					<KeyValue key="minDisplayCount" value="0" type="number"/>
+				</KeyValues>
 				<Anchors>
 					<Anchor point="TOP" x="0" y="0"/>
 				</Anchors>

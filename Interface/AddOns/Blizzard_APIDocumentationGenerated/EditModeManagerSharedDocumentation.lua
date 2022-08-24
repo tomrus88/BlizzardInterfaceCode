@@ -17,14 +17,55 @@ local EditModeManagerShared =
 		{
 			Name = "ActionBarVisibleSetting",
 			Type = "Enumeration",
-			NumValues = 3,
+			NumValues = 4,
 			MinValue = 0,
-			MaxValue = 2,
+			MaxValue = 3,
 			Fields =
 			{
 				{ Name = "Always", Type = "ActionBarVisibleSetting", EnumValue = 0 },
 				{ Name = "InCombat", Type = "ActionBarVisibleSetting", EnumValue = 1 },
 				{ Name = "OutOfCombat", Type = "ActionBarVisibleSetting", EnumValue = 2 },
+				{ Name = "Hidden", Type = "ActionBarVisibleSetting", EnumValue = 3 },
+			},
+		},
+		{
+			Name = "AuraFrameIconDirection",
+			Type = "Enumeration",
+			NumValues = 4,
+			MinValue = 0,
+			MaxValue = 1,
+			Fields =
+			{
+				{ Name = "Down", Type = "AuraFrameIconDirection", EnumValue = 0 },
+				{ Name = "Up", Type = "AuraFrameIconDirection", EnumValue = 1 },
+				{ Name = "Left", Type = "AuraFrameIconDirection", EnumValue = 0 },
+				{ Name = "Right", Type = "AuraFrameIconDirection", EnumValue = 1 },
+			},
+		},
+		{
+			Name = "AuraFrameIconWrap",
+			Type = "Enumeration",
+			NumValues = 4,
+			MinValue = 0,
+			MaxValue = 1,
+			Fields =
+			{
+				{ Name = "Down", Type = "AuraFrameIconWrap", EnumValue = 0 },
+				{ Name = "Up", Type = "AuraFrameIconWrap", EnumValue = 1 },
+				{ Name = "Left", Type = "AuraFrameIconWrap", EnumValue = 0 },
+				{ Name = "Right", Type = "AuraFrameIconWrap", EnumValue = 1 },
+			},
+		},
+		{
+			Name = "AuraFrameOrientation",
+			Type = "Enumeration",
+			NumValues = 2,
+			MinValue = 0,
+			MaxValue = 1,
+			Fields =
+			{
+				{ Name = "Horizontal", Type = "AuraFrameOrientation", EnumValue = 0 },
+				{ Name = "Vertical", Type = "AuraFrameOrientation", EnumValue = 1 },
 			},
 		},
 		{
@@ -43,9 +84,9 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeAccountSetting",
 			Type = "Enumeration",
-			NumValues = 10,
+			NumValues = 14,
 			MinValue = 0,
-			MaxValue = 9,
+			MaxValue = 13,
 			Fields =
 			{
 				{ Name = "ShowGrid", Type = "EditModeAccountSetting", EnumValue = 0 },
@@ -58,6 +99,10 @@ local EditModeManagerShared =
 				{ Name = "ShowCastBar", Type = "EditModeAccountSetting", EnumValue = 7 },
 				{ Name = "ShowEncounterBar", Type = "EditModeAccountSetting", EnumValue = 8 },
 				{ Name = "ShowExtraAbilities", Type = "EditModeAccountSetting", EnumValue = 9 },
+				{ Name = "ShowBuffFrame", Type = "EditModeAccountSetting", EnumValue = 10 },
+				{ Name = "ShowDebuffFrame", Type = "EditModeAccountSetting", EnumValue = 11 },
+				{ Name = "ShowPartyFrames", Type = "EditModeAccountSetting", EnumValue = 12 },
+				{ Name = "ShowRaidFrames", Type = "EditModeAccountSetting", EnumValue = 13 },
 			},
 		},
 		{
@@ -96,6 +141,36 @@ local EditModeManagerShared =
 				{ Name = "StanceBar", Type = "EditModeActionBarSystemIndices", EnumValue = 11 },
 				{ Name = "PetActionBar", Type = "EditModeActionBarSystemIndices", EnumValue = 12 },
 				{ Name = "PossessActionBar", Type = "EditModeActionBarSystemIndices", EnumValue = 13 },
+			},
+		},
+		{
+			Name = "EditModeAuraFrameSetting",
+			Type = "Enumeration",
+			NumValues = 8,
+			MinValue = 0,
+			MaxValue = 7,
+			Fields =
+			{
+				{ Name = "Orientation", Type = "EditModeAuraFrameSetting", EnumValue = 0 },
+				{ Name = "IconWrap", Type = "EditModeAuraFrameSetting", EnumValue = 1 },
+				{ Name = "IconDirection", Type = "EditModeAuraFrameSetting", EnumValue = 2 },
+				{ Name = "IconLimitBuffFrame", Type = "EditModeAuraFrameSetting", EnumValue = 3 },
+				{ Name = "IconLimitDebuffFrame", Type = "EditModeAuraFrameSetting", EnumValue = 4 },
+				{ Name = "IconSize", Type = "EditModeAuraFrameSetting", EnumValue = 5 },
+				{ Name = "IconPadding", Type = "EditModeAuraFrameSetting", EnumValue = 6 },
+				{ Name = "ShowFull", Type = "EditModeAuraFrameSetting", EnumValue = 7 },
+			},
+		},
+		{
+			Name = "EditModeAuraFrameSystemIndices",
+			Type = "Enumeration",
+			NumValues = 2,
+			MinValue = 1,
+			MaxValue = 2,
+			Fields =
+			{
+				{ Name = "BuffFrame", Type = "EditModeAuraFrameSystemIndices", EnumValue = 1 },
+				{ Name = "DebuffFrame", Type = "EditModeAuraFrameSystemIndices", EnumValue = 2 },
 			},
 		},
 		{
@@ -162,9 +237,9 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeSystem",
 			Type = "Enumeration",
-			NumValues = 6,
+			NumValues = 7,
 			MinValue = 0,
-			MaxValue = 5,
+			MaxValue = 6,
 			Fields =
 			{
 				{ Name = "ActionBar", Type = "EditModeSystem", EnumValue = 0 },
@@ -173,33 +248,39 @@ local EditModeManagerShared =
 				{ Name = "UnitFrame", Type = "EditModeSystem", EnumValue = 3 },
 				{ Name = "EncounterBar", Type = "EditModeSystem", EnumValue = 4 },
 				{ Name = "ExtraAbilities", Type = "EditModeSystem", EnumValue = 5 },
+				{ Name = "AuraFrame", Type = "EditModeSystem", EnumValue = 6 },
 			},
 		},
 		{
 			Name = "EditModeUnitFrameSetting",
 			Type = "Enumeration",
-			NumValues = 4,
+			NumValues = 7,
 			MinValue = 0,
-			MaxValue = 3,
+			MaxValue = 6,
 			Fields =
 			{
 				{ Name = "HidePortrait", Type = "EditModeUnitFrameSetting", EnumValue = 0 },
 				{ Name = "CastBarUnderneath", Type = "EditModeUnitFrameSetting", EnumValue = 1 },
 				{ Name = "BuffsOnTop", Type = "EditModeUnitFrameSetting", EnumValue = 2 },
 				{ Name = "UseLargerFrame", Type = "EditModeUnitFrameSetting", EnumValue = 3 },
+				{ Name = "UseRaidStylePartyFrames", Type = "EditModeUnitFrameSetting", EnumValue = 4 },
+				{ Name = "ShowPartyFrameBackground", Type = "EditModeUnitFrameSetting", EnumValue = 5 },
+				{ Name = "UseHorizontalGroups", Type = "EditModeUnitFrameSetting", EnumValue = 6 },
 			},
 		},
 		{
 			Name = "EditModeUnitFrameSystemIndices",
 			Type = "Enumeration",
-			NumValues = 3,
+			NumValues = 5,
 			MinValue = 1,
-			MaxValue = 3,
+			MaxValue = 5,
 			Fields =
 			{
 				{ Name = "Player", Type = "EditModeUnitFrameSystemIndices", EnumValue = 1 },
 				{ Name = "Target", Type = "EditModeUnitFrameSystemIndices", EnumValue = 2 },
 				{ Name = "Focus", Type = "EditModeUnitFrameSystemIndices", EnumValue = 3 },
+				{ Name = "Party", Type = "EditModeUnitFrameSystemIndices", EnumValue = 4 },
+				{ Name = "Raid", Type = "EditModeUnitFrameSystemIndices", EnumValue = 5 },
 			},
 		},
 		{

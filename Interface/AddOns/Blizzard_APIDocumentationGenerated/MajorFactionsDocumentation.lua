@@ -86,6 +86,15 @@ local MajorFactions =
 			},
 		},
 		{
+			Name = "GetRenownNPCFactionID",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "renownNPCFactionID", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetRenownRewardsForLevel",
 			Type = "Function",
 
@@ -159,16 +168,6 @@ local MajorFactions =
 			Name = "MajorFactionRenownCatchUpStateUpdate",
 			Type = "Event",
 			LiteralName = "MAJOR_FACTION_RENOWN_CATCH_UP_STATE_UPDATE",
-		},
-		{
-			Name = "MajorFactionRenownInteractionEnded",
-			Type = "Event",
-			LiteralName = "MAJOR_FACTION_RENOWN_INTERACTION_ENDED",
-		},
-		{
-			Name = "MajorFactionRenownInteractionStarted",
-			Type = "Event",
-			LiteralName = "MAJOR_FACTION_RENOWN_INTERACTION_STARTED",
 		},
 		{
 			Name = "MajorFactionRenownLevelChanged",

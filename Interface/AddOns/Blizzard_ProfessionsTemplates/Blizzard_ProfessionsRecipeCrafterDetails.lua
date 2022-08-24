@@ -1,3 +1,19 @@
+local craftCompleteSoundKits = {
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY1,
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY2,
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY3,
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY4,
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY5,
+};
+
+local nextQualitySoundKits = {
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY1,
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY2,
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY3,
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY4,
+	SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_QUALITY5,
+};
+
 CraftingQualityStatLine = EnumUtil.MakeEnum("Difficulty", "Skill");
 
 local detailsPanelTitles =
@@ -155,8 +171,6 @@ function ProfessionsRecipeCrafterDetailsMixin:OnLoad()
 	self:RegisterEvent("TRADE_SKILL_ITEM_CRAFTED_RESULT");
 end
 
-UseTest1 = true;
-
 function ProfessionsRecipeCrafterDetailsMixin:OnEvent(event, ...)
 	if event == "TRADE_SKILL_ITEM_CRAFTED_RESULT" then
 		local resultData = ...;
@@ -177,6 +191,8 @@ function ProfessionsRecipeCrafterDetailsMixin:HandleCritAnimation(resultData)
 	local startingWidth = self.QualityMeter.Center.Fill:GetWidth();
 	local unitsPerSecond = 375;
 
+	PlaySound(SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_START);
+
 	local sequence = CreateInterpolationSequence();
 	do
 		-- Resize primary fill left to right
@@ -189,6 +205,10 @@ function ProfessionsRecipeCrafterDetailsMixin:HandleCritAnimation(resultData)
 
 	if resultData.isCrit then
 		do
+			sequence:Add(0, 0, 0, InterpolatorUtil.InterpolateLinear, function()
+				PlaySound(SOUNDKIT.UI_PROFESSION_CRAFTING_RESULT_CRIT);
+			end);
+
 			-- Resize secondary fill left ro right.
 			local skillRange = self.operationInfo.upperSkillTreshold - self.operationInfo.lowerSkillThreshold;
 			if skillRange == 0 then
@@ -203,7 +223,7 @@ function ProfessionsRecipeCrafterDetailsMixin:HandleCritAnimation(resultData)
 
 			if t > 0 then
 				local function SetAnimState(value)
-				self.QualityMeter.Center.Fill.Test2:SetWidth(startingWidth + (value * extraCritWidth));
+					self.QualityMeter.Center.Fill.Test2:SetWidth(startingWidth + (value * extraCritWidth));
 					self.QualityMeter.Center.Test2b:SetAlpha(value * .6);
 					self.QualityMeter.Center.Fill.Flare2:SetAlpha(value * .6);
 					self.QualityMeter.Center.Test2b:Show();
@@ -235,6 +255,14 @@ function ProfessionsRecipeCrafterDetailsMixin:HandleCritAnimation(resultData)
 		end
 	end
 
+	sequence:Add(0, 0, 0, InterpolatorUtil.InterpolateLinear, function()
+		local craftingQuality = resultData.craftingQuality;
+		local soundKit = craftingQuality and craftCompleteSoundKits[craftingQuality];
+		if soundKit then
+			PlaySound(soundKit);
+		end
+	end);
+
 	sequence:Play();
 end
 
@@ -242,10 +270,28 @@ function ProfessionsRecipeCrafterDetailsMixin:SetTransaction(transaction)
 	self.transaction = transaction;
 end
 
+function ProfessionsRecipeCrafterDetailsMixin:OnShow()
+	self.projectedQuality = nil;
+end
+
 function ProfessionsRecipeCrafterDetailsMixin:SetStats(operationInfo, supportsQualities, isGatheringRecipe)
 	if self.recipeInfo == nil or operationInfo == nil then
 		return;
 	end
+
+	local nextProjectedQuality = operationInfo.quality and math.floor(operationInfo.quality);
+	if self.projectedQuality ~= nil then
+		if nextProjectedQuality > self.projectedQuality then
+			local soundKit = nextQualitySoundKits[nextProjectedQuality];
+			if soundKit then
+				PlaySound(soundKit);
+			end
+		elseif nextProjectedQuality < nextProjectedQuality then
+			PlaySound(SOUNDKIT.UI_PROFESSION_CRAFTING_PREVIOUS_QUALITY);
+		end
+	end
+	self.projectedQuality = nextProjectedQuality;
+	
 
 	local professionType = isGatheringRecipe and Professions.ProfessionType.Gathering or Professions.ProfessionType.Crafting;
 	self.Label:SetText(detailsPanelTitles[professionType]);

@@ -37,6 +37,9 @@ end
 
 function ProfessionsRecraftSlotMixin:SetItem(item)
 	self.InputSlot:Init(item);
+
+	-- Fixme output item does not represent the actual output result. Still needs the
+	-- synthesized item preview.
 	self.OutputSlot:Init(item);
 end
 
@@ -58,12 +61,16 @@ function ProfessionsRecraftInputSlotMixin:Init(item)
 	self:ClearNormalTexture();
 
 	if item then
+		SetItemButtonTexture(self, item:GetItemIcon());
+		local itemLocation = item:GetItemLocation();
+		local itemLink = C_Item.GetItemLink(itemLocation);
+		SetItemCraftingQualityOverlay(self, itemLink);
 		self:SetPushedTexture("Interface\\Buttons\\UI-Quickslot-Depress");
 		self.Glow.EmptySlotGlow:Hide();
 		self.Glow.PulseEmptySlotGlow:Stop();
-		SetItemButtonTexture(self, item:GetItemIcon());
 	else
 		SetItemButtonTexture(self, nil);
+		ClearItemCraftingQualityOverlay(self)
 		self:SetNormalAtlas("itemupgrade_greenplusicon");
 		self:SetPushedAtlas("itemupgrade_greenplusicon_pressed");
 		self.Glow.EmptySlotGlow:Show();
@@ -91,7 +98,11 @@ function ProfessionsRecraftOutputSlotMixin:Init(item)
 
 	if item then
 		SetItemButtonTexture(self, item:GetItemIcon());
+		local itemLocation = item:GetItemLocation();
+		local itemLink = C_Item.GetItemLink(itemLocation);
+		SetItemCraftingQualityOverlay(self, itemLink);
 	else
 		SetItemButtonTexture(self, nil);
+		ClearItemCraftingQualityOverlay(self)
 	end
 end

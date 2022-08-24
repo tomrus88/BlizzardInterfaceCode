@@ -6,7 +6,6 @@ function ProfessionsReagentSlotMixin:Reset()
 	self.unallocatable = nil;
 	self.originalItem = nil;
 	self.UndoButton:Hide();
-	self.quantityAvailableCallback = nil;
 	self.CustomerState:Hide();
 	self.Button:Reset();
 	if self.continuableContainer then
@@ -88,45 +87,43 @@ function ProfessionsReagentSlotMixin:Update()
 	end
 end
 
-function ProfessionsReagentSlotMixin:SetQuantityAvailableCallback(callback)
-	self.quantityAvailableCallback = callback;
-end
-
-function ProfessionsReagentSlotMixin:GetQuantityAvailable(reagents)
-	if self.quantityAvailableCallback then
-		return self.quantityAvailableCallback(reagents);
-	end
-	local transaction = self:GetTransaction();
-	return transaction:AccumulateAllocations(self:GetSlotIndex());
-end
-
 function ProfessionsReagentSlotMixin:UpdateAllocationText()
 	local reagentSlotSchematic = self:GetReagentSlotSchematic();
 	if reagentSlotSchematic.reagentType == Enum.CraftingReagentType.Basic then
-		local quantity = self:GetQuantityAvailable(reagentSlotSchematic.reagents);
+		local foundMultiple, foundIndex = self:GetAllocationDetails();
+
+		local quantity = nil;
+		if foundMultiple then
+			quantity = TRADESKILL_QUANTITY_MULTIPLE;
+		else
+			quantity = Professions.AccumulateReagentsInPossession(reagentSlotSchematic.reagents);
+		end
 
 		local reagent = reagentSlotSchematic.reagents[1];
 		local item = Item:CreateFromItemID(reagent.itemID);
-
 		self:SetNameText(("%s %s"):format(TRADESKILL_REAGENT_COUNT:format(quantity, reagentSlotSchematic.quantityRequired), item:GetItemName()));
 	end
 end
 
+function ProfessionsReagentSlotMixin:GetAllocationDetails()
+	local transaction = self:GetTransaction();
+	local foundMultiple = nil;
+	local foundIndex = nil;
+	local quantities = Professions.GetQuantitiesAllocated(transaction, self:GetReagentSlotSchematic());
+	for index, quantity in ipairs(quantities) do
+		if quantity > 0 then
+			if foundIndex then
+				foundMultiple = true;
+			end
+			foundIndex = index;
+		end
+	end
+	return foundMultiple, foundIndex;
+end
+
 function ProfessionsReagentSlotMixin:UpdateQualityOverlay()
 	if Professions.GetReagentInputMode(self:GetReagentSlotSchematic()) == Professions.ReagentInputMode.Quality then
-		local transaction = self:GetTransaction();
-		local foundMultiple = nil;
-		local foundIndex = nil;
-		local quantities = Professions.GetQuantitiesAllocated(transaction, self:GetReagentSlotSchematic());
-		for index, quantity in ipairs(quantities) do
-			if quantity > 0 then
-				if foundIndex then
-					foundMultiple = true;
-				end
-				foundIndex = index;
-			end
-		end
-
+		local foundMultiple, foundIndex = self:GetAllocationDetails();
 		if foundMultiple then
 			self.Button.QualityOverlay:SetAtlas("Professions-Icon-Quality-Mixed-Inv", TextureKitConstants.UseAtlasSize);
 		elseif foundIndex then
@@ -155,6 +152,12 @@ function ProfessionsReagentSlotMixin:ClearItem()
 	local reagentSlotSchematic = self:GetReagentSlotSchematic();
 	local slotInfo = reagentSlotSchematic.slotInfo;
 	self:SetNameText(slotInfo.slotText or OPTIONAL_REAGENT_POSTFIX);
+
+	if self.originalItem then
+		self.UndoButton:Show();
+	else
+		self.UndoButton:Hide();
+	end
 
 	self:Update();
 end

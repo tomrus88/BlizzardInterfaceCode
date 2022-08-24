@@ -26,7 +26,7 @@ local CraftingOrderUIConstants =
 			},
 		},
 		{
-			Name = "CraftingOrderCustomerOption",
+			Name = "CraftingOrderCustomerOptionInfo",
 			Type = "Structure",
 			Fields =
 			{
@@ -38,8 +38,9 @@ local CraftingOrderUIConstants =
 				{ Name = "itemName", Type = "string", Nilable = false },
 				{ Name = "primaryCategoryID", Type = "number", Nilable = false },
 				{ Name = "iLvl", Type = "number", Nilable = false },
+				{ Name = "level", Type = "number", Nilable = false },
+				{ Name = "quality", Type = "ItemQuality", Nilable = true },
 				{ Name = "slots", Type = "number", Nilable = true },
-				{ Name = "level", Type = "number", Nilable = true },
 				{ Name = "skill", Type = "number", Nilable = true },
 				{ Name = "secondaryCategoryID", Type = "number", Nilable = true },
 				{ Name = "tertiaryCategoryID", Type = "number", Nilable = true },

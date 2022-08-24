@@ -34,6 +34,16 @@ local Sound =
 				{ Name = "isPlaying", Type = "bool", Nilable = false },
 			},
 		},
+		{
+			Name = "PlayItemSound",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "soundType", Type = "ItemSoundType", Nilable = false },
+				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+		},
 	},
 
 	Events =

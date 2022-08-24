@@ -34,29 +34,51 @@ local CraftingOrderUI =
 			},
 		},
 		{
+			Name = "HasFavoriteCustomerOptions",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "hasFavorites", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsCustomerOptionFavorited",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "recipeID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "favorited", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "ParseCustomerOptions",
 			Type = "Function",
 		},
 		{
-			Name = "TEST_SignalHideCrafter",
+			Name = "SetCustomerOptionFavorited",
 			Type = "Function",
-		},
-		{
-			Name = "TEST_SignalHideCustomer",
-			Type = "Function",
-		},
-		{
-			Name = "TEST_SignalShowCrafter",
-			Type = "Function",
-		},
-		{
-			Name = "TEST_SignalShowCustomer",
-			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "recipeID", Type = "number", Nilable = false },
+				{ Name = "favorited", Type = "bool", Nilable = false },
+			},
 		},
 	},
 
 	Events =
 	{
+		{
+			Name = "CraftingordersCustomerFavoritesChanged",
+			Type = "Event",
+			LiteralName = "CRAFTINGORDERS_CUSTOMER_FAVORITES_CHANGED",
+		},
 		{
 			Name = "CraftingordersCustomerOptionsParsed",
 			Type = "Event",

@@ -55,6 +55,25 @@ local ClassTalents =
 			},
 		},
 		{
+			Name = "GetNextStarterBuildPurchase",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "nodeID", Type = "number", Nilable = true },
+				{ Name = "entryID", Type = "number", Nilable = true },
+			},
+		},
+		{
+			Name = "GetStarterBuildActive",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "isActive", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "IsConfigReady",
 			Type = "Function",
 			Documentation = { "New configs may or may not be ready to load immediately after creation" },
@@ -112,6 +131,30 @@ local ClassTalents =
 				{ Name = "success", Type = "bool", Nilable = false },
 			},
 		},
+		{
+			Name = "SetStarterBuildActive",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "active", Type = "bool", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "result", Type = "LoadConfigResult", Nilable = false },
+			},
+		},
+		{
+			Name = "SetUsesSharedActionBars",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "configID", Type = "number", Nilable = false },
+				{ Name = "usesShared", Type = "bool", Nilable = false },
+			},
+		},
 	},
 
 	Events =
@@ -124,6 +167,11 @@ local ClassTalents =
 			{
 				{ Name = "configID", Type = "number", Nilable = false },
 			},
+		},
+		{
+			Name = "StarterBuildActivationFailed",
+			Type = "Event",
+			LiteralName = "STARTER_BUILD_ACTIVATION_FAILED",
 		},
 	},
 

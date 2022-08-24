@@ -5,9 +5,9 @@ local CharacterCustomizationShared =
 		{
 			Name = "CharCustomizationType",
 			Type = "Enumeration",
-			NumValues = 10,
+			NumValues = 12,
 			MinValue = 0,
-			MaxValue = 9,
+			MaxValue = 11,
 			Fields =
 			{
 				{ Name = "Skin", Type = "CharCustomizationType", EnumValue = 0 },
@@ -20,6 +20,8 @@ local CharacterCustomizationShared =
 				{ Name = "CustomOptionFacewear", Type = "CharCustomizationType", EnumValue = 7 },
 				{ Name = "CustomOptionTattooColor", Type = "CharCustomizationType", EnumValue = 8 },
 				{ Name = "Outfit", Type = "CharCustomizationType", EnumValue = 9 },
+				{ Name = "Facepaint", Type = "CharCustomizationType", EnumValue = 10 },
+				{ Name = "FacepaintColor", Type = "CharCustomizationType", EnumValue = 11 },
 			},
 		},
 		{
@@ -57,6 +59,8 @@ local CharacterCustomizationShared =
 				{ Name = "isNew", Type = "bool", Nilable = false },
 				{ Name = "swatchColor1", Type = "table", Mixin = "ColorMixin", Nilable = true },
 				{ Name = "swatchColor2", Type = "table", Mixin = "ColorMixin", Nilable = true },
+				{ Name = "showLocked", Type = "bool", Nilable = false },
+				{ Name = "lockedTooltip", Type = "string", Nilable = false },
 			},
 		},
 		{

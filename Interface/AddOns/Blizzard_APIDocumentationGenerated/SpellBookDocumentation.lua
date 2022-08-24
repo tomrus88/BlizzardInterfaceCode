@@ -103,7 +103,7 @@ local SpellBook =
 			},
 		},
 		{
-			Name = "GetTrackedNameplateSpells",
+			Name = "GetTrackedNameplateCooldownSpells",
 			Type = "Function",
 
 			Returns =

@@ -6,7 +6,12 @@ local HideUnownedCvar = "professionsFlyoutHideUnowned";
 ProfessionsItemFlyoutButtonMixin = {};
 
 function ProfessionsItemFlyoutButtonMixin:Init(item)
-	self:SetItem(item:GetItemID());
+	local itemLocation = item:GetItemLocation();
+	if itemLocation then
+		self:SetItemLocation(itemLocation);
+	else
+		self:SetItem(item:GetItemID());
+	end
 
 	-- FIXME - Allow initializer to be installed so we can have elective behavior in either crafting order or crafting UI.
 	-- Temp disabled appearance
@@ -38,9 +43,13 @@ function ProfessionsItemFlyoutMixin:OnLoad()
 		local checked = button:GetChecked();
 		SetCVar(HideUnownedCvar, checked);
 		self:InitializeContents();
+		PlaySound(SOUNDKIT.UI_PROFESSION_HIDE_UNOWNED_REAGENTS_CHECKBOX);
 	end);
 
 	local view = CreateScrollBoxListGridView(MaxColumns);
+	local padding = 3;
+	local spacing = 3;
+	view:SetPadding(padding, padding, padding, padding, spacing, spacing);
 	view:SetElementInitializer("ProfessionsItemFlyoutButtonTemplate", function(button, elementData)
 		local item = elementData.item;
 		button:Init(item);
@@ -112,10 +121,12 @@ function ProfessionsItemFlyoutMixin:InitializeContents()
 			local rows = math.min(MaxRows, math.ceil(count / MaxColumns));
 			local columns = self.canFilter and MaxColumns or (math.max(1, math.min(MaxColumns, count)));
 
-			local padding = 0;
+			local padding = self.ScrollBox:GetPadding();
+			local vSpacing = padding:GetVerticalSpacing();
+			local hSpacing = padding:GetHorizontalSpacing();
 			local elementHeight = 37;
-			local height = (rows * elementHeight) + (math.max(0, rows - 1) * padding);
-			local width = (columns * elementHeight) + (math.max(0, columns - 1) * padding);
+			local height = (rows * elementHeight) + (math.max(0, rows - 1) * vSpacing) + (padding.top + padding.bottom);
+			local width = (columns * elementHeight) + (math.max(0, columns - 1) * hSpacing)+ (padding.left + padding.right);
 			self.ScrollBox:SetSize(width, height);
 
 			local scrollBoxAnchorOffset = 15;
@@ -157,6 +168,8 @@ function ProfessionsItemFlyoutMixin:InitializeContents()
 
 		self:SetSize(250, 120);
 	end
+
+	PlaySound(SOUNDKIT.UI_PROFESSION_FILTER_MENU_OPEN_CLOSE);
 end
 
 -- FIXME Visual states required for reagents already in transaction.

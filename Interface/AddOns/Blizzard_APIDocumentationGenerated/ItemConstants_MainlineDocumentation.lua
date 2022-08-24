@@ -27,9 +27,9 @@ local ItemConstants_Mainline =
 		{
 			Name = "PointsModifierSourceType",
 			Type = "Enumeration",
-			NumValues = 63,
+			NumValues = 64,
 			MinValue = 0,
-			MaxValue = 62,
+			MaxValue = 63,
 			Fields =
 			{
 				{ Name = "PlayerLevel", Type = "PointsModifierSourceType", EnumValue = 0 },
@@ -93,8 +93,9 @@ local ItemConstants_Mainline =
 				{ Name = "CraftSkill", Type = "PointsModifierSourceType", EnumValue = 58 },
 				{ Name = "NumWeeklyRewardsThresholdsEarned", Type = "PointsModifierSourceType", EnumValue = 59 },
 				{ Name = "SalvagedItemLevel", Type = "PointsModifierSourceType", EnumValue = 60 },
-				{ Name = "ProfessionRatingGatherExtra", Type = "PointsModifierSourceType", EnumValue = 61 },
-				{ Name = "ProfessionRatingGatherDiscover", Type = "PointsModifierSourceType", EnumValue = 62 },
+				{ Name = "ProfessionRatingFinessePercent", Type = "PointsModifierSourceType", EnumValue = 61 },
+				{ Name = "ProfessionRatingPerceptionPercent", Type = "PointsModifierSourceType", EnumValue = 62 },
+				{ Name = "ProfessionTraitRanksByLabel", Type = "PointsModifierSourceType", EnumValue = 63 },
 			},
 		},
 	},

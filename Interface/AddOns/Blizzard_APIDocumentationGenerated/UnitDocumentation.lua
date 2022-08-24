@@ -217,6 +217,23 @@ local Unit =
 			},
 		},
 		{
+			Name = "SetUnitCursorTexture",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "textureObject", Type = "table", Nilable = false },
+				{ Name = "unit", Type = "string", Nilable = false },
+				{ Name = "style", Type = "CursorStyle", Nilable = true },
+				{ Name = "includeLowPriority", Type = "bool", Nilable = true },
+			},
+
+			Returns =
+			{
+				{ Name = "hasCursor", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "UnitAlliedRaceInfo",
 			Type = "Function",
 
@@ -274,22 +291,6 @@ local Unit =
 			{
 				{ Name = "classFilename", Type = "string", Nilable = false },
 				{ Name = "classID", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "UnitCursor",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "unit", Type = "string", Nilable = false },
-				{ Name = "style", Type = "CursorStyle", Nilable = true },
-				{ Name = "includeLowPriority", Type = "bool", Nilable = true },
-			},
-
-			Returns =
-			{
-				{ Name = "texture", Type = "number", Nilable = true },
 			},
 		},
 		{

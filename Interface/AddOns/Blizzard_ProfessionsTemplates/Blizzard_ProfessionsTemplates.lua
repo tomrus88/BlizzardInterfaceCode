@@ -185,12 +185,12 @@ function ProfessionsTableBuilderMixin:AddUnsortableFillColumn(owner, padding, fi
 	return column;
 end
 
-ProfessionsTableCellTextMixin = {};
+ProfessionsTableCellTextMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsTableCellTextMixin:SetText(text)
 	self.Text:SetText(text);
 end
-ProfessionsCrafterTableCellNameMixin = {};
+ProfessionsCrafterTableCellNameMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCrafterTableCellNameMixin:Populate(rowData, dataIndex)
 	local order = rowData;
@@ -198,7 +198,7 @@ function ProfessionsCrafterTableCellNameMixin:Populate(rowData, dataIndex)
 	ProfessionsTableCellTextMixin.SetText(self, text);
 end
 
-ProfessionsCrafterTableCellTipMixin = {};
+ProfessionsCrafterTableCellTipMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCrafterTableCellTipMixin:Populate(rowData, dataIndex)
 	local order = rowData;
@@ -206,7 +206,7 @@ function ProfessionsCrafterTableCellTipMixin:Populate(rowData, dataIndex)
 	ProfessionsTableCellTextMixin.SetText(self, text);
 end
 
-ProfessionsCrafterTableCellQualityMixin = {};
+ProfessionsCrafterTableCellQualityMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCrafterTableCellQualityMixin:Populate(rowData, dataIndex)
 	local order = rowData;
@@ -215,7 +215,7 @@ function ProfessionsCrafterTableCellQualityMixin:Populate(rowData, dataIndex)
 	ProfessionsTableCellTextMixin.SetText(self, text);
 end
 
-ProfessionsCrafterTableCellReagentsMixin = {};
+ProfessionsCrafterTableCellReagentsMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCrafterTableCellReagentsMixin:Populate(rowData, dataIndex)
 	local order = rowData;
@@ -223,7 +223,7 @@ function ProfessionsCrafterTableCellReagentsMixin:Populate(rowData, dataIndex)
 	ProfessionsTableCellTextMixin.SetText(self, text);
 end
 
-ProfessionsCrafterTableCellExpirationMixin = {};
+ProfessionsCrafterTableCellExpirationMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCrafterTableCellExpirationMixin:Populate(rowData, dataIndex)
 	local order = rowData;
@@ -231,7 +231,7 @@ function ProfessionsCrafterTableCellExpirationMixin:Populate(rowData, dataIndex)
 	ProfessionsTableCellTextMixin.SetText(self, text);
 end
 
-ProfessionsCustomerTableCellItemNameMixin = {};
+ProfessionsCustomerTableCellItemNameMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCustomerTableCellItemNameMixin:Populate(rowData, dataIndex)
 	local option = rowData.option;
@@ -246,28 +246,28 @@ function ProfessionsCustomerTableCellItemNameMixin:Populate(rowData, dataIndex)
 	end);
 end
 
-ProfessionsCustomerTableCellIlvlMixin = {};
+ProfessionsCustomerTableCellIlvlMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCustomerTableCellIlvlMixin:Populate(rowData, dataIndex)
 	local option = rowData.option;
 	ProfessionsTableCellTextMixin.SetText(self, option.iLvl);
 end
 
-ProfessionsCustomerTableCellSlotsMixin = {};
+ProfessionsCustomerTableCellSlotsMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCustomerTableCellSlotsMixin:Populate(rowData, dataIndex)
 	local option = rowData.option;
 	ProfessionsTableCellTextMixin.SetText(self, option.slots);
 end
 
-ProfessionsCustomerTableCellLevelMixin = {};
+ProfessionsCustomerTableCellLevelMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCustomerTableCellLevelMixin:Populate(rowData, dataIndex)
 	local option = rowData.option;
 	ProfessionsTableCellTextMixin.SetText(self, option.level);
 end
 
-ProfessionsCustomerTableCellSkillMixin = {};
+ProfessionsCustomerTableCellSkillMixin = CreateFromMixins(TableBuilderCellMixin);
 
 function ProfessionsCustomerTableCellSkillMixin:Populate(rowData, dataIndex)
 	local option = rowData.option;

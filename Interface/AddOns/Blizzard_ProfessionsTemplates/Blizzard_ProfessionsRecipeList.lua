@@ -110,7 +110,13 @@ function ProfessionsRecipeListMixin:OnLoad()
 			local data = elementData:GetData();
 			assert(data.recipeInfo);
 
-			EventRegistry:TriggerEvent("ProfessionsRecipeListMixin.Event.OnRecipeSelected", data.recipeInfo);
+			local newRecipeID = data.recipeInfo.recipeID;
+			local changed = self.previousRecipeID ~= newRecipeID;
+			if changed then
+				EventRegistry:TriggerEvent("ProfessionsRecipeListMixin.Event.OnRecipeSelected", data.recipeInfo);
+				self.previousRecipeID = newRecipeID;
+			end
+
 		end
 	end;
 
@@ -229,7 +235,7 @@ function ProfessionsRecipeListRecipeMixin:Init(node)
 
 		self.LockedIcon:Show();
 		table.insert(rightFrames, self.LockedIcon);
-	elseif not C_TradeSkillUI.IsTradeSkillGuild() and not C_TradeSkillUI.IsNPCCrafting() then
+	elseif not C_TradeSkillUI.IsTradeSkillGuild() and not C_TradeSkillUI.IsNPCCrafting() and not C_TradeSkillUI.IsRuneforging() then
 		local skillUpAtlas;
 		local xOfs = -3;
 		local yOfs = 0;
@@ -279,9 +285,10 @@ function ProfessionsRecipeListRecipeMixin:Init(node)
 		rightFramesWidth = rightFramesWidth + frame:GetWidth();
 	end
 	
-	local hasCount = recipeInfo.numAvailable > 0;
+	local count = C_TradeSkillUI.GetCraftableCount(recipeInfo.recipeID);
+	local hasCount = count > 0;
 	if hasCount then
-		self.Count:SetFormattedText(" [%d] ", recipeInfo.numAvailable);
+		self.Count:SetFormattedText(" [%d] ", count);
 		self.Count:Show();
 	else
 		self.Count:Hide();

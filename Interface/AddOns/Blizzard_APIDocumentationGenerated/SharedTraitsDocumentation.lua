@@ -100,6 +100,20 @@ local SharedTraits =
 			},
 		},
 		{
+			Name = "GetConfigIDBySystemID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "systemID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "configID", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetConfigIDByTreeID",
 			Type = "Function",
 
@@ -540,6 +554,7 @@ local SharedTraits =
 				{ Name = "type", Type = "TraitConfigType", Nilable = false },
 				{ Name = "name", Type = "string", Nilable = false },
 				{ Name = "treeIDs", Type = "table", InnerType = "number", Nilable = false },
+				{ Name = "usesSharedActionBars", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -655,6 +670,7 @@ local SharedTraits =
 			{
 				{ Name = "ID", Type = "number", Nilable = false },
 				{ Name = "gates", Type = "table", InnerType = "TraitGateInfo", Nilable = false },
+				{ Name = "hideSingleRankNumbers", Type = "bool", Nilable = false },
 			},
 		},
 		{

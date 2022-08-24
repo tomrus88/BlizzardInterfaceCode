@@ -5,9 +5,9 @@ local PlayerInteractionManagerConstants =
 		{
 			Name = "PlayerInteractionType",
 			Type = "Enumeration",
-			NumValues = 64,
+			NumValues = 65,
 			MinValue = 0,
-			MaxValue = 63,
+			MaxValue = 64,
 			Fields =
 			{
 				{ Name = "None", Type = "PlayerInteractionType", EnumValue = 0 },
@@ -74,6 +74,7 @@ local PlayerInteractionManagerConstants =
 				{ Name = "TraitSystem", Type = "PlayerInteractionType", EnumValue = 61 },
 				{ Name = "BarbersChoice", Type = "PlayerInteractionType", EnumValue = 62 },
 				{ Name = "JailersTowerBuffs", Type = "PlayerInteractionType", EnumValue = 63 },
+				{ Name = "MajorFactionRenown", Type = "PlayerInteractionType", EnumValue = 64 },
 			},
 		},
 	},

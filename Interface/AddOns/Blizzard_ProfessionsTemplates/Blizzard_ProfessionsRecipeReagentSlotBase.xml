@@ -39,7 +39,8 @@
 										<Anchor point="CENTER" relativeKey="$parent.AddIcon"/>
 									</Anchors>
 								</Texture>
-								<Texture parentKey="LockedIcon" atlas="tradeskills-icon-locked" useAtlasSize="true" hidden="true">
+								<Texture parentKey="LockedIcon" atlas="AdventureMapIcon-Lock" useAtlasSize="false" hidden="true">
+									<Size x="16" y="21"/>
 									<Anchors>
 										<Anchor point="CENTER" x="0" y="0"/>
 									</Anchors>

@@ -92,6 +92,7 @@ function ProfessionsQualityDialogMixin:OnLoad()
 	
 	local function OnCancel()
 		self:Hide();
+		PlaySound(SOUNDKIT.UI_PROFESSION_QUALITY_DIALOG_EXIT);
 	end
 
 	self.CloseButton:SetScript("OnClick", OnCancel);
@@ -103,6 +104,7 @@ function ProfessionsQualityDialogMixin:OnLoad()
 	self.AcceptButton:SetScript("OnClick", function(button, buttonName, down)
 		self:TriggerEvent(ProfessionsQualityDialogMixin.Event.Accepted, self.allocations, self.reagentSlotSchematic);
 		self:Hide();
+		PlaySound(SOUNDKIT.UI_PROFESSION_QUALITY_DIALOG_CONFIRM);
 	end);
 end
 
@@ -121,13 +123,22 @@ function ProfessionsQualityDialogMixin:GetReagentSlotCount()
 	return #self.reagentSlotSchematic.reagents;
 end
 
-function ProfessionsQualityDialogMixin:Init(recipeID, reagentSlotSchematic, allocations)
+function ProfessionsQualityDialogMixin:Init(recipeID, reagentSlotSchematic, allocations, slotIndex)
 	self.reagentSlotSchematic = reagentSlotSchematic;
 	self.recipeID = recipeID;
-
+	self.slotIndex = slotIndex;
 	self.allocations = allocations;
 
-	for qualityIndex, reagent in ipairs(reagentSlotSchematic.reagents) do
+	self:Setup();
+end
+
+function ProfessionsQualityDialogMixin:ReinitAllocations(allocations)
+	self.allocations = allocations;
+	self:Setup();
+end
+
+function ProfessionsQualityDialogMixin:Setup()
+	for qualityIndex, reagent in ipairs(self.reagentSlotSchematic.reagents) do
 		local container = self.containers[qualityIndex];
 		local itemID = reagent.itemID;
 		local button = container.Button;
@@ -140,14 +151,23 @@ function ProfessionsQualityDialogMixin:Init(recipeID, reagentSlotSchematic, allo
 		local quantity = self:GetQuantityAllocated(qualityIndex);
 		editBox:SetText(quantity);
 
-		button:SetItemButtonCount(Professions.GetReagentQuantityInPossession(reagent));
+		local count = Professions.GetReagentQuantityInPossession(reagent);
+		button:SetItemButtonCount(count);
+
+		local enabled = count > 0;
+		button:DesaturateHierarchy(enabled and 0 or 1);
+		editBox:SetEnabled(enabled);
 	end
 
 	self:EvaluateAllocations();
 end
 
-function ProfessionsQualityDialogMixin:Open(recipeID, reagentSlotSchematic, allocations)
-	self:Init(recipeID, reagentSlotSchematic, allocations);
+function ProfessionsQualityDialogMixin:GetSlotIndex()
+	return self.slotIndex;
+end
+
+function ProfessionsQualityDialogMixin:Open(recipeID, reagentSlotSchematic, allocations, slotIndex)
+	self:Init(recipeID, reagentSlotSchematic, allocations, slotIndex);
 	self:Show();
 end
 
