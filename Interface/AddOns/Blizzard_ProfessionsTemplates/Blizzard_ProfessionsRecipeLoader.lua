@@ -11,8 +11,18 @@ function ProfessionsRecipeLoaderMixin:Load(recipeSchematic, callback)
 	self.callback = callback;
 
 	local recipeID = recipeSchematic.recipeID;
+	local recipeInfo = C_TradeSkillUI.GetRecipeInfo(recipeID);
 	local outputItemID = recipeSchematic.outputItemID;
-	local counter = outputItemID ~= nil and 2 or 1;
+	local counter;
+	if recipeInfo.qualityItemIDs then
+		counter = 1 + #recipeInfo.qualityItemIDs;
+	elseif outputItemID then
+		counter = 2;
+	else
+		counter = 1;
+	end
+
+	self.qualityItemIDLoads = {};
 
 	local function Decrement()
 		counter = counter - 1;
@@ -26,7 +36,14 @@ function ProfessionsRecipeLoaderMixin:Load(recipeSchematic, callback)
 		Decrement();
 	end);
 
-	if outputItemID then
+	if recipeInfo.qualityItemIDs then
+		for _, itemID in ipairs(recipeInfo.qualityItemIDs) do
+			local cc = Load(Item:CreateFromItemID(itemID), function()
+				Decrement();
+			end);
+			table.insert(self.qualityItemIDLoads, cc);
+		end
+	elseif outputItemID then
 		self.cc1 = Load(Item:CreateFromItemID(outputItemID), function()
 			local itemID2 = C_TradeSkillUI.GetFactionSpecificOutputItem(recipeID);
 			if itemID2 then
@@ -55,6 +72,11 @@ function ProfessionsRecipeLoaderMixin:Cancel()
 		self.cc2:Cancel();
 		self.cc2 = nil;
 	end
+
+	for _, cc in ipairs(self.qualityItemIDLoads) do
+		cc:Cancel();
+	end
+	self.qualityItemIDLoads = {};
 end
 
 function CreateProfessionsRecipeLoader(recipeSchematic, callback)
