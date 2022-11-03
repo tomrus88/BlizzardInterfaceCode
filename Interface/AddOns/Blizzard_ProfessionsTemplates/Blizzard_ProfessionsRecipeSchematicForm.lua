@@ -523,7 +523,9 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo, isRecraftOverride)
 		local text;
 		if outputItemInfo.hyperlink then
 			local item = Item:CreateFromItemLink(outputItemInfo.hyperlink);
-			text = WrapTextInColor(item:GetItemName(), item:GetItemQualityColor().color);
+			local qualityColor = item:GetItemQualityColor();
+			local color = qualityColor and qualityColor.color;
+			text = color and WrapTextInColor(item:GetItemName(), color) or item:GetItemName();
 		else
 			text = WrapTextInColor(self.recipeSchematic.name, NORMAL_FONT_COLOR);
 		end
