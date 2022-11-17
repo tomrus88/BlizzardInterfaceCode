@@ -674,17 +674,7 @@ function Professions.GenerateCraftingDataProvider(professionID, searching, noStr
 	local showAllRecipes = searching or C_TradeSkillUI.IsNPCCrafting();
 	for index, recipeID in ipairs(C_TradeSkillUI.GetFilteredRecipeIDs()) do
 		local recipeInfo = Professions.GetFirstRecipe(C_TradeSkillUI.GetRecipeInfo(recipeID));
-		local showRecipe = showAllRecipes;
-		if not showRecipe then
-			showRecipe = C_TradeSkillUI.IsRecipeInSkillLine(recipeID, professionID);
-			-- Temporary fix for expansionless recipes not appearing in the list. This will cause the
-			-- recipe to appear in every expansion in an undesirable categorization. Once these recipes
-			-- are reorganized this function may be removed.
-			if not showRecipe then
-				showRecipe = C_TradeSkillUI.IsRecipeInBaseSkillLine(recipeID);
-			end
-		end
-
+		local showRecipe = showAllRecipes or C_TradeSkillUI.IsRecipeInSkillLine(recipeID, professionID);
 		if showRecipe then
 			recipeInfos[recipeInfo.recipeID] = recipeInfo;
 		end
@@ -823,7 +813,7 @@ function Professions.IsUsingDefaultFilters(ignoreSkillLine)
 		not C_TradeSkillUI.GetOnlyShowSkillUpRecipes() and 
 		not C_TradeSkillUI.GetOnlyShowFirstCraftRecipes();
 	local newestKnownProfessionInfo = Professions.GetNewestKnownProfessionInfo();
-	local isDefaultSkillLine = ignoreSkillLine or newestKnownProfessionInfo == nil or (C_TradeSkillUI.GetChildProfessionInfo().professionID == Professions.GetNewestKnownProfessionInfo().professionID);
+	local isDefaultSkillLine = ignoreSkillLine or newestKnownProfessionInfo == nil or (Professions.GetProfessionInfo().professionID == Professions.GetNewestKnownProfessionInfo().professionID);
 	return showAllRecipes and isDefaultSkillLine and not C_TradeSkillUI.AreAnyInventorySlotsFiltered() and 
 		not C_TradeSkillUI.AnyRecipeCategoriesFiltered() and Professions.AreAllSourcesUnfiltered() and not C_TradeSkillUI.GetShowUnlearned() and C_TradeSkillUI.GetShowLearned();
 end
@@ -962,7 +952,7 @@ function Professions.InitFilterMenu(dropdown, level, onUpdate, ignoreSkillLine)
 		}
 	};
 
-	local isGatheringProfession = Professions.GetProfessionType(C_TradeSkillUI.GetChildProfessionInfo()) == Professions.ProfessionType.Gathering;
+	local isGatheringProfession = Professions.GetProfessionType(Professions.GetProfessionInfo()) == Professions.ProfessionType.Gathering;
 	
 	if not C_TradeSkillUI.IsNPCCrafting() then
 		local sourcesFilters = {
@@ -1056,7 +1046,7 @@ function Professions.InitFilterMenu(dropdown, level, onUpdate, ignoreSkillLine)
 	end
 	
 	if not C_TradeSkillUI.IsTradeSkillGuild() then
-		local professionInfo = C_TradeSkillUI.GetChildProfessionInfo();
+		local professionInfo = Professions.GetProfessionInfo();
 		local isNPCCrafting = C_TradeSkillUI.IsNPCCrafting() and professionInfo.maxSkillLevel == 0;
 		if not isNPCCrafting then
 			local onlyShowSkillUpRecipes = { 
@@ -1357,4 +1347,17 @@ function Professions.ApplySortOrder(sortOrder, lhs, rhs)
 	end
 
 	return nil, false;
+end
+
+function Professions.GetProfessionInfo()
+	local professionInfo = C_TradeSkillUI.GetChildProfessionInfo();
+
+	-- Child profession info will be unavailable in some NPC crafting contexts. In these cases,
+	-- use the base profession info instead.
+	if professionInfo.professionID == 0 then
+		professionInfo = C_TradeSkillUI.GetBaseProfessionInfo();
+	end
+	professionInfo.displayName = professionInfo.parentProfessionName and professionInfo.parentProfessionName or professionInfo.professionName;
+
+	return professionInfo;
 end
