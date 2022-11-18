@@ -1449,9 +1449,7 @@ function CharacterCreateRaceAndClassMixin:UpdateState(selectedFaction)
 		self.selectedFaction = self.selectedRaceData.factionInternalName;
 	end
 
-	if not self.blockedRaces then
-		self:InitBlockedRaces();
-	end
+	self:InitBlockedRaces();
 
 	if not self:IsRaceValid(self.selectedRaceData, self.selectedFaction) and CharacterCreateFrame:HasService() then
 		local randomRaceData = self:GetRandomValidRaceData();
