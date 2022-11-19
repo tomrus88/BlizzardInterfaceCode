@@ -664,50 +664,49 @@ function LFGListingActivityView_OnLoad(self)
 		local elementData = node:GetData();
 
 		if (elementData.buttonType == LFGLISTING_BUTTONTYPE_ACTIVITYGROUP) then
-			local frame = factory("Frame", "LFGListingActivityRowTemplate");
+			factory("LFGListingActivityRowTemplate", function(frame, unused)
+				LFGListingActivityView_InitActivityGroupButton(frame, elementData, node:IsCollapsed());
 
-			frame.CheckButton:SetScript("OnClick", function(button, buttonName, down)
-				local node = button:GetParent():GetElementData();
-				local parentFrame = view:FindFrame(node);
-				local parentData = node:GetData();
-				local activityGroupID = parentData.activityGroupID;
-				local allSelected = LFGListingFrame:IsAnyActivityForActivityGroupSelected(activityGroupID);
-				LFGListingFrame:SetAllActivitiesForActivityGroup(activityGroupID, not allSelected, true);
+				frame.CheckButton:SetScript("OnClick", function(button, buttonName, down)
+					local node = button:GetParent():GetElementData();
+					local parentFrame = view:FindFrame(node);
+					local parentData = node:GetData();
+					local activityGroupID = parentData.activityGroupID;
+					local allSelected = LFGListingFrame:IsAnyActivityForActivityGroupSelected(activityGroupID);
+					LFGListingFrame:SetAllActivitiesForActivityGroup(activityGroupID, not allSelected, true);
 
-				LFGListingActivityView_InitActivityGroupButton(parentFrame, parentData, node:IsCollapsed());
-				for index, child in ipairs(node.nodes) do
-					local childFrame = view:FindFrame(child);
-					if (childFrame) then
-						LFGListingActivityView_InitActivityButton(childFrame, child:GetData());
+					LFGListingActivityView_InitActivityGroupButton(parentFrame, parentData, node:IsCollapsed());
+					for index, child in ipairs(node.nodes) do
+						local childFrame = view:FindFrame(child);
+						if (childFrame) then
+							LFGListingActivityView_InitActivityButton(childFrame, child:GetData());
+						end
 					end
-				end
+				end)
+
+				frame.ExpandOrCollapseButton:SetScript("OnClick", function(button, buttonName, down)
+					local node = button:GetParent():GetElementData();
+					node:ToggleCollapsed(true);
+					LFGListingActivityView_InitActivityGroupButton(view:FindFrame(node), node:GetData(), node:IsCollapsed());
+				end)
 			end)
-
-			frame.ExpandOrCollapseButton:SetScript("OnClick", function(button, buttonName, down)
-				local node = button:GetParent():GetElementData();
-				node:ToggleCollapsed(true);
-				LFGListingActivityView_InitActivityGroupButton(view:FindFrame(node), node:GetData(), node:IsCollapsed());
-			end)
-
-			LFGListingActivityView_InitActivityGroupButton(frame, elementData, node:IsCollapsed());
-
 		elseif (elementData.buttonType == LFGLISTING_BUTTONTYPE_ACTIVITY) then
-			local frame = factory("Frame", "LFGListingActivityRowTemplate");
+			factory("LFGListingActivityRowTemplate", function(frame, unused)
+				LFGListingActivityView_InitActivityButton(frame, elementData);
 
-			frame.CheckButton:SetScript("OnClick", function(button, buttonName, down)
-				local node = button:GetParent():GetElementData();
-				local activityID = node:GetData().activityID;
-				LFGListingFrame:ToggleActivity(activityID, false, true);
+				frame.CheckButton:SetScript("OnClick", function(button, buttonName, down)
+					local node = button:GetParent():GetElementData();
+					local activityID = node:GetData().activityID;
+					LFGListingFrame:ToggleActivity(activityID, false, true);
 
-				if (node.parent) then
-					local parentFrame = view:FindFrame(node.parent);
-					if (parentFrame) then
-						LFGListingActivityView_InitActivityGroupButton(parentFrame, node.parent:GetData(), node.parent:IsCollapsed());
+					if (node.parent) then
+						local parentFrame = view:FindFrame(node.parent);
+						if (parentFrame) then
+							LFGListingActivityView_InitActivityGroupButton(parentFrame, node.parent:GetData(), node.parent:IsCollapsed());
+						end
 					end
-				end
+				end)
 			end)
-
-			LFGListingActivityView_InitActivityButton(frame, elementData);
 		end
 	end);
 

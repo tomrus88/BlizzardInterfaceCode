@@ -2826,9 +2826,7 @@ function CalendarCreateEventInviteList_OnLoad(self)
 	};
 
 	local view = CreateScrollBoxListLinearView();
-	view:SetElementInitializer("Button", "CalendarCreateEventInviteListButtonTemplate", function(button, elementData)
-	--view:SetElementInitializer("CalendarCreateEventInviteListButtonTemplate", function(button, elementData)
-	--view:SetElementInitializer("CalendarCreateEventInviteListButtonTemplate", function(button, elementData)
+	view:SetElementInitializer("CalendarCreateEventInviteListButtonTemplate", function(button, elementData)
 		CalendarCreateEventInviteList_InitButton(button, elementData);
 	end);
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.ScrollBox, self.ScrollBar, view);
@@ -3363,8 +3361,7 @@ function CalendarViewEventInviteList_OnLoad(self)
 
 	local view = CreateScrollBoxListLinearView();
 	view:SetElementExtent(14);
-	view:SetElementInitializer("Button", "CalendarViewEventInviteListButtonTemplate", function(button, elementData)
-	--view:SetElementInitializer("CalendarViewEventInviteListButtonTemplate", function(button, elementData)
+	view:SetElementInitializer("CalendarViewEventInviteListButtonTemplate", function(button, elementData)
 		CalendarViewEventInviteList_InitButton(button, elementData);
 	end);
 	local calculator = function(dataIndex, elementData)
@@ -4683,8 +4680,7 @@ function CalendarEventPickerFrame_OnLoad(self)
 	
 	local view = CreateScrollBoxListLinearView();
 	view:SetElementExtent(16);
-	view:SetElementInitializer("Button", "CalendarEventPickerButtonTemplate", function(button, elementData)
-	--view:SetElementInitializer("CalendarEventPickerButtonTemplate", function(button, elementData)
+	view:SetElementInitializer("CalendarEventPickerButtonTemplate", function(button, elementData)
 		CalendarEventPickerFrame_InitButton(button, elementData);
 	end);
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.ScrollBox, self.ScrollBar, view);
@@ -4879,8 +4875,7 @@ function CalendarTexturePickerFrame_OnLoad(self)
 	
 	local view = CreateScrollBoxListLinearView();
 	view:SetElementExtent(16);
-	view:SetElementInitializer("Button", "CalendarTexturePickerButtonTemplate", function(button, elementData)
-	--view:SetElementInitializer("CalendarTexturePickerButtonTemplate", function(button, elementData)
+	view:SetElementInitializer("CalendarTexturePickerButtonTemplate", function(button, elementData)
 		CalendarTexturePicker_InitButton(button, elementData);
 	end);
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.ScrollBox, self.ScrollBar, view);

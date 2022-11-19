@@ -357,6 +357,23 @@ local LFGListInfo =
 				{ Name = "newPlayerFriendly", Type = "bool", Nilable = true },
 			},
 		},
+		{
+			Name = "WowLocale",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "enUS", Type = "bool", Nilable = false, Default = false },
+				{ Name = "koKR", Type = "bool", Nilable = false, Default = false },
+				{ Name = "frFR", Type = "bool", Nilable = false, Default = false },
+				{ Name = "deDE", Type = "bool", Nilable = false, Default = false },
+				{ Name = "zhCN", Type = "bool", Nilable = false, Default = false },
+				{ Name = "zhTW", Type = "bool", Nilable = false, Default = false },
+				{ Name = "esES", Type = "bool", Nilable = false, Default = false },
+				{ Name = "esMX", Type = "bool", Nilable = false, Default = false },
+				{ Name = "ruRU", Type = "bool", Nilable = false, Default = false },
+				{ Name = "ptBR", Type = "bool", Nilable = false, Default = false },
+			},
+		},
 	},
 };
 
