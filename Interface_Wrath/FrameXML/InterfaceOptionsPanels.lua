@@ -564,7 +564,8 @@ DisplayPanelOptions = {
 	displayFreeBagSlots = { text = "DISPLAY_FREE_BAG_SLOTS" },
     showTutorials = { text = "SHOW_TUTORIALS" },
 	displayAggroWarning =  { text = "DISPLAY_AGGRO_WARNING" },
-	threatShowNumeric = { text = "SHOW_AGGRO_PERCENTAGES", tooltip = OPTION_TOOLTIP_SHOW_NUMERIC_THREAT }
+	threatShowNumeric = { text = "SHOW_AGGRO_PERCENTAGES", tooltip = OPTION_TOOLTIP_SHOW_NUMERIC_THREAT },
+	consolidateBuffs = { text = "CONSOLIDATE_BUFFS_TEXT" },
 }
 
 function InterfaceOptionsDisplayPanel_OnLoad (self)
@@ -657,7 +658,7 @@ function InterfaceOptionsDisplayPanelSelfHighlightDropDown_Initialize()
     UIDropDownMenu_AddButton(info);
 end]]
 
-function InterfaceOptionsDisplayPanelChatBubblesDropDown_GetValue(self)
+function InterfaceOptionsSocialPanelChatBubblesDropDown_GetValue(self)
     if (GetCVarBool(self.cvar) and GetCVarBool(self.partyCvar)) then
         return 1;
     elseif (GetCVarBool(self.cvar)) then
@@ -667,7 +668,7 @@ function InterfaceOptionsDisplayPanelChatBubblesDropDown_GetValue(self)
     end
 end
 
-function InterfaceOptionsDisplayPanelChatBubblesDropDown_SetValue(self, value)
+function InterfaceOptionsSocialPanelChatBubblesDropDown_SetValue(self, value)
     if (value == 1) then
         SetCVar(self.cvar, "1");
         SetCVar(self.partyCvar, "1");
@@ -680,11 +681,11 @@ function InterfaceOptionsDisplayPanelChatBubblesDropDown_SetValue(self, value)
     end
 end
 
-function InterfaceOptionsDisplayPanelChatBubblesDropDown_OnShow(self)
+function InterfaceOptionsSocialPanelChatBubblesDropDown_OnShow(self)
 	self.cvar = "chatBubbles";
     self.partyCvar = "chatBubblesParty";
 
-    local value = InterfaceOptionsDisplayPanelChatBubblesDropDown_GetValue(self);
+    local value = InterfaceOptionsSocialPanelChatBubblesDropDown_GetValue(self);
 	self.value = value;
 
 	UIDropDownMenu_SetWidth(self, 110);
@@ -694,7 +695,7 @@ function InterfaceOptionsDisplayPanelChatBubblesDropDown_OnShow(self)
 	self.SetValue =
 		function (self, value)
 			self.value = value;
-			InterfaceOptionsDisplayPanelChatBubblesDropDown_SetValue(self, value);
+			InterfaceOptionsSocialPanelChatBubblesDropDown_SetValue(self, value);
 			UIDropDownMenu_SetSelectedValue(self, self.value);
 		end
 	self.GetValue =
@@ -708,8 +709,8 @@ function InterfaceOptionsDisplayPanelChatBubblesDropDown_OnShow(self)
 		end
 end
 
-function InterfaceOptionsDisplayPanelChatBubblesDropDown_OnClick(self)
-	InterfaceOptionsDisplayPanelChatBubblesDropDown:SetValue(self.value);
+function InterfaceOptionsSocialPanelChatBubblesDropDown_OnClick(self)
+	InterfaceOptionsSocialPanelChatBubblesDropDown:SetValue(self.value);
 end
 
 function InterfaceOptionsDisplayPanelChatBubbles_Initialize(self)
@@ -718,7 +719,7 @@ function InterfaceOptionsDisplayPanelChatBubbles_Initialize(self)
 	self.tooltip = OPTION_TOOLTIP_CHAT_BUBBLES;
 
 	info.text = ALL;
-	info.func = InterfaceOptionsDisplayPanelChatBubblesDropDown_OnClick;
+	info.func = InterfaceOptionsSocialPanelChatBubblesDropDown_OnClick;
 	info.value = 1;
 	if ( info.value == selectedValue ) then
 		info.checked = 1;
@@ -728,7 +729,7 @@ function InterfaceOptionsDisplayPanelChatBubbles_Initialize(self)
 	UIDropDownMenu_AddButton(info);
 
 	info.text =NONE;
-	info.func = InterfaceOptionsDisplayPanelChatBubblesDropDown_OnClick;
+	info.func = InterfaceOptionsSocialPanelChatBubblesDropDown_OnClick;
 	info.value = 2;
 	if ( info.value == selectedValue ) then
 		info.checked = 1;
@@ -738,7 +739,7 @@ function InterfaceOptionsDisplayPanelChatBubbles_Initialize(self)
 	UIDropDownMenu_AddButton(info);
 
 	info.text = CHAT_BUBBLES_EXCLUDE_PARTY_CHAT;
-	info.func = InterfaceOptionsDisplayPanelChatBubblesDropDown_OnClick;
+	info.func = InterfaceOptionsSocialPanelChatBubblesDropDown_OnClick;
 	info.value = 3;
 	if ( info.value == selectedValue ) then
 		info.checked = 1;

@@ -82,7 +82,6 @@ UIPanelWindows["TabardFrame"] =					{ area = "left",			pushable = 0,		xoffset = 
 UIPanelWindows["GuildRegistrarFrame"] =			{ area = "left",			pushable = 0,		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	whileDead = 1 };
 UIPanelWindows["ArenaRegistrarFrame"] =			{ area = "left",			pushable = 0,		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	whileDead = 1 };
 UIPanelWindows["PetitionFrame"] =				{ area = "left",			pushable = 0,		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	whileDead = 1 };
-UIPanelWindows["BattlefieldFrame"] =			{ area = "left",			pushable = 0,		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	whileDead = 1 };
 UIPanelWindows["AuctionFrame"] =				{ area = "doublewide",		pushable = 0,		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 840 }
 UIPanelWindows["TaxiFrame"] =					{ area = "left",			pushable = 0, 		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	showFailedFunc = CloseTaxiMap };
 UIPanelWindows["ItemTextFrame"] =				{ area = "left",			pushable = 0, 		xoffset = -16,		yoffset = 12,	bottomClampOverride = 140+12,	width = 353,	height = 424,	whileDead = 1 };
@@ -230,7 +229,7 @@ function UIParent_OnLoad(self)
 	self:RegisterEvent("QUEST_ACCEPT_CONFIRM");
 	self:RegisterEvent("QUEST_LOG_UPDATE");
 	self:RegisterEvent("UNIT_QUEST_LOG_CHANGED");
-	self:RegisterEvent("CURSOR_UPDATE");
+	self:RegisterEvent("CURSOR_CHANGED");
 	self:RegisterEvent("LOCALPLAYER_PET_RENAMED");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("MIRROR_TIMER_START");
@@ -290,6 +289,7 @@ function UIParent_OnLoad(self)
 	self:RegisterEvent("ALERT_REGIONAL_CHAT_DISABLED");
 	self:RegisterEvent("BARBER_SHOP_OPEN");
 	self:RegisterEvent("BARBER_SHOP_CLOSE");
+	self:RegisterEvent("RAISED_AS_GHOUL");
 
 	-- Events for auction UI handling
 	self:RegisterEvent("AUCTION_HOUSE_SHOW");
@@ -318,6 +318,9 @@ function UIParent_OnLoad(self)
 	-- Events for Guild bank UI
 	self:RegisterEvent("GUILDBANKFRAME_OPENED");
 	self:RegisterEvent("GUILDBANKFRAME_CLOSED");
+
+	-- Events for Glyphs!
+	self:RegisterEvent("USE_GLYPH");
 
 	--Events for GMChatUI
 	self:RegisterEvent("CHAT_MSG_WHISPER");
@@ -497,7 +500,7 @@ function Store_LoadUI()
 end
 
 function APIDocumentation_LoadUI()
-	UIParentLoadAddOn("Blizzard_APIDocumentation");
+	UIParentLoadAddOn("Blizzard_APIDocumentationGenerated");
 end
 
 --[[
@@ -922,7 +925,7 @@ function UIParent_OnEvent(self, event, ...)
 				button:Disable();
 			end
 		end
-	elseif ( event == "CURSOR_UPDATE" ) then
+	elseif ( event == "CURSOR_CHANGED" ) then
 		if ( not CursorHasItem() ) then
 			StaticPopup_Hide("EQUIP_BIND");
 			StaticPopup_Hide("EQUIP_BIND_TRADEABLE");
@@ -1048,6 +1051,16 @@ function UIParent_OnEvent(self, event, ...)
 			if ( dialog ) then
 				dialog.data = resSicknessTime;
 			end
+		else
+			local dialog = nil;
+			if (UnitLevel("player") <= Constants.LevelConstsExposed.MIN_RES_SICKNESS_LEVEL) then
+				dialog = StaticPopup_Show("XP_LOSS_NO_SICKNESS_NO_DURABILITY");
+			else
+				dialog = StaticPopup_Show("XP_LOSS_NO_SICKNESS");
+			end
+			if ( dialog ) then
+				dialog.data = 1;
+			end
 		end
 		HideUIPanel(GossipFrame);
 	elseif ( event == "CORPSE_IN_RANGE" ) then
@@ -1150,10 +1163,10 @@ function UIParent_OnEvent(self, event, ...)
 			MoneyFrame_Update(dialog:GetName().."MoneyFrame", arg1);
 			-- open the talent UI to the player's active talent group...just so the player knows
 			-- exactly which talent spec he is wiping
---			TalentFrame_LoadUI();
---			if ( PlayerTalentFrame_Open ) then
---				PlayerTalentFrame_Open(GetActiveSpecGroup());
---			end
+			TalentFrame_LoadUI();
+			if ( PlayerTalentFrame_Open ) then
+				PlayerTalentFrame_Open(false, GetActiveTalentGroup());
+			end
 		end
 	elseif ( event == "CONFIRM_BARBERS_CHOICE" ) then
 		HideUIPanel(GossipFrame);
@@ -1314,6 +1327,11 @@ function UIParent_OnEvent(self, event, ...)
 		if ( GuildBankFrame ) then
 			HideUIPanel(GuildBankFrame);
 		end
+
+	-- Events for Glyphs
+	elseif ( event == "USE_GLYPH" ) then
+		OpenGlyphFrame();
+		return;
 
 	-- Display instance reset info
 	elseif ( event == "RAID_INSTANCE_WELCOME" ) then
@@ -2542,6 +2560,18 @@ function FramePositionDelegate:UIParentManageFramePositions()
 		end
 	end
 
+	-- HACK: we have too many bars in this game now...
+	-- if the Stance bar is shown then hide the multi-cast bar
+	-- we'll have to figure out what we should do in this case if it ever really becomes a problem
+	-- HACK 2: if the possession bar is shown then hide the multi-cast bar
+	-- yeah, way too many bars...
+	if ( ( StanceBarFrame and StanceBarFrame:IsShown() ) or
+		 ( PossessBarFrame and PossessBarFrame:IsShown() ) ) then
+		HideMultiCastActionBar();
+	elseif ( HasMultiCastActionBar and HasMultiCastActionBar() ) then
+		ShowMultiCastActionBar();
+	end
+
 	-- If petactionbar is already shown, set its point in addition to changing its y target
 	if ( PetActionBarFrame:IsShown() ) then
 		PetActionBar_UpdatePositionValues();
@@ -2579,6 +2609,21 @@ function FramePositionDelegate:UIParentManageFramePositions()
 		anchorY = anchorY - UIWidgetBelowMinimapContainerFrame:GetHeight() - 4;
 	end
 
+	--Setup Vehicle seat indicator offset
+	if ( VehicleSeatIndicator ) then
+		if ( VehicleSeatIndicator and VehicleSeatIndicator:IsShown() ) then
+			anchorY = anchorY - VehicleSeatIndicator:GetHeight() - 18;	--The -18 is there to give a small buffer for things like the QuestTimeFrame below the Seat Indicator
+		end
+
+		if ( SHOW_MULTI_ACTIONBAR_3 and SHOW_MULTI_ACTIONBAR_4 ) then
+			VehicleSeatIndicator:SetPoint("TOPRIGHT", MinimapCluster, "BOTTOMRIGHT", -100, 0);
+		elseif ( SHOW_MULTI_ACTIONBAR_3 ) then
+			VehicleSeatIndicator:SetPoint("TOPRIGHT", MinimapCluster, "BOTTOMRIGHT", -62, 0);
+		else
+			VehicleSeatIndicator:SetPoint("TOPRIGHT", MinimapCluster, "BOTTOMRIGHT", 0, 0);
+		end
+	end
+
 	-- Boss frames - need to move below buffs/debuffs if both right action bars are showing
 	local numBossFrames = 0;
 	for i = 1, MAX_BOSS_FRAMES do
@@ -2613,21 +2658,23 @@ function FramePositionDelegate:UIParentManageFramePositions()
 	end
 
 	-- QuestWatchFrame
-	local numArenaOpponents = GetNumArenaOpponents();
-	if ( not WatchFrame:IsUserPlaced() and ArenaEnemyFrames and ArenaEnemyFrames:IsShown() and (numArenaOpponents > 0) ) then
-		WatchFrame:ClearAllPoints();
-		WatchFrame:SetPoint("TOPRIGHT", "ArenaEnemyFrame"..numArenaOpponents, "BOTTOMRIGHT", 2, -35);
-	elseif ( not WatchFrame:IsUserPlaced() ) then -- We're using Simple Quest Tracking, automagically size and position!
-		WatchFrame:ClearAllPoints();
-		-- move up if only the minimap cluster is above, move down a little otherwise
-		if ( anchorY == 0 ) then
-			anchorY = 10;
+	if not ( WatchFrame:IsUserPlaced() ) then
+		local numArenaOpponents = GetNumArenaOpponents();
+		if ( ArenaEnemyFrames and ArenaEnemyFrames:IsShown() and (numArenaOpponents > 0) ) then
+			WatchFrame:ClearAllPoints();
+			WatchFrame:SetPoint("TOPRIGHT", "ArenaEnemyFrame"..numArenaOpponents, "BOTTOMRIGHT", 2, -35);
+		else -- We're using Simple Quest Tracking, automagically size and position!
+			WatchFrame:ClearAllPoints();
+			-- move up if only the minimap cluster is above, move down a little otherwise
+			if ( anchorY == 0 ) then
+				anchorY = 10;
+			end
+			WatchFrame:SetPoint("TOPRIGHT", "MinimapCluster", "BOTTOMRIGHT", -CONTAINER_OFFSET_X, anchorY);
+			-- OnSizeChanged for WatchFrame handles its redraw
 		end
-		WatchFrame:SetPoint("TOPRIGHT", "MinimapCluster", "BOTTOMRIGHT", -CONTAINER_OFFSET_X, anchorY);
-		-- OnSizeChanged for WatchFrame handles its redraw
+
+		WatchFrame:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -CONTAINER_OFFSET_X, CONTAINER_OFFSET_Y);
 	end
-	
-	WatchFrame:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -CONTAINER_OFFSET_X, CONTAINER_OFFSET_Y);
 	
 	-- Update chat dock since the dock could have moved
 	FCF_DockUpdate();
@@ -3555,6 +3602,8 @@ function ToggleGameMenu()
 		ChallengesKeystoneFrame:Hide();
 	elseif ( CanAutoSetGamePadCursorControl(false) and (not IsModifierKeyDown()) ) then
 		SetGamePadCursorControl(false);
+	elseif ( ReportFrame:IsShown() ) then
+		ReportFrame:Hide();
 	else
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPEN);
 		ShowUIPanel(GameMenuFrame);

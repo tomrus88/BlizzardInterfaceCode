@@ -43,7 +43,7 @@ function LFGBrowseMixin:OnLoad()
 	self:RegisterEvent("LFG_LIST_AVAILABILITY_UPDATE");
 	self:RegisterEvent("LFG_LIST_SEARCH_FAILED");
 	self:RegisterEvent("LFG_LIST_SEARCH_RESULTS_RECEIVED");
-	self:RegisterEvent("LFG_LIST_SEARCH_RESULT_UPDATED");
+	self:RegisterEvent("REPORT_PLAYER_RESULT");
 
 	self.results = {};
 	self.searchFailed = false;
@@ -99,6 +99,11 @@ function LFGBrowseMixin:OnEvent(event, ...)
 		self.searching = false;
 		self.searchFailed = true;
 		self:UpdateResultList();
+	elseif ( event == "REPORT_PLAYER_RESULT") then
+		local success, reportType = ...;
+		if (success and reportType == Enum.ReportType.GroupFinderPosting) then
+			LFGBrowseFrame:UpdateResultList();
+		end
 	end
 end
 
@@ -252,12 +257,13 @@ function LFGBrowseSearchEntry_Update(self)
 			self.ClassIcon:Hide();
 		end
 		self.Name:SetPoint("TOPLEFT", self.PartyIcon, "TOPLEFT", 1, -2);
+		self.NewPlayerFriendlyIcon:SetPoint("LEFT", self.ClassIcon, "RIGHT", 2, 0);
 	else
 		self.PartyIcon:Show();
-		self.ClassIcon:Hide();
 		self.Level:Hide();
 		self.ClassIcon:Hide();
 		self.Name:SetPoint("TOPLEFT", self.PartyIcon, "TOPRIGHT", 0, -2);
+		self.NewPlayerFriendlyIcon:SetPoint("LEFT", self.Name, "RIGHT", 2, 0);
 	end
 
 	self.isDelisted = searchResultInfo.isDelisted;
@@ -295,7 +301,7 @@ function LFGBrowseSearchEntry_Update(self)
 		activityColor = LFGBROWSE_DELISTED_FONT_COLOR;
 	elseif ( searchResultInfo.hasSelf ) then
 		activityColor = LFGBROWSE_SELF_FONT_COLOR;
-	elseif (hasMatchingActivity) then
+	elseif ( hasMatchingActivity ) then
 		activityColor = LFGBROWSE_ACTIVITY_MATCH_FONT_COLOR;
 	end
 
@@ -309,7 +315,13 @@ function LFGBrowseSearchEntry_Update(self)
 	self.ClassIcon:SetDesaturated(searchResultInfo.isDelisted);
 	self.ActivityName:SetText(activityText);
 	self.ActivityName:SetTextColor(activityColor.r, activityColor.g, activityColor.b);
-	self.ActivityName:SetWidth(176);
+
+	if ( searchResultInfo.newPlayerFriendly ) then
+		self.NewPlayerFriendlyIcon:Show();
+	else
+		self.NewPlayerFriendlyIcon:Hide();
+	end
+	self.NewPlayerFriendlyIcon:SetDesaturated(searchResultInfo.isDelisted);
 
 	local displayData = C_LFGList.GetSearchResultMemberCounts(self.resultID);
 	local displayType, maxNumPlayers = LFGBrowseUtil_GetBestDisplayTypeForActivityIDs(searchResultInfo.activityIDs);
@@ -390,13 +402,27 @@ function LFGBrowseSearchEntryTooltip_UpdateAndShow(self, resultID)
 	-- Delisted Alert
 	if (searchResultInfo.isDelisted) then
 		self.Delisted:Show();
-		self.LeaderIcon:SetPoint("TOPLEFT", self.Delisted, "BOTTOMLEFT", 0, -8);
 	else
 		self.Delisted:Hide();
-		self.LeaderIcon:SetPoint("TOPLEFT", 11, -10);
+	end
+
+	-- New Player Friendly
+	if (searchResultInfo.newPlayerFriendly and not self.Delisted:IsShown()) then
+		self.NewPlayerFriendlyIcon:Show();
+		self.NewPlayerFriendlyText:Show();
+	else
+		self.NewPlayerFriendlyIcon:Hide();
+		self.NewPlayerFriendlyText:Hide();
 	end
 
 	-- Leader
+	if (self.NewPlayerFriendlyIcon:IsShown()) then
+		self.LeaderIcon:SetPoint("TOPLEFT", self.NewPlayerFriendlyIcon, "BOTTOMLEFT", 0, -5);
+	elseif (self.Delisted:IsShown()) then
+		self.LeaderIcon:SetPoint("TOPLEFT", self.Delisted, "BOTTOMLEFT", 0, -8);
+	else
+		self.LeaderIcon:SetPoint("TOPLEFT", 11, -10);
+	end
 	local lastMemberFrame = self.Leader;
 	local maxNameWidth = 0;
 	if (numMembers > 1) then
@@ -418,12 +444,8 @@ function LFGBrowseSearchEntryTooltip_UpdateAndShow(self, resultID)
 			self.Leader.Roles[1]:SetSize(14, 14);
 		else
 			-- If we're in a party, just show our party-level role.
-			self.Leader.Roles[1]:SetAtlas(LFGBROWSE_GROUPDATA_ATLASES[role], false);
+			LFGBrowseUtil_MapRoleStatesToRoleIcons(self.Leader.Roles, role == "TANK", role == "HEALER", role == "DAMAGER", false);
 			self.Leader.Roles[1]:SetSize(16, 16);
-			self.Leader.Roles[1]:Show();
-			for i = 2,#self.Leader.Roles do
-				self.Leader.Roles[i]:Hide();
-			end
 		end
 		self.Leader:Show();
 
@@ -587,6 +609,10 @@ function LFGBrowseSearchEntryTooltip_UpdateAndShow(self, resultID)
 	local contentHeight = 40;
 	if ( self.Delisted:IsShown() ) then
 		contentHeight = contentHeight + self.Delisted:GetHeight();
+		contentHeight = contentHeight + 8;
+	end
+	if ( self.NewPlayerFriendlyText:IsShown() ) then
+		contentHeight = contentHeight + self.NewPlayerFriendlyText:GetHeight();
 		contentHeight = contentHeight + 8;
 	end
 	contentHeight = contentHeight + self.Leader:GetHeight();
@@ -769,7 +795,6 @@ local LFGBROWSE_SEARCH_ENTRY_MENU = {
 		func = function(_, id, name) 
 			CloseDropDownMenus();
 			LFGBrowseUtil_ReportListing(id, name);
-			LFGBrowseFrame:UpdateResultList();
 		end,
 	},
 	{
@@ -780,7 +805,6 @@ local LFGBROWSE_SEARCH_ENTRY_MENU = {
 		func = function(_, id, name) 
 			CloseDropDownMenus();
 			LFGBrowseUtil_ReportAdvertisement(id, name);
-			LFGBrowseFrame:UpdateResultList();
 		end;
 	},
 	{
@@ -926,7 +950,7 @@ function LFGBrowseActivityDropDown_Initialize(self, level, menuList)
 							buttonInfo.keepShownOnClick = true;
 							buttonInfo.classicChecks = true;
 
-							buttonInfo.text = "  "..activityInfo.shortName; -- Extra spacing to "indent" this from the group title.
+							buttonInfo.text = string.format(LFG_LIST_INDENT, activityInfo.shortName); -- Extra spacing to "indent" this from the group title.
 							buttonInfo.value = activityID;
 							buttonInfo.checked = function(self)
 								return LFGBrowseActivityDropDown_ValueIsSelected(LFGBrowseFrame.ActivityDropDown, self.value);
@@ -1236,11 +1260,11 @@ function LFGBrowseUtil_MapRoleStatesToRoleIcons(iconArray, isTank, isHealer, isD
 			if (useSimple) then
 				iconArray[roleButtonIndex]:SetTexture("Interface\\LFGFrame\\LFGROLE.BLP");
 				iconArray[roleButtonIndex]:SetTexCoord(GetTexCoordsForRoleSmall(LFGBROWSE_GROUPDATA_ROLE_ORDER[i]));
-				iconArray[roleButtonIndex]:SetDesaturated(useDisabled);
 			else
 				iconArray[roleButtonIndex]:SetAtlas(LFGBROWSE_GROUPDATA_ATLASES[LFGBROWSE_GROUPDATA_ROLE_ORDER[i]], false);
-				iconArray[roleButtonIndex]:SetDesaturated(useDisabled);
+				iconArray[roleButtonIndex]:SetTexCoord(0, 1, 0, 1);
 			end
+			iconArray[roleButtonIndex]:SetDesaturated(useDisabled);
 			iconArray[roleButtonIndex]:Show();
 			roleButtonIndex = roleButtonIndex+1;
 		end

@@ -42,13 +42,14 @@ function LFGListingMixin:OnLoad()
 	self.viewState = LFGLISTING_VIEWSTATE_ACTIVITIES;
 
 	self:ClearUI();
+	self:LoadSoloRolesOnStartup();
 	self:UpdateFrameView();
 end
 
 function LFGListingMixin:OnEvent(event, ...)
 	if ( event == "GROUP_LEFT" ) then
 		local partyCategory, partyGUID = ...;
-		if (partyCategory == LE_PARTY_CATEGORY_HOME and not C_LFGList.HasActiveEntryInfo()) then
+		if ( partyCategory == LE_PARTY_CATEGORY_HOME and not C_LFGList.HasActiveEntryInfo() ) then
 			-- If we just left a party and we don't have an activeEntry, assume that
 			-- any activeEntry information we have was inherited from the group and should probably be thrown out.
 			self:ClearCategorySelection();
@@ -59,16 +60,14 @@ function LFGListingMixin:OnEvent(event, ...)
 		local createdNew = ...;
 		self:LoadActiveEntry();
 		if (C_LFGList.HasActiveEntryInfo()) then
-			if (createdNew or PENDING_LISTING_UPDATE) then
-				-- Play sound, only if the update was manual.
+			if ( createdNew or PENDING_LISTING_UPDATE ) then
+				-- If this is either a brand new entry, or it was a manual update that we ourselves made, play a sound and swap to the browser.
+				-- Notable case: if this is an update to an existing listing from our party leader, but we ourselves didn't do anything, don't deliver feedback.
 				PlaySound(SOUNDKIT.PVP_ENTER_QUEUE);
-			end
-			if ( createdNew ) then
-				-- Search LFM based on the active entry.
 				LFGParentFrame_SearchActiveEntry();
 			end
 		else
-			if (PENDING_LISTING_UPDATE) then
+			if ( PENDING_LISTING_UPDATE ) then
 				-- Play sound, only if the update was manual.
 				PlaySound(SOUNDKIT.LFG_DENIED);
 			end
@@ -142,6 +141,7 @@ function LFGListingMixin:UpdateFrameView()
 	-- Buttons.
 	self:UpdatePostButtonEnableState();
 	self:UpdateBackButtonEnableState();
+	self:UpdateNewPlayerFriendlyButtonEnableState();
 end
 
 function LFGListingMixin:ClearUI()
@@ -167,6 +167,8 @@ function LFGListingMixin:LoadActiveEntry()
 		local activityInfo = C_LFGList.GetActivityInfoTable(activeEntryInfo.activityIDs[1]);
 		self:SetCategorySelection(activityInfo.categoryID); -- This will call UpdateActivities.
 		C_LFGList.CopyActiveEntryInfoToCreationFields();
+		self.NewPlayerFriendlyButton.CheckButton:SetChecked(activeEntryInfo.newPlayerFriendly);
+
 		self:SetDirty(false);
 	end
 end
@@ -186,13 +188,14 @@ function LFGListingMixin:CreateOrUpdateListing()
 			i = i+1;
 		end
 	end
+	local newPlayerFriendlyEnabled = self.NewPlayerFriendlyButton.CheckButton:GetChecked();
 
 	local saveSoloRoles = false;
 	if (C_LFGList.HasActiveEntryInfo()) then
 		if (hasSelectedActivity) then
 			-- Update.
 			PENDING_LISTING_UPDATE = true;
-			C_LFGList.UpdateListing(selectedActivityIDs);
+			C_LFGList.UpdateListing(selectedActivityIDs, newPlayerFriendlyEnabled);
 			saveSoloRoles = true;
 		else
 			-- Delete.
@@ -203,7 +206,7 @@ function LFGListingMixin:CreateOrUpdateListing()
 		if (hasSelectedActivity) then
 			-- Create.
 			PENDING_LISTING_UPDATE = true;
-			C_LFGList.CreateListing(selectedActivityIDs);
+			C_LFGList.CreateListing(selectedActivityIDs, newPlayerFriendlyEnabled);
 			saveSoloRoles = true;
 		end
 	end
@@ -348,9 +351,25 @@ end
 ----------Button Control
 -------------------------------------------------------
 function LFGListingMixin:UpdatePostButtonEnableState()
+	if (not LFGListingUtil_CanEditListing()) then
+		if (C_LFGList.HasActiveEntryInfo()) then
+			self.PostButton.errorText = LFG_LIST_ONLY_LEADER_UPDATE;
+		else
+			self.PostButton.errorText = LFG_LIST_ONLY_LEADER_CREATE;
+		end
+		self.PostButton:SetEnabled(false);
+		return;
+	end
+
 	-- If our dirty flag is not set, disable the Post button.
 	-- Alternatively, if we do not have an activeEntry, and also do not have any activities set, disable the Post button. (An initial listing needs at least one activity.)
-	if (not self.dirty or (not C_LFGList.HasActiveEntryInfo() and not LFGListingFrame:IsAnyActivitySelected())) then
+	if (not self.dirty or (not C_LFGList.HasActiveEntryInfo() and not self:IsAnyActivitySelected())) then
+		self.PostButton.errorText = nil;
+		self.PostButton:SetEnabled(false);
+		return;
+	end
+
+	if (not LFGListingActivityView_CanPostWithCurrentComment(self.ActivityView)) then
 		self.PostButton.errorText = nil;
 		self.PostButton:SetEnabled(false);
 		return;
@@ -391,9 +410,22 @@ function LFGListingMixin:UpdateBackButtonEnableState()
 	self.BackButton:SetEnabled(self.viewState == LFGLISTING_VIEWSTATE_ACTIVITIES);
 end
 
+function LFGListingMixin:UpdateNewPlayerFriendlyButtonEnableState()
+	self.NewPlayerFriendlyButton.CheckButton:SetEnabled(LFGListingUtil_CanEditListing());
+end
+
 -------------------------------------------------------
 ----------Solo Role UI
 -------------------------------------------------------
+function LFGListingMixin:LoadSoloRolesOnStartup()
+	local roles = C_LFGList.GetSavedRoles();
+	self.SoloRoleButtons.Tank.CheckButton:SetChecked(roles.tank);
+	self.SoloRoleButtons.Healer.CheckButton:SetChecked(roles.healer);
+	self.SoloRoleButtons.DPS.CheckButton:SetChecked(roles.dps);
+
+	self:SaveSoloRoles();
+end
+
 function LFGListingMixin:LoadSoloRoles()
 	local roles = C_LFGList.GetRoles();
 	self.SoloRoleButtons.Tank.CheckButton:SetChecked(roles.tank);
@@ -416,14 +448,13 @@ function LFGListingRoleDropDown_Initialize(self)
 	local info = UIDropDownMenu_CreateInfo();
 	local currentRole = UnitGroupRolesAssigned("player");
 
-	info.func = LFGListingRoleButton_OnClick;
+	info.func = LFGListingRoleDropDownButton_OnClick;
 	info.classicChecks = true;
 
 	local buttons = {
 		{ text = TANK, value = "TANK", },
 		{ text = HEALER, value = "HEALER", },
 		{ text = DAMAGER, value = "DAMAGER", },
-		{ text = NO_ROLE, value = "NONE", },
 	};
 
 	for i, button in ipairs(buttons) do
@@ -438,7 +469,7 @@ function LFGListingRoleDropDown_Initialize(self)
 	end
 end
 
-function LFGListingRoleButton_OnClick(self)
+function LFGListingRoleDropDownButton_OnClick(self)
 	UIDropDownMenu_SetSelectedValue(self.owner, self.value);
 	UnitSetRole("player", self.value);
 end
@@ -483,6 +514,26 @@ function LFGListingRolePollButton_UpdateEnableState(self)
 	else
 		self:Disable();
 	end
+end
+
+-------------------------------------------------------
+----------New Player Friendly Button
+-------------------------------------------------------
+function LFGListingNewPlayerFriendlyButtonCheckButton_OnShow(self)
+	if (not C_LFGList.HasActiveEntryInfo()) then
+		self:SetChecked(GetCVarBool("lfgNewPlayerFriendly"));
+	end
+end
+
+function LFGListingNewPlayerFriendlyButtonCheckButton_OnClick(self, button)
+	if ( self:GetChecked() ) then
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+		SetCVar("lfgNewPlayerFriendly", "1");
+	else
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
+		SetCVar("lfgNewPlayerFriendly", "0");
+	end
+	LFGListingFrame:SetDirty(true);
 end
 
 -------------------------------------------------------
@@ -605,6 +656,8 @@ end
 ----------Activity Selection
 -------------------------------------------------------
 function LFGListingActivityView_OnLoad(self)
+	self.commentRequired = false;
+
 	local view = CreateScrollBoxListTreeListView(0);
 
 	view:SetElementFactory(function(factory, node)
@@ -684,6 +737,7 @@ function LFGListingActivityView_OnShow(self)
 		self.BarMiddle:Hide();
 		self.BarRight:Hide();
 		self.ScrollBox:Hide();
+		self.commentRequired = true;
 		self.Comment:ClearAllPoints();
 		self.Comment:SetPoint("CENTER", 0, 20);
 		self.Comment:SetHeight(110);
@@ -697,6 +751,7 @@ function LFGListingActivityView_OnShow(self)
 		self.BarMiddle:Show();
 		self.BarRight:Show();
 		self.ScrollBox:Show();
+		self.commentRequired = false;
 		self.Comment:ClearAllPoints();
 		self.Comment:SetPoint("BOTTOM", 0, 19);
 		self.Comment:SetHeight(47);
@@ -712,10 +767,17 @@ function LFGListingActivityView_UpdateActivities(self, categoryID)
 		local lhs = lhsNode:GetData();
 		local rhs = rhsNode:GetData();
 
-		if (lhs.orderIndex ~= rhs.orderIndex) then return lhs.orderIndex > rhs.orderIndex;
-		elseif (lhs.maxLevel ~= rhs.maxLevel) then return lhs.maxLevel > rhs.maxLevel;
-		elseif (lhs.minLevel ~= rhs.minLevel) then return lhs.minLevel > rhs.minLevel;
-		else return strcmputf8i(lhs.name, rhs.name) < 0;
+		if (lhs.orderIndex ~= rhs.orderIndex) then
+			return lhs.orderIndex > rhs.orderIndex;
+		elseif (lhs.maxLevel ~= rhs.maxLevel) then
+			if (lhs.maxLevel == 0 or rhs.maxLevel == 0) then
+				return lhs.maxLevel == 0;
+			end
+			return lhs.maxLevel > rhs.maxLevel;
+		elseif (lhs.minLevel ~= rhs.minLevel) then
+			return lhs.minLevel > rhs.minLevel;
+		else
+			return strcmputf8i(lhs.name, rhs.name) < 0;
 		end
 	end
 	local function ActivityGroupSortComparator(lhsNode, rhsNode)
@@ -738,12 +800,13 @@ function LFGListingActivityView_UpdateActivities(self, categoryID)
 		for _, activityID in ipairs(activities) do
 			local activityInfo = C_LFGList.GetActivityInfoTable(activityID);
 			local name = activityInfo.shortName ~= "" and activityInfo.shortName or activityInfo.fullName;
+			local maxLevel = activityInfo.maxLevel ~= 0 and activityInfo.maxLevel or activityInfo.maxLevelSuggestion;
 			dataProvider:Insert({
 				buttonType = LFGLISTING_BUTTONTYPE_ACTIVITY,
 				activityID = activityID,
 				name = name,
 				minLevel = activityInfo.minLevel,
-				maxLevel = activityInfo.maxLevel,
+				maxLevel = maxLevel,
 				orderIndex = activityInfo.orderIndex,
 			});
 		end
@@ -767,13 +830,14 @@ function LFGListingActivityView_UpdateActivities(self, categoryID)
 			for _, activityID in ipairs(activities) do
 				local activityInfo = C_LFGList.GetActivityInfoTable(activityID);
 				local name = activityInfo.shortName ~= "" and activityInfo.shortName or activityInfo.fullName;
+				local maxLevel = activityInfo.maxLevel ~= 0 and activityInfo.maxLevel or activityInfo.maxLevelSuggestion;
 				 
 				groupTree:Insert({
 					buttonType = LFGLISTING_BUTTONTYPE_ACTIVITY,
 					activityID = activityID,
 					name = name,
 					minLevel = activityInfo.minLevel,
-					maxLevel = activityInfo.maxLevel,
+					maxLevel = maxLevel,
 					orderIndex = activityInfo.orderIndex
 				});
 
@@ -839,12 +903,18 @@ function LFGListingActivityView_InitActivityButton(button, elementData)
 	-- Name
 	button.NameButton.Name:SetWidth(0);
 	button.NameButton.Name:SetText(elementData.name);
-	button.NameButton.Name:SetFontObject(LFGActivityEntry);
+	if (elementData.maxLevel ~= 0 and elementData.maxLevel < UnitLevel("player")) then
+		button.NameButton.Name:SetFontObject(LFGActivityEntryTrivial);
+		button.Level:SetFontObject(LFGActivityEntryTrivial);
+	else
+		button.NameButton.Name:SetFontObject(LFGActivityEntry);
+		button.Level:SetFontObject(LFGActivityEntry);
+	end
 	button.NameButton:SetWidth(button.NameButton.Name:GetWidth());
 
 	-- Level
 	button.Level:Show();
-	if ( elementData.minLevel == elementData.maxLevel ) then
+	if ( elementData.minLevel == elementData.maxLevel or elementData.maxLevel == 0 ) then
 		if (elementData.minLevel == 0) then
 			button.Level:SetText("");
 		else
@@ -853,6 +923,15 @@ function LFGListingActivityView_InitActivityButton(button, elementData)
 	else
 		button.Level:SetText(format(LFD_LEVEL_FORMAT_RANGE, elementData.minLevel, elementData.maxLevel));
 	end
+end
+
+function LFGListingActivityView_CanPostWithCurrentComment(self)
+	if (self.commentRequired) then
+		local commentText = LFGListingComment_GetComment(self.Comment);
+		return commentText and commentText ~= "";
+	end
+
+	return true;
 end
 
 -------------------------------------------------------
@@ -868,6 +947,10 @@ function LFGListingComment_OnMouseDown(self, button)
 	if (not self.EditBox:IsEnabled() and not C_LFGList.IsPlayerAuthenticatedForLFG(LFGListingFrame:GetCategorySelection())) then
 		StaticPopup_Show("GROUP_FINDER_AUTHENTICATOR_POPUP");
 	end
+end
+
+function LFGListingComment_GetComment(self)
+	return self.EditBox:GetText();
 end
 
 -------------------------------------------------------

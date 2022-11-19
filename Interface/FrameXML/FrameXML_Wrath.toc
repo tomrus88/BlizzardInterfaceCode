@@ -176,6 +176,7 @@ Cooldown.xml
 ActionBarController.xml
 ..\..\Interface_TBC\FrameXML\StanceBar.xml
 OverrideActionBar.xml
+PossessActionBar.xml
 TutorialFrame.xml
 ..\..\Interface_Wrath\FrameXML\Minimap.xml
 ..\..\Interface_Wrath\FrameXML\GameTime.xml
@@ -230,7 +231,7 @@ TaxiFrame.xml
 ..\..\Interface_TBC\FrameXML\BankFrame.xml
 ItemRef.xml
 ..\..\Interface_Wrath\FrameXML\FriendsFrame.xml
-RaidFrame.xml
+..\..\Interface_Wrath\FrameXML\RaidFrame.xml
 PetActionBarFrame.xml
 MultiCastActionBarFrame.xml
 ..\..\Interface_Wrath\FrameXML\MainMenuBarBagButtons.xml
@@ -246,6 +247,7 @@ ColorPickerFrame.xml
 GossipFrame.xml
 MailFrame.xml
 ..\..\Interface_Wrath\FrameXML\PetStable.xml
+..\..\Interface_Wrath\FrameXML\VehicleSeatIndicator.xml
 DurabilityFrame.xml
 BattlegroundChatFilters.xml
 ..\..\Interface_Wrath\FrameXML\WorldStateFrame.xml
@@ -259,8 +261,7 @@ VoiceChatTranscriptionFrame.xml
 TextToSpeechCommands.lua
 TextToSpeechFrame.xml
 TextToSpeech.xml
-..\..\Interface_Wrath\FrameXML\ChatConfigFrame_Wrath.lua
-ChatConfigFrame.xml
+..\..\Interface_Wrath\FrameXML\ChatConfigFrame_Wrath.xml
 MovieFrame.xml
 AnimationSystem.lua
 ..\..\Interface_Wrath\FrameXML\CompactUnitFrame.xml
@@ -275,13 +276,14 @@ PVPHelper.xml
 ProductChoice.xml
 ..\SharedXML\ModelPreviewFrame.xml
 ClassTrainerFrameTemplates.xml
+..\..\Interface_Wrath\FrameXML\PVPFrame.xml
 ..\..\Interface_Wrath\FrameXML\BattlefieldFrame.xml
 ..\SharedXML\ArenaUtil.lua
 ArenaFrame.xml
 ArenaRegistrarFrame.xml
-..\..\Interface_Wrath\FrameXML\PVPFrame.xml
 RuneFrame.xml
 ..\..\Interface_Wrath\FrameXML\EquipmentManager.lua
+QueueReadyCheckFrame.xml
 
 #Save off whatever we need available unmodified.
 SecureCapsule.lua

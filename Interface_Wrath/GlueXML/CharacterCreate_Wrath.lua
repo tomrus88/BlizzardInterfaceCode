@@ -3,7 +3,8 @@ MAX_CLASSES_PER_RACE = 10;
 
 FRAMES_TO_BACKDROP_COLOR = { 
 	"CharacterCreateCharacterRace",
-	"CharacterCreateCharacterClass"
+	"CharacterCreateCharacterClass",
+	"CharacterCreateNameEdit",
 };
 
 RACE_ICON_TCOORDS = {
@@ -45,6 +46,10 @@ end
 
 function CharacterCreateRaceButton_OnLeave(self)
 	GlueTooltip:Hide();
+end
+
+function CharacterCreateWrath_OnShow()
+	CharacterCreateGender:SetText(BODY_TYPE);
 end
 
 function CharacterCreateClassButton_OnEnter(self)
@@ -149,16 +154,7 @@ end
 function SetCharacterRace(id)
 	CharacterCreate.selectedRace = id;
 
-	for i=1, CharacterCreate.numRaces, 1 do
-		local button = _G["CharacterCreateRaceButton"..i];
-		if ( button.raceID == id ) then
-			_G["CharacterCreateRaceButton"..i.."Text"]:SetText(button.tooltip);
-			button:SetChecked(1);
-		else
-			_G["CharacterCreateRaceButton"..i.."Text"]:SetText("");
-			button:SetChecked(nil);
-		end
-	end
+	UpdateCharacterRaceLabelText();
 
 	--twain SetSelectedRace(id);
 	local name, faction = C_CharacterCreation.GetFactionForRace(CharacterCreate.selectedRace);
@@ -191,16 +187,15 @@ function SetCharacterRace(id)
 			abilityIndex = abilityIndex + 1;
 			tempText = _G["ABILITY_INFO_"..fileString..abilityIndex];
 		end
-		abilityText = abilityText.."\n"; -- A bit of spacing at the bottom (to match Classic).
 	end
 
 
 	CharacterCreateRaceScrollFrameScrollBar:SetValue(0);
 	if ( abilityText and abilityText ~= "" ) then
-		CharacterCreateRaceText:SetText(_G["RACE_INFO_"..fileString]);
+		CharacterCreateRaceText:SetText(_G["RACE_INFO_"..fileString] .. "\n\n");
 		CharacterCreateRaceAbilityText:SetText(abilityText);
 	else
-		CharacterCreateRaceText:SetText(_G["RACE_INFO_"..fileString]);
+		CharacterCreateRaceText:SetText(_G["RACE_INFO_"..fileString] .. "\n\n");
 		CharacterCreateRaceAbilityText:SetText("");
 	end
 	CharacterCreateRaceScrollFrame:UpdateScrollChildRect();
@@ -221,6 +216,19 @@ function SetCharacterRace(id)
 	-- Hair customization stuff
 	CharacterCreate_UpdateFacialHairCustomization();
 	CharacterCreate_UpdateCustomizationOptions();
+end
+
+function UpdateCharacterRaceLabelText()
+	for i=1, CharacterCreate.numRaces, 1 do
+		local button = _G["CharacterCreateRaceButton"..i];
+		if ( button.raceID == CharacterCreate.selectedRace ) then
+			_G["CharacterCreateRaceButton"..i.."Text"]:SetText(button.tooltip);
+			button:SetChecked(1);
+		else
+			_G["CharacterCreateRaceButton"..i.."Text"]:SetText("");
+			button:SetChecked(nil);
+		end
+	end
 end
 
 function SetDefaultClass()
@@ -248,11 +256,21 @@ function SetCharacterClass(id)
 	
 	--twain SetSelectedClass(id);
 	local classData = C_CharacterCreation.GetSelectedClass();
+	local abilityIndex = 0;
+	local tempText = _G["CLASS_INFO_"..classData.fileName..abilityIndex];
+	abilityText = "";
+	while ( tempText ) do
+		abilityText = abilityText..tempText.."\n\n";
+		abilityIndex = abilityIndex + 1;
+		tempText = _G["CLASS_INFO_"..classData.fileName..abilityIndex];
+	end
+	local classData = C_CharacterCreation.GetSelectedClass();
 	local coords = CLASS_ICON_TCOORDS[strupper(classData.fileName)];
 	CharacterCreateClassIcon:SetTexCoord(coords[1], coords[2], coords[3], coords[4]);
 	CharacterCreateClassLabel:SetText(classData.name);
 	CharacterCreateClassScrollFrameScrollBar:SetValue(0);
-	CharacterCreateClassText:SetText(_G["CLASS_"..strupper(classData.fileName)]);
+	CharacterCreateClassRolesText:SetText(abilityText);	
+	CharacterCreateClassText:SetText(_G["CLASS_"..strupper(classData.fileName)] .. "\n\n");
 	CharacterCreateClassScrollFrame:UpdateScrollChildRect();
 	--CharacterCreateCharacterClass:SetHeight(CharacterCreateClassText:GetHeight() + 45);
 
@@ -264,14 +282,15 @@ function SetCharacterGender(sex)
 	C_CharacterCreation.SetSelectedSex(sex);
 	if ( sex == Enum.UnitSex.Male ) then
 		gender = "MALE";
-		CharacterCreateGender:SetText(MALE);
 		CharacterCreateGenderButtonMale:SetChecked(1);
 		CharacterCreateGenderButtonFemale:SetChecked(nil);
 	else
 		gender = "FEMALE";
-		CharacterCreateGender:SetText(FEMALE);
 		CharacterCreateGenderButtonMale:SetChecked(nil);
 		CharacterCreateGenderButtonFemale:SetChecked(1);
+	end
+	if (SetCharacterGenderAppend) then
+		SetCharacterGenderAppend(sex);
 	end
 	
 	--twain SetSelectedSex(id);
@@ -288,6 +307,13 @@ function SetCharacterGender(sex)
 	fileString = strupper(fileString);
 	local coords = RACE_ICON_TCOORDS[fileString.."_"..gender];
 	CharacterCreateRaceIcon:SetTexCoord(coords[1], coords[2], coords[3], coords[4]);
+	UpdateCharacterRaceLabelText();
+	-- Update class labels to reflect gender change
+	-- Set Class
+	local classData = C_CharacterCreation.GetSelectedClass();
+	CharacterCreateClassLabel:SetText(classData.name);
+	CharacterCreateClassName:SetText(classData.name);
+	CharacterCreateEnumerateClasses(); -- Update class tooltips.
 end
 
 function CharacterCreate_UpdateFacialHairCustomization()

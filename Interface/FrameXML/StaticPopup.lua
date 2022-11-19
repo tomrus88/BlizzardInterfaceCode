@@ -637,7 +637,9 @@ StaticPopupDialogs["ADD_TEAMMEMBER"] = {
 	autoCompleteParams = AUTOCOMPLETE_LIST.TEAM_INVITE,
 	maxLetters = 77,
 	OnAccept = function(self)
-		ArenaTeamInviteByName(PVPTeamDetails.team, self.editBox:GetText());
+		if( GetCurrentArenaSeasonUsesTeams() ) then
+			ArenaTeamInviteByName(PVPTeamDetails.team, self.editBox:GetText());
+		end
 	end,
 	OnShow = function(self)
 		self.editBox:SetFocus();
@@ -647,9 +649,11 @@ StaticPopupDialogs["ADD_TEAMMEMBER"] = {
 		self.editBox:SetText("");
 	end,
 	EditBoxOnEnterPressed = function(self)
-		local parent = self:GetParent();
-		ArenaTeamInviteByName(PVPTeamDetails.team, parent.editBox:GetText());
-		parent:Hide();
+		if( GetCurrentArenaSeasonUsesTeams() ) then
+			local parent = self:GetParent();
+			ArenaTeamInviteByName(PVPTeamDetails.team, parent.editBox:GetText());
+			parent:Hide();
+		end
 	end,
 	EditBoxOnEscapePressed = function(self)
 		self:GetParent():Hide();
@@ -4374,6 +4378,70 @@ StaticPopupDialogs["CHAT_CONFIG_DISABLE_CHAT"] = {
 	exclusive = 1,
 };
 
+StaticPopupDialogs["ON_BATTLEFIELD_AUTO_QUEUE"] = {
+	button1 = JOIN,
+	button2 = BATTLEFIELD_GROUP_JOIN,
+	button3 = CANCEL,
+	selectCallbackByIndex = true,
+	OnShow = function(self)
+		self.text:SetText(WORLD_PVP_INVITED_WARMUP:format(GetWorldPVPQueueMapName(true)));
+		if ( not IsInGroup() or not UnitIsGroupLeader("player") ) then
+			self.button2:Disable();
+		end
+	end,
+	OnButton1 = function(self)
+		JoinWorldPVPQueue(true, false);
+	end,
+	OnButton2 = function(self, data, reason)
+		JoinWorldPVPQueue(true, true);
+	end,
+	OnButton3 = function()
+
+	end,
+	timeout = 15,
+	whileDead = 1,
+	showAlert = 1,
+	hideOnEscape = false,
+	exclusive = 1,
+};
+
+StaticPopupDialogs["ON_BATTLEFIELD_AUTO_QUEUE_EJECT"] = {
+	button1 = OKAY,
+	OnShow = function(self)
+		self.text:SetText(WORLD_PVP_AUTO_QUEUE_EJECT:format(GetWorldPVPQueueMapName(true)));
+	end,
+	OnButton1 = function()
+	end,
+	timeout = 15,
+	whileDead = 1,
+	showAlert = 1,
+	hideOnEscape = false,
+};
+
+StaticPopupDialogs["ON_WORLD_PVP_QUEUE"] = {
+	button1 = JOIN,
+	button2 = BATTLEFIELD_GROUP_JOIN,
+	button3 = CANCEL,
+	selectCallbackByIndex = true,
+	OnShow = function(self)
+		self.text:SetText(WORLD_PVP_INVITED_WARMUP:format(GetWorldPVPQueueMapName(false)));
+		if ( not IsInGroup() or not UnitIsGroupLeader("player") ) then
+			self.button2:Disable();
+		end
+	end,
+	OnButton1 = function(self)
+		JoinWorldPVPQueue(false, false);
+	end,
+	OnButton2 = function(self, data, reason)
+		JoinWorldPVPQueue(false, true);
+	end,
+	OnButton3 = function()
+
+	end,
+	showAlert = 1,
+	hideOnEscape = false,
+};
+
 function StaticPopup_FindVisible(which, data)
 	local info = StaticPopupDialogs[which];
 	if ( not info ) then
@@ -4605,7 +4673,10 @@ function StaticPopup_Show(which, text_arg1, text_arg2, data, insertedFrame)
 		 (which == "BFMGR_INVITED_TO_ENTER") or
 		 (which == "AREA_SPIRIT_HEAL") or
 		 (which == "CONFIRM_REMOVE_COMMUNITY_MEMBER") or
-		 (which == "CONFIRM_DESTROY_COMMUNITY_STREAM") ) then
+		 (which == "CONFIRM_DESTROY_COMMUNITY_STREAM") or
+		 (which == "ON_BATTLEFIELD_AUTO_QUEUE") or
+		 (which == "ON_BATTLEFIELD_AUTO_QUEUE_EJECT") or
+		 (which == "ON_WORLD_PVP_QUEUE") ) then
 		text:SetText(" ");	-- The text will be filled in later.
 		text.text_arg1 = text_arg1;
 		text.text_arg2 = text_arg2;
@@ -4923,10 +4994,18 @@ function StaticPopup_OnUpdate(dialog, elapsed)
 			local text = _G[dialog:GetName().."Text"];
 			timeleft = ceil(timeleft);
 			if ( (which == "INSTANCE_BOOT") or (which == "GARRISON_BOOT") ) then
-				if ( timeleft < 60 ) then
-					text:SetFormattedText(StaticPopupDialogs[which].text, GetBindLocation(), timeleft, SECONDS);
-				else
-					text:SetFormattedText(StaticPopupDialogs[which].text, GetBindLocation(), ceil(timeleft / 60), MINUTES);
+				if( GetClassicExpansionLevel() < LE_EXPANSION_WRATH_OF_THE_LICH_KING ) then
+					if ( timeleft < 60 ) then
+						text:SetFormattedText(StaticPopupDialogs[which].text, GetBindLocation(), timeleft, SECONDS);
+					else
+						text:SetFormattedText(StaticPopupDialogs[which].text, GetBindLocation(), ceil(timeleft / 60), MINUTES);
+					end
+				else -- In Wrath+ player is booted to graveyard rather than bind location, so one less format param
+					if ( timeleft < 60 ) then
+						text:SetFormattedText(StaticPopupDialogs[which].text, timeleft, SECONDS);
+					else
+						text:SetFormattedText(StaticPopupDialogs[which].text, ceil(timeleft / 60), MINUTES);
+					end
 				end
 			elseif ( which == "CONFIRM_SUMMON" or which == "CONFIRM_SUMMON_SCENARIO" or which == "CONFIRM_SUMMON_STARTING_AREA" ) then
 				if ( timeleft < 60 ) then

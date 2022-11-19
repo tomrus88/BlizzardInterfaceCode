@@ -74,7 +74,8 @@ local INVITE_RESTRICTION_WOW_PROJECT_ID = 6;
 local INVITE_RESTRICTION_WOW_PROJECT_MAINLINE = 7;
 local INVITE_RESTRICTION_WOW_PROJECT_CLASSIC = 8;
 local INVITE_RESTRICTION_WOW_PROJECT_BCC = 9;
-local INVITE_RESTRICTION_NONE = 10;
+local INVITE_RESTRICTION_WOW_PROJECT_WRATH = 10;
+local INVITE_RESTRICTION_NONE = 11;
 
 local FriendListEntries = { };
 local playerRealmID;
@@ -393,8 +394,13 @@ function FriendsList_InitializePendingInviteDropDown(self, level)
 		UIDropDownMenu_AddButton(info, level)
 
 		info.text = REPORT_PLAYER;
-		info.hasArrow = true;
-		info.func = nil;
+		info.func = function() 
+			local bnetIDAccount, name = BNGetFriendInviteInfo(self.inviteIndex);
+			local playerLocation = PlayerLocation:CreateFromBattleNetID(bnetIDAccount);
+			local reportInfo = ReportInfo:CreateReportInfoFromType(Enum.ReportType.Friend);
+			local dropdownMenu = UnitPopupSharedUtil.GetCurrentDropdownMenu();
+			ReportFrame:InitiateReport(reportInfo, name, playerLocation, bnetIDAccount ~= nil);
+		end; 
 		UIDropDownMenu_AddButton(info, level)
 
 		info.text = BLOCK_INVITES;
@@ -407,32 +413,6 @@ function FriendsList_InitializePendingInviteDropDown(self, level)
 						end
 					end
 		UIDropDownMenu_AddButton(info, level)
-	else
-		if level == 2 then
-			local bnetIDAccount, name = BNGetFriendInviteInfo(self.inviteIndex);
-
-			info.text = REPORT_SPAMMING;
-			info.func = function()
-							UIDROPDOWNMENU_MENU_VALUE = self.inviteIndex;
-							PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_SPAM, name);
-						end
-			UIDropDownMenu_AddButton(info, level)
-
-			info.text = REPORT_ABUSE;
-			info.func = function()
-							UIDROPDOWNMENU_MENU_VALUE = self.inviteIndex;
-							PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_ABUSE, name);
-						end
-			UIDropDownMenu_AddButton(info, level)
-
-			info.text = REPORT_BAD_NAME;
-			info.func = function()
-							UIDROPDOWNMENU_MENU_VALUE = self.inviteIndex;
-							PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_BAD_PLAYER_NAME, name);
-						end
-			UIDropDownMenu_AddButton(info, level)
-			info.notCheckable = false;
-		end
 	end
 end
 
@@ -847,7 +827,7 @@ function FriendsFrameFriendButton_OnClick(self, button)
 		else
 			-- wow friend
 			local info = C_FriendList.GetFriendInfoByIndex(self.id);
-			FriendsFrame_ShowDropdown(info.name, info.connected, nil, nil, nil, 1, nil, nil, nil, nil);
+			FriendsFrame_ShowDropdown(info.name, info.connected, nil, nil, nil, 1, nil, nil, nil, nil, nil, info.guid);
 		end
 	end
 end
@@ -1237,23 +1217,25 @@ function FriendsFrame_UpdateFriendButton(button)
 		end
 
 		if ( isOnline ) then
-			local _, _, _, realmName, realmID, faction, _, _, _, zoneName, _, gameText, _, _, _, _, _, isGameAFK, isGameBusy, guid, wowProjectID = BNGetGameAccountInfo(bnetIDGameAccount);
+			local gameAccountInfo = C_BattleNet.GetGameAccountInfoByID(bnetIDGameAccount);
 			button.background:SetColorTexture(FRIENDS_BNET_BACKGROUND_COLOR.r, FRIENDS_BNET_BACKGROUND_COLOR.g, FRIENDS_BNET_BACKGROUND_COLOR.b, FRIENDS_BNET_BACKGROUND_COLOR.a);
-			if ( isBnetAFK or isGameAFK ) then
-				button.status:SetTexture(FRIENDS_TEXTURE_AFK);
-			elseif ( isBnetDND or isGameBusy ) then
-				button.status:SetTexture(FRIENDS_TEXTURE_DND);
-			else
-				button.status:SetTexture(FRIENDS_TEXTURE_ONLINE);
-			end
-
-			if ShowRichPresenceOnly(client, wowProjectID, faction, realmID) then
-				infoText = gameText;
-			else
-				if ( not zoneName or zoneName == "" ) then
-					infoText = UNKNOWN;
+			if(gameAccountInfo) then
+				if ( isBnetAFK or gameAccountInfo.isGameAFK ) then
+					button.status:SetTexture(FRIENDS_TEXTURE_AFK);
+				elseif ( isBnetDND or gameAccountInfo.isGameBusy ) then
+					button.status:SetTexture(FRIENDS_TEXTURE_DND);
 				else
-					infoText = zoneName;
+					button.status:SetTexture(FRIENDS_TEXTURE_ONLINE);
+				end
+
+				if ShowRichPresenceOnly(client, gameAccountInfo.wowProjectID, gameAccountInfo.factionName, gameAccountInfo.realmID) then
+					infoText = gameAccountInfo.richPresence;
+				else
+					if ( not gameAccountInfo.areaName or gameAccountInfo.areaName == "" ) then
+						infoText = UNKNOWN;
+					else
+						infoText = gameAccountInfo.areaName;
+					end
 				end
 			end
 			
@@ -2141,6 +2123,8 @@ function FriendsFrame_GetInviteRestriction(index)
 					restriction = max(INVITE_RESTRICTION_WOW_PROJECT_CLASSIC, restriction);
 				elseif(wowProjectID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC) then
 					restriction = max(INVITE_RESTRICTION_WOW_PROJECT_BCC, restriction);
+				elseif(wowProjectID == WOW_PROJECT_WRATH_CLASSIC) then
+					restriction = max(INVITE_RESTRICTION_WOW_PROJECT_WRATH, restriction);
 				elseif(wowProjectID == WOW_PROJECT_MAINLINE) then
 					restriction = max(INVITE_RESTRICTION_WOW_PROJECT_MAINLINE, restriction);
 				else
@@ -2183,6 +2167,8 @@ function FriendsFrame_GetInviteRestrictionText(restriction)
 		return ERR_TRAVEL_PASS_WRONG_PROJECT_CLASSIC_OVERRIDE;
 	elseif ( restriction == INVITE_RESTRICTION_WOW_PROJECT_BCC ) then
 		return ERR_TRAVEL_PASS_WRONG_PROJECT; -- ERR_TRAVEL_PASS_WRONG_PROJECT_BCC_OVERRIDE
+	elseif ( restriction == INVITE_RESTRICTION_WOW_PROJECT_WRATH ) then
+		return ERR_TRAVEL_PASS_WRONG_PROJECT; -- ERR_TRAVEL_PASS_WRONG_PROJECT_WRATH_OVERRIDE
 	else
 		return "";
 	end

@@ -20,35 +20,28 @@ BATTLEFIELD_FRAME_FADE_TIME = 0.15
 
 function BattlefieldFrame_OnLoad(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
-	self:RegisterEvent("BATTLEFIELDS_SHOW");
-	self:RegisterEvent("BATTLEFIELDS_CLOSED");
 	self:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");
+	self:RegisterEvent("PARTY_LEADER_CHANGED");
+	self:RegisterEvent("GROUP_ROSTER_UPDATE");
+	RequestPVPRewards();
 
 	BattlefieldFrame.timerDelay = 0;
 end
 
 function BattlefieldFrame_OnEvent(self, event, ...)
-	if ( event == "BATTLEFIELDS_SHOW") then
-		local isArena = ...;
-		if(not isArena) then
-			self.currentData = true;
-			ShowUIPanel(BattlefieldFrame);
-			BattlefieldFrame_UpdateStatus(false);
-		end
-	elseif ( event == "BATTLEFIELDS_CLOSED") then
-		HideUIPanel(BattlefieldFrame);
-	elseif ( event == "UPDATE_BATTLEFIELD_STATUS" ) then
+	if ( event == "UPDATE_BATTLEFIELD_STATUS" ) then
 		PVPBattleground_UpdateQueueStatus();
 		BattlefieldFrame_UpdateStatus(false);
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
-		self:UnregisterEvent("PLAYER_ENTERING_WORLD");
-		
+		RequestPVPRewards();
 		FauxScrollFrame_SetOffset(BattlefieldFrameTypeScrollFrame, 0);
 		FauxScrollFrame_OnVerticalScroll(BattlefieldFrameTypeScrollFrame, 0, 16, PVPBattleground_UpdateBattlegrounds); --We may be changing brackets, so we don't want someone to see an outdated version of the data.
 		if ( self.selectedBG ) then
 			PVPBattleground_ResetInfo();
 			PVPBattleground_UpdateJoinButton(self.selectedBG);
 		end
+	elseif ( event == "PARTY_LEADER_CHANGED" or event == "GROUP_ROSTER_UPDATE" ) then
+		BattlefieldFrame_UpdateGroupAvailable();
 	end
 end
 
@@ -128,14 +121,60 @@ function BattlefieldTimerFrame_OnUpdate(self, elapsed)
 	end
 end
 
+function BattlefieldFrame_UpdatePanelInfo()
+	if(not IsBattlefieldArena()) then
+		RequestPVPRewards();
+		PVPBattleground_ResetInfo();
+		BattlefieldFrame_UpdateStatus(false);
+	end
+end
 
---TODO : implement these 2 bonuses functions. Figure out what rewards will actually be!
 function GetRandomBGHonorCurrencyBonuses()
-	return true, 100, 50, 25, 0;
+	local honorWin,_,_, currencyRewardsWin = C_PvP.GetRandomBGRewards();
+	local honorLoss,_,_, currencyRewardsLoss = C_PvP.GetRandomBGLossRewards();
+	local conquestWin, conquestLoss = 0, 0;
+
+	if(currencyRewardsWin) then
+		for i, reward in ipairs(currencyRewardsWin) do
+			if reward.id == Constants.CurrencyConsts.CLASSIC_ARENA_POINTS_CURRENCY_ID then
+				conquestWin = reward.quantity;
+			end
+		end
+	end
+
+	if(currencyRewardsLoss) then
+		for i, reward in ipairs(currencyRewardsLoss) do
+			if reward.id == Constants.CurrencyConsts.CLASSIC_ARENA_POINTS_CURRENCY_ID then
+				conquestLoss = reward.quantity;
+			end
+		end
+	end
+
+	return true, honorWin, conquestWin, honorLoss, conquestLoss;
 end
 
 function GetHolidayBGHonorCurrencyBonuses()
-	return true, 100, 50, 25, 0;
+	local honorWin,_,_, currencyRewardsWin = C_PvP.GetHolidayBGRewards();
+	local honorLoss,_,_, currencyRewardsLoss = C_PvP.GetHolidayBGLossRewards();
+	local conquestWin, conquestLoss = 0, 0;
+
+	if(currencyRewardsWin) then
+		for i, reward in ipairs(currencyRewardsWin) do
+			if reward.id == Constants.CurrencyConsts.CLASSIC_ARENA_POINTS_CURRENCY_ID then
+				conquestWin = reward.quantity;
+			end
+		end
+	end
+
+	if(currencyRewardsLoss) then
+		for i, reward in ipairs(currencyRewardsLoss) do
+			if reward.id == Constants.CurrencyConsts.CLASSIC_ARENA_POINTS_CURRENCY_ID then
+				conquestLoss = reward.quantity;
+			end
+		end
+	end
+
+	return true, honorWin, conquestWin, honorLoss, conquestLoss;
 end
 
 function PVPQueue_UpdateRandomInfo(base, infoFunc)
@@ -220,21 +259,23 @@ end
 
 --Code copied from BattlefieldFrame below
 function BattlefieldFrame_OnShow(self)
-	if ( IsInInstance() ) then
-		WintergraspTimer:Hide();
-	else
-		WintergraspTimer:Show();
-	end
-	
 	SortBGList();
 	
 	PVPBattleground_UpdateBattlegrounds(self, true);
+	BattlefieldFrame_UpdatePanelInfo();
 	RequestBattlegroundInstanceInfo(self.selectedBG or 1);
 end
 
 function BattlefieldFrame_OnHide(self)
-	--CloseBattlefield();
 	ClearBattlemaster();
+	UpdateMicroButtons();
+end
+
+function BattlefieldFrameCloseButton_OnClick(self)
+	if ( PVPParentFrame ) then 
+		HideUIPanel(PVPParentFrame)
+	end
+	UpdateMicroButtons();
 end
 
 function PVPBattleground_UpdateBattlegrounds(self, initializeSelectedBG)
@@ -373,6 +414,9 @@ function PVPBattleground_UpdateQueueStatus()
 end
 
 function PVPBattleground_ResetInfo()	
+	if ( BattlefieldFrame.selectedBG == nil ) then 
+		BattlefieldFrame.selectedBG = 1; 
+	end
 	RequestBattlegroundInstanceInfo(BattlefieldFrame.selectedBG);
 	
 	PVPBattleground_UpdateInfo();
@@ -424,35 +468,5 @@ function BattlefieldFrame_UpdateGroupAvailable()
 		BattlefieldFrameGroupJoinButton:Enable();
 	else
 		BattlefieldFrameGroupJoinButton:Disable();
-	end
-end
-
-function WintergraspTimer_OnLoad(self)
-	self.canQueue = false;
-	self.tooltip = PVPBATTLEGROUND_WINTERGRASPTIMER_CANNOT_QUEUE;
-	self.texture:SetTexCoord(0.0, 1.0, 0.0, 0.5);
-end
-
-function WintergraspTimer_OnUpdate(self, elapsed)
-	local nextBattleTime = GetWintergraspWaitTime();
-	if ( nextBattleTime and nextBattleTime > 60 ) then
-		self.text:SetFormattedText(PVPBATTLEGROUND_WINTERGRASPTIMER, SecondsToTime(nextBattleTime, true));
-	elseif ( nextBattleTime and nextBattleTime > 0 ) then
-		self.text:SetFormattedText(PVPBATTLEGROUND_WINTERGRASPTIMER, SecondsToTime(nextBattleTime, false));
-	else
-		self.text:SetFormattedText(PVPBATTLEGROUND_WINTERGRASPTIMER, WINTERGRASP_IN_PROGRESS);
-	end
-
-	local canQueue = CanQueueForWintergrasp();
-	if ( self.canQueue ~= canQueue ) then
-		-- simple safeguard so we're not doing a bunch of unnecessary work for each OnUpdate
-		if ( canQueue ) then
-			self.tooltip = PVPBATTLEGROUND_WINTERGRASPTIMER_CAN_QUEUE;
-			self.texture:SetTexCoord(0.0, 1.0, 0.5, 1.0);
-		else
-			self.tooltip = PVPBATTLEGROUND_WINTERGRASPTIMER_CANNOT_QUEUE;
-			self.texture:SetTexCoord(0.0, 1.0, 0.0, 0.5);
-		end
-		self.canQueue = canQueue;
 	end
 end
