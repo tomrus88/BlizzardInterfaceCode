@@ -489,6 +489,8 @@ function ScrollBoxListViewMixin:CalculateDataIndices(scrollBox, stride, spacing)
 		CheckDataIndicesReturn(1, size);
 	end
 
+	self:RecalculateExtent(scrollBox, stride, spacing); --prevents the assert in GetElementExtent
+
 	local dataIndexBegin;
 	local scrollOffset = scrollBox:GetDerivedScrollOffset();
 	local upperPadding = scrollBox:GetUpperPadding();

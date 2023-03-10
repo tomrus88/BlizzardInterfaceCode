@@ -1222,6 +1222,20 @@ local TooltipInfo =
 				{ Name = "data", Type = "TooltipData", Nilable = false },
 			},
 		},
+		{
+			Name = "GetWorldLootObject",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "unitTokenString", Type = "cstring", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "data", Type = "TooltipData", Nilable = false },
+			},
+		},
 	},
 
 	Events =

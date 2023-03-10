@@ -84,7 +84,7 @@ UIPanelWindows["ChatConfigFrame"] =				{ area = "center",			pushable = 0, 		xoff
 UIPanelWindows["ChromieTimeFrame"] =			{ area = "center",			pushable = 0, 		xoffset = -16,	whileDead = 0, allowOtherPanels = 1 };
 UIPanelWindows["PVPMatchScoreboard"] =			{ area = "center",			pushable = 0, 		xoffset = -16,	yoffset = -125,	whileDead = 1,	ignoreControlLost = true, };
 UIPanelWindows["PVPMatchResults"] =				{ area = "center",			pushable = 0, 		xoffset = -16,	yoffset = -41,	whileDead = 1,	ignoreControlLost = true, };
-UIPanelWindows["PlayerChoiceFrame"] =			{ area = "center",			pushable = 0, 		xoffset = -16,	yoffset = -41,	whileDead = 0, allowOtherPanels = 1 };
+UIPanelWindows["PlayerChoiceFrame"] =			{ area = "center",			pushable = 0, 		xoffset = -16,	yoffset = -41,	whileDead = 0, allowOtherPanels = 1, ignoreControlLost = true };
 UIPanelWindows["GarrisonBuildingFrame"] =		{ area = "center",			pushable = 0,		whileDead = 1, 		width = 1002, 	allowOtherPanels = 1};
 UIPanelWindows["GarrisonMissionFrame"] =		{ area = "center",			pushable = 0,		whileDead = 1, 		checkFit = 1,	allowOtherPanels = 1, extraWidth = 20,	extraHeight = 100 };
 UIPanelWindows["GarrisonShipyardFrame"] =		{ area = "center",			pushable = 0,		whileDead = 1, 		checkFit = 1,	allowOtherPanels = 1, extraWidth = 20,	extraHeight = 100 };
@@ -704,10 +704,6 @@ function GMChatFrame_LoadUI(...)
 	end
 end
 
-function GuildFrame_LoadUI()
-	UIParentLoadAddOn("Blizzard_GuildUI");
-end
-
 function EncounterJournal_LoadUI()
 	UIParentLoadAddOn("Blizzard_EncounterJournal");
 end
@@ -932,7 +928,7 @@ function ToggleTalentFrame(suggestedTab, inspectUnit)
 
 	ClassTalentFrame_LoadUI();
 
-	ClassTalentFrame:SetInspecting(inspectUnit);
+	ClassTalentFrame:SetInspectUnit(inspectUnit);
 	if not ClassTalentFrame:IsShown() then
 		ShowUIPanel(ClassTalentFrame);
 	else
@@ -1002,11 +998,6 @@ function ToggleGuildFrame()
 		end
 
 		ToggleCommunitiesFrame();
-	elseif ( IsInGuild() ) then
-		GuildFrame_LoadUI();
-		if ( GuildFrame_Toggle ) then
-			GuildFrame_Toggle();
-		end
 	else
 		ToggleGuildFinder();
 	end
@@ -3370,7 +3361,7 @@ function CloseSpecialWindows()
 	return found;
 end
 
-function CloseWindows(ignoreCenter, frameToIgnore)
+function CloseWindows(ignoreCenter, frameToIgnore, context)
 	-- This function will close all frames that are not the current frame
 	local leftFrame = GetUIPanel("left");
 	local centerFrame = GetUIPanel("center");
@@ -3378,15 +3369,18 @@ function CloseWindows(ignoreCenter, frameToIgnore)
 	local doublewideFrame = GetUIPanel("doublewide");
 	local fullScreenFrame = GetUIPanel("fullscreen");
 	local found = leftFrame or centerFrame or rightFrame or doublewideFrame or fullScreenFrame;
+	local ignoreControlLostLeft =  ( leftFrame ~= nil and context == "lossOfControl" and GetUIPanelAttribute( leftFrame, "ignoreControlLost" ) )
+	local ignoreControlLostRight =  ( rightFrame ~= nil and context == "lossOfControl" and GetUIPanelAttribute( rightFrame, "ignoreControlLost" ) )
+	local ignoreControlLostCenter =  ( centerFrame ~= nil and context == "lossOfControl" and GetUIPanelAttribute( centerFrame, "ignoreControlLost" ) )
 
-	if ( not frameToIgnore or frameToIgnore ~= leftFrame ) then
+	if ( ( not frameToIgnore or frameToIgnore ~= leftFrame ) and not ignoreControlLostLeft ) then
 		HideUIPanel(leftFrame, UIPANEL_SKIP_SET_POINT);
 	end
-
+	
 	HideUIPanel(fullScreenFrame, UIPANEL_SKIP_SET_POINT);
 	HideUIPanel(doublewideFrame, UIPANEL_SKIP_SET_POINT);
 
-	if ( not frameToIgnore or frameToIgnore ~= centerFrame ) then
+	if ( ( not frameToIgnore or frameToIgnore ~= centerFrame ) and not ignoreControlLostCenter ) then
 		if ( centerFrame ) then
 			local area = GetUIPanelAttribute(centerFrame, "area");
 			if ( area ~= "center" or not ignoreCenter ) then
@@ -3395,7 +3389,7 @@ function CloseWindows(ignoreCenter, frameToIgnore)
 		end
 	end
 
-	if ( not frameToIgnore or frameToIgnore ~= rightFrame ) then
+	if ( ( not frameToIgnore or frameToIgnore ~= rightFrame ) and not ignoreControlLostRight ) then
 		if ( rightFrame ) then
 			HideUIPanel(rightFrame, UIPANEL_SKIP_SET_POINT);
 		end
@@ -3408,17 +3402,14 @@ function CloseWindows(ignoreCenter, frameToIgnore)
 	return found;
 end
 
+-- When the player loses control we close all UIs, unless they're handled below
 function CloseAllWindows_WithExceptions()
-	-- When the player loses control we close all UIs, unless they're handled below
-	local centerFrame = GetUIPanel("center");
-	local ignoreCenter = (centerFrame and GetUIPanelAttribute(centerFrame, "ignoreControlLost")) or IsOptionFrameOpen();
-
-	CloseAllWindows(ignoreCenter);
+	CloseAllWindows(IsOptionFrameOpen(), "lossOfControl");
 end
 
-function CloseAllWindows(ignoreCenter)
+function CloseAllWindows(ignoreCenter, context)
 	local bagsVisible = CloseAllBags();
-	local windowsVisible = CloseWindows(ignoreCenter);
+	local windowsVisible = CloseWindows(ignoreCenter, nil, context );
 	local anyClosed = (bagsVisible or windowsVisible);
 	if (anyClosed and CanAutoSetGamePadCursorControl(false)) then
 		SetGamePadCursorControl(false);

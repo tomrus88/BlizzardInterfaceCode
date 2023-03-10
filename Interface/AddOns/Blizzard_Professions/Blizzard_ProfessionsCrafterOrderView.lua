@@ -431,7 +431,7 @@ function ProfessionsCrafterOrderViewMixin:SchematicPostInit()
                 slot:SetAddIconDesaturated(true);
             end
 
-            if reagentType == Enum.CraftingReagentType.Optional then
+            if reagentType == Enum.CraftingReagentType.Modifying then
 				local modification = transaction:GetModification(slot:GetReagentSlotSchematic().dataSlotIndex);
 				if modification and modification.itemID > 0 then
 					slot:SetItem(Item:CreateFromItemID(modification.itemID));

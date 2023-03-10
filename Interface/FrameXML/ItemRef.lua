@@ -420,12 +420,26 @@ function SetItemRef(link, text, button, chatFrame)
 		DisplayPvpRatingLink(link);
 		return;
 	elseif ( strsub(link, 1, 14) == "aadcopenconfig" ) then
-		ShowUIPanel(ChatConfigFrame);
+		Settings.OpenToCategory(Settings.SOCIAL_CATEGORY_ID);
 		return;
 	elseif ( strsub(link, 1, 6) == "layout" ) then
 		local fixedLink = GetFixedLink(text);
 		if not HandleModifiedItemClick(fixedLink) then
 			EditModeManagerFrame:OpenAndShowImportLayoutLinkDialog(fixedLink);
+		end
+		return;
+	elseif (strsub(link, 1, 11) == "talentbuild") then
+		local fixedLink = GetFixedLink(text);
+		if not HandleModifiedItemClick(fixedLink) then
+			local specID, level, inspectString = string.split(":", linkData);
+			level = tonumber(level);
+
+			ClassTalentFrame_LoadUI();
+
+			ClassTalentFrame:SetInspectString(inspectString, level);
+			if not ClassTalentFrame:IsShown() then
+				ShowUIPanel(ClassTalentFrame);
+			end
 		end
 		return;
 	elseif ( strsub(link, 1, 13) == "perksactivity" ) then
@@ -485,6 +499,8 @@ function GetFixedLink(text, quality)
 		elseif ( strsub(text, startLink + 2, startLink + 9) == "worldmap" ) then
 			return (gsub(text, "(|H.+|h.+|h)", "|cffffff00%1|r", 1));
 		elseif ( strsub(text, startLink + 2, startLink + 7) == "layout" ) then
+			return (gsub(text, "(|H.+|h.+|h)", "|cffff80ff%1|r", 1));
+		elseif ( strsub(text, startLink + 2, startLink + 12) == "talentbuild" ) then
 			return (gsub(text, "(|H.+|h.+|h)", "|cffff80ff%1|r", 1));
 		end
 	end

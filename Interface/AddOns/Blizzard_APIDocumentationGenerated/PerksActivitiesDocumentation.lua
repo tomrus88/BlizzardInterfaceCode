@@ -174,6 +174,7 @@ local PerksActivities =
 				{ Name = "thresholdContributionAmount", Type = "number", Nilable = false },
 				{ Name = "completed", Type = "bool", Nilable = false },
 				{ Name = "tracked", Type = "bool", Nilable = false },
+				{ Name = "m_supersedes", Type = "number", Nilable = false },
 				{ Name = "requirementsList", Type = "table", InnerType = "PerksActivityRequirement", Nilable = false },
 				{ Name = "criteriaList", Type = "table", InnerType = "PerksActivityCriteria", Nilable = false },
 				{ Name = "tagNames", Type = "table", InnerType = "string", Nilable = false },

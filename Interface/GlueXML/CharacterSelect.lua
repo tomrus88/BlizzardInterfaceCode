@@ -900,7 +900,7 @@ function CharacterSelect_InitCharacterButton(button, elementData)
 
 	-- If we're not showing the build, don't bother doing nice formatting.
 	if (showlastLoginBuild) then
-		local currentVersion = select(6, GetBuildInfo());
+		local currentVersion = select(7, GetBuildInfo());
 
 		-- Set the Color based on the build being old / new
 		if (lastLoginBuild < currentVersion) then
@@ -2290,7 +2290,8 @@ local function GetVASDistributions()
 	if GetNumCharacters() == 0 then
 		local needsNoCharactersStatus = {
 			Enum.ValueAddedServiceType.PaidCharacterTransfer,
-			Enum.ValueAddedServiceType.PaidFactionChange
+			Enum.ValueAddedServiceType.PaidFactionChange,
+			Enum.ValueAddedServiceType.PaidRaceChange
 		};
 		for i, serviceType in ipairs(needsNoCharactersStatus) do
 			local distribution = distributionsByVASType[serviceType];
@@ -2527,8 +2528,10 @@ function CharacterUpgradePopup_BeginVASFlow(data, guid)
 	assert(data.vasType ~= nil);
 	if data.vasType == Enum.ValueAddedServiceType.PaidCharacterTransfer then
 		BeginFlow(PaidCharacterTransferFlow, data);
-	elseif data.vasType == Enum.ValueAddedServiceType.PaidFactionChange  then
+	elseif data.vasType == Enum.ValueAddedServiceType.PaidFactionChange then
 		BeginFlow(PaidFactionChangeFlow, data);
+	elseif data.vasType == Enum.ValueAddedServiceType.PaidRaceChange then
+		BeginFlow(PaidRaceChangeFlow, data);
 	else
 		error("Unsupported VAS Type Flow");
 	end

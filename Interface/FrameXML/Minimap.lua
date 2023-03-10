@@ -275,7 +275,7 @@ function MinimapClusterMixin:OnLoad()
 			frame.defaultFramePoints[i] = { point = point, relativeTo = relativeTo, relativePoint = relativePoint, offsetX = offsetX, offsetY = offsetY };
 		end
 	end
-	CacheFramePoints(self.Minimap);
+	CacheFramePoints(self.MinimapContainer);
 	CacheFramePoints(self.BorderTop);
 	CacheFramePoints(self.InstanceDifficulty);
 	CacheFramePoints(self.IndicatorFrame);
@@ -312,20 +312,24 @@ function MinimapClusterMixin:CheckTutorials()
 	end
 end
 
-local function ResetFramePoints(frame)
+local function ResetFramePoints(frame, accountForFrameScale)
+	local scale = accountForFrameScale and frame:GetScale() or 1;
+
 	frame:ClearAllPoints();
 	for i, value in ipairs(frame.defaultFramePoints) do
-		frame:SetPoint(value.point, value.relativeTo, value.relativePoint, value.offsetX, value.offsetY);
+		frame:SetPoint(value.point, value.relativeTo, value.relativePoint, value.offsetX / scale, value.offsetY / scale);
 	end
 end
 
 function MinimapClusterMixin:SetHeaderUnderneath(headerUnderneath)
 	if (headerUnderneath) then
-		self.Minimap:ClearAllPoints();
-		self.Minimap:SetPoint("TOP", self, "TOP", 10, -13);
+		-- Since minimap container can be scaled, account for it's scale when setting offsets
+		local scale = self.MinimapContainer:GetScale();
+		self.MinimapContainer:ClearAllPoints();
+		self.MinimapContainer:SetPoint("BOTTOM", self, "BOTTOM", 10 / scale, 30 / scale);
 
 		self.BorderTop:ClearAllPoints();
-		self.BorderTop:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -24, 2);
+		self.BorderTop:SetPoint("BOTTOM", self, "BOTTOM", 15, 2);
 
 		self.InstanceDifficulty:ClearAllPoints();
 		self.InstanceDifficulty:SetPoint("BOTTOMRIGHT", self.BorderTop, "TOPRIGHT", -2, -2);
@@ -333,12 +337,13 @@ function MinimapClusterMixin:SetHeaderUnderneath(headerUnderneath)
 		self.IndicatorFrame:ClearAllPoints();
 		self.IndicatorFrame:SetPoint("BOTTOMRIGHT", self.Tracking, "TOPRIGHT");
 	else
-		ResetFramePoints(self.Minimap);
+		local accountForFrameScaleYes = true;
+		ResetFramePoints(self.MinimapContainer, accountForFrameScaleYes);
 		ResetFramePoints(self.BorderTop);
 		ResetFramePoints(self.InstanceDifficulty);
 		ResetFramePoints(self.IndicatorFrame);
 	end
-	
+
 	self.InstanceDifficulty:SetFlipped(headerUnderneath);
 end
 

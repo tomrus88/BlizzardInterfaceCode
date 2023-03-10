@@ -1,6 +1,6 @@
 
 
-ProfessionsCustomerListingsElementMixin = CreateFromMixins(ScrollListLineMixin, TableBuilderRowMixin);
+ProfessionsCustomerListingsElementMixin = CreateFromMixins(TableBuilderRowMixin);
 
 function ProfessionsCustomerListingsElementMixin:OnLineEnter()
 	self.HighlightTexture:Show();
@@ -659,7 +659,7 @@ function ProfessionsCustomerOrderFormMixin:UpdateReagentSlots()
 	local slotParents =
 	{
 		[Enum.CraftingReagentType.Basic] = self.ReagentContainer.Reagents,
-		[Enum.CraftingReagentType.Optional] = self.ReagentContainer.OptionalReagents,
+		[Enum.CraftingReagentType.Modifying] = self.ReagentContainer.OptionalReagents,
 	};
 
 	local qualityReagentsHelpTipInfo =
@@ -930,11 +930,14 @@ function ProfessionsCustomerOrderFormMixin:UpdateReagentSlots()
 			slot.Button.InputOverlay.AddIcon:Hide();
 		end
 	end
-
-	local forCraftingOrders = true;
-	Professions.LayoutReagentSlots(
-		reagentTypes[Enum.CraftingReagentType.Basic], self.ReagentContainer.Reagents,
-		reagentTypes[Enum.CraftingReagentType.Optional], self.ReagentContainer.OptionalReagents, nil, forCraftingOrders);
+	
+	do
+		local spacingX, spacingY = 35, -5;
+		local stride = 4;
+		local direction = GridLayoutMixin.Direction.TopLeftToBottomRightVertical;
+		Professions.LayoutReagentSlots(reagentTypes[Enum.CraftingReagentType.Basic], self.ReagentContainer.Reagents, spacingX, spacingY, stride, direction);
+	end
+	Professions.LayoutAndShowReagentSlotContainer(reagentTypes[Enum.CraftingReagentType.Modifying], self.ReagentContainer.OptionalReagents);
 
 	self:UpdateListOrderButton();
 end

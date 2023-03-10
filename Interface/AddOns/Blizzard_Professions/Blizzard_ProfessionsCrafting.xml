@@ -64,7 +64,12 @@
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<Texture parentKey="Background"/>
+						<Texture parentKey="Background" hidden="true"/>
+						<Texture parentKey="MinimalBackground" hidden="true">
+							<Anchors>
+								<Anchor point="TOPLEFT" x="-3" y="7"/>
+							</Anchors>
+						</Texture>
 					</Layer>
 				</Layers>
 				<Frames>
@@ -80,11 +85,6 @@
 
 			<Button parentKey="CreateButton" inherits="UIPanelButtonTemplate" motionScriptsWhileDisabled="true">
 				<Size x="80" y="22"/>
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-20" y="7"/>
-				</Anchors>
-				<Scripts>
-				</Scripts>
 			</Button>
 
 			<EditBox parentKey="CreateMultipleInputBox" inherits="NumericInputSpinnerTemplate">

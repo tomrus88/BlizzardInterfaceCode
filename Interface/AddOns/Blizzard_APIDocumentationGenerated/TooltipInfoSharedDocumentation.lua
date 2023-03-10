@@ -24,9 +24,9 @@ local TooltipInfoShared =
 		{
 			Name = "TooltipDataLineType",
 			Type = "Enumeration",
-			NumValues = 30,
+			NumValues = 31,
 			MinValue = 0,
-			MaxValue = 29,
+			MaxValue = 30,
 			Fields =
 			{
 				{ Name = "None", Type = "TooltipDataLineType", EnumValue = 0 },
@@ -59,6 +59,7 @@ local TooltipInfoShared =
 				{ Name = "RestrictedLevel", Type = "TooltipDataLineType", EnumValue = 27 },
 				{ Name = "EquipSlot", Type = "TooltipDataLineType", EnumValue = 28 },
 				{ Name = "ItemName", Type = "TooltipDataLineType", EnumValue = 29 },
+				{ Name = "Separator", Type = "TooltipDataLineType", EnumValue = 30 },
 			},
 		},
 		{

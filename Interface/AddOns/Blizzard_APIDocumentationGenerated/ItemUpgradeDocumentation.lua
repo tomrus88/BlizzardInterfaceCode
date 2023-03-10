@@ -166,6 +166,7 @@ local ItemUpgrade =
 				{ Name = "currUpgrade", Type = "number", Nilable = false },
 				{ Name = "maxUpgrade", Type = "number", Nilable = false },
 				{ Name = "upgradeLevelInfos", Type = "table", InnerType = "ItemUpgradeLevelInfo", Nilable = false },
+				{ Name = "customUpgradeString", Type = "string", Nilable = true },
 			},
 		},
 		{

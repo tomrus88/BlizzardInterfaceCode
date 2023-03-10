@@ -56,6 +56,15 @@ function Professions.ExtractItemIDsFromCraftingReagents(reagents)
 	return tbl;
 end
 
+local isCraftingMinimized = false;
+function Professions.SetCraftingMinimized(minimized)
+	isCraftingMinimized = minimized;
+end
+
+function Professions.IsCraftingMinimized()
+	return isCraftingMinimized;
+end
+
 function Professions.AddCommonOptionalTooltipInfo(item, tooltip, recipeID, recraftItemGUID)
 	local craftingReagents = Professions.CreateCraftingReagentInfoBonusTbl(item:GetItemID());
 	local difficultyText = C_TradeSkillUI.GetReagentDifficultyText(1, craftingReagents);
@@ -1213,33 +1222,28 @@ function Professions.OnRecipeListSearchTextChanged(text)
 	end
 end
 
-function Professions.LayoutReagentSlots(reagentSlots, reagentsContainer, optionalReagentsSlots, optionalReagentsContainer, divider, forCraftingOrders)
-	if reagentSlots then
-		local stride = 4;
-		local spacingX = forCraftingOrders and 35 or -5;
+
+function Professions.LayoutReagentSlots(slots, slotContainer, spacingX, spacingY, stride, direction)
+	if slots then
 		local spacingY = -5;
-		local layout = AnchorUtil.CreateGridLayout(GridLayoutMixin.Direction.TopLeftToBottomRightVertical, stride, spacingX, spacingY);
-		local anchor = CreateAnchor("TOPLEFT", reagentsContainer, "TOPLEFT", 1, -23);
-		AnchorUtil.GridLayout(reagentSlots, anchor, layout);
-		reagentsContainer:Layout();
+		local layout = AnchorUtil.CreateGridLayout(direction, stride, spacingX, spacingY);
+		local anchor = CreateAnchor("TOPLEFT", slotContainer, "TOPLEFT", 1, -23);
+		AnchorUtil.GridLayout(slots, anchor, layout);
+		slotContainer:Layout();
 	end
+end
 
-	do
-		local optionalShown = optionalReagentsSlots and #optionalReagentsSlots > 0;
-		if optionalShown then
-			local stride = 4;
-			local spacing = 3;
-			local layout = AnchorUtil.CreateGridLayout(GridLayoutMixin.Direction.TopLeftToBottomRight, stride, spacing, spacing, 40, 40);
-			local anchor = CreateAnchor("TOPLEFT", optionalReagentsContainer, "TOPLEFT", 1, -23);
-			AnchorUtil.GridLayout(optionalReagentsSlots, anchor, layout);
-			optionalReagentsContainer:Layout();
-		end
-		optionalReagentsContainer:SetShown(optionalShown);
-
-		if divider then
-			divider:SetShown(optionalShown);
-		end
+function Professions.LayoutAndShowReagentSlotContainer(slots, slotContainer)
+	local slotsShown = slots and #slots > 0;
+	if slotsShown then
+		local stride = 4;
+		local spacing = 3;
+		local layout = AnchorUtil.CreateGridLayout(GridLayoutMixin.Direction.TopLeftToBottomRight, stride, spacing, spacing, 40, 40);
+		local anchor = CreateAnchor("TOPLEFT", slotContainer, "TOPLEFT", 1, -23);
+		AnchorUtil.GridLayout(slots, anchor, layout);
+		slotContainer:Layout();
 	end
+	slotContainer:SetShown(slotsShown);
 end
 
 function Professions.LayoutFinishingSlots(finishingSlots, finishingSlotContainer)

@@ -574,10 +574,7 @@ function PlayerFrame_ToVehicleArt(self, vehicleType)
 		TotemFrame:Hide();
 	elseif class == "DEATHKNIGHT" then
 		RuneFrame:Hide();
-	elseif class == "PRIEST" then
-		PriestBarFrame:Hide();
 	end
-	ComboPointPlayerFrame:Setup();
 	EssencePlayerFrame:Setup();
 
 	-- Update other stuff
@@ -641,10 +638,7 @@ function PlayerFrame_ToPlayerArt(self)
 		TotemFrame:Update(); 
 	elseif (class == "DEATHKNIGHT") then
 		RuneFrame:Show();
-	elseif (class == "PRIEST") then
-		PriestBarFrame_CheckAndShow();
 	end
-	ComboPointPlayerFrame:Setup();
 	EssencePlayerFrame:Setup();
 
 	-- Update other stuff

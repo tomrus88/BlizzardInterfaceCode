@@ -51,6 +51,7 @@ ExpansionDocumentation.lua
 FogOfWarDocumentation.lua
 GMTicketInfoDocumentation.lua
 GamePadDocumentation.lua
+GameRulesDocumentation.lua
 GlyphInfoDocumentation.lua
 GossipInfoDocumentation.lua
 GuildBankDocumentation.lua
@@ -319,6 +320,7 @@ VectorSharedDocumentation.lua
 VehicleConstantsDocumentation.lua
 VignetteConstantsDocumentation.lua
 WeeklyRewardsSharedDocumentation.lua
+WowLabsConstantsDocumentation.lua
 AuctionHouseConstants_MainlineDocumentation.lua
 ClickBindingsConstantsDocumentation.lua
 CovenantCallingsConstantsDocumentation.lua

@@ -1,3 +1,4 @@
+
 -- Panel Positions
 PANEL_INSET_LEFT_OFFSET = 4;
 PANEL_INSET_RIGHT_OFFSET = -6;
@@ -176,160 +177,6 @@ end
 function UIPanelCloseButton_SetBorderShown(self, shown)
 	if self.Border then
 		self.Border:SetShown(shown);
-	end
-end
-
--- Scrollframe functions
-function ScrollFrame_OnLoad(self)
-	local scrollbar = self.ScrollBar or _G[self:GetName().."ScrollBar"];
-	scrollbar:SetMinMaxValues(0, 0);
-	scrollbar:SetValue(0);
-	self.offset = 0;
-
-	local scrollDownButton = scrollbar.ScrollDownButton or _G[scrollbar:GetName().."ScrollDownButton"];
-	local scrollUpButton = scrollbar.ScrollUpButton or _G[scrollbar:GetName().."ScrollUpButton"];
-
-	scrollDownButton:Disable();
-	scrollUpButton:Disable();
-
-	if ( self.scrollBarHideable ) then
-		scrollbar:Hide();
-		scrollDownButton:Hide();
-		scrollUpButton:Hide();
-	else
-		scrollDownButton:Disable();
-		scrollUpButton:Disable();
-		scrollDownButton:Show();
-		scrollUpButton:Show();
-	end
-	if ( self.noScrollThumb ) then
-		(scrollbar.ThumbTexture or _G[scrollbar:GetName().."ThumbTexture"]):Hide();
-	end
-end
-
-function ScrollFrameTemplate_OnMouseWheel(self, value, scrollBar)
-	scrollBar = scrollBar or self.ScrollBar or _G[self:GetName() .. "ScrollBar"];
-	local scrollStep = scrollBar.scrollStep or scrollBar:GetHeight() / 2
-	if ( value > 0 ) then
-		scrollBar:SetValue(scrollBar:GetValue() - scrollStep);
-	else
-		scrollBar:SetValue(scrollBar:GetValue() + scrollStep);
-	end
-end
-
-function ScrollFrame_OnScrollRangeChanged(self, xrange, yrange)
-	local name = self:GetName();
-	local scrollbar = self.ScrollBar or _G[name.."ScrollBar"];
-	if ( not yrange ) then
-		yrange = self:GetVerticalScrollRange();
-	end
-
-	-- Accounting for very small ranges
-	yrange = floor(yrange);
-
-	local value = min(scrollbar:GetValue(), yrange);
-	scrollbar:SetMinMaxValues(0, yrange);
-	scrollbar:SetValue(value);
-
-	local scrollDownButton = scrollbar.ScrollDownButton or _G[scrollbar:GetName().."ScrollDownButton"];
-	local scrollUpButton = scrollbar.ScrollUpButton or _G[scrollbar:GetName().."ScrollUpButton"];
-	local thumbTexture = scrollbar.ThumbTexture or _G[scrollbar:GetName().."ThumbTexture"];
-
-	if ( yrange == 0 ) then
-		if ( self.scrollBarHideable ) then
-			scrollbar:Hide();
-			scrollDownButton:Hide();
-			scrollUpButton:Hide();
-			thumbTexture:Hide();
-		else
-			scrollDownButton:Disable();
-			scrollUpButton:Disable();
-			scrollDownButton:Show();
-			scrollUpButton:Show();
-			if ( not self.noScrollThumb ) then
-				thumbTexture:Show();
-			end
-		end
-	else
-		scrollDownButton:Show();
-		scrollUpButton:Show();
-		scrollbar:Show();
-		if ( not self.noScrollThumb ) then
-			thumbTexture:Show();
-		end
-		-- The 0.005 is to account for precision errors
-		if ( yrange - value > 0.005 ) then
-			scrollDownButton:Enable();
-		else
-			scrollDownButton:Disable();
-		end
-	end
-
-	-- Hide/show scrollframe borders
-	local top = self.Top or name and _G[name.."Top"];
-	local bottom = self.Bottom or name and _G[name.."Bottom"];
-	local middle = self.Middle or name and _G[name.."Middle"];
-	if ( top and bottom and self.scrollBarHideable ) then
-		if ( self:GetVerticalScrollRange() == 0 ) then
-			top:Hide();
-			bottom:Hide();
-		else
-			top:Show();
-			bottom:Show();
-		end
-	end
-	if ( middle and self.scrollBarHideable ) then
-		if ( self:GetVerticalScrollRange() == 0 ) then
-			middle:Hide();
-		else
-			middle:Show();
-		end
-	end
-end
-
-function ScrollBar_AdjustAnchors(scrollBar, topAdj, bottomAdj, xAdj)
-	-- assumes default anchoring of topleft-topright, bottomleft-bottomright
-	local topY = 0;
-	local bottomY = 0;
-	local point, parent, refPoint, x, y;
-	for i = 1, 2 do
-		point, parent, refPoint, x, y = scrollBar:GetPoint(i);
-		if ( point == "TOPLEFT" ) then
-			topY = y;
-		elseif ( point == "BOTTOMLEFT" ) then
-			bottomY = y;
-		end
-	end
-	xAdj = xAdj or 0;
-	topAdj = topAdj or 0;
-	bottomAdj = bottomAdj or 0;
-	scrollBar:SetPoint("TOPLEFT", parent, "TOPRIGHT", x + xAdj, topY + topAdj);
-	scrollBar:SetPoint("BOTTOMLEFT", parent, "BOTTOMRIGHT", x + xAdj, bottomY + bottomAdj);
-end
-
-function ScrollBar_Disable(scrollBar)
-	scrollBar:Disable();
-	local scrollDownButton = scrollBar.ScrollDownButton or _G[scrollBar:GetName().."ScrollDownButton"];
-	if scrollDownButton then
-		scrollDownButton:Disable();
-	end
-	local scrollUpButton = scrollBar.ScrollUpButton or _G[scrollBar:GetName().."ScrollUpButton"];
-	if scrollUpButton then
-		scrollUpButton:Disable();
-	end
-end
-
-function ScrollBar_Enable(scrollBar)
-	scrollBar:Enable();
-	local currValue = scrollBar:GetValue();
-	local minVal, maxVal = scrollBar:GetMinMaxValues();
-	local scrollDownButton = scrollBar.ScrollDownButton or _G[scrollBar:GetName().."ScrollDownButton"];
-	if scrollDownButton and currValue < maxVal then
-		scrollDownButton:Enable();
-	end
-	local scrollUpButton = scrollBar.ScrollUpButton or _G[scrollBar:GetName().."ScrollUpButton"];
-	if scrollUpButton and currValue > minVal then
-		scrollUpButton:Enable();
 	end
 end
 
@@ -2746,16 +2593,29 @@ end
 
 AlphaHighlightButtonMixin = {};
 
-function AlphaHighlightButtonMixin:OnLoad()
-	self:SetHighlightAtlas(self.NormalTexture:GetAtlas());
+function AlphaHighlightButtonMixin:UpdateHighlightForState()
+	self:SetHighlightAtlas(self:GetHighlightForState());
+end
+
+function AlphaHighlightButtonMixin:GetHighlightForState()
+	if self.isPressed then
+		return self.PushedTexture:GetAtlas();
+	end
+
+	return self.NormalTexture:GetAtlas();
 end
 
 function AlphaHighlightButtonMixin:OnMouseDown()
-	self:SetHighlightAtlas(self.PushedTexture:GetAtlas());
+	self:SetPressed(true);
 end
 
 function AlphaHighlightButtonMixin:OnMouseUp()
-	self:SetHighlightAtlas(self.NormalTexture:GetAtlas());
+	self:SetPressed(false);
+end
+
+function AlphaHighlightButtonMixin:SetPressed(pressed)
+	self.isPressed = pressed;
+	self:UpdateHighlightForState();
 end
 
 NumericInputBoxMixin = {};
@@ -2800,7 +2660,7 @@ function IconSelectorPopupFrameTemplateMixin:OnLoad()
 		button:SetIconTexture(icon);
 	end
 	self.IconSelector:SetSetupCallback(IconButtonInitializer);
-	self.IconSelector:AdjustScrollBarOffsets(0, 18, -1);
+	self.IconSelector:AdjustScrollBarOffsets(-14, -4, 6);
 
 	self.BorderBox.OkayButton:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.GS_TITLE_OPTION_OK);
