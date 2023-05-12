@@ -597,7 +597,7 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo, isRecraftOverride)
 		end
 
 		self.RecipeSourceButton:SetScript("OnEnter", function()
-			GameTooltip:SetOwner(self.RecipeSourceButton, "ANCHOR_RIGHT");
+			GameTooltip:SetOwner(self.RecipeSourceButton.Text, "ANCHOR_RIGHT");
 			GameTooltip:SetCustomWordWrapMinWidth(350);
 			GameTooltip_AddHighlightLine(GameTooltip, sourceText);
 			GameTooltip:Show();
@@ -1260,12 +1260,17 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo, isRecraftOverride)
 						tooltip:Show();
 					end
 					
+					local function IsEnchantTargetValid(elementData)
+						local reagents = self.transaction:CreateCraftingReagentInfoTbl();
+						return C_TradeSkillUI.IsEnchantTargetValid(recipeID, elementData.item:GetItemGUID(), reagents);
+					end
+
 					flyout.OnElementEnabledImplementation = function(button, elementData)
-						return C_TradeSkillUI.IsEnchantTargetValid(recipeID, elementData.item:GetItemGUID());
+						return IsEnchantTargetValid(elementData);
 					end
 					
 					flyout.GetElementValidImplementation = function(button, elementData)
-						return C_TradeSkillUI.IsEnchantTargetValid(recipeID, elementData.item:GetItemGUID());
+						return IsEnchantTargetValid(elementData);
 					end
 
 					local canModifyFilter = false;
