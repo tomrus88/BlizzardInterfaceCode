@@ -496,6 +496,9 @@ function UIParent_OnLoad(self)
 	self:RegisterEvent("SHOW_HYPERLINK_TOOLTIP");
 	self:RegisterEvent("HIDE_HYPERLINK_TOOLTIP");
 	self:RegisterEvent("WORLD_CURSOR_TOOLTIP_UPDATE");
+
+	-- Event(s) for ping system
+	self:RegisterEvent("PING_PIN_FRAME_ADDED");
 end
 
 function UIParent_OnShow(self)
@@ -878,6 +881,10 @@ function SubscriptionInterstitial_LoadUI()
 	LoadAddOn("Blizzard_SubscriptionInterstitialUI");
 end
 
+function PingUI_LoadUI()
+	LoadAddOn("Blizzard_PingUI");
+end
+
 local playerEnteredWorld = false;
 local varsLoaded = false;
 function NPETutorial_AttemptToBegin(event)
@@ -961,7 +968,7 @@ function InClickBindingMode()
 end
 
 function ToggleBattlefieldMap()
-	if DISALLOW_FRAME_TOGGLING then 
+	if DISALLOW_FRAME_TOGGLING then
 		return
 	end
 	BattlefieldMap_LoadUI();
@@ -1175,7 +1182,7 @@ function ToggleCollectionsJournal(tabIndex)
 	if ( Kiosk.IsEnabled() or DISALLOW_FRAME_TOGGLING ) then
 		return;
 	end
-	
+
 	if Kiosk.IsEnabled() then
 		return;
 	end
@@ -1193,7 +1200,7 @@ function SetCollectionsJournalShown(shown, tabIndex)
 	if ( Kiosk.IsEnabled() or DISALLOW_FRAME_TOGGLING ) then
 		return;
 	end
-	
+
 	if not CollectionsJournal then
 		CollectionsJournal_LoadUI();
 	end
@@ -1303,7 +1310,7 @@ function ToggleMajorFactionRenown()
 end
 
 function ToggleExpansionLandingPage()
-	if(TRAIT_SYSTEM_OVERRIDE_MAP) then 
+	if(TRAIT_SYSTEM_OVERRIDE_MAP) then
 		GenericTraitUI_LoadUI();
 
 		local currentMapID = select(8, GetInstanceInfo());
@@ -1754,7 +1761,7 @@ function UIParent_OnEvent(self, event, ...)
 			end
 		end
 
-	    if (not IGNORE_DEATH_REQUIREMENTS) then 
+	    if (not IGNORE_DEATH_REQUIREMENTS) then
 		if ( UnitIsGhost("player") ) then
 			GhostFrame:Show();
 		else
@@ -2483,11 +2490,14 @@ function UIParent_OnEvent(self, event, ...)
 				PlaySound(SOUNDKIT.UI_SOFT_TARGET_INTERACT_AVAILABLE);
 			end
 		end
-	elseif event == "SHOW_PARTY_POSE_UI" then 
-		MatchCelebrationPartyPose_LoadUI(); 
+	elseif event == "SHOW_PARTY_POSE_UI" then
+		MatchCelebrationPartyPose_LoadUI();
 		local partyPoseID, won = ...;
 		MatchCelebrationPartyPoseFrame:LoadScreenByPartyPoseID(partyPoseID, won);
 		ShowUIPanel(MatchCelebrationPartyPoseFrame);
+	elseif event == "PING_PIN_FRAME_ADDED" then
+		PingUI_LoadUI();
+		PingManager:OnPingPinFrameAdded(...);
 	end
 end
 
@@ -3424,7 +3434,7 @@ function CloseWindows(ignoreCenter, frameToIgnore, context)
 	if ( ( not frameToIgnore or frameToIgnore ~= leftFrame ) and not ignoreControlLostLeft ) then
 		HideUIPanel(leftFrame, UIPANEL_SKIP_SET_POINT);
 	end
-	
+
 	HideUIPanel(fullScreenFrame, UIPANEL_SKIP_SET_POINT);
 	HideUIPanel(doublewideFrame, UIPANEL_SKIP_SET_POINT);
 

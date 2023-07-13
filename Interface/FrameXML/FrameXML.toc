@@ -145,6 +145,8 @@ POIButton\POIButtonOwner.xml
 POIButton\POIButtonUtil.lua
 
 ## add new modules below here
+..\SharedXML\PingAttributes.xml
+..\SharedXML\PingableType.lua
 ..\SharedXML\Backdrop.xml
 ChatBubbleTemplates.xml
 WorldFrame.xml

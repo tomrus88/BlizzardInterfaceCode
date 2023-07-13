@@ -88,6 +88,8 @@ PartyInfoDocumentation.lua
 PartyPoseUIDocumentation.lua
 PetInfoDocumentation.lua
 PetJournalInfoDocumentation.lua
+PingManagerDocumentation.lua
+PingPinFrameAPIDocumentation.lua
 PlatformDocumentation.lua
 PlayerInfoDocumentation.lua
 PlayerInteractionManagerDocumentation.lua
@@ -309,6 +311,7 @@ PVPMgrConstantsDocumentation.lua
 PerksVendorConstantsDocumentation.lua
 PetBattleConstantsDocumentation.lua
 PetScalingConstantsDocumentation.lua
+PingConstantsDocumentation.lua
 PlayerDocumentation.lua
 PlayerInfoSharedDocumentation.lua
 PlayerInteractionManagerConstantsDocumentation.lua

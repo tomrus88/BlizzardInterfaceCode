@@ -146,6 +146,7 @@ CharacterServicesAccountSelector.xml
 CharacterServicesPaidCharacterTransfer.xml
 CharacterServicesPaidFactionChange.xml
 CharacterServicesPaidRaceChange.xml
+CharacterServicesPaidNameChange.xml
 SocialContract.xml
 PromotionFrame.xml
 StarterEditionPopUp.xml

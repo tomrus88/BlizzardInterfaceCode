@@ -2361,6 +2361,8 @@ local function GetVASDistributions()
 					usable = DoesClientThinkTheCharacterIsEligibleForPFC(charID);
 				elseif vasType == Enum.ValueAddedServiceType.PaidRaceChange then
 					usable = DoesClientThinkTheCharacterIsEligibleForPRC(charID);
+				elseif vasType == Enum.ValueAddedServiceType.PaidNameChange then
+					usable = DoesClientThinkTheCharacterIsEligibleForPNC(charID);
 				end
 				if usable then
 					break;
@@ -2615,6 +2617,8 @@ function CharacterUpgradePopup_BeginVASFlow(data, guid)
 		BeginCharacterServicesFlow(PaidFactionChangeFlow, data);
 	elseif data.vasType == Enum.ValueAddedServiceType.PaidRaceChange then
 		BeginCharacterServicesFlow(PaidRaceChangeFlow, data);
+	elseif data.vasType == Enum.ValueAddedServiceType.PaidNameChange then
+		BeginCharacterServicesFlow(PaidNameChangeFlow, data);
 	else
 		error("Unsupported VAS Type Flow");
 	end

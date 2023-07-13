@@ -4,7 +4,7 @@
 	<!--IMPORTANT
 		If you change anything in this file, be sure to check in PlayerFrame.lua if these values get set there as well.
 		IMPORTANT-->
-	<Button name="PlayerFrame" frameStrata="LOW" toplevel="true" movable="true" inherits="SecureUnitButtonTemplate, EditModePlayerFrameSystemTemplate" parent="UIParent">
+	<Button name="PlayerFrame" frameStrata="LOW" toplevel="true" movable="true" inherits="SecureUnitButtonTemplate, EditModePlayerFrameSystemTemplate" parent="UIParent" mixin="PingableType_UnitFrameMixin">
 		<Size x="232" y="100"/>
 		<HitRectInsets>
 			<AbsInset left="6" right="0" top="4" bottom="9"/>

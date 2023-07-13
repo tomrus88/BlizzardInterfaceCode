@@ -394,7 +394,7 @@ function MonthlyActivitiesFilterListMixin:OnLoad()
 		end
 		self:SetFilterSetting(elementData.filter);
 		local activitiesInfo = C_PerksActivities.GetPerksActivitiesInfo();
-		EncounterJournal.MonthlyActivitiesFrame:SetActivities(activitiesInfo.activities, ScrollBoxConstants.RetainScrollPosition);
+		EncounterJournal.MonthlyActivitiesFrame:SetActivities(activitiesInfo.activities, ScrollBoxConstants.DiscardScrollPosition);
 		EncounterJournal.MonthlyActivitiesFrame:CollapseAllMonthlyActivities();
 	end;
 
