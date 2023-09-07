@@ -32,6 +32,8 @@
 ..\SharedXML\PredictedSetting.lua
 ..\SharedXML\SecureUtil.lua
 ..\SharedXML\TimeUtil.lua
+..\SharedXML\Vector2D.lua
+..\SharedXML\Vector3D.lua
 ..\SharedXML\NineSliceLayouts.lua
 ..\SharedXML\NineSlice.lua
 ..\SharedXML\BindingUtil.lua
@@ -72,6 +74,7 @@
 ..\SharedXML\VASErrorLookup.lua
 ..\SharedXML\MixinUtil.lua
 ..\SharedXML\PingAttributes.xml
+..\SharedXML\DebugBarManager.lua
 
 ## intrinsics
 ..\SharedXML\ScrollingMessageFrame.xml
@@ -98,8 +101,6 @@ GlueContextMenu.xml
 ..\SharedXML\DataProviders.xml
 ..\SharedXML\ButtonTray\ButtonTrayUtil.lua
 ..\SharedXML\ButtonTray\ButtonTray.xml
-..\SharedXML\Vector2D.lua
-..\SharedXML\Vector3D.lua
 ..\SharedXML\Spline.lua
 ..\SharedXML\ModelSceneTemplates.xml
 ..\SharedXML\ModelSceneMixin.xml
@@ -127,6 +128,7 @@ GlueParent.xml
 GlueDialog.xml
 GlueTooltip.xml
 ..\SharedXML\DialogUtil.lua
+..\SharedXML\ActionStatus.xml
 
 ..\SharedXML\Settings\Settings.xml
 ..\SharedXML\SettingDefinitions\OverrideDefinitions.xml
@@ -156,6 +158,7 @@ MovieFrame.xml
 CinematicsFrame.xml
 CreditsFrame.xml
 GlueMenuFrame.xml
+..\SharedXML\ToolWindowOwnerMixin.lua
 
 ## Should only load internally
 DesignerMenu.xml

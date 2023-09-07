@@ -1480,6 +1480,8 @@ function LFGListApplicationViewer_UpdateInfo(self)
 	end
 
 	local filters = activityInfo.filters;
+	local categoryID = activityInfo.categoryID;
+
 	--Set the background
 	local atlasName = nil;
 	if ( categoryInfo.separateRecommended and bit.band(filters, Enum.LFGListFilter.Recommended) ~= 0 ) then

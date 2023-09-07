@@ -564,14 +564,15 @@ local UIWidgetManager =
 		{
 			Name = "ItemDisplayTextDisplayStyle",
 			Type = "Enumeration",
-			NumValues = 3,
+			NumValues = 4,
 			MinValue = 0,
-			MaxValue = 2,
+			MaxValue = 3,
 			Fields =
 			{
 				{ Name = "WorldQuestReward", Type = "ItemDisplayTextDisplayStyle", EnumValue = 0 },
 				{ Name = "ItemNameAndInfoText", Type = "ItemDisplayTextDisplayStyle", EnumValue = 1 },
 				{ Name = "ItemNameOnlyCentered", Type = "ItemDisplayTextDisplayStyle", EnumValue = 2 },
+				{ Name = "PlayerChoiceReward", Type = "ItemDisplayTextDisplayStyle", EnumValue = 3 },
 			},
 		},
 		{
@@ -1726,6 +1727,7 @@ local UIWidgetManager =
 				{ Name = "tooltipEnabled", Type = "bool", Nilable = false },
 				{ Name = "iconSizeType", Type = "WidgetIconSizeType", Nilable = false },
 				{ Name = "infoTextEnabledState", Type = "WidgetEnabledState", Nilable = false },
+				{ Name = "showAsEarned", Type = "bool", Nilable = false },
 			},
 		},
 		{

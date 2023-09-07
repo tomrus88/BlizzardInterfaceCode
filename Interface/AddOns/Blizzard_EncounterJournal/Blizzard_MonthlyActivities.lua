@@ -970,12 +970,12 @@ end
 
 function MonthlyActivitiesFrameMixin:UpdateTime(displayMonthName, secondsRemaining)
 	local text = MonthlyActivitiesFrameMixin.TimeLeftFormatter:Format(secondsRemaining);
-	self.TimeLeft:SetText(MONTHLY_ACTIVITIES_DAYS:format(text));
+	self.HeaderContainer.TimeLeft:SetText(MONTHLY_ACTIVITIES_DAYS:format(text));
 
 	if displayMonthName and #displayMonthName > 0 then
-		self.Month:SetText(displayMonthName);
+		self.HeaderContainer.Month:SetText(displayMonthName);
 	else
-		self.Month:SetText(ACTIVITIES_MONTH_NAMES[currentCalendarTime.month]);
+		self.HeaderContainer.Month:SetText(ACTIVITIES_MONTH_NAMES[currentCalendarTime.month]);
 	end
 end
 
@@ -1097,4 +1097,41 @@ function MonthlyActivitiesRewardButtonMixin:OnUpdate()
 			ResetCursor();
 		end
 	end
+end
+
+-- MonthlyActivitiesThemeContainerMixin
+MonthlyActivitiesThemeContainerMixin = {};
+
+function MonthlyActivitiesThemeContainerMixin:OnLoad()
+	local function PositionFrame(frame, point, relativeTo, relativePoint, offsetX, offsetY)
+		frame:ClearAllPoints();
+		frame:SetPoint(point, relativeTo, relativePoint, offsetX, offsetY);
+	end
+
+	PositionFrame(self.FilterList, "CENTER", EncounterJournalMonthlyActivitiesFrame.FilterList, "CENTER", 0, 0);
+	PositionFrame(self.Top, "BOTTOM", EncounterJournal, "TOP", 0, -133);
+	PositionFrame(self.Bottom, "TOP", EncounterJournal, "BOTTOM", 0, 7);
+	PositionFrame(self.Left, "RIGHT", EncounterJournal, "LEFT", 7, -11);
+	PositionFrame(self.Right, "LEFT", EncounterJournal, "RIGHT", -6, -11);
+end
+
+function MonthlyActivitiesThemeContainerMixin:OnShow()
+	local theme = C_PerksActivities.GetPerksUIThemePrefix();
+	local atlasPrefix = "perks-theme-"..theme.."-tl-";
+
+	local function SetAtlas(texture, atlasSuffix)
+		local atlasName = atlasPrefix..atlasSuffix;
+		if not C_Texture.GetAtlasInfo(atlasName) then
+			texture:SetTexture(nil);
+			return;
+		end
+
+		texture:SetAtlas(atlasName, true);
+	end
+
+	SetAtlas(self.FilterList, "box");
+	SetAtlas(self.Top, "top");
+	SetAtlas(self.Bottom, "bottom");
+	SetAtlas(self.Left, "left");
+	SetAtlas(self.Right, "right");
 end

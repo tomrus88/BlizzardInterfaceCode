@@ -2279,17 +2279,17 @@ SlashCmdList["RESETCHAT"] = function(msg)
 end
 
 SlashCmdList["ENABLE_ADDONS"] = function(msg)
-	EnableAllAddOns(msg);
+	C_AddOns.EnableAllAddOns(msg);
 	ReloadUI();
 end
 
 SlashCmdList["DISABLE_ADDONS"] = function(msg)
-	DisableAllAddOns(msg);
+	C_AddOns.DisableAllAddOns(msg);
 	ReloadUI();
 end
 
 SlashCmdList["STOPWATCH"] = function(msg)
-	if ( not IsAddOnLoaded("Blizzard_TimeManager") ) then
+	if ( not C_AddOns.IsAddOnLoaded("Blizzard_TimeManager") ) then
 		UIParentLoadAddOn("Blizzard_TimeManager");
 	end
 	if ( StopwatchFrame ) then
@@ -2342,7 +2342,7 @@ SlashCmdList["STOPWATCH"] = function(msg)
 end
 
 SlashCmdList["CALENDAR"] = function(msg)
-	if ( not IsAddOnLoaded("Blizzard_Calendar") ) then
+	if ( not C_AddOns.IsAddOnLoaded("Blizzard_Calendar") ) then
 		UIParentLoadAddOn("Blizzard_Calendar");
 	end
 	if ( Calendar_Toggle ) then
@@ -2544,7 +2544,7 @@ SlashCmdList["API"] = function(msg)
 end
 
 SlashCmdList["COMMENTATOR_OVERRIDE"] = function(msg)
-	if not IsAddOnLoaded("Blizzard_Commentator") then
+	if not C_AddOns.IsAddOnLoaded("Blizzard_Commentator") then
 		return;
 	end
 
@@ -2572,7 +2572,7 @@ SlashCmdList["COMMENTATOR_OVERRIDE"] = function(msg)
 end
 
 SlashCmdList["COMMENTATOR_NAMETEAM"] = function(msg)
-	if not IsAddOnLoaded("Blizzard_Commentator") then
+	if not C_AddOns.IsAddOnLoaded("Blizzard_Commentator") then
 		return;
 	end
 
@@ -2596,7 +2596,7 @@ SlashCmdList["COMMENTATOR_NAMETEAM"] = function(msg)
 end
 
 SlashCmdList["COMMENTATOR_ASSIGNPLAYER"] = function(msg)
-	if not IsAddOnLoaded("Blizzard_Commentator") then
+	if not C_AddOns.IsAddOnLoaded("Blizzard_Commentator") then
 		return;
 	end
 
@@ -2612,7 +2612,7 @@ SlashCmdList["COMMENTATOR_ASSIGNPLAYER"] = function(msg)
 end
 
 SlashCmdList["RESET_COMMENTATOR_SETTINGS"] = function(msg)
-	if not IsAddOnLoaded("Blizzard_Commentator") then
+	if not C_AddOns.IsAddOnLoaded("Blizzard_Commentator") then
 		return;
 	end
 

@@ -247,6 +247,8 @@ ProfessionsCraftingOutputLogMixin:GenerateCallbackEvents(
 function ProfessionsCraftingOutputLogMixin:OnLoad()
 	CallbackRegistryMixin.OnLoad(self);
 	ScrollingFlatPanelMixin.OnLoad(self);
+	self:RegisterEvent("TRADE_SKILL_ITEM_CRAFTED_RESULT");
+	self:RegisterEvent("TRADE_SKILL_CURRENCY_REWARD_RESULT");
 	
 	self.pendingResultData = {};
 
@@ -368,10 +370,6 @@ function ProfessionsCraftingOutputLogMixin:FinalizePendingResultData()
 end
 
 function ProfessionsCraftingOutputLogMixin:OnHide()
-	self:UnregisterEvents();
-	self:UnregisterEvent("TRADE_SKILL_ITEM_CRAFTED_RESULT");
-	self:UnregisterEvent("TRADE_SKILL_CURRENCY_REWARD_RESULT");
-
 	self.ScrollBox:RemoveDataProvider();
 end
 
@@ -399,7 +397,7 @@ function ProfessionsCraftingOutputLogMixin:CalculateElementsHeight()
 	return height;
 end
 
-function ProfessionsCraftingOutputLogMixin:StartListening()
-	self:RegisterEvent("TRADE_SKILL_ITEM_CRAFTED_RESULT");
-	self:RegisterEvent("TRADE_SKILL_CURRENCY_REWARD_RESULT");
+function ProfessionsCraftingOutputLogMixin:Cleanup()
+	self.ScrollBox:Flush();
+	self:Hide();
 end

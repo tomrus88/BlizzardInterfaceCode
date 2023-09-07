@@ -482,7 +482,7 @@ function Settings.InitSelectionDropDown(selectionDropDown, setting, getOptions, 
 		--	print(errorMsg);
 		--end
 		--assertsafe(false, errorMsg);
-		--LoadAddOn("Blizzard_DebugTools");
+		--C_AddOns.LoadAddOn("Blizzard_DebugTools");
 		--if Dump then
 		--	Dump(options);
 		--end

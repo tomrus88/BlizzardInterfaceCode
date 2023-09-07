@@ -1016,8 +1016,6 @@ function ProfessionsCraftingPageMixin:CreateInternal(recipeID, count, recipeLeve
 		end
 	end
 
-	self.CraftingOutputLog:StartListening();
-
 	self.CreateMultipleInputBox:ClearFocus();
 	self:ValidateControls();
 

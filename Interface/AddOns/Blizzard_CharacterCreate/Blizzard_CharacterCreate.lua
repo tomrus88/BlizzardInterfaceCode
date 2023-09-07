@@ -200,6 +200,15 @@ function CharacterCreateMixin:OnShow()
 	self:UpdateRecruitInfo();
 
 	RaceAndClassFrame:UpdateState(selectedFaction);
+
+	if Kiosk.IsEnabled() and not Kiosk.IsCompetitiveModeEnabled() then
+		local templateIndex = Kiosk.GetCharacterTemplateSetIndex();
+		if templateIndex then
+			C_CharacterCreation.SetCharacterTemplate(templateIndex);
+		else
+			C_CharacterCreation.ClearCharacterTemplate();
+		end
+	end
 end
 
 local rafHelpTipInfo = {

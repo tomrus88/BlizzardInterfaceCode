@@ -76,8 +76,15 @@ function TargetFrameMixin:OnLoad(unit, menuFunc)
 	self.auraPools:CreatePool("FRAME", self, "TargetDebuffFrameTemplate");
 	self.auraPools:CreatePool("FRAME", self, "TargetBuffFrameTemplate");
 
-	healthBar:GetStatusBarTexture():AddMaskTexture(healthBar.HealthBarMask);
-	manaBar:GetStatusBarTexture():AddMaskTexture(manaBar.ManaBarMask);
+	local healthBarTexture = healthBar:GetStatusBarTexture();
+	healthBarTexture:AddMaskTexture(healthBar.HealthBarMask);
+	healthBarTexture:SetTexelSnappingBias(0);
+	healthBarTexture:SetSnapToPixelGrid(false);
+
+	local manaBarTexture = manaBar:GetStatusBarTexture();
+	manaBarTexture:AddMaskTexture(manaBar.ManaBarMask);
+	manaBarTexture:SetTexelSnappingBias(0);
+	manaBarTexture:SetSnapToPixelGrid(false);
 
 	self:Update();
 
