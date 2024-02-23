@@ -723,7 +723,7 @@ local Unit =
 			Returns =
 			{
 				{ Name = "name", Type = "cstring", Nilable = false },
-				{ Name = "displayName", Type = "cstring", Nilable = false },
+				{ Name = "displayName", Type = "string", Nilable = false },
 				{ Name = "textureID", Type = "fileID", Nilable = false },
 				{ Name = "startTimeMs", Type = "number", Nilable = false },
 				{ Name = "endTimeMs", Type = "number", Nilable = false },
@@ -2050,9 +2050,9 @@ local Unit =
 
 			Returns =
 			{
-				{ Name = "positionX", Type = "number", Nilable = false },
-				{ Name = "positionY", Type = "number", Nilable = false },
-				{ Name = "positionZ", Type = "number", Nilable = false },
+				{ Name = "x", Type = "number", Nilable = true },
+				{ Name = "y", Type = "number", Nilable = true },
+				{ Name = "z", Type = "number", Nilable = true },
 				{ Name = "mapID", Type = "number", Nilable = false },
 			},
 		},
@@ -3875,7 +3875,7 @@ local Unit =
 			Fields =
 			{
 				{ Name = "name", Type = "cstring", Nilable = false },
-				{ Name = "displayName", Type = "cstring", Nilable = false },
+				{ Name = "displayName", Type = "string", Nilable = false },
 				{ Name = "textureID", Type = "fileID", Nilable = false },
 				{ Name = "startTimeMs", Type = "number", Nilable = false },
 				{ Name = "endTimeMs", Type = "number", Nilable = false },

@@ -1209,12 +1209,6 @@ function WardrobeCollectionFrameMixin:OnShow()
 		self:SetTab(self.selectedCollectionTab);
 	end
 	self:UpdateTabButtons();
-
-	if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_TRANSMOG_MODEL_CLICK) and WardrobeCollectionFrame.fromSuggestedContent) then
-		--skip showing info tutorial if we came from suggested content and haven't seen the tracking tutorial
-	elseif (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_WARDROBE_TRACKING_INTERFACE)) then
-		HelpTip:Show(WardrobeCollectionFrame.InfoButton, WardrobeCollectionFrame.InfoButton.helpTipInfo);
-	end
 end
 
 function WardrobeCollectionFrameMixin:OnHide()
@@ -1310,7 +1304,7 @@ local function IsAnySourceCollected(sources)
 	return false;
 end
 
-function WardrobeCollectionFrameMixin:SetAppearanceTooltip(contentFrame, sources, primarySourceID, warningString)
+function WardrobeCollectionFrameMixin:SetAppearanceTooltip(contentFrame, sources, primarySourceID, warningString, slot)
 	self.tooltipContentFrame = contentFrame;
 	local selectedIndex = self.tooltipSourceIndex;
 	local showUseError = true;
@@ -1320,7 +1314,7 @@ function WardrobeCollectionFrameMixin:SetAppearanceTooltip(contentFrame, sources
 	if WardrobeCollectionFrame.activeFrame == WardrobeCollectionFrame.SetsCollectionFrame then
 		showTrackingInfo = false;
 	end
-	self.tooltipSourceIndex, self.tooltipCycle = CollectionWardrobeUtil.SetAppearanceTooltip(GameTooltip, sources, primarySourceID, selectedIndex, showUseError, inLegionArtifactCategory, subheaderString, warningString, showTrackingInfo);
+	self.tooltipSourceIndex, self.tooltipCycle = CollectionWardrobeUtil.SetAppearanceTooltip(GameTooltip, sources, primarySourceID, selectedIndex, showUseError, inLegionArtifactCategory, subheaderString, warningString, showTrackingInfo, slot);
 end
 
 function WardrobeCollectionFrameMixin:HideAppearanceTooltip()
@@ -1578,10 +1572,6 @@ function WardrobeItemsCollectionMixin:CheckHelpTip()
 			return;
 		end
 
-		if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_WARDROBE_TRACKING_INTERFACE)) then
-			return;
-		end
-
 		local sets = C_TransmogSets.GetAllSets();
 		local hasCollected = false;
 		if (sets) then
@@ -1606,10 +1596,6 @@ function WardrobeItemsCollectionMixin:CheckHelpTip()
 		HelpTip:Show(WardrobeCollectionFrame, helpTipInfo, WardrobeCollectionFrame.SetsTab);
 	else
 		if (GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_TRANSMOG_SETS_TAB)) then
-			return;
-		end
-
-		if (not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_WARDROBE_TRACKING_INTERFACE)) then
 			return;
 		end
 
@@ -2950,7 +2936,7 @@ function WardrobeCollectionFrameModelDropDown_SetFavorite(visualID, value, confi
 end
 
 -- ***** TUTORIAL
-WardrobeCollectionTutorialMixin = { }
+WardrobeCollectionTutorialMixin = { };
 
 function WardrobeCollectionTutorialMixin:OnLoad()
 
@@ -2972,7 +2958,6 @@ end
 
 function WardrobeCollectionTutorialMixin:OnLeave()
 	HelpTip:Hide(self, WARDROBE_SHORTCUTS_TUTORIAL_1);
-	TrackingInterfaceShortcutsFrame.NewAlert:ClearAlert();
 end
 
 -- ***** WEAPON DROPDOWN
