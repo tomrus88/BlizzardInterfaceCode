@@ -35,6 +35,8 @@ CinematicDocumentation.lua
 ClassTrialDocumentation.lua
 ClientDocumentation.lua
 ClientSceneDocumentation.lua
+ClubDocumentation.lua
+ClubFinderDocumentation.lua
 CombatLogDocumentation.lua
 CompactUnitFramesDocumentation.lua
 ConfigurationWarningsDocumentation.lua
@@ -47,11 +49,13 @@ CreatureInfoDocumentation.lua
 CurrencyInfoDocumentation.lua
 CursorDocumentation.lua
 CursorUtilDocumentation.lua
+DeathAlertDocumentation.lua
 DeathInfoDocumentation.lua
 DebugToggleDocumentation.lua
 DuelInfoDocumentation.lua
 EditModeManagerDocumentation.lua
 EncounterInfoDocumentation.lua
+EncounterJournalDocumentation.lua
 EquipmentManagerDocumentation.lua
 EventUtilsDocumentation.lua
 ExpansionDocumentation.lua
@@ -136,6 +140,7 @@ RaidLocksDocumentation.lua
 RecruitAFriendDocumentation.lua
 ReportSystemDocumentation.lua
 ReputationInfoDocumentation.lua
+ResearchInfoDocumentation.lua
 RestrictedActionsDocumentation.lua
 ScreenDocumentation.lua
 ScriptWarningsDocumentation.lua
@@ -209,6 +214,7 @@ ToyBoxInfoDocumentation.lua
 TradeInfoDocumentation.lua
 TrainerDocumentation.lua
 TraitConfigDocumentation.lua
+TransmogDocumentation.lua
 TutorialDocumentation.lua
 UIColorDocumentation.lua
 UIGenericWidgetDisplayDocumentation.lua
@@ -242,8 +248,6 @@ ChromieTimeUIDocumentation.lua
 ClassColorDocumentation.lua
 ClassTalentsDocumentation.lua
 ClickBindingsDocumentation.lua
-ClubDocumentation.lua
-ClubFinderDocumentation.lua
 CommentatorFrameDocumentation.lua
 ContentTrackingDocumentation.lua
 CovenantCallingsDocumentation.lua
@@ -252,7 +256,6 @@ CovenantSanctumDocumentation.lua
 CovenantsDocumentation.lua
 CraftingOrderUIDocumentation.lua
 DateAndTimeDocumentation.lua
-EncounterJournalDocumentation.lua
 ExpansionTrialDocumentation.lua
 FrameAPIArchaeologyDigsiteDocumentation.lua
 FrameAPICharacterModelBaseDocumentation.lua
@@ -285,7 +288,6 @@ PlayerChoiceDocumentation.lua
 PlayerMentorshipDocumentation.lua
 ProfessionSpecUIDocumentation.lua
 QuestItemUseDocumentation.lua
-ResearchInfoDocumentation.lua
 ReturningPlayerUIDocumentation.lua
 ScenarioInfoDocumentation.lua
 ScrappingMachineUIDocumentation.lua
@@ -298,7 +300,6 @@ SuperTrackManagerDocumentation.lua
 SystemDocumentation.lua
 TalkingHeadDocumentation.lua
 TradeSkillUIDocumentation.lua
-TransmogDocumentation.lua
 TransmogItemsDocumentation.lua
 TransmogSetsDocumentation.lua
 UIEventToastManagerDocumentation.lua
@@ -335,7 +336,6 @@ ExpansionLandingPageConstantsDocumentation.lua
 FrameAPIModelSceneFrameSharedDocumentation.lua
 GARRISON_FOLLOWER_TYPEConstantsDocumentation.lua
 GARRISON_TYPEConstantsDocumentation.lua
-GameModeConstantsDocumentation.lua
 GamePadConstDocumentation.lua
 GarrisonConstantsDocumentation.lua
 GossipConstantsDocumentation.lua
@@ -355,6 +355,7 @@ PVPMgrConstantsDocumentation.lua
 PartyConstantsDocumentation.lua
 PerksVendorConstantsDocumentation.lua
 PetBattleConstantsDocumentation.lua
+PetConstantsDocumentation.lua
 PetScalingConstantsDocumentation.lua
 PingConstantsDocumentation.lua
 PlayerDocumentation.lua
@@ -379,6 +380,7 @@ SocialConstantsDocumentation.lua
 SoftTargetConstantsDocumentation.lua
 TextureSharedDocumentation.lua
 TimeDocumentation.lua
+TimerunningConstantsDocumentation.lua
 TooltipConstantsDocumentation.lua
 TooltipInfoSharedDocumentation.lua
 TradeSkillUITypesDocumentation.lua

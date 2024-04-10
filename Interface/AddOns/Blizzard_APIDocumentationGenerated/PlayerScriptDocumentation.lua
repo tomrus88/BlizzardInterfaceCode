@@ -1232,6 +1232,15 @@ local PlayerScript =
 			},
 		},
 		{
+			Name = "PlayerGetTimerunningSeasonID",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "timerunningSeasonID", Type = "number", Nilable = true },
+			},
+		},
+		{
 			Name = "PortGraveyard",
 			Type = "Function",
 		},

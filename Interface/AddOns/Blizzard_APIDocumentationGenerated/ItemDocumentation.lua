@@ -175,7 +175,7 @@ local Item =
 			Arguments =
 			{
 				{ Name = "itemInfo", Type = "ItemInfo", Nilable = false },
-				{ Name = "dstSlot", Type = "number", Nilable = true },
+				{ Name = "dstSlot", Type = "luaIndex", Nilable = true },
 			},
 		},
 		{
@@ -398,6 +398,21 @@ local Item =
 			{
 				{ Name = "gemName", Type = "string", Nilable = false },
 				{ Name = "gemLink", Type = "cstring", Nilable = false },
+			},
+		},
+		{
+			Name = "GetItemGemID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "ItemInfo", Nilable = false },
+				{ Name = "index", Type = "luaIndex", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "gemID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -658,6 +673,34 @@ local Item =
 			Returns =
 			{
 				{ Name = "itemName", Type = "string", Nilable = true },
+			},
+		},
+		{
+			Name = "GetItemNumAddedSockets",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "ItemInfo", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "socketCount", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "GetItemNumSockets",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "ItemInfo", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "socketCount", Type = "number", Nilable = false },
 			},
 		},
 		{

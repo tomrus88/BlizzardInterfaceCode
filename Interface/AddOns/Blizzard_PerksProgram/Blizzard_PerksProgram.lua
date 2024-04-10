@@ -37,6 +37,13 @@ function PerksProgramMixin:OnLoad()
 	self.FooterFrame:Init();
 end
 
+function PerksProgramMixin:SetDefaultSort()
+	self:SetSortAscending(false);
+	self.sortField = "price";
+
+	EventRegistry:TriggerEvent("PerksProgram.SortFieldSet");
+end
+
 function PerksProgramMixin:GetLabelFont()
 	return self.labelFont or GameFontNormalMed3;
 end
