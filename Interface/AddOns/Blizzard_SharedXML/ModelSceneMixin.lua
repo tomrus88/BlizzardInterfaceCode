@@ -235,6 +235,11 @@ end
 function ModelSceneMixin:ReleaseAllActors()
 	if self.actorPool then
 		self.actorPool:ReleaseAll();
+
+		if self.dropShadowPool then
+			self.dropShadowPool:ReleaseAll();
+		end
+
 		self.tagToActor = {};
 	end
 end
@@ -252,7 +257,7 @@ function ModelSceneMixin:AcquireActor()
 end
 
 function ModelSceneMixin:ReleaseActor(actor)
-	if not self.actorPool then
+	if not actor or not self.actorPool then
 		return;
 	end
 
@@ -262,7 +267,11 @@ function ModelSceneMixin:ReleaseActor(actor)
 			break;
 		end
 	end
-	
+
+	if actor.dropShadowTexture then
+		self.dropShadowPool:Release(actor.dropShadowTexture);
+	end
+
 	return self.actorPool:Release(actor);
 end
 
@@ -502,6 +511,44 @@ function ModelSceneMixin:ShowAndAnimateActors(actorSettings, onFinishedCallback)
 	if onFinishedCallback and totalTime > 0 then
 		C_Timer.After(totalTime, onFinishedCallback);
 	end
+end
+
+function ModelSceneMixin:GetOrAcquireDropShadow(actor)
+	if actor.dropShadowTexture then
+		return actor.dropShadowTexture;
+	end
+
+	if not self.dropShadowPool then
+		self.dropShadowPool = CreateTexturePool(self, "BORDER", 1, "ModelSceneDropShadowTemplate");
+	end
+
+	actor.dropShadowTexture = self.dropShadowPool:Acquire();
+	return actor.dropShadowTexture;
+end
+
+function ModelSceneMixin:AddOrUpdateDropShadow(actor, baseShadowScale)
+	baseShadowScale = baseShadowScale or 1.0;
+
+	local dropShadowTexture = self:GetOrAcquireDropShadow(actor);
+	local positionVector = CreateVector3D(actor:GetPosition());
+	positionVector:ScaleBy(actor:GetScale());
+	local x, y, depthScale = self:Transform3DPointTo2D(positionVector:GetXYZ());
+
+	if not x or not y or not depthScale then
+		dropShadowTexture:Hide();
+		return;
+	end
+
+	dropShadowTexture:ClearAllPoints();
+	depthScale = baseShadowScale * Lerp(.05, 1, ClampedPercentageBetween(depthScale, .8, 1))
+	-- Scales down the texture depending on it's depthScale.
+	dropShadowTexture:SetScale(depthScale);
+
+	-- Need to apply the effective scale to account for UI Scaling.
+	local inverseScale = self:GetEffectiveScale() * depthScale;
+	-- The position of the character can be found by the offset on the screen.
+	dropShadowTexture:SetPoint("CENTER", self, "BOTTOMLEFT", (x / inverseScale) + 2, (y / inverseScale) - 4);
+	dropShadowTexture:Show();
 end
 
 

@@ -1353,4 +1353,44 @@
 			</Frame>
 		</Frames>
 	</Frame>
+
+	<Frame name="EventToastFlightpointDiscoveredTemplate" mixin="EventToastFlightpointDiscoveredMixin" inherits="EventToastWithIconLargeTextTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="animInStartDelay" value="0" type="number"/>
+		</KeyValues>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="FiligreeGlow" atlas="UI-World-Quest-filigree-glow" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.$parent.GLine" relativePoint="CENTER" y="-6"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="TopIcon" atlas="UI-Flightpoint-Discovery-Toast-Frame" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.$parent.GLine2" relativePoint="CENTER" y="2"/>
+					</Anchors>
+				</Texture>
+				<FontString parentKey="Title" inherits="GameFontNormalHuge3" justifyH="LEFT" justifyV="BOTTOM">
+					<Anchors>
+						<Anchor point="TOP" relativePoint="BOTTOM" relativeKey="$parent.TopIcon" y="-1"/>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="SubTitle" inherits="SystemFont_Shadow_Med2" justifyH="LEFT" justifyV="TOP">
+					<Anchors>
+						<Anchor point="TOP" relativeKey="$parent.Title" relativePoint="BOTTOM" y="-5"/>
+						<Anchor point="CENTER"/>
+						<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.$parent.GLine" y="7"/>
+					</Anchors>
+				</FontString>
+				<Texture parentKey="Filigree" atlas="UI-World-Quest-filigree" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.$parent.GLine" relativePoint="CENTER" y="-6"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
 </Ui>

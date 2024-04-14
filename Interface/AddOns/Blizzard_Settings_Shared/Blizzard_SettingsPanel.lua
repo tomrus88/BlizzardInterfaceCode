@@ -294,6 +294,7 @@ function SettingsPanelMixin:OnHide()
 
 	if IsOnGlueScreen() then
 		GlueParent_RemoveModalFrame(self);
+		GlueParent_CloseSecondaryScreen();
 		return;
 	else 
 		UpdateMicroButtons();

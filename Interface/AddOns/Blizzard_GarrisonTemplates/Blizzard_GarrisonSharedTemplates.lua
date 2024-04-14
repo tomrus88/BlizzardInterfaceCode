@@ -747,7 +747,7 @@ function GarrisonFollowerButton_SetCounterButton(button, followerID, index, info
 	elseif (info.spellID) then
 		counter.tooltip = nil;
 		counter.info.showCounters = false;
-		counter.Icon:SetTexture(select(3, GetSpellInfo(info.spellID)));
+		counter.Icon:SetTexture(C_Spell.GetSpellTexture(info.spellID));
 		counter.AbilityFeedbackGlowAnim:Stop();
 		counter.Border:Hide();
 	else
@@ -2020,7 +2020,7 @@ function GarrisonFollowerTabMixin:ShowAbilities(followerInfo)
 	local hasCombatAllySpell = #followerInfo.combatAllySpellIDs ~= 0;
 
 	for i, combatAllySpell in ipairs(followerInfo.combatAllySpellIDs) do
-		local _, _, texture = GetSpellInfo(combatAllySpell);
+		local texture = C_Spell.GetSpellTexture(combatAllySpell);
 		if (i == 1) then
 			self.AbilitiesFrame.CombatAllySpell[i].layoutIndex = BASE_COMBAT_ALLY_LAYOUT_INDEX + 2;
 		else

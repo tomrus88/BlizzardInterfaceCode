@@ -39,7 +39,7 @@ function SpellMixin:IsDataEvictable()
 end
 
 function SpellMixin:GetSpellName()
-	return (GetSpellInfo(self:GetSpellID()));
+	return (C_Spell.GetSpellName(self:GetSpellID()));
 end
 
 function SpellMixin:GetSpellTexture()

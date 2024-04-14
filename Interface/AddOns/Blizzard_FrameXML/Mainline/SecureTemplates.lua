@@ -461,12 +461,6 @@ SECURE_ACTIONS.macro =
             securecall("MacroFrame_SaveMacro");
 
             RunMacro(macro, button);
-        else
-            local text =
-                SecureButton_GetModifiedAttribute(self, "macrotext", button);
-            if ( text ) then
-                RunMacroText(text, button);
-            end
         end
     end;
 

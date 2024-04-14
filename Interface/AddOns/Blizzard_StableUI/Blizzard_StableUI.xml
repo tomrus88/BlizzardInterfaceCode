@@ -291,8 +291,8 @@
 					<Frame parentKey="PetInfo" mixin="StablePetInfoMixin">
 						<Size y="70"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeKey="$parent.PetModelScene" y="-10"/>
-							<Anchor point="TOPRIGHT" relativeKey="$parent.PetModelScene" y="-10"/>
+							<Anchor point="TOPLEFT" relativeKey="$parent.$parent.PetModelScene" y="-10"/>
+							<Anchor point="TOPRIGHT" relativeKey="$parent.$parent.PetModelScene" y="-10"/>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">

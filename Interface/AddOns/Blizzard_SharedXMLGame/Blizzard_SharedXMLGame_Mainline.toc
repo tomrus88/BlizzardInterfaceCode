@@ -16,8 +16,6 @@ ScriptedAnimations\ScriptAnimatedModelScene.lua
 ScriptedAnimations\ScriptAnimatedModelScene.xml
 StaticModelInfo.lua
 DressUpModelFrameMixin.lua
-TemplatedList.xml
-PagedList.xml
 LoopingSoundEffect.lua
 Shared\Localization.lua
 Mainline\Localization.lua

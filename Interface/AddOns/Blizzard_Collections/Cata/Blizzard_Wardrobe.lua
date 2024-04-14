@@ -341,14 +341,14 @@ function TransmogFrameMixin:GetSelectedTransmogLocation()
 end
 
 function TransmogFrameMixin:RefreshPlayerModel()
-	local sheatheWeapons = false;
-	local autoDress = true;
-	local hideWeapons = false;
-	local useNativeForm = true;
-	local _, raceFilename = UnitRace("Player");
-	if(raceFilename == "Dracthyr" or raceFilename == "Worgen") then
-		useNativeForm = not self.inAlternateForm;
-	end
+		local sheatheWeapons = false;
+		local autoDress = true;
+		local hideWeapons = false;
+		local useNativeForm = true;
+		local _, raceFilename = UnitRace("Player");
+		if(raceFilename == "Dracthyr" or raceFilename == "Worgen") then
+			useNativeForm = not self.inAlternateForm;
+		end
 	WardrobeTransmogFrame.Model:SetUnit("player", sheatheWeapons, autoDress, hideWeapons, useNativeForm);
 	self:Update();
 end
@@ -522,27 +522,27 @@ end
 
 function TransmogSlotButtonMixin:OnEnter()
 	local isTransmogrified, hasPending, isPendingCollected, canTransmogrify, cannotTransmogrifyReason, hasUndo = C_Transmog.GetSlotInfo(self.transmogLocation);
-	if ( self.UndoButton and canTransmogrify and isTransmogrified and not ( hasPending or hasUndo ) ) then
-		self.UndoButton:Show();
-	end
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 14, 0);
-	if not canTransmogrify and not hasUndo then
-		GameTooltip:SetText(_G[self.slot]);
-		local tag = TRANSMOG_INVALID_CODES[cannotTransmogrifyReason];
-		local errorMsg;
-		if ( tag == "CANNOT_USE" ) then
-			local errorCode, errorString = C_Transmog.GetSlotUseError(self.transmogLocation);
-			errorMsg = errorString;
+		if ( self.UndoButton and canTransmogrify and isTransmogrified and not ( hasPending or hasUndo ) ) then
+			self.UndoButton:Show();
+		end
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 14, 0);
+		if not canTransmogrify and not hasUndo then
+			GameTooltip:SetText(_G[self.slot]);
+			local tag = TRANSMOG_INVALID_CODES[cannotTransmogrifyReason];
+			local errorMsg;
+			if ( tag == "CANNOT_USE" ) then
+				local errorCode, errorString = C_Transmog.GetSlotUseError(self.transmogLocation);
+				errorMsg = errorString;
+			else
+				errorMsg = tag and _G["TRANSMOGRIFY_INVALID_"..tag];
+			end
+			if ( errorMsg ) then
+				GameTooltip:AddLine(errorMsg, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b, true);
+			end
+			GameTooltip:Show();
 		else
-			errorMsg = tag and _G["TRANSMOGRIFY_INVALID_"..tag];
-		end
-		if ( errorMsg ) then
-			GameTooltip:AddLine(errorMsg, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b, true);
-		end
-		GameTooltip:Show();
-	else
 		GameTooltip:SetTransmogrifyItem(self.slotID);
-	end
+		end
 
 	WardrobeTransmogFrame.Model.controlFrame:Show();
 	self.UpdateTooltip = GenerateClosure(self.OnEnter, self);
@@ -1248,20 +1248,20 @@ function WardrobeItemsCollectionSlotButtonMixin:OnClick()
 end
 
 function WardrobeItemsCollectionSlotButtonMixin:OnEnter()
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-	local slotName = _G[self.slot];
-	-- for shoulders check if equipped item has the secondary appearance toggled on
-	if self.transmogLocation:GetSlotName() == "SHOULDERSLOT" then
-		local itemLocation = TransmogUtil.GetItemLocationFromTransmogLocation(self.transmogLocation);
-		if TransmogUtil.IsSecondaryTransmoggedForItemLocation(itemLocation) then
-			if self.transmogLocation:IsSecondary() then
-				slotName = LEFTSHOULDERSLOT;
-			else
-				slotName = RIGHTSHOULDERSLOT;
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+		local slotName = _G[self.slot];
+		-- for shoulders check if equipped item has the secondary appearance toggled on
+		if self.transmogLocation:GetSlotName() == "SHOULDERSLOT" then
+			local itemLocation = TransmogUtil.GetItemLocationFromTransmogLocation(self.transmogLocation);
+			if TransmogUtil.IsSecondaryTransmoggedForItemLocation(itemLocation) then
+				if self.transmogLocation:IsSecondary() then
+					slotName = LEFTSHOULDERSLOT;
+				else
+					slotName = RIGHTSHOULDERSLOT;
+				end
 			end
 		end
-	end
-	GameTooltip:SetText(slotName);
+		GameTooltip:SetText(slotName);
 end
 
 WardrobeItemsCollectionMixin = { };
@@ -1862,8 +1862,8 @@ function WardrobeItemsCollectionMixin:UpdateItems()
 	local changeModel = false;
 	local isAtTransmogrifier = C_Transmog.IsAtTransmogNPC();
 
-	local _, isWeapon = C_TransmogCollection.GetCategoryInfo(self.activeCategory);
-	isArmor = not isWeapon;
+		local _, isWeapon = C_TransmogCollection.GetCategoryInfo(self.activeCategory);
+		isArmor = not isWeapon;
 
 	local tutorialAnchorFrame;
 
@@ -1997,14 +1997,14 @@ end
 
 function WardrobeItemsCollectionMixin:UpdateProgressBar()
 	local collected, total;
-	collected = C_TransmogCollection.GetCategoryCollectedCount(self.activeCategory);
-	total = C_TransmogCollection.GetCategoryTotal(self.activeCategory);
+		collected = C_TransmogCollection.GetCategoryCollectedCount(self.activeCategory);
+		total = C_TransmogCollection.GetCategoryTotal(self.activeCategory);
 
 	self:GetParent():UpdateProgressBar(collected, total);
 end
 
 function WardrobeItemsCollectionMixin:RefreshVisualsList()
-	self.visualsList = C_TransmogCollection.GetCategoryAppearances(self.activeCategory, self.transmogLocation);
+		self.visualsList = C_TransmogCollection.GetCategoryAppearances(self.activeCategory, self.transmogLocation);
 
 	self:FilterVisuals();
 	self:SortVisuals();
@@ -2206,11 +2206,11 @@ function WardrobeItemsModelMixin:OnMouseDown(button)
 	local itemsCollectionFrame = self:GetParent();
 	if ( IsModifiedClick("CHATLINK") ) then
 		local link;
-		local sources = CollectionWardrobeUtil.GetSortedAppearanceSources(self.visualInfo.visualID, itemsCollectionFrame:GetActiveCategory(), itemsCollectionFrame.transmogLocation);
-		if ( WardrobeCollectionFrame.tooltipSourceIndex ) then
-			local index = CollectionWardrobeUtil.GetValidIndexForNumSources(WardrobeCollectionFrame.tooltipSourceIndex, #sources);
-			link = WardrobeCollectionFrame:GetAppearanceItemHyperlink(sources[index]);
-		end
+			local sources = CollectionWardrobeUtil.GetSortedAppearanceSources(self.visualInfo.visualID, itemsCollectionFrame:GetActiveCategory(), itemsCollectionFrame.transmogLocation);
+			if ( WardrobeCollectionFrame.tooltipSourceIndex ) then
+				local index = CollectionWardrobeUtil.GetValidIndexForNumSources(WardrobeCollectionFrame.tooltipSourceIndex, #sources);
+				link = WardrobeCollectionFrame:GetAppearanceItemHyperlink(sources[index]);
+			end
 
 		if ( link ) then
 			HandleModifiedItemClick(link);
@@ -2255,8 +2255,8 @@ function WardrobeItemsModelMixin:OnEnter()
 		self.NewGlow:Hide();
 	end
 
-	self.needsItemGeo = not self:IsGeoReady();
-	itemsCollectionFrame:SetAppearanceTooltip(self);
+		self.needsItemGeo = not self:IsGeoReady();
+		itemsCollectionFrame:SetAppearanceTooltip(self);
 end
 
 function WardrobeItemsModelMixin:OnLeave()

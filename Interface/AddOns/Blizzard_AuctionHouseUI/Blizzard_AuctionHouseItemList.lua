@@ -303,7 +303,7 @@ function AuctionHouseItemListMixin:ScrollToEntryIndex(entryIndex)
 	if not self.isInitialized then
 		return;
 	end
-	self.ScrollBox:ScrollToElementDataIndex(entryIndex, ScrollBoxConstants.AlignCenter, ScrollBoxConstants.NoScrollInterpolation);
+	self.ScrollBox:ScrollToElementDataIndex(entryIndex, ScrollBoxConstants.AlignCenter);
 end
 
 function AuctionHouseItemListMixin:GetScrollBoxDataIndexBegin()

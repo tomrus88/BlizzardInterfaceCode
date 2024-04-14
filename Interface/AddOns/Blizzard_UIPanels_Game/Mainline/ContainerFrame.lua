@@ -164,17 +164,35 @@ end
 local ContainerFrame_GetBestFilterIcon;
 
 do
-	local BAG_FILTER_ICONS = {
-		[Enum.BagSlotFlags.PriorityEquipment] = "bags-icon-equipment",
-		[Enum.BagSlotFlags.PriorityConsumables] = "bags-icon-consumables",
-		[Enum.BagSlotFlags.PriorityTradeGoods] = "bags-icon-tradegoods",
-		[Enum.BagSlotFlags.PriorityJunk] = "bags-icon-junk",
-		[Enum.BagSlotFlags.PriorityQuestItems] = "bags-icon-questitem",
+	BAG_FILTER_ICONS = {
+		[Enum.BagSlotFlags.ClassEquipment] = "bags-icon-equipment",
+		[Enum.BagSlotFlags.ClassConsumables] = "bags-icon-consumables",
+		[Enum.BagSlotFlags.ClassProfessionGoods] = "bags-icon-profession-goods",
+		[Enum.BagSlotFlags.ClassJunk] = "bags-icon-junk",
+		[Enum.BagSlotFlags.ClassQuestItems] = "bags-icon-questitem",
+		[Enum.BagSlotFlags.ClassReagents] = "bags-icon-reagents",
 	};
 
 	ContainerFrame_GetBestFilterIcon = function(id)
-		local iconIndex = ContainerFrameSettingsManager:GetFilterFlag(id);
-		if iconIndex then
+		local filterFlags = ContainerFrameSettingsManager:GetFilterFlags(id);
+		if not filterFlags then
+			return;
+		end
+
+		local numFilters = 0;
+		for index, filter in ContainerFrameUtil_EnumerateBagGearFilters() do
+			if FlagsUtil.IsSet(filterFlags, filter) then
+				numFilters = numFilters + 1;
+			end
+
+			local usingMultipleFilters = numFilters > 1;
+			if usingMultipleFilters then
+				return "bags-icon-multiple";
+			end
+		end
+
+		if numFilters == 1 then
+			local iconIndex = filterFlags;
 			return BAG_FILTER_ICONS[iconIndex];
 		end
 	end
@@ -403,11 +421,12 @@ end
 
 -- Filters
 BAG_FILTER_LABELS = {
-	[Enum.BagSlotFlags.PriorityEquipment] = BAG_FILTER_EQUIPMENT,
-	[Enum.BagSlotFlags.PriorityConsumables] = BAG_FILTER_CONSUMABLES,
-	[Enum.BagSlotFlags.PriorityTradeGoods] = BAG_FILTER_TRADE_GOODS,
-	[Enum.BagSlotFlags.PriorityJunk] = BAG_FILTER_JUNK,
-	[Enum.BagSlotFlags.PriorityQuestItems] = BAG_FILTER_QUEST_ITEMS,
+	[Enum.BagSlotFlags.ClassEquipment] = BAG_FILTER_EQUIPMENT,
+	[Enum.BagSlotFlags.ClassConsumables] = BAG_FILTER_CONSUMABLES,
+	[Enum.BagSlotFlags.ClassProfessionGoods] = BAG_FILTER_PROFESSION_GOODS,
+	[Enum.BagSlotFlags.ClassJunk] = BAG_FILTER_JUNK,
+	[Enum.BagSlotFlags.ClassQuestItems] = BAG_FILTER_QUEST_ITEMS,
+	[Enum.BagSlotFlags.ClassReagents] = BAG_FILTER_REAGENTS,
 };
 
 local ContainerFrameFilterDropDown_Initialize = nil;
@@ -431,13 +450,13 @@ do
 		UIDropDownMenu_AddButton(info, level);
 
 		info = UIDropDownMenu_CreateInfo();
-		local activeBagFilter = ContainerFrameSettingsManager:GetFilterFlag(bagID);
 
 		for i, flag in ContainerFrameUtil_EnumerateBagGearFilters() do
 			info.text = BAG_FILTER_LABELS[flag];
-			info.checked = activeBagFilter == flag;
+			info.checked = C_Container.GetBagSlotFlag(bagID, flag);
+			info.isNotRadio = true;
 			info.func = function(_, _, _, value)
-				return OnBagFilterClicked(bagID, flag, not value);
+				return OnBagFilterClicked(bagID, flag, not C_Container.GetBagSlotFlag(bagID, flag));
 			end
 
 			UIDropDownMenu_AddButton(info, level);
@@ -454,6 +473,7 @@ do
 
 		info = UIDropDownMenu_CreateInfo();
 		info.text = BAG_FILTER_CLEANUP;
+		info.isNotRadio = true;
 		info.func = function(_, _, _, value)
 			if ContainerFrame_IsMainBank(bagID) then
 				C_Container.SetBankAutosortDisabled(not value);
@@ -478,6 +498,7 @@ do
 		if not ContainerFrame_IsMainBank(bagID) then
 			info = UIDropDownMenu_CreateInfo();
 			info.text = SELL_ALL_JUNK_ITEMS_EXCLUDE_FLAG;
+			info.isNotRadio = true;
 			info.func = function(_, _, _, value)
 				if ContainerFrame_IsBackpack(bagID) then
 					C_Container.SetBackpackSellJunkDisabled(not value);
@@ -678,6 +699,9 @@ function ContainerFrame_OnLoad(self)
 	UIDropDownMenu_SetInitializeFunction(self.FilterDropDown, ContainerFrameFilterDropDown_Initialize);
 	self:SetPortraitTextureSizeAndOffset(36, -4, 1);
 	self:SetTitleOffsets(35);
+
+	self.itemButtonPool = CreateFramePool("ItemButton", self, "ContainerFrameItemButtonTemplate");
+	self:ClearItems();
 end
 
 function ContainerFrame_OnHide(self)
@@ -847,8 +871,8 @@ end
 
 function ContainerFrameMixin:CalculateHeight()
 	local rows = self:GetRows();
-	local itemButton = self.Items[1];
-	local itemsHeight = (rows * itemButton:GetHeight()) + ((rows - 1) * ITEM_SPACING_Y);
+	local templateInfo = C_XMLUtil.GetTemplateInfo(self.itemButtonPool:GetTemplate());
+	local itemsHeight = (rows * templateInfo.height) + ((rows - 1) * ITEM_SPACING_Y);
 	return itemsHeight + self:GetPaddingHeight() + self:CalculateExtraHeight();
 end
 
@@ -901,34 +925,58 @@ do
 		end
 	end
 
-	function ContainerFrameMixin:UpdateItemLayout()
-		local bagSize = self:GetBagSize();
+	local function GetBagSetupIndices(ascendingOrder)
+		if ascendingOrder then
+			return 0, Constants.InventoryConstants.NumBagSlots, 1;
+		else
+			return Constants.InventoryConstants.NumBagSlots, 0, -1;
+		end
+	end
 
-		local isBankBag = self:IsBankBag();
-		local isCombinedBag = self:IsCombinedBagContainer();
-		local requiresIDAssignment = isBankBag or not isCombinedBag;
-		local itemsToLayout = {};
+	function ContainerFrameMixin:AcquireNewItemButton()
+		local itemButton = self.itemButtonPool:Acquire();
+		table.insert(self.Items, itemButton);
 
-		for i, itemButton in self:EnumerateValidItems() do
-				table.insert(itemsToLayout, itemButton);
+		return itemButton;
+	end
+	
+	function ContainerFrameMixin:ClearItems()
+		self.itemButtonPool:ReleaseAll();
+		self.Items = {};
+	end
 
-				-- NOTE: This workaround has to do with the fact that banks are not using combined inventory yet, so this
-				-- is the most ideal place to update the itemSlot id.
-				if requiresIDAssignment then
-					itemButton:SetID(bagSize - i + 1);
-					itemButton:SetBagID(self:GetBagID());
+	function ContainerFrameMixin:UpdateItemSlots()
+		self:ClearItems();
+		if self:IsCombinedBagContainer() then
+			local useAscendingOrder = false;
+			local startIndex, endIndex, increment = GetBagSetupIndices(useAscendingOrder);	
+			for bag = startIndex, endIndex, increment do
+				local bagSize = ContainerFrame_GetContainerNumSlots(bag);
+				for i = 1, bagSize do	
+					local itemButton = self:AcquireNewItemButton();
+					local slotID = bagSize - i + 1;
+					itemButton:Initialize(bag, slotID);
 				end
-
-				itemButton:Show();
 			end
+		else
+			local bagSize = self:GetBagSize();
+			for i = 1, ContainerFrame_GetContainerNumSlots(self:GetBagID()) do
+				local itemButton = self:AcquireNewItemButton();
+				local slotID = bagSize - i + 1;
+				itemButton:Initialize(self:GetBagID(), slotID);
+			end
+		end
+	end
+
+	function ContainerFrameMixin:UpdateItemLayout()
+		local itemsToLayout = {};
+		for i, itemButton in self:EnumerateValidItems() do
+			table.insert(itemsToLayout, itemButton);
+		end
 
 		UpdateItemSort(itemsToLayout);
 
 		AnchorUtil.GridLayout(itemsToLayout, self:GetInitialItemAnchor(), self:GetAnchorLayout());
-
-		for i = bagSize + 1, #self.Items do
-			self.Items[i]:Hide();
-		end
 
 		self:LayoutAddSlots();
 	end
@@ -1121,6 +1169,7 @@ function ContainerFrame_GenerateFrame(frame, size, id)
 	frame:Show();
 	frame:Raise();
 
+	frame:UpdateItemSlots();
 	frame:UpdateName();
 	frame:UpdateBackground();
 	frame:UpdateMiscellaneousFrames();
@@ -1404,7 +1453,7 @@ function ContainerFrameItemButton_OnClick(self, button)
 				end
 			end
 		end
-		C_Container.UseContainerItem(self:GetBagID(), self:GetID(), nil, BankFrame:IsShown() and (BankFrame.selectedTab == 2));
+		C_Container.UseContainerItem(self:GetBagID(), self:GetID(), nil, BankFrame:GetActiveBankType(), BankFrame:IsShown() and BankFrame.selectedTab == 2);
 		StackSplitFrame:Hide();
 	end
 end
@@ -1600,15 +1649,14 @@ function ContainerFrameItemButtonMixin:GetSlotAndBagID()
 	return self:GetID(), self:GetBagID();
 end
 
-function ContainerFrameItemButtonMixin:ChangeOwnership(bag, slot, newParent)
+function ContainerFrameItemButtonMixin:Initialize(bag, slot)
 	self:SetBagID(bag);
 	self:SetID(slot);
-	self:SetParent(newParent);
 	self:UpdateExtended();
 
 	-- Potentially temporary, item slots don't have a background, so when they're used in a combined inventory setup
 	-- they need to make their own.
-	local isCombined = newParent:IsCombinedBagContainer();
+	local isCombined = self:GetParent():IsCombinedBagContainer();
 	if isCombined and not self.ItemSlotBackground then
 		self.ItemSlotBackground = self:CreateTexture(nil, "BACKGROUND", "ItemSlotBackgroundCombinedBagsTemplate", -6);
 		self.ItemSlotBackground:SetAllPoints(self);
@@ -1617,6 +1665,8 @@ function ContainerFrameItemButtonMixin:ChangeOwnership(bag, slot, newParent)
 	if self.ItemSlotBackground then
 		self.ItemSlotBackground:SetShown(isCombined);
 	end
+
+	self:Show();
 end
 
 function ContainerFrameItemButtonMixin:UpdateQuestItem(isQuestItem, questID, isActive)
@@ -1792,9 +1842,10 @@ function ContainerFramePortraitButtonMixin:OnEnter()
 			waitingOnData = true;
 		end
 
-		local filterFlag = ContainerFrameSettingsManager:GetFilterFlag(id);
-		if filterFlag then
-			GameTooltip:AddLine(BAG_FILTER_ASSIGNED_TO:format(BAG_FILTER_LABELS[filterFlag]));
+		local filterList = ContainerFrameSettingsManager:GenerateFilterList(id);
+		if filterList then
+			local wrapText = true;
+			GameTooltip_AddNormalLine(GameTooltip, BAG_FILTER_ASSIGNED_TO:format(filterList), wrapText);
 		end
 
 		local binding = GetBindingKey("TOGGLEBAG"..(4 - self:GetID() + 1));
@@ -1837,7 +1888,7 @@ local function OpenAllBagsInternal(includeBank)
 	OpenBackpack();
 
 	local startIndex  = ContainerFrameSettingsManager:IsUsingCombinedBags() and (Constants.InventoryConstants.NumBagSlots + 1) or 1;
-	local endIndex = includeBank and NUM_CONTAINER_FRAMES or NUM_TOTAL_BAG_FRAMES;
+	local endIndex = includeBank and (NUM_TOTAL_BAG_FRAMES + NUM_BANKBAGSLOTS) or NUM_TOTAL_BAG_FRAMES;
 
 	for i = startIndex, endIndex do
 		OpenBag(i);
@@ -1901,7 +1952,7 @@ function ToggleAllBags()
 	elseif BankFrame:IsShown() then
 		bagsOpen = 0;
 		totalBags = 0;
-		for i = NUM_TOTAL_BAG_FRAMES + 1, NUM_CONTAINER_FRAMES do
+		for i = NUM_TOTAL_BAG_FRAMES + 1, (NUM_TOTAL_BAG_FRAMES + NUM_BANKBAGSLOTS) do
 			if C_Container.GetContainerNumSlots(i) > 0 then
 				totalBags = totalBags + 1;
 			end
@@ -2015,6 +2066,7 @@ end
 ContainerFrameUtil_EnumerateContainerFrames = nil;
 ContainerFrameUtil_EnumerateBagFrames = nil;
 ContainerFrameUtil_EnumerateBagGearFilters = nil;
+ContainerFrameUtil_ConvertFilterFlagsToList = nil;
 
 local ContainerFrameUtil_MarkContainerEnumeratorDirty;
 
@@ -2068,15 +2120,35 @@ do
 	end
 
 	local bagGearFilters = {
-		Enum.BagSlotFlags.PriorityEquipment,
-		Enum.BagSlotFlags.PriorityConsumables,
-		Enum.BagSlotFlags.PriorityTradeGoods,
-		Enum.BagSlotFlags.PriorityJunk,
-		Enum.BagSlotFlags.PriorityQuestItems,
+		Enum.BagSlotFlags.ClassEquipment,
+		Enum.BagSlotFlags.ClassConsumables,
+		Enum.BagSlotFlags.ClassProfessionGoods,
+		Enum.BagSlotFlags.ClassJunk,
+		Enum.BagSlotFlags.ClassQuestItems,
+		Enum.BagSlotFlags.ClassReagents,
 	}
 
 	ContainerFrameUtil_EnumerateBagGearFilters = function()
 		return ipairs(bagGearFilters);
+	end
+
+	ContainerFrameUtil_ConvertFilterFlagsToList = function(filterFlags)
+		if not filterFlags then
+			return;
+		end
+
+		local filterList;
+		for index, filter in ContainerFrameUtil_EnumerateBagGearFilters() do
+			if FlagsUtil.IsSet(filterFlags, filter) then
+				if not filterList then
+					filterList = BAG_FILTER_LABELS[filter];
+				else
+					filterList = filterList .. LIST_DELIMITER .. BAG_FILTER_LABELS[filter];
+				end
+			end
+		end
+
+		return filterList;
 	end
 end
 
@@ -2261,51 +2333,14 @@ end
 
 function ContainerFrameSettingsManager:SetupBagsCombined()
 	local container = ContainerFrameCombinedBags;
-	self:SetupBagsGeneric(container);
 	self:SetTokenTrackerOwner(container);
 	self:SetMoneyFrameOwner(container);
 end
 
 function ContainerFrameSettingsManager:SetupBagsIndividual()
 	local container = ContainerFrame1;
-	self:SetupBagsGeneric();
 	self:SetTokenTrackerOwner(container);
 	self:SetMoneyFrameOwner(container);
-end
-
-function ContainerFrameSettingsManager:SetupBagsGeneric(overrideParent)
-	if overrideParent then
-		overrideParent:HideItems();
-		overrideParent:ClearItems();
-	end
-
-	local isOverrideParent = overrideParent ~= nil;
-
-	local function GetBagSetupIndices(ascendingOrder)
-		if ascendingOrder then
-			return 0, Constants.InventoryConstants.NumBagSlots, 1;
-		else
-			return Constants.InventoryConstants.NumBagSlots, 0, -1;
-		end
-	end
-
-	local ascendingOrder = not isOverrideParent or not overrideParent:IsCombinedBagContainer();
-	local startIndex, endIndex, increment = GetBagSetupIndices(ascendingOrder);
-
-	for bag = startIndex, endIndex, increment do
-		local numBagSlots = ContainerFrame_GetContainerNumSlots(bag);
-		for i = 1, numBagSlots do
-			local containerFrame = ContainerFrameContainer.ContainerFrames[bag + 1];
-			local itemButton = containerFrame.Items[i];
-			local slot = numBagSlots - i + 1;
-
-			itemButton:ChangeOwnership(bag, slot, overrideParent or containerFrame);
-
-			if isOverrideParent then
-				overrideParent:AddItem(itemButton);
-			end
-		end
-	end
 end
 
 function ContainerFrameSettingsManager:GetBagsShown()
@@ -2333,7 +2368,8 @@ function ContainerFrameSettingsManager:SetFilterFlag(bagID, flag, value)
 		self.filterFlags = {};
 	end
 
-	self.filterFlags[bagID] = value and flag;
+	local currentFilters = self.filterFlags[bagID] or 0;
+	self.filterFlags[bagID] = FlagsUtil.Combine(currentFilters, flag, value);
 
 	for i, containerFrame in ContainerFrameUtil_EnumerateContainerFrames() do
 		if containerFrame:GetBagID() == bagID then
@@ -2351,25 +2387,35 @@ function ContainerFrameSettingsManager:ClearFilterFlag(bagID)
 	self.filterFlags[bagID] = nil;
 end
 
-function ContainerFrameSettingsManager:GetFilterFlag(bagID)
+function ContainerFrameSettingsManager:GetFilterFlags(bagID)
 	if ContainerFrame_CanContainerUseFilterMenu(bagID) then
 		if not self.filterFlags then
 			self.filterFlags = {};
-			self.filterFlags[bagID] = self:QueryFilterFlag(bagID);
+			self.filterFlags[bagID] = self:QueryFilterFlags(bagID);
 		elseif self.filterFlags[bagID] == nil then
-			self.filterFlags[bagID] = self:QueryFilterFlag(bagID);
+			self.filterFlags[bagID] = self:QueryFilterFlags(bagID);
 		end
 
 		return self.filterFlags[bagID];
 	end
 end
 
-function ContainerFrameSettingsManager:QueryFilterFlag(bagID)
+function ContainerFrameSettingsManager:QueryFilterFlags(bagID)
+	local filterFlags = 0;
 	for i, flag in ContainerFrameUtil_EnumerateBagGearFilters() do
-		if C_Container.GetBagSlotFlag(bagID, flag) then
-			return flag;
-		end
+		local isSet = C_Container.GetBagSlotFlag(bagID, flag);
+		filterFlags = FlagsUtil.Combine(filterFlags, flag, isSet);
 	end
+
+	return filterFlags;
+end
+function ContainerFrameSettingsManager:GenerateFilterList(bagID)
+	local filterFlags = self:GetFilterFlags(bagID);
+	if not filterFlags then
+		return;
+	end
+
+	return ContainerFrameUtil_ConvertFilterFlagsToList(filterFlags);
 end
 
 ContainerFrameSettingsManager:Init();
@@ -2583,8 +2629,8 @@ end
 
 function ContainerFrameCombinedBagsMixin:CalculateWidth()
 	local columns = self:GetColumns();
-	local ITEM_BUTTON_WIDTH = 37;
-	local itemsWidth = (columns * ITEM_BUTTON_WIDTH) + ((columns - 1) * ITEM_SPACING_X);
+	local templateInfo = C_XMLUtil.GetTemplateInfo(self.itemButtonPool:GetTemplate());
+	local itemsWidth = (columns * templateInfo.width) + ((columns - 1) * ITEM_SPACING_X);
 
 	return itemsWidth + self:GetPaddingWidth();
 end
@@ -2601,20 +2647,12 @@ function ContainerFrameCombinedBagsMixin:CalculateExtraHeight()
 	return ContainerFrameTokenWatcherMixin.CalculateExtraHeight(self) + self.MoneyFrame:GetHeight() + 12; -- extra for  the search bar
 end
 
-function ContainerFrameCombinedBagsMixin:ClearItems()
-	self.Items = {};
-end
-
 function ContainerFrameCombinedBagsMixin:HideItems()
 	if self.Items then
 		for i = 1, #self.Items do
 			self.Items[i]:Hide();
 		end
 	end
-end
-
-function ContainerFrameCombinedBagsMixin:AddItem(item)
-	table.insert(self.Items, item);
 end
 
 function ContainerFrameCombinedBagsMixin:UpdateName()

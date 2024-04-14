@@ -1720,7 +1720,7 @@
 		</Layers>
 		<Animations>
 			<AnimationGroup parentKey="LingerAndFade">
-				<Alpha childKey="FadeOut" startDelay="5" fromAlpha="1" toAlpha="0" duration="1" smoothing="IN_OUT" order="2"/>
+				<Alpha parentKey="FadeOut" startDelay="5" fromAlpha="1" toAlpha="0" duration="1" smoothing="IN_OUT" order="2"/>
 				<Scripts>
 					<OnFinished>
 						self:GetParent():Hide();

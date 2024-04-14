@@ -1,6 +1,6 @@
 ## Title: Blizzard WoW Token UI
 ## LoadOnDemand: 0
-..\Blizzard_SharedXML\Mixin.lua
+..\Blizzard_SharedXMLBase\Mixin.lua
 ..\Blizzard_SharedXML\PortraitFrame.lua
 ..\Blizzard_SharedXML\Mainline\NineSliceLayouts.lua
 ..\Blizzard_SharedXML\NineSlice.lua

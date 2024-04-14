@@ -63,6 +63,8 @@
 			<TexCoords left="0.750" right=".875" top="0.875" bottom="1"/>
 		</PushedTexture>
 		<Scripts>
+			<OnShow method="OnShow"/>
+			<OnHide method="OnHide"/>
 			<OnMouseDown method="OnMouseDown"/>
 			<OnMouseUp method="OnMouseUp"/>
 			<OnClick method="OnClick"/>

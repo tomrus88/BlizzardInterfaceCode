@@ -559,9 +559,10 @@ function WorldMapBountyBoardMixin:AreBountiesAvailable()
 end
 
 local function SortActivityBountiesAlphabetical(bounty1, bounty2)
-	local faction1Name = select(1, GetFactionInfoByID(bounty1.factionID));
-	local faction2Name = select(1, GetFactionInfoByID(bounty2.factionID));
-	return strcmputf8i(faction1Name, faction2Name) < 0;
+	local faction1Data = C_Reputation.GetFactionDataByID(bounty1.factionID);
+	local faction2Data = C_Reputation.GetFactionDataByID(bounty2.factionID);
+	assert(faction1Data and faction2Data); -- No data for one of the bounty factions!
+	return strcmputf8i(faction1Data.name, faction2Data.name) < 0;
 end
 
 WorldMapActivityTrackerMixin = CreateFromMixins(BountyFrameMixin);
@@ -685,10 +686,10 @@ function WorldMapActivityTrackerMixin:OnEnter()
 end
 
 function WorldMapActivityTrackerMixin:ShowMapJumpTooltip()
-	local factionName = select(1, GetFactionInfoByID(self.selectedBounty.factionID));
-	if factionName then
+	local factionData = C_Reputation.GetFactionDataByID(self.selectedBounty.factionID);
+	if factionData then
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-		GameTooltip_AddHighlightLine(GameTooltip, factionName);
+		GameTooltip_AddHighlightLine(GameTooltip, factionData.name);
 		local wrapText = false;
 		GameTooltip_AddInstructionLine(GameTooltip, WORLD_MAP_ACTIVITY_TRACKER_RING_TOOLTIP, wrapText);
 		GameTooltip:Show();
@@ -789,7 +790,11 @@ function WorldMapActivityTrackerDropDownMixin:InitializeDropDown(level)
 
 	for _, bountyInfo in ipairs(self:GetParent().bounties) do
 		local activityIcon = CreateSimpleTextureMarkup(bountyInfo.icon or [[Interface\Icons\INV_Misc_QuestionMark]], 16, 16);
-		local buttonText = activityIcon .. " " .. select(1, GetFactionInfoByID(bountyInfo.factionID));
+		local buttonText = activityIcon;
+		local factionData = C_Reputation.GetFactionDataByID(bountyInfo.factionID);
+		if factionData then
+			buttonText = buttonText .. " " .. factionData.name;
+		end
 		local function SetBounty()
 			self:GetParent():SetSelectedBounty(bountyInfo); 
 			local isNewSelection = true;

@@ -458,6 +458,7 @@
 		<xs:attribute name="protected" type="xs:boolean" default="false"/>
 		<xs:attribute name="secureReferenceKey" type="xs:string"/>
     <xs:attribute name="retainClickThroughOverride" type="xs:boolean" default="false"/>
+    <xs:attribute name="propagateMouseInput" type="xs:string"/>
 	</xs:attributeGroup>
 
 	<xs:complexType name="LayoutFrameType">
@@ -979,9 +980,10 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:element name="Model" type="ModelType" substitutionGroup="ui:FrameRef"/>
-	<xs:element name="ModelFFX" type="ModelType" substitutionGroup="ui:FrameRef"/>
+  <xs:element name="ModelFFX" type="ModelType" substitutionGroup="ui:FrameRef"/>
+  <xs:element name="MapScene" type="ModelType" substitutionGroup="ui:FrameRef"/>
 
-	<xs:complexType name="SimpleHTMLType">
+  <xs:complexType name="SimpleHTMLType">
 		<xs:complexContent>
 			<xs:extension base="ui:FrameRefType">
 				<xs:sequence minOccurs="0">

@@ -146,7 +146,7 @@ function UnitFrame_Update (self, isParty)
 
 		local nameText = GetUnitName(name, isParty);
 		if ( nameText ) then
-			if ( UnitInPartyIsAI(self.unit) and C_LFGInfo.IsInLFGFollowerDungeon() ) then
+			if ( UnitInPartyIsAI(self.unit) and (C_LFGInfo.IsInLFGFollowerDungeon() or C_PartyInfo.IsPartyWalkIn()) ) then
 				nameText = LFG_FOLLOWER_NAME_PREFIX:format(nameText);
 			end
 

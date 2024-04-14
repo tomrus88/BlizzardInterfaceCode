@@ -756,13 +756,13 @@ function GameTooltip_AddQuest(self, questID)
 		GameTooltip_SetTitle(GameTooltip, title, color);
 		QuestUtils_AddQuestTypeToTooltip(GameTooltip, questID, NORMAL_FONT_COLOR);
 
-		local factionName = factionID and GetFactionInfoByID(factionID);
-		if (factionName) then
+		local factionData = factionID and C_Reputation.GetFactionDataByID(factionID);
+		if ( factionData ) then
 			local reputationYieldsRewards = (not capped) or C_Reputation.IsFactionParagon(factionID);
 			if (reputationYieldsRewards) then
-				GameTooltip:AddLine(factionName);
+				GameTooltip:AddLine(factionData.name);
 			else
-				GameTooltip:AddLine(factionName, GRAY_FONT_COLOR:GetRGB());
+				GameTooltip:AddLine(factionData.name, GRAY_FONT_COLOR:GetRGB());
 			end
 		end
 

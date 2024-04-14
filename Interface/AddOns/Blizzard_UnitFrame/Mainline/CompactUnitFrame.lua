@@ -717,7 +717,7 @@ function CompactUnitFrame_UpdatePowerColor(frame)
 end
 
 function ShouldShowName(frame)
-	if UnitNameplateShowsWidgetsOnly(frame.unit) then
+	if frame.WidgetContainer and UnitNameplateShowsWidgetsOnly(frame.unit) then
 		return false;
 	end
 	if ( frame.optionTable.displayName ) then
@@ -798,7 +798,7 @@ function CompactUnitFrame_UpdateName(frame)
 			end
 		end
 
-		if ( UnitInPartyIsAI(frame.unit) and C_LFGInfo.IsInLFGFollowerDungeon() ) then
+		if ( UnitInPartyIsAI(frame.unit) and (C_LFGInfo.IsInLFGFollowerDungeon() or C_PartyInfo.IsPartyWalkIn()) ) then
 			name = LFG_FOLLOWER_NAME_PREFIX:format(name);
 		end
 

@@ -430,6 +430,9 @@ function UIWidgetContainerMixin:CreateWidget(widgetID, widgetType, widgetTypeInf
 		self.initFunc(widgetFrame);
 	end
 
+	-- Set an anchor to avoid any invalid rect issues happening before layoutFunc is run
+	widgetFrame:SetPoint("TOPLEFT", self, "TOPLEFT");
+
 	self.widgetFrames[widgetID] = widgetFrame;
 
 	return widgetFrame;

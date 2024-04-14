@@ -506,7 +506,7 @@ local function InitializeHonorXPBarDropDown(self, level)
 		else
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 			SetWatchingHonorAsXP(true);
-			SetWatchedFactionIndex(0);
+			C_Reputation.SetWatchedFactionByIndex(0);
 		end
 
 		StatusTrackingBarManager:UpdateBarsShown();
@@ -1637,7 +1637,7 @@ end
 
 function PVPRewardEnlistmentBonus_OnEnter(self)
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-	local spellName = GetSpellInfo(BATTLEGROUND_ENLISTMENT_BONUS);
+	local spellName = C_Spell.GetSpellName(BATTLEGROUND_ENLISTMENT_BONUS);
 	local spellDesc = GetSpellDescription(BATTLEGROUND_ENLISTMENT_BONUS);
 	GameTooltip:SetText(spellName);
 	GameTooltip:AddLine(spellDesc, 1, 1, 1, true);

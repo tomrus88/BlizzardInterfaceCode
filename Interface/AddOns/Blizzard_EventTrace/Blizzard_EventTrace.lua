@@ -122,7 +122,7 @@ end
 function EventTracePanelMixin:OnShow()
 	self:MoveToNewWindow(EVENTTRACE_HEADER, 1000, 600, 930, 300);
 
-	self.Log.Events.ScrollBox:ScrollToEnd(ScrollBoxConstants.NoScrollInterpolation);
+	self.Log.Events.ScrollBox:ScrollToEnd();
 
 	if not self:IsLoggingEventsWhenHidden() then
 		self:LogMessage(EVENTTRACE_LOG_START);
@@ -271,7 +271,7 @@ function EventTracePanelMixin:InitializeLog()
 
 				local found = self.Log.Search.ScrollBox:ScrollToElementDataByPredicate(function(elementData)
 					return elementData.id == pendingSearch.id;
-				end, ScrollBoxConstants.AlignCenter, ScrollBoxConstants.NoScrollInterpolation);
+				end, ScrollBoxConstants.AlignCenter);
 
 				if found then
 					local button = self.Log.Search.ScrollBox:FindFrame(found);
@@ -280,7 +280,7 @@ function EventTracePanelMixin:InitializeLog()
 					end
 				end
 			elseif self.Log.Search.ScrollBox:HasScrollableExtent() then
-				self.Log.Search.ScrollBox:ScrollToEnd(ScrollBoxConstants.NoScrollInterpolation);
+				self.Log.Search.ScrollBox:ScrollToEnd();
 			end
 		end
 	end);
@@ -362,7 +362,7 @@ function EventTracePanelMixin:InitializeLog()
 
 			local found = self.Log.Events.ScrollBox:ScrollToElementDataByPredicate(function(data)
 				return data.id == elementData.id;
-			end, ScrollBoxConstants.AlignCenter, ScrollBoxConstants.NoScrollInterpolation);
+			end, ScrollBoxConstants.AlignCenter);
 
 			local button = found and self.Log.Events.ScrollBox:FindFrame(found);
 			if button then
@@ -659,7 +659,7 @@ function EventTracePanelMixin:LogLine(elementData)
 	self:TrimDataProvider(self.searchDataProvider);
 
 	if not IsAltKeyDown() and (preInsertAtScrollEnd or (not preInsertScrollable and self.Log.Events.ScrollBox:HasScrollableExtent())) then
-		self.Log.Events.ScrollBox:ScrollToEnd(ScrollBoxConstants.NoScrollInterpolation);
+		self.Log.Events.ScrollBox:ScrollToEnd();
 	end
 end
 

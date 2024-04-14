@@ -215,7 +215,7 @@ end
 
 function MoneyInputFrame_OpenPopup(moneyFrame)
 	if moneyFrame.showCurrencyTracking then
-		CharacterFrame_ToggleTokenFrame();
+		CharacterFrame:ToggleTokenFrame();
 		return;
 	end
 

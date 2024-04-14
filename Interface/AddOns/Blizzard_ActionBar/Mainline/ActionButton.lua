@@ -245,7 +245,7 @@ function ActionBarActionEventsFrameMixin:OnLoad()
 	self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "player");
 	self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "player");
 
-	self:RegisterEvent("LEARNED_SPELL_IN_TAB");
+	self:RegisterEvent("LEARNED_SPELL_IN_SKILL_LINE");
 	self:RegisterEvent("PET_STABLE_UPDATE");
 	self:RegisterEvent("PET_STABLE_SHOW");
 	self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW");
@@ -758,8 +758,11 @@ function ActionButton_UpdateCooldown(self)
 		chargeModRate = modRate; 
 		enable = 1; 
 	elseif (self.spellID) then
-		locStart, locDuration = GetSpellLossOfControlCooldown(self.spellID);
-		start, duration, enable, modRate = GetSpellCooldown(self.spellID);
+		locStart, locDuration = C_Spell.GetSpellLossOfControlCooldown(self.spellID);
+		
+		local spellCooldownInfo = C_Spell.GetSpellCooldown(self.spellID) or {startTime = 0, duration = 0, isEnabled = false, modRate = 0};
+		start, duration, enable, modRate = spellCooldownInfo.startTime, spellCooldownInfo.duration, spellCooldownInfo.isEnabled, spellCooldownInfo.modRate;
+
 		charges, maxCharges, chargeStart, chargeDuration, chargeModRate = GetSpellCharges(self.spellID);
 	else
 		locStart, locDuration = GetActionLossOfControlCooldown(self.action);
@@ -974,7 +977,7 @@ end
 
 function ActionBarActionButtonMixin:OnEvent(event, ...)
 	local arg1 = ...;
-	if ((event == "UNIT_INVENTORY_CHANGED" and arg1 == "player") or event == "LEARNED_SPELL_IN_TAB") then
+	if ((event == "UNIT_INVENTORY_CHANGED" and arg1 == "player") or event == "LEARNED_SPELL_IN_SKILL_LINE") then
 		if ( GameTooltip:GetOwner() == self ) then
 			self:SetTooltip();
 		end
@@ -1340,7 +1343,7 @@ function ActionBarActionButtonMixin:UpdateFlyout(isButtonDownOverride)
 	end
 
 	-- Update border
-	local isMouseOverButton =  GetMouseFocus() == self;
+	local isMouseOverButton = self:IsMouseMotionFocus();
 	local isFlyoutShown = SpellFlyout and SpellFlyout:IsShown() and SpellFlyout:GetParent() == self;
 	if (isFlyoutShown or isMouseOverButton) then
 		self.FlyoutBorderShadow:Show();

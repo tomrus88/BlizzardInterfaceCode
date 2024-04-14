@@ -834,10 +834,10 @@ function NameplateBuffContainerMixin:UpdateBuffs(unit, unitAuraUpdateInfo, auraS
 		local nameplateSpells = C_SpellBook.GetTrackedNameplateCooldownSpells(); 
 		for _, spellID in ipairs(nameplateSpells) do 
 			if (not self:HasActiveBuff(spellID) and buffIndex < BUFF_MAX_DISPLAY) then
-				local locStart, locDuration = GetSpellLossOfControlCooldown(spellID);
-				local start, duration, enable, modRate = GetSpellCooldown(spellID);
-				if (locDuration ~= 0 or duration ~= 0) then 
-					local spellInfo = C_SpellBook.GetSpellInfo(spellID);
+				local locStart, locDuration = C_Spell.GetSpellLossOfControlCooldown(spellID);
+				local cooldownInfo = C_Spell.GetSpellCooldown(spellID);
+				if ((locDuration and locDuration ~= 0) or (cooldownInfo and cooldownInfo.duration ~= 0)) then
+					local spellInfo = C_Spell.GetSpellInfo(spellID);
 					if(spellInfo) then 
 						local buff = self.buffPool:Acquire();
 						buff.isBuff = true;
@@ -846,9 +846,14 @@ function NameplateBuffContainerMixin:UpdateBuffs(unit, unitAuraUpdateInfo, auraS
 						buff.auraInstanceID = nil;
 						buff.Icon:SetTexture(spellInfo.iconID); 
 
-						local charges, maxCharges, chargeStart, chargeDuration, chargeModRate = GetSpellCharges(spellID);
+						local charges, maxCharges = GetSpellCharges(spellID);
 						buff.Cooldown:SetSwipeColor(0, 0, 0);
-						CooldownFrame_Set(buff.Cooldown, start, duration, enable, true, modRate);
+
+						if (cooldownInfo and cooldownInfo.duration ~= 0) then
+							CooldownFrame_Set(buff.Cooldown, cooldownInfo.startTime, cooldownInfo.duration, cooldownInfo.isEnabled, true, cooldownInfo.modRate);
+						else
+							CooldownFrame_Set(buff.Cooldown, locStart, locDuration, true, true);
+						end
 
 						if (maxCharges and maxCharges > 1) then
 							buff.CountFrame.Count:SetText(charges);
@@ -857,7 +862,7 @@ function NameplateBuffContainerMixin:UpdateBuffs(unit, unitAuraUpdateInfo, auraS
 							buff.CountFrame.Count:Hide();
 						end
 						buff:Show();
-						buffIndex = buffIndex + 1; 
+						buffIndex = buffIndex + 1;
 					end
 				end
 			end

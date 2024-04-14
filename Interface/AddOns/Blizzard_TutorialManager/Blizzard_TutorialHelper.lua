@@ -39,8 +39,7 @@ end
 function TutorialHelper:FormatString(str)
 	-- Spell Names and Icons e.g. {$1234}
 	str = string.gsub(str, "{%$(%d+)}", function(spellID)
-			local name, _, icon = GetSpellInfo(spellID);
-			--return string.format("|cFF00FFFF%s|r |T%s:16|t", name, icon);
+			local name = C_Spell.GetSpellName(spellID);
 			return string.format("|cFF00FFFF%s|r", name);
 		end);
 

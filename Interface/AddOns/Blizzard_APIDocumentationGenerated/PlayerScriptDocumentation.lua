@@ -129,7 +129,15 @@ local PlayerScript =
 			},
 		},
 		{
+			Name = "ClearPendingBindConversionItem",
+			Type = "Function",
+		},
+		{
 			Name = "ConfirmTalentWipe",
+			Type = "Function",
+		},
+		{
+			Name = "ConvertItemToBindToAccount",
 			Type = "Function",
 		},
 		{

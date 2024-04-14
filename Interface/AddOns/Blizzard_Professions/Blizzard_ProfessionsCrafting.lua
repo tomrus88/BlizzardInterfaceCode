@@ -28,7 +28,7 @@ function ProfessionsCraftingPageMixin:OnLoad()
 	PaperDollItemSlotButton_SetAutoEquipSlotIDs(self.Prof0ToolSlot, self.Prof0Gear0Slot, self.Prof0Gear1Slot);
 	PaperDollItemSlotButton_SetAutoEquipSlotIDs(self.Prof1ToolSlot, self.Prof1Gear0Slot, self.Prof1Gear1Slot);
 	PaperDollItemSlotButton_SetAutoEquipSlotIDs(self.CookingToolSlot, self.CookingGear0Slot);
-	PaperDollItemSlotButton_SetAutoEquipSlotIDs(self.FishingToolSlot);
+	PaperDollItemSlotButton_SetAutoEquipSlotIDs(self.FishingToolSlot, self.FishingGear0Slot, self.FishingGear1Slot);
 
 	self.RecipeList.FilterButton:SetResetFunction(Professions.SetDefaultFilters);
 	self.RecipeList.FilterButton:SetScript("OnMouseDown", function(button, buttonName, down)
@@ -985,7 +985,8 @@ function ProfessionsCraftingPageMixin:CreateInternal(recipeID, count, recipeLeve
 		if salvageItem then
 			local itemLocation = C_Item.GetItemLocation(salvageItem:GetItemGUID());
 			if itemLocation then
-				C_TradeSkillUI.CraftSalvage(recipeID, count, itemLocation);
+				local craftingReagentTbl = transaction:CreateCraftingReagentInfoTbl();
+				C_TradeSkillUI.CraftSalvage(recipeID, count, itemLocation, craftingReagentTbl);
 			end
 		end
 	else

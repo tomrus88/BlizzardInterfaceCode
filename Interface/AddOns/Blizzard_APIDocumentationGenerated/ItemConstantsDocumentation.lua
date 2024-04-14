@@ -3,6 +3,19 @@ local ItemConstants =
 	Tables =
 	{
 		{
+			Name = "BankType",
+			Type = "Enumeration",
+			NumValues = 3,
+			MinValue = 0,
+			MaxValue = 2,
+			Fields =
+			{
+				{ Name = "Character", Type = "BankType", EnumValue = 0 },
+				{ Name = "Guild", Type = "BankType", EnumValue = 1 },
+				{ Name = "Account", Type = "BankType", EnumValue = 2 },
+			},
+		},
+		{
 			Name = "InventoryType",
 			Type = "Enumeration",
 			NumValues = 35,
@@ -72,9 +85,9 @@ local ItemConstants =
 		{
 			Name = "ItemBind",
 			Type = "Enumeration",
-			NumValues = 7,
+			NumValues = 10,
 			MinValue = 0,
-			MaxValue = 6,
+			MaxValue = 9,
 			Fields =
 			{
 				{ Name = "None", Type = "ItemBind", EnumValue = 0 },
@@ -84,6 +97,9 @@ local ItemConstants =
 				{ Name = "Quest", Type = "ItemBind", EnumValue = 4 },
 				{ Name = "Unused1", Type = "ItemBind", EnumValue = 5 },
 				{ Name = "Unused2", Type = "ItemBind", EnumValue = 6 },
+				{ Name = "ToWoWAccount", Type = "ItemBind", EnumValue = 7 },
+				{ Name = "ToBnetAccount", Type = "ItemBind", EnumValue = 8 },
+				{ Name = "ToBnetAccountUntilEquipped", Type = "ItemBind", EnumValue = 9 },
 			},
 		},
 		{
@@ -168,7 +184,7 @@ local ItemConstants =
 				{ Name = "Cypher", Type = "ItemGemColor", EnumValue = 8388608 },
 				{ Name = "Tinker", Type = "ItemGemColor", EnumValue = 16777216 },
 				{ Name = "Primordial", Type = "ItemGemColor", EnumValue = 33554432 },
-				{ Name = "FutureUse", Type = "ItemGemColor", EnumValue = 67108864 },
+				{ Name = "Fragrance", Type = "ItemGemColor", EnumValue = 67108864 },
 			},
 		},
 		{
@@ -300,7 +316,7 @@ local ItemConstants =
 				{ Name = "Cypher", Type = "ItemSocketType", EnumValue = 23 },
 				{ Name = "Tinker", Type = "ItemSocketType", EnumValue = 24 },
 				{ Name = "Primordial", Type = "ItemSocketType", EnumValue = 25 },
-				{ Name = "FutureUse", Type = "ItemSocketType", EnumValue = 26 },
+				{ Name = "Fragrance", Type = "ItemSocketType", EnumValue = 26 },
 			},
 		},
 		{
@@ -412,16 +428,65 @@ local ItemConstants =
 		{
 			Name = "SlotRegion",
 			Type = "Enumeration",
-			NumValues = 5,
+			NumValues = 7,
 			MinValue = 0,
-			MaxValue = 4,
+			MaxValue = 6,
 			Fields =
 			{
 				{ Name = "Invalid", Type = "SlotRegion", EnumValue = 0 },
 				{ Name = "PlayerEquip", Type = "SlotRegion", EnumValue = 1 },
-				{ Name = "PlayerInv", Type = "SlotRegion", EnumValue = 2 },
-				{ Name = "Bank", Type = "SlotRegion", EnumValue = 3 },
-				{ Name = "ReagentBank", Type = "SlotRegion", EnumValue = 4 },
+				{ Name = "PlayerBags", Type = "SlotRegion", EnumValue = 2 },
+				{ Name = "PlayerInv", Type = "SlotRegion", EnumValue = 3 },
+				{ Name = "Bank", Type = "SlotRegion", EnumValue = 4 },
+				{ Name = "ReagentBank", Type = "SlotRegion", EnumValue = 5 },
+				{ Name = "AccountBank", Type = "SlotRegion", EnumValue = 6 },
+			},
+		},
+		{
+			Name = "SubcontainerType",
+			Type = "Enumeration",
+			NumValues = 37,
+			MinValue = 0,
+			MaxValue = 36,
+			Fields =
+			{
+				{ Name = "Bag", Type = "SubcontainerType", EnumValue = 0 },
+				{ Name = "Equipped", Type = "SubcontainerType", EnumValue = 1 },
+				{ Name = "Bankgeneric", Type = "SubcontainerType", EnumValue = 2 },
+				{ Name = "Bankbag", Type = "SubcontainerType", EnumValue = 3 },
+				{ Name = "Mail", Type = "SubcontainerType", EnumValue = 4 },
+				{ Name = "Auction", Type = "SubcontainerType", EnumValue = 5 },
+				{ Name = "KeyringObsolete", Type = "SubcontainerType", EnumValue = 6 },
+				{ Name = "GuildBank0", Type = "SubcontainerType", EnumValue = 7 },
+				{ Name = "GuildBank1", Type = "SubcontainerType", EnumValue = 8 },
+				{ Name = "GuildBank2", Type = "SubcontainerType", EnumValue = 9 },
+				{ Name = "GuildBank3", Type = "SubcontainerType", EnumValue = 10 },
+				{ Name = "GuildBank4", Type = "SubcontainerType", EnumValue = 11 },
+				{ Name = "GuildBank5", Type = "SubcontainerType", EnumValue = 12 },
+				{ Name = "GuildOverflow", Type = "SubcontainerType", EnumValue = 13 },
+				{ Name = "Equipablespells", Type = "SubcontainerType", EnumValue = 14 },
+				{ Name = "CurrencytokenOboslete", Type = "SubcontainerType", EnumValue = 15 },
+				{ Name = "GuildBank6", Type = "SubcontainerType", EnumValue = 16 },
+				{ Name = "GuildBank7", Type = "SubcontainerType", EnumValue = 17 },
+				{ Name = "GuildBank8", Type = "SubcontainerType", EnumValue = 18 },
+				{ Name = "GuildBank9", Type = "SubcontainerType", EnumValue = 19 },
+				{ Name = "GuildBank10", Type = "SubcontainerType", EnumValue = 20 },
+				{ Name = "GuildBank11", Type = "SubcontainerType", EnumValue = 21 },
+				{ Name = "Reagentbank", Type = "SubcontainerType", EnumValue = 22 },
+				{ Name = "Childequipmentstorage", Type = "SubcontainerType", EnumValue = 23 },
+				{ Name = "Quarantine", Type = "SubcontainerType", EnumValue = 24 },
+				{ Name = "CreatedImmediately", Type = "SubcontainerType", EnumValue = 25 },
+				{ Name = "BuybackSlots", Type = "SubcontainerType", EnumValue = 26 },
+				{ Name = "CachedReward", Type = "SubcontainerType", EnumValue = 27 },
+				{ Name = "EquippedBags", Type = "SubcontainerType", EnumValue = 28 },
+				{ Name = "EquippedProfession1", Type = "SubcontainerType", EnumValue = 29 },
+				{ Name = "EquippedProfession2", Type = "SubcontainerType", EnumValue = 30 },
+				{ Name = "EquippedCooking", Type = "SubcontainerType", EnumValue = 31 },
+				{ Name = "EquippedFishing", Type = "SubcontainerType", EnumValue = 32 },
+				{ Name = "EquippedReagentbag", Type = "SubcontainerType", EnumValue = 33 },
+				{ Name = "CraftingOrder", Type = "SubcontainerType", EnumValue = 34 },
+				{ Name = "CraftingOrderReagents", Type = "SubcontainerType", EnumValue = 35 },
+				{ Name = "AccountBankTabs", Type = "SubcontainerType", EnumValue = 36 },
 			},
 		},
 		{
@@ -462,6 +527,7 @@ local ItemConstants =
 			{
 				{ Name = "NUM_ITEM_ENCHANTMENT_SOCKETS", Type = "number", Value = 3 },
 				{ Name = "MAX_LOOT_OBJECT_ITEMS", Type = "number", Value = 31 },
+				{ Name = "INVALID_TRANSACTION_BANK_TAB_SLOT", Type = "number", Value = 0xFF },
 			},
 		},
 		{

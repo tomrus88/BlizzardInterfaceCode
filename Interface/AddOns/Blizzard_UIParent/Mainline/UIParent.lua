@@ -14,6 +14,15 @@ MAX_CHARACTER_MACROS = 18;
 CVarCallbackRegistry:SetCVarCachable("showCastableBuffs");
 CVarCallbackRegistry:SetCVarCachable("showDispelDebuffs");
 
+-- These are windows that rely on a parent frame to be open.  If the parent closes or a pushable frame overlaps them they must be hidden.
+UIChildWindows = {
+	"OpenMailFrame",
+	"GuildMemberDetailFrame",
+	"TokenFramePopup",
+	"GuildBankPopupFrame",
+	"GearManagerDialog",
+};
+
 function GetNotchHeight()
     local notchHeight = 0;
 
@@ -110,6 +119,7 @@ function UIParent_OnLoad(self)
 	self:RegisterEvent("EQUIP_BIND_REFUNDABLE_CONFIRM");
 	self:RegisterEvent("EQUIP_BIND_TRADEABLE_CONFIRM");
 	self:RegisterEvent("USE_BIND_CONFIRM");
+	self:RegisterEvent("CONVERT_TO_BIND_TO_ACCOUNT_CONFIRM");
 	self:RegisterEvent("USE_NO_REFUND_CONFIRM");
 	self:RegisterEvent("CONFIRM_BEFORE_USE");
 	self:RegisterEvent("DELETE_ITEM_CONFIRM");
@@ -354,6 +364,9 @@ function UIParent_OnLoad(self)
 
 	-- Event(s) for ping system
 	self:RegisterEvent("PING_SYSTEM_ERROR");
+
+	-- Event(s) for PlayerSpells
+	self:RegisterEvent("USE_GLYPH");
 end
 
 function UIParent_OnShow(self)
@@ -497,8 +510,12 @@ function TalentFrame_LoadUI()
 	UIParentLoadAddOn("Blizzard_TalentUI");
 end
 
-function ClassTalentFrame_LoadUI()
-	UIParentLoadAddOn("Blizzard_ClassTalentUI");
+function PlayerSpellsFrame_LoadUI()
+	UIParentLoadAddOn("Blizzard_PlayerSpells");
+end
+
+function ProfessionsBook_LoadUI()
+	UIParentLoadAddOn("Blizzard_ProfessionsBook");
 end
 
 function ProfessionsFrame_LoadUI()
@@ -728,6 +745,10 @@ function GenericTraitUI_LoadUI()
 	UIParentLoadAddOn("Blizzard_GenericTraitUI");
 end
 
+function DelvesCompanionConfiguration_LoadUI()
+	UIParentLoadAddOn("Blizzard_DelvesCompanionConfiguration");
+end
+
 function SubscriptionInterstitial_LoadUI()
 	C_AddOns.LoadAddOn("Blizzard_SubscriptionInterstitialUI");
 end
@@ -786,24 +807,6 @@ function ToggleAchievementFrame(stats)
 	if ( ( HasCompletedAnyAchievement() or IsInGuild() ) and CanShowAchievementUI() ) then
 		AchievementFrame_LoadUI();
 		AchievementFrame_ToggleAchievementFrame(stats);
-	end
-end
-
-function ToggleTalentFrame(suggestedTab, inspectUnit)
-        if ( DISALLOW_FRAME_TOGGLING ) then
-		return;
-	end
-	if not inspectUnit and not C_SpecializationInfo.CanPlayerUseTalentSpecUI() then
-		return;
-	end
-
-	ClassTalentFrame_LoadUI();
-
-	ClassTalentFrame:SetInspectUnit(inspectUnit);
-	if not ClassTalentFrame:IsShown() then
-		ShowUIPanel(ClassTalentFrame);
-	else
-		ClassTalentFrame:CheckConfirmClose();
 	end
 end
 
@@ -941,7 +944,7 @@ function ToggleLFDParentFrame()
 	end
 end
 
-function ToggleHelpFrame()
+function ToggleHelpFrame(contextKey)
 	if (Kiosk.IsEnabled()) then
 		return;
 	end
@@ -949,7 +952,8 @@ function ToggleHelpFrame()
 	if ( HelpFrame:IsShown() ) then
 		HideUIPanel(HelpFrame);
 	else
-		HelpFrame:ShowFrame();
+		local key = nil;
+		HelpFrame:ShowFrame(key, contextKey);
 	end
 end
 
@@ -1108,7 +1112,7 @@ function TogglePVPUI()
 	end
 end
 
-function ToggleStoreUI()
+function ToggleStoreUI(contextKey)
 	if ( Kiosk.IsEnabled() or DISALLOW_FRAME_TOGGLING ) then
 		return;
 	end
@@ -1120,7 +1124,7 @@ function ToggleStoreUI()
 		--We weren't showing, now we are. We should hide all other panels.
 		securecall("CloseAllWindows");
 	end
-	StoreFrame_SetShown(not wasShown);
+	StoreFrame_SetShown(not wasShown, contextKey);
 end
 
 function SetStoreUIShown(shown)
@@ -1202,6 +1206,14 @@ function ToggleExpansionLandingPage()
 	ToggleFrame(ExpansionLandingPage);
 end
 
+function ToggleProfessionsBook()
+	if not ProfessionsBookFrame then
+		ProfessionsBook_LoadUI();
+	end
+
+	ToggleFrame(ProfessionsBookFrame);
+end
+
 
 function OpenDeathRecapUI(id)
 	if (not DeathRecapFrame) then
@@ -1213,8 +1225,9 @@ end
 function InspectUnit(unit)
 	InspectFrame_LoadUI();
 	if ( InspectFrame_Show ) then
-		if ( ClassTalentFrame and ClassTalentFrame:IsInspecting() ) then
-			ClassTalentFrame:LockInspect();
+		if ( PlayerSpellsFrame and PlayerSpellsFrame:IsInspecting() ) then
+			-- If already inspecting a unit's talents, close that frame to clear out that prior inspect before starting the new inspect
+			HideUIPanel(PlayerSpellsFrame);
 		end
 
 		InspectFrame_Show(unit);
@@ -1568,6 +1581,8 @@ function UIParent_OnEvent(self, event, ...)
 		end
 	elseif ( event == "USE_BIND_CONFIRM" ) then
 		StaticPopup_Show("USE_BIND");
+	elseif ( event == "CONVERT_TO_BIND_TO_ACCOUNT_CONFIRM" ) then
+		StaticPopup_Show("CONVERT_TO_BIND_TO_ACCOUNT_CONFIRM");
 	elseif( event == "USE_NO_REFUND_CONFIRM" )then
 		StaticPopup_Show("USE_NO_REFUND_CONFIRM");
 	elseif ( event == "CONFIRM_BEFORE_USE" ) then
@@ -1804,8 +1819,8 @@ function UIParent_OnEvent(self, event, ...)
 
 		Designers previously wanted these disabled when feared, they seem to have changed their minds
 		CharacterMicroButton:Disable();
-		SpellbookMicroButton:Disable();
-		TalentMicroButton:Disable();
+		ProfessionMicroButton:Disable();
+		PlayerSpellsMicroButton:Disable();
 		QuestLogMicroButton:Disable();
 		GuildMicroButton:Disable();
 		WorldMapMicroButton:Disable();
@@ -1818,8 +1833,8 @@ function UIParent_OnEvent(self, event, ...)
 		SetDesaturation(MicroButtonPortrait, false);
 
 		CharacterMicroButton:Enable();
-		SpellbookMicroButton:Enable();
-		TalentMicroButton:Enable();
+		ProfessionMicroButton:Enable();
+		PlayerSpellsMicroButton:Enable();
 		QuestLogMicroButton:Enable();
 		GuildMicroButton:Enable();
 		WorldMapMicroButton:Enable();
@@ -2307,11 +2322,19 @@ function UIParent_OnEvent(self, event, ...)
 
 		ShowUIPanel(RuneforgeFrame);
 	elseif (event == "TRAIT_SYSTEM_INTERACTION_STARTED") then
-		GenericTraitUI_LoadUI();
-
+		-- TODO / NOTE : This is temporary, until we have a GameObject specifically for opening delves configuration.
+		--				 Until then, we're piggybacking off of the generic trait frame
 		local traitTreeID = ...;
-		GenericTraitFrame:SetTreeID(traitTreeID);
-		ShowUIPanel(GenericTraitFrame);
+		local DELVES_TEST_TREE = 874;
+		if traitTreeID == DELVES_TEST_TREE then
+			DelvesCompanionConfiguration_LoadUI();
+			ShowUIPanel(DelvesCompanionConfigurationFrame);
+		else
+			GenericTraitUI_LoadUI();
+	
+			GenericTraitFrame:SetTreeID(traitTreeID);
+			ShowUIPanel(GenericTraitFrame);
+		end
 	-- Events for Reporting system
 	elseif (event == "REPORT_PLAYER_RESULT") then
 		local success = ...;
@@ -2334,10 +2357,12 @@ function UIParent_OnEvent(self, event, ...)
 		end
 
 		-- Close dropdown(s).
-		local mouseFocus = GetMouseFocus();
-		if not HandlesGlobalMouseEvent(mouseFocus, buttonID, event) then
-			UIDropDownMenu_HandleGlobalMouseEvent(buttonID, event);
-			SelectionPopouts:HandleGlobalMouseEvent(buttonID, event);
+		local mouseFoci = GetMouseFoci();
+		for _, mouseFocus in ipairs(mouseFoci) do
+			if not HandlesGlobalMouseEvent(mouseFocus, buttonID, event) then
+				UIDropDownMenu_HandleGlobalMouseEvent(buttonID, event);
+				SelectionPopouts:HandleGlobalMouseEvent(buttonID, event);
+			end
 		end
 
 		-- Clear keyboard focus.
@@ -2383,6 +2408,12 @@ function UIParent_OnEvent(self, event, ...)
 	elseif event == "PING_SYSTEM_ERROR" then
 		local errorMsg = ...;
 		UIErrorsFrame:AddMessage(errorMsg, RED_FONT_COLOR:GetRGBA());
+	elseif event == "USE_GLYPH" then
+		self:UnregisterEvent("USE_GLYPH");
+		if(not PlayerSpellsFrame) then
+			PlayerSpellsUtil.OpenToSpellBookTab();
+			PlayerSpellsFrame.SpellBookFrame:OnEvent(event, ...);
+		end
 	end
 end
 
@@ -2457,7 +2488,7 @@ function UIParentManagedFrameContainerMixin:UpdateFrame(frame)
 	self.BottomManagedLayoutContainer:Layout();
 
 	if frame.isRightManagedFrame and ObjectiveTrackerFrame then
-		ObjectiveTracker_UpdateHeight();
+		ObjectiveTrackerFrame:UpdateHeight();
 	end
 end
 
@@ -2499,7 +2530,7 @@ function UIParentManagedFrameContainerMixin:RemoveManagedFrame(frame)
 	end
 
 	if ObjectiveTrackerFrame then
-		ObjectiveTracker_UpdateHeight();
+		ObjectiveTrackerFrame:UpdateHeight();
 	end
 
 	self:Layout();
@@ -2808,8 +2839,8 @@ function ToggleGameMenu()
 	elseif ( SpellStopTargeting() ) then
 	elseif(MatchCelebrationPartyPoseFrame and MatchCelebrationPartyPoseFrame:IsShown()) then
 	elseif ( SoulbindViewer and SoulbindViewer:HandleEscape()) then
-	elseif ( ClassTalentFrame and ClassTalentFrame:IsShown() ) then
-		ClassTalentFrame:CheckConfirmClose();
+	elseif ( PlayerSpellsFrame and PlayerSpellsFrame:IsShown() ) then
+		PlayerSpellsFrame:CheckConfirmClose();
 	elseif ( ProfessionsFrame and ProfessionsFrame:IsShown() ) then
 		ProfessionsFrame:CheckConfirmClose();
 	elseif ( securecall("CloseAllWindows") ) then
@@ -3801,6 +3832,25 @@ function ConfirmOrLeaveLFGParty()
 		StaticPopup_Show("CONFIRM_LEAVE_INSTANCE_PARTY", partyLFGCategory == LE_LFG_CATEGORY_WORLDPVP and CONFIRM_LEAVE_BATTLEFIELD or CONFIRM_LEAVE_INSTANCE_PARTY);
 	else
 		LeaveInstanceParty();
+	end
+end
+
+-- WALK_IN party members automatically leave the party upon zoning out
+-- Porting out of a delve is only allowed when the delve is complete (unless a hearthstone or other tool is used)
+function LeaveWalkInParty()
+	C_PartyInfo.DelveTeleportOut();
+end
+
+function ConfirmOrLeaveParty()
+	if ( not IsInGroup(LE_PARTY_CATEGORY_INSTANCE) ) then
+		return;
+	end
+
+	if ( IsPartyLFG() ) then
+		ConfirmOrLeaveLFGParty();
+	-- If the party is walk-in (aka Delve) *and* it is complete, let the player choose to just leave
+	elseif ( C_PartyInfo.IsPartyWalkIn() and C_PartyInfo.IsDelveComplete() ) then
+		LeaveWalkInParty();
 	end
 end
 

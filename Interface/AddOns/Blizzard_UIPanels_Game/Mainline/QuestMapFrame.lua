@@ -38,7 +38,6 @@ function QuestLogMixin:UpdatePOIs()
 	if self:SyncQuestSystemWithCurrentMap() then
 		QuestMapUpdateAllQuests();
 		QuestPOIUpdateIcons();
-		ObjectiveTracker_UpdatePOIs();
 	end
 end
 
@@ -544,18 +543,16 @@ end
 function QuestMapFrame_UpdateAll(numPOIs)
 	QuestMapFrame:UpdatePOIs();
 
-	numPOIs = numPOIs or QuestMapUpdateAllQuests();
+	if not numPOIs then
+		QuestMapUpdateAllQuests();
+	end
 
 	if ( QuestMapFrame:GetParent():IsShown() ) then
-		local poiTable = { };
-		if ( numPOIs > 0 and GetCVarBool("questPOI") ) then
-			GetQuestPOIs(poiTable);
-		end
 		local questDetailID = QuestMapFrame.DetailsFrame.questID;
 		if questDetailID then
 			QuestMapFrame_ShowQuestDetails(questDetailID);
 		else
-			QuestLogQuests_Update(poiTable);
+			QuestLogQuests_Update();
 		end
 		QuestMapFrame:GetParent():OnQuestLogUpdate();
 	end
@@ -835,7 +832,7 @@ end
 
 function QuestMapQuestOptions_TrackQuest(questID)
 	if QuestUtils_IsQuestWatched(questID) then
-		QuestObjectiveTracker_UntrackQuest(nil, questID);
+		C_QuestLog.RemoveQuestWatch(questID);
 	else
 		C_QuestLog.AddQuestWatch(questID, Enum.QuestWatchType.Manual);
 		QuestSuperTracking_OnQuestTracked(questID);
@@ -1131,22 +1128,9 @@ local function QuestLogQuests_GetQuestInfos(questInfoContainer)
 	return infos;
 end
 
-local function QuestLogQuests_ShouldDisplayPOIButton(displayState, info, isDisabledQuest)
-	return (info.hasLocalPOI or isDisabledQuest) and displayState.questPOI;
-end
-
 local function QuestLogQuests_GetPOIButton(displayState, info, isDisabledQuest, isComplete)
-	if isDisabledQuest then
-		return QuestScrollFrame.Contents:GetButtonForQuest(info.questID, POIButtonUtil.Style.QuestDisabled, nil);
-	elseif isComplete then
-		return QuestScrollFrame.Contents:GetButtonForQuest(info.questID, POIButtonUtil.Style.QuestComplete, nil);
-	else
-		for index, poiQuestID in ipairs(displayState.poiTable) do
-			if poiQuestID == info.questID then
-				return QuestScrollFrame.Contents:GetButtonForQuest(info.questID, POIButtonUtil.Style.Numeric, index);
-			end
-		end
-	end
+	local isWayPoint = false; -- TODO: This probably needs to be supported
+	return QuestScrollFrame.Contents:GetButtonForQuest(info.questID, POIButtonUtil.GetStyleFromQuestData(isComplete, isWayPoint, isDisabledQuest));
 end
 
 local function QuestLogQuests_GetBestTagID(questID, info, isComplete)
@@ -1306,19 +1290,15 @@ local function QuestLogQuests_AddQuestButton(displayState, info)
 		end
 	end
 
-	if QuestLogQuests_ShouldDisplayPOIButton(displayState, info, isDisabledQuest) then
-		local poiButton = QuestLogQuests_GetPOIButton(displayState, info, isDisabledQuest, isComplete);
-		if poiButton then
-			poiButton:SetPoint("TOPLEFT", button, 6, -4);
-			poiButton.parent = button;
-		end
-
-		-- extra room because of POI icon
-		totalHeight = totalHeight + 6;
-		button.Text:SetPoint("TOPLEFT", 31, -8);
-	else
-		button.Text:SetPoint("TOPLEFT", 31, -4);
+	local poiButton = QuestLogQuests_GetPOIButton(displayState, info, isDisabledQuest, isComplete);
+	if poiButton then
+		poiButton:SetPoint("TOPLEFT", button, 6, -4);
+		poiButton.parent = button;
 	end
+
+	-- extra room because of POI icon
+	totalHeight = totalHeight + 6;
+	button.Text:SetPoint("TOPLEFT", 31, -8);
 
 	button:SetHeight(totalHeight);
 
@@ -1438,10 +1418,9 @@ local function QuestLogQuests_UpdateBackground(displayState)
 	QuestMapFrame.Background:SetAtlas(atlas, true);
 end
 
-local function QuestLogQuests_BuildInitialDisplayState(poiTable, questInfoContainer)
+local function QuestLogQuests_BuildInitialDisplayState(questInfoContainer)
 	return {
 		questInfoContainer = questInfoContainer,
-		poiTable = poiTable,
 		displayQuestID = GetCVarBool("displayQuestID"),
 		displayInternalOnlyStatus = GetCVarBool("displayInternalOnlyStatus"),
 		showReadyToRecord = GetCVarBool("showReadyToRecord"),
@@ -1461,7 +1440,7 @@ local function QuestLogQuests_DisplayQuestsFromIndices(displayState, infos)
 	end
 end
 
-function QuestLogQuests_Update(poiTable)
+function QuestLogQuests_Update()
 	QuestScrollFrame.titleFramePool:ReleaseAll();
 	QuestScrollFrame.objectiveFramePool:ReleaseAll();
 	QuestScrollFrame.headerFramePool:ReleaseAll();
@@ -1476,7 +1455,7 @@ function QuestLogQuests_Update(poiTable)
 	local campaignInfos = QuestLogQuests_GetCampaignInfos(questInfoContainer);
 	local covenantCallingsInfos = QuestLogQuests_GetCovenantCallingsInfos(questInfoContainer);
 	local questInfos = QuestLogQuests_GetQuestInfos(questInfoContainer);
-	local displayState = QuestLogQuests_BuildInitialDisplayState(poiTable, questInfoContainer);
+	local displayState = QuestLogQuests_BuildInitialDisplayState(questInfoContainer);
 
 	-- Display all campaigns
 	QuestLogQuests_DisplayQuestsFromIndices(displayState, campaignInfos);

@@ -16,7 +16,7 @@ function QuestFrame_OnLoad(self)
 	self:RegisterEvent("QUEST_LOG_UPDATE");
 	self:RegisterEvent("UNIT_PORTRAIT_UPDATE");
 	self:RegisterEvent("PORTRAITS_UPDATED");
-	self:RegisterEvent("LEARNED_SPELL_IN_TAB");
+	self:RegisterEvent("LEARNED_SPELL_IN_SKILL_LINE");
 end
 
 function QuestFrame_OnEvent(self, event, ...)
@@ -42,8 +42,8 @@ function QuestFrame_OnEvent(self, event, ...)
 			return;
 		end
 
-        if(questStartItemID ~= nil and questStartItemID ~= 0) then
-			if (AutoQuestPopupTracker_AddPopUp(GetQuestID(), "OFFER", questStartItemID)) then
+        if(questStartItemID ~= nil and questStartItemID ~= 0) then		
+			if (QuestObjectiveTracker:AddAutoQuestPopUp(GetQuestID(), "OFFER", questStartItemID)) then
                 PlayAutoAcceptQuestSound();
             end
             CloseQuest();
@@ -51,7 +51,7 @@ function QuestFrame_OnEvent(self, event, ...)
 		end
 
 		if ( QuestGetAutoAccept() and QuestIsFromAreaTrigger()) then
-			if (AutoQuestPopupTracker_AddPopUp(GetQuestID(), "OFFER")) then
+			if (QuestObjectiveTracker:AddAutoQuestPopUp(GetQuestID(), "OFFER")) then
 				PlayAutoAcceptQuestSound();
 			end
 			CloseQuest();
@@ -87,7 +87,7 @@ function QuestFrame_OnEvent(self, event, ...)
 			QuestFrameGreetingPanel_OnShow(QuestFrameGreetingPanel);
 		end
 		return;
-	elseif ( event == "LEARNED_SPELL_IN_TAB" ) then
+	elseif ( event == "LEARNED_SPELL_IN_SKILL_LINE" ) then
 		if ( QuestInfoFrame.rewardsFrame:IsVisible() ) then
 			QuestInfo_ShowRewards();
 			QuestDetailScrollFrame.ScrollBar:ScrollToBegin();
@@ -420,7 +420,7 @@ function QuestFrame_OnHide()
 		QuestFrame.dialog = nil;
 	end
 	if ( QuestFrame.autoQuest ) then
-		AutoQuestPopupTracker_RemovePopUp(GetQuestID());
+		QuestObjectiveTracker:RemoveAutoQuestPopUp(GetQuestID());
 		QuestFrameDeclineButton:Show();
 		QuestFrameCloseButton:Enable();
 		PlayAutoAcceptQuestSound();

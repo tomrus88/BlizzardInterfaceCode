@@ -320,14 +320,10 @@ function PTR_IssueReporter.CreateReports()
     }
     warfrontsReport:RegisterPopEvent(event.MapIDExit, warfrontMapIDs)        
     
-    ------------------------------------- Spell Reporting ----------------------------------------------
-    local GetIconFromSpellID = function(value)
-        return select(3, GetSpellInfo(value))
-    end
-    
+    ------------------------------------- Spell Reporting ----------------------------------------------   
     local spellReport = PTR_IssueReporter.CreateSurvey(7, "Issue Report: %s")
     spellReport:PopulateDynamicTitleToken(1, "Name")
-    spellReport:AttachIconViewer("ID", GetIconFromSpellID)
+    spellReport:AttachIconViewer("ID", C_Spell.GetSpellTexture)
     PTR_IssueReporter.AttachDefaultCollectionToSurvey(spellReport, true)
     
     spellReport:AddDataCollection(collector.FromDataPackage, "ID")
@@ -550,6 +546,7 @@ function PTR_IssueReporter.CreateReports()
         AdventureGuide = 7,
         ClassTalent = 8,
         ProfessionTalents = 9,
+        WarbandsCharacterSelect = 10,
     }
     
     ----------------------------------------------- Edit Mode ------------------------------------------------
@@ -620,8 +617,8 @@ function PTR_IssueReporter.CreateReports()
     ------------------------------------------- Class Talents -------------------------------------------------
     local getSpecIDFunc = function()
         local ID = 0
-        if (ClassTalentFrame) and (ClassTalentFrame.TalentsTab) and (ClassTalentFrame.TalentsTab.GetTalentTreeID) then
-            ID = ClassTalentFrame.TalentsTab:GetTalentTreeID()
+        if (PlayerSpellsFrame) and (PlayerSpellsFrame.TalentsFrame) and (PlayerSpellsFrame.TalentsFrame.GetTalentTreeID) then
+            ID = PlayerSpellsFrame.TalentsFrame:GetTalentTreeID()
         end
         
         return ID
@@ -630,8 +627,8 @@ function PTR_IssueReporter.CreateReports()
     local getTalentTreeString = function()
         local loadOutString = ""
         
-        if (ClassTalentFrame) and (ClassTalentFrame.TalentsTab) and (ClassTalentFrame.TalentsTab.GetLoadoutExportString) then
-            loadOutString = ClassTalentFrame.TalentsTab:GetLoadoutExportString()
+        if (PlayerSpellsFrame) and (PlayerSpellsFrame.TalentsFrame) and (PlayerSpellsFrame.TalentsFrame.GetLoadoutExportString) then
+            loadOutString = PlayerSpellsFrame.TalentsFrame:GetLoadoutExportString()
         end
         
         return loadOutString        
@@ -645,7 +642,7 @@ function PTR_IssueReporter.CreateReports()
     classTalentUIReport:AddDataCollection(collector.RunFunction, getSpecIDFunc)
     classTalentUIReport:AddDataCollection(collector.RunFunction, getTalentTreeString)
     
-    classTalentUIReport:RegisterUIPanelClick("ClassTalentFrame.TabSet", 2)
+    classTalentUIReport:RegisterUIPanelClick("PlayerSpellsFrame.TabSet", 2)
     
     ----------------------------------------- Profession Talents -----------------------------------------------
     local getProfSpecID = function()

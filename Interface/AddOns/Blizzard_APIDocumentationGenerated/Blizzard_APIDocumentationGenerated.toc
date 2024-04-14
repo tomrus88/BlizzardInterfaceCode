@@ -52,6 +52,7 @@ CursorUtilDocumentation.lua
 DeathAlertDocumentation.lua
 DeathInfoDocumentation.lua
 DebugToggleDocumentation.lua
+Deprecated_11_0_0Documentation.lua
 DuelInfoDocumentation.lua
 EditModeManagerDocumentation.lua
 EncounterInfoDocumentation.lua
@@ -85,6 +86,7 @@ GossipInfoDocumentation.lua
 GuildBankDocumentation.lua
 GuildInfoDocumentation.lua
 HeirloomInfoDocumentation.lua
+ImmersiveInteractionManagerDocumentation.lua
 InputDocumentation.lua
 InstanceDocumentation.lua
 InstanceEncounterDocumentation.lua
@@ -238,6 +240,7 @@ WowEntitlementInfoDocumentation.lua
 WowTokenUIDocumentation.lua
 XMLUtilDocumentation.lua
 ZoneScriptDocumentation.lua
+AccessibilityOptionsDocumentation.lua
 AlliedRacesFrameDocumentation.lua
 AnimaDiversionUIDocumentation.lua
 ArdenwealdGardeningDocumentation.lua
@@ -293,6 +296,7 @@ ScenarioInfoDocumentation.lua
 ScrappingMachineUIDocumentation.lua
 ScriptedAnimationsDocumentation.lua
 SeasonInfoDocumentation.lua
+SimpleMapSceneAPIDocumentation.lua
 SocialRestrictionsDocumentation.lua
 SoulbindsDocumentation.lua
 SplashScreenDocumentation.lua
@@ -312,6 +316,7 @@ PerksProgramDocumentation.lua
 AccountConstantsDocumentation.lua
 ActionDocumentation.lua
 AppearanceSourceDocumentation.lua
+ArrowCalloutConstantsDocumentation.lua
 AuctionHouseEnumsDocumentation.lua
 AzeriteConstantsDocumentation.lua
 BagConstantsDocumentation.lua
@@ -322,6 +327,7 @@ ButtonConstantsDocumentation.lua
 CalendarConstantsDocumentation.lua
 CameraConstantsDocumentation.lua
 CharacterCustomizationSharedDocumentation.lua
+CharacterSelectionConstantsDocumentation.lua
 ChatConstantsDocumentation.lua
 ClubSharedDocumentation.lua
 ColorDocumentation.lua
@@ -353,6 +359,7 @@ ModelAnimationSharedDocumentation.lua
 NamePlateDocumentation.lua
 PVPMgrConstantsDocumentation.lua
 PartyConstantsDocumentation.lua
+PartyPoseUIConstantsDocumentation.lua
 PerksVendorConstantsDocumentation.lua
 PetBattleConstantsDocumentation.lua
 PetConstantsDocumentation.lua
@@ -362,6 +369,7 @@ PlayerDocumentation.lua
 PlayerInfoSharedDocumentation.lua
 PlayerInteractionManagerConstantsDocumentation.lua
 PlayerMentorshipConstantsDocumentation.lua
+PowerTypeConstantsDocumentation.lua
 ProfessionConstantsDocumentation.lua
 PvPFactionConstantsDocumentation.lua
 PvpInfoConstantsDocumentation.lua
@@ -378,6 +386,8 @@ SharedTraitsEnumsDocumentation.lua
 SimpleHTMLSharedDocumentation.lua
 SocialConstantsDocumentation.lua
 SoftTargetConstantsDocumentation.lua
+SpellBookConstantsDocumentation.lua
+SpellSharedDocumentation.lua
 TextureSharedDocumentation.lua
 TimeDocumentation.lua
 TimerunningConstantsDocumentation.lua

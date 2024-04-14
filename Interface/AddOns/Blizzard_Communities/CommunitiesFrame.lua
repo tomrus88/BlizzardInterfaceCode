@@ -155,8 +155,7 @@ function CommunitiesFrameMixin:OnShow()
 	self:UpdateCommunitiesTabs();
 
 	if self.CommunitiesList:IsShown() then
-		local noScrollInterpolation = true;
-		self.CommunitiesList:ScrollToClub(self:GetSelectedClubId(), noScrollInterpolation);
+		self.CommunitiesList:ScrollToClub(self:GetSelectedClubId());
 	end
 
 	self:RegisterCallback(CommunitiesFrameMixin.Event.MemberListDropDownShown, self.OnMemberListDropDownShown, self);

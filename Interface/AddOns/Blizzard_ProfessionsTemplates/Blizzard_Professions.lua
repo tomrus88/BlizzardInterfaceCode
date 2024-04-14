@@ -113,6 +113,11 @@ local CraftingAccessibleBags =
 	Enum.BagIndex.BankBag_6,
 	Enum.BagIndex.BankBag_7,
 	Enum.BagIndex.Reagentbank,
+	Enum.BagIndex.AccountBankTab_1,
+	Enum.BagIndex.AccountBankTab_2,
+	Enum.BagIndex.AccountBankTab_3,
+	Enum.BagIndex.AccountBankTab_4,
+	Enum.BagIndex.AccountBankTab_5,
 };
 
 function Professions.FindItemsMatchingItemID(itemID, maxFindCount)

@@ -1396,8 +1396,19 @@ function QueueStatusDropDown_AddLFGButtons(category)
 			end
 		end
 		if ( addExitOption ) then
-			info.text = (category == LE_LFG_CATEGORY_WORLDPVP) and LEAVE_BATTLEGROUND or INSTANCE_PARTY_LEAVE;
-			info.func = wrapFunc(ConfirmOrLeaveLFGParty);
+			local text = (category == LE_LFG_CATEGORY_WORLDPVP) and LEAVE_BATTLEGROUND or INSTANCE_PARTY_LEAVE;
+
+			if C_PartyInfo.IsPartyWalkIn() then
+				if C_PartyInfo.IsDelveComplete() then
+					text = INSTANCE_WALK_IN_LEAVE;
+				else
+					-- If in a delve and the delve is incomplete, don't show an option to leave.
+					return;
+				end
+			end
+
+			info.text = text;
+			info.func = wrapFunc(ConfirmOrLeaveParty);
 			info.arg1 = nil;
 			info.disabled = false;
 			UIDropDownMenu_AddButton(info);

@@ -86,7 +86,11 @@ function WorldMap_DoesWorldQuestInfoPassFilters(info, ignoreTypeFilters)
 				end
 			end
 		elseif ( tagInfo.worldQuestType == Enum.QuestTagType.PetBattle ) then
-			if ( not GetCVarBool("showTamers") ) then
+			if ( not GetCVarBool("showTamersWQ") ) then
+				return false;
+			end
+		elseif tagInfo.worldQuestType == Enum.QuestTagType.DragonRiderRacing then
+			if ( not GetCVarBool("dragonRidingRacesFilterWQ") ) then
 				return false;
 			end
 		else

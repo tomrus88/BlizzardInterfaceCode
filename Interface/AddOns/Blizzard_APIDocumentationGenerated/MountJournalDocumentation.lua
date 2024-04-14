@@ -169,6 +169,15 @@ local MountJournal =
 			},
 		},
 		{
+			Name = "GetDynamicFlightModeSpellID",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "spellID", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetIsFavorite",
 			Type = "Function",
 
@@ -461,6 +470,10 @@ local MountJournal =
 			},
 		},
 		{
+			Name = "PickupDynamicFlightMode",
+			Type = "Function",
+		},
+		{
 			Name = "SetAllSourceFilters",
 			Type = "Function",
 
@@ -539,6 +552,10 @@ local MountJournal =
 			{
 				{ Name = "mountID", Type = "number", Nilable = false },
 			},
+		},
+		{
+			Name = "SwapDynamicFlightMode",
+			Type = "Function",
 		},
 	},
 

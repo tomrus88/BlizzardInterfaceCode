@@ -201,11 +201,10 @@ InspectPaperDollFrameTalentsButtonMixin = {};
 
 function InspectPaperDollFrameTalentsButtonMixin:OnClick()
 	if C_Traits.HasValidInspectData() then
-		ClassTalentFrame_LoadUI();
+		PlayerSpellsFrame_LoadUI();
 
-		local suggestedTab = nil;
 		local inspectUnit = InspectFrame.unit;
-		ToggleTalentFrame(suggestedTab, inspectUnit);
+		PlayerSpellsUtil.OpenToClassTalentsTab(inspectUnit);
 	end
 end
 

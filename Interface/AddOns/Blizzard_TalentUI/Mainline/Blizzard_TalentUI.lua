@@ -131,7 +131,7 @@ function PlayerTalentFrame_Toggle(suggestedTalentTab)
 			else
 				PlayerTalentTab_OnClick(_G["PlayerTalentFrameTab"..TALENTS_TAB]);
 			end
-			MainMenuMicroButton_HideAlert(TalentMicroButton);
+			MainMenuMicroButton_HideAlert(PlayerSpellsMicroButton);
 		end
 	else
 		PlayerTalentFrame_Close();
@@ -170,7 +170,7 @@ function PlayerTalentFrame_OnLoad(self)
 	self:RegisterEvent("ADDON_LOADED");
 	self:RegisterEvent("UNIT_MODEL_CHANGED");
 	self:RegisterEvent("UNIT_LEVEL");
-	self:RegisterEvent("LEARNED_SPELL_IN_TAB");
+	self:RegisterEvent("LEARNED_SPELL_IN_SKILL_LINE");
 	self:RegisterEvent("PLAYER_TALENT_UPDATE");
 	self:RegisterEvent("PET_SPECIALIZATION_CHANGED");
 	self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED");
@@ -256,8 +256,8 @@ end
 
 function PlayerTalentFrame_OnShow(self)
 	-- Stop buttons from flashing after skill up
-	MicroButtonPulseStop(TalentMicroButton);
-	MainMenuMicroButton_HideAlert(TalentMicroButton);
+	MicroButtonPulseStop(PlayerSpellsMicroButton);
+	MainMenuMicroButton_HideAlert(PlayerSpellsMicroButton);
 
 	PlaySound(SOUNDKIT.IG_CHARACTER_INFO_OPEN);
 	UpdateMicroButtons();
@@ -289,7 +289,7 @@ function PlayerTalentFrame_OnHide()
 	wipe(talentTabWidthCache);
 
 	StaticPopup_Hide("CONFIRM_LEARN_SPEC");
-	TalentMicroButton:EvaluateAlertVisibility()
+	PlayerSpellsMicroButton:EvaluateAlertVisibility()
 end
 
 function PlayerTalentFrame_OnClickClose(self)
@@ -311,7 +311,7 @@ function PlayerTalentFrame_OnEvent(self, event, ...)
 					PlayerTalentFrame_Update();
 				end
 			end
-		elseif (event == "LEARNED_SPELL_IN_TAB") then
+		elseif (event == "LEARNED_SPELL_IN_SKILL_LINE") then
 			-- Must update the Mastery bonus if you just learned Mastery
 		end
 	end
@@ -582,15 +582,12 @@ end
 
 function HandleGeneralTalentFrameChatLink(self, talentName, talentLink)
 	if ( MacroFrameText and MacroFrameText:HasFocus() ) then
-		local spellName = GetSpellInfo(talentName);
-		if ( spellName and not IsPassiveSpell(spellName) ) then
-			local subSpellName = GetSpellSubtext(talentName);
-			if ( subSpellName ) then
-				if ( subSpellName ~= "" ) then
-					ChatEdit_InsertLink(spellName.."("..subSpellName..")");
-				else
-					ChatEdit_InsertLink(spellName);
-				end
+		local spellName, subSpellName = C_Spell.GetSpellName(talentName);
+		if ( spellName and not C_Spell.IsSpellPassive(spellName) ) then
+			if ( subSpellName and subSpellName ~= "" ) then
+				ChatEdit_InsertLink(spellName.."("..subSpellName..")");
+			else
+				ChatEdit_InsertLink(spellName);
 			end
 		end
 	elseif ( talentLink ) then
@@ -1044,7 +1041,7 @@ function PlayerSpecSpellTemplate_OnEnter(self)
 	local isPet = specFrame.isPet;
 	local sex = isPet and UnitSex("pet") or UnitSex("player");
 	local id = GetSpecializationInfo(shownSpec, nil, isPet, nil, sex);
-    if (not id or not self.spellID or not GetSpellInfo(self.spellID)) then
+    if (not id or not self.spellID or not C_Spell.DoesSpellExist(self.spellID)) then
 		return;
 	end
 
@@ -1263,9 +1260,9 @@ function PlayerTalentFrame_UpdateSpecFrame(self, spec)
 				end
 			end
 
-			local _, icon = GetSpellTexture(bonuses[i]);
-			SetPortraitToTexture(frame.icon, icon);
-			frame.name:SetText(GetSpellInfo(bonuses[i]));
+			local spellInfo = C_Spell.GetSpellInfo(bonuses[i]);
+			SetPortraitToTexture(frame.icon, spellInfo.iconID);
+			frame.name:SetText(spellInfo.name);
 			frame.spellID = bonuses[i];
 			frame.extraTooltip = nil;
 			frame.isPet = self.isPet;
@@ -1281,7 +1278,7 @@ function PlayerTalentFrame_UpdateSpecFrame(self, spec)
 				frame.subText:SetText(BOOSTED_CHAR_SPELL_TEMPLOCK);
 			else
 				frame.icon:SetAlpha(1);
-				local level = GetSpellLevelLearned(bonuses[i]);
+				local level = C_Spell.GetSpellLevelLearned(bonuses[i]);
 				local futureSpell = level and level > UnitLevel("player");
 				if ( futureSpell ) then
 					frame.subText:SetFormattedText(SPELLBOOK_AVAILABLE_AT, level);
@@ -1556,7 +1553,7 @@ function PvpTalentFrameMixin:SelectSlot(slot)
 	self.selectedSlotIndex = slot.slotIndex;
 	slot.Arrow:Show();
 
-	self.TalentList.ScrollBox:ScrollToBegin(ScrollBoxConstants.NoScrollInterpolation);
+	self.TalentList.ScrollBox:ScrollToBegin();
 	self.TalentList:Update();
 	self.TalentList:Show();
 end

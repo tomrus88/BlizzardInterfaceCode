@@ -505,7 +505,7 @@ function DebuffFrameMixin:UpdateAuras()
 		-- TODO:: Rename usages in this file to match packed auraData names, then just use packed aura everywhere
 		self.auraInfo[index] = {index = index, texture = auraData.icon, count = auraData.applications, debuffType = auraData.dispelName, duration =  auraData.duration, expirationTime =  auraData.expirationTime, timeMod =  auraData.timeMod, auraType = "Debuff" };
 
-		local deadlyDebuffInfo = C_SpellBook.GetDeadlyDebuffInfo(auraData.spellId);
+		local deadlyDebuffInfo = C_Spell.GetDeadlyDebuffInfo(auraData.spellId);
 		if(deadlyDebuffInfo) then
 			local deadlyDebuff = {
 				spellID = auraData.spellId,

@@ -11,8 +11,6 @@ Mainline\DressUpFrames.lua
 Mainline\DressUpFrames.xml
 Mainline\ExtraAbilityContainer.lua
 Mainline\ExtraAbilityContainer.xml
-Mainline\SpellBookFrame.lua
-Mainline\SpellBookFrame.xml
 Mainline\CharacterFrame.lua
 Mainline\CharacterFrame.xml
 Mainline\AzeritePaperDollItemOverlay.lua

@@ -19,6 +19,9 @@ UIDROPDOWNMENU_DEFAULT_WIDTH_PADDING = 25;
 -- List of open menus
 OPEN_DROPDOWNMENUS = {};
 
+local securecallfunction = securecallfunction;
+local securecall = securecall;
+
 local UIDropDownMenuDelegate = CreateFrame("FRAME");
 
 function UIDropDownMenuDelegate_OnAttributeChanged (self, attribute, value)
@@ -188,7 +191,7 @@ function UIDropDownMenuButton_OnEnter(self)
 	if ( self.tooltipTitle and not self.noTooltipWhileEnabled and not UIDropDownMenuButton_ShouldShowIconTooltip(self) ) then
 		if ( self.tooltipOnButton ) then
 			local tooltip = GetAppropriateTooltip();
-			tooltip:SetOwner(self, "ANCHOR_RIGHT");
+			tooltip:SetOwner(self, self.tooltipAnchor or "ANCHOR_RIGHT");
 			GameTooltip_SetTitle(tooltip, self.tooltipTitle);
 			if self.tooltipInstruction then
 				GameTooltip_AddInstructionLine(tooltip, self.tooltipInstruction);
@@ -232,7 +235,7 @@ end
 
 function UIDropDownMenuButton_ShouldShowIconTooltip(self)
 	if self.Icon and (self.iconTooltipTitle or self.iconTooltipText) and (self.icon or self.mouseOverIcon) then
-		return GetMouseFocus() == self.Icon;
+		return self.Icon:IsMouseMotionFocus();
 	end
 	return false;
 end
@@ -306,6 +309,7 @@ info.tooltipWarning = [nil, STRING] -- Warning-style text of the tooltip shown o
 info.tooltipInstruction = [nil, STRING] -- Instruction-style text of the tooltip shown on mouseover
 info.tooltipOnButton = [nil, 1] -- Show the tooltip attached to the button instead of as a Newbie tooltip.
 info.tooltipBackdropStyle = [nil, TABLE] -- Optional Backdrop style of the tooltip shown on mouseover
+info.tooltipAnchor = [nil, STRING] -- Pass a custom tooltip anchor (Default is "ANCHOR_RIGHT")
 info.justifyH = [nil, "CENTER"] -- Justify button text
 info.arg1 = [ANYTHING] -- This is the first argument used by info.func
 info.arg2 = [ANYTHING] -- This is the second argument used by info.func
@@ -398,6 +402,11 @@ function UIDropDownMenu_AddSpace(level)
 	};
 
 	UIDropDownMenu_AddButton(spaceInfo, level);
+end
+
+local function UIDropDownMenu_IsDisplayModeMenu()
+	local frame = UIDROPDOWNMENU_OPEN_MENU;
+	return frame and frame.displayMode == "MENU";
 end
 
 function UIDropDownMenu_AddButton(info, level)
@@ -547,6 +556,7 @@ function UIDropDownMenu_AddButton(info, level)
 	button.tooltipInstruction = info.tooltipInstruction;
 	button.tooltipWarning = info.tooltipWarning;
 	button.tooltipBackdropStyle = info.tooltipBackdropStyle;
+	button.tooltipAnchor = info.tooltipAnchor;
 	button.arg1 = info.arg1;
 	button.arg2 = info.arg2;
 	button.hasArrow = info.hasArrow;
@@ -606,11 +616,8 @@ function UIDropDownMenu_AddButton(info, level)
 	end
 
 	-- Adjust offset if displayMode is menu
-	local frame = UIDROPDOWNMENU_OPEN_MENU;
-	if ( frame and frame.displayMode == "MENU" ) then
-		if ( not info.notCheckable ) then
-			xPos = xPos - 6;
-		end
+	if (not info.notCheckable) and securecallfunction(UIDropDownMenu_IsDisplayModeMenu) then
+		xPos = xPos - 6;
 	end
 
 	-- If no open frame then set the frame to the currently initialized frame
@@ -959,17 +966,23 @@ function UIDropDownMenu_GetSelectedID(frame)
 	if ( frame.selectedID ) then
 		return frame.selectedID;
 	else
+		local selectedName = UIDropDownMenu_GetSelectedName(frame);
+		local selectedValue = UIDropDownMenu_GetSelectedValue(frame);
+		if ( not selectedName and not selectedValue ) then
+			return nil;
+		end
+
 		-- If no explicit selectedID then try to send the id of a selected value or name
 		local listFrame = _G["DropDownList"..UIDROPDOWNMENU_MENU_LEVEL];
 		for i=1, listFrame.numButtons do
 			local button = _G["DropDownList"..UIDROPDOWNMENU_MENU_LEVEL.."Button"..i];
 			-- See if checked or not
-			if ( UIDropDownMenu_GetSelectedName(frame) ) then
-				if ( button:GetText() == UIDropDownMenu_GetSelectedName(frame) ) then
+			if ( selectedName ) then
+				if ( button:GetText() == selectedName ) then
 					return i;
 				end
-			elseif ( UIDropDownMenu_GetSelectedValue(frame) ) then
-				if ( button.value == UIDropDownMenu_GetSelectedValue(frame) ) then
+			elseif ( selectedValue ) then
+				if ( button.value == selectedValue ) then
 					return i;
 				end
 			end

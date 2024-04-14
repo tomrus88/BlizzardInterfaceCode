@@ -383,6 +383,14 @@ function QuestInfo_ShowObjectivesHeader()
 	return QuestInfoObjectivesHeader;
 end
 
+function QuestInfo_ShowAccountCompletedNotice()
+	local questID = GetQuestID();
+	-- We only want to display this notice on non-repeatable quests
+	local startingAccountCompletedQuest = C_QuestLog.IsQuestFlaggedCompletedOnAccount(questID) and not C_QuestLog.IsQuestRepeatableType(questID);
+	QuestInfoAccountCompletedNotice:SetShown(startingAccountCompletedQuest);
+	return startingAccountCompletedQuest and QuestInfoAccountCompletedNotice or nil;
+end
+
 function QuestInfo_ShowObjectivesText()
 	local questObjectives, _;
 	if ( QuestInfoFrame.questLog ) then
@@ -494,18 +502,20 @@ local function AddSpellToBucket(buckets, spellInfo)
 end
 
 local function QuestInfo_ShowRewardAsItemCommon(questItem, index, questLogQueryFunction)
-	local name, texture, numItems, quality, isUsable, itemID;
+	local name, texture, numItems, quality, isUsable, itemID, itemLevel, questRewardContextFlags;
 
 	if ( QuestInfoFrame.questLog ) then
-		name, texture, numItems, quality, isUsable, itemID = questLogQueryFunction(index);
+		name, texture, numItems, quality, isUsable, itemID, itemLevel, questRewardContextFlags = questLogQueryFunction(index);
 		SetItemButtonQuality(questItem, quality, itemID);
 	else
-		name, texture, numItems, quality, isUsable, itemID = GetQuestItemInfo(questItem.type, index);
+		name, texture, numItems, quality, isUsable, itemID, questRewardContextFlags = GetQuestItemInfo(questItem.type, index);
 		SetItemButtonQuality(questItem, quality, GetQuestItemLink(questItem.type, index));
 	end
 
 	questItem.objectType = "item";
 	questItem:SetID(index);
+	questItem:UpdateQuestRewardContextFlags(questRewardContextFlags);
+
 	questItem:Show();
 
 	if not itemID then
@@ -550,11 +560,11 @@ local function FormatAssertMissingCurrencyID(questID, index, isChoice)
 end
 
 local function QuestInfo_ShowRewardAsCurrency(questItem, index, isChoice)
-	local name, texture, quality, amount, currencyID;
+	local name, texture, quality, amount, currencyID, questRewardContextFlags;
 	if ( QuestInfoFrame.questLog ) then
-		name, texture, amount, currencyID, quality = GetQuestLogRewardCurrencyInfo(index, questItem.questID, isChoice);
+		name, texture, amount, currencyID, quality, questRewardContextFlags = GetQuestLogRewardCurrencyInfo(index, questItem.questID, isChoice);
 	else
-		name, texture, amount, quality = GetQuestCurrencyInfo(questItem.type, index);
+		name, texture, amount, quality, questRewardContextFlags = GetQuestCurrencyInfo(questItem.type, index);
 		currencyID = GetQuestCurrencyID(questItem.type, index);
 	end
 
@@ -577,6 +587,7 @@ local function QuestInfo_ShowRewardAsCurrency(questItem, index, isChoice)
 	SetItemButtonTextureVertexColor(questItem, 1.0, 1.0, 1.0);
 	SetItemButtonNameFrameVertexColor(questItem, 1.0, 1.0, 1.0);
 	SetItemButtonQuality(questItem, quality, currencyID);
+	questItem:UpdateQuestRewardContextFlags(questRewardContextFlags);
 end
 
 function QuestInfo_ShowRewards()
@@ -1050,6 +1061,7 @@ QUEST_TEMPLATE_DETAIL = { questLog = nil, chooseItems = nil, contentWidth = 275,
 		QuestInfo_ShowSpecialObjectives, 0, -10,
 		QuestInfo_ShowGroupSize, 0, -10,
 		QuestInfo_ShowRewards, 0, -15,
+		QuestInfo_ShowAccountCompletedNotice, 0, -20,
 		QuestInfo_ShowSpacer, 0, -20,
 	}
 }
@@ -1107,7 +1119,47 @@ QUEST_TEMPLATE_MAP_REWARDS = { questLog = true, chooseItems = nil, contentWidth 
 	}
 }
 
-function QuestInfoRewardItemCodeTemplate_OnEnter(self)
+QuestInfoRewardItemMixin = {};
+
+local QUEST_REWARD_CONTEXT_TOOLTIP_LINES = {
+	[Enum.QuestRewardContextFlags.FirstCompletionBonus] = ACCOUNT_FIRST_TIME_QUEST_BONUS_TOOLTIP,
+	[Enum.QuestRewardContextFlags.RepeatCompletionBonus] = ACCOUNT_PREVIOUSLY_COMPLETED_QUEST_BONUS_TOOLTIP,
+}
+
+local function GetBestQuestRewardContextTooltipLine(questRewardContextFlags)
+	if not questRewardContextFlags then
+		return nil;
+	end
+
+	if (FlagsUtil.IsSet(questRewardContextFlags, Enum.QuestRewardContextFlags.FirstCompletionBonus)) then 
+		return QUEST_REWARD_CONTEXT_TOOLTIP_LINES[Enum.QuestRewardContextFlags.FirstCompletionBonus];
+	elseif (FlagsUtil.IsSet(questRewardContextFlags, Enum.QuestRewardContextFlags.RepeatCompletionBonus)) then 
+		return QUEST_REWARD_CONTEXT_TOOLTIP_LINES[Enum.QuestRewardContextFlags.RepeatCompletionBonus];
+	end
+
+	return nil;
+end
+
+local QUEST_REWARD_CONTEXT_ICONS = {
+	[Enum.QuestRewardContextFlags.FirstCompletionBonus] = "UI-CastingBar-Shield",
+	[Enum.QuestRewardContextFlags.RepeatCompletionBonus] = "UI-CastingBar-Shield",
+}
+
+local function GetBestQuestRewardContextIcon(questRewardContextFlags)
+	if not questRewardContextFlags then
+		return nil;
+	end
+
+	if (FlagsUtil.IsSet(questRewardContextFlags, Enum.QuestRewardContextFlags.FirstCompletionBonus)) then 
+		return QUEST_REWARD_CONTEXT_ICONS[Enum.QuestRewardContextFlags.FirstCompletionBonus];
+	elseif (FlagsUtil.IsSet(questRewardContextFlags, Enum.QuestRewardContextFlags.RepeatCompletionBonus)) then 
+		return QUEST_REWARD_CONTEXT_ICONS[Enum.QuestRewardContextFlags.RepeatCompletionBonus];
+	end
+
+	return nil;
+end
+
+function QuestInfoRewardItemMixin:OnEnter()
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 
 	local showCollectionText = false;
@@ -1132,11 +1184,23 @@ function QuestInfoRewardItemCodeTemplate_OnEnter(self)
 		end
 	end
 
+	local rewardContextLine = GetBestQuestRewardContextTooltipLine(self.questRewardContextFlags);
+	if rewardContextLine then
+		GameTooltip_AddBlankLineToTooltip(GameTooltip);
+		GameTooltip_AddColoredLine(GameTooltip, rewardContextLine, QUEST_REWARD_CONTEXT_FONT_COLOR);
+	end
+
+	GameTooltip:Show();
 	CursorUpdate(self);
-	self.UpdateTooltip = QuestInfoRewardItemCodeTemplate_OnEnter;
+	self.UpdateTooltip = self.OnEnter;
 end
 
-function QuestInfoRewardItemCodeTemplate_OnClick(self, button)
+function QuestInfoRewardItemMixin:OnLeave()
+	GameTooltip:Hide();
+	ResetCursor();
+end
+
+function QuestInfoRewardItemMixin:OnClick(button)
 	if ( IsModifiedClick() and self.objectType == "item") then
 		local link;
 		if ( QuestInfoFrame.questLog ) then
@@ -1150,6 +1214,35 @@ function QuestInfoRewardItemCodeTemplate_OnClick(self, button)
 			QuestInfoItem_OnClick(self);
 		end
 	end
+end
+
+function QuestInfoRewardItemMixin:OnUpdate(elapsed)
+	CursorOnUpdate(self, elapsed);
+end
+
+function QuestInfoRewardItemMixin:UpdateQuestRewardContextFlags(questRewardContextFlags)
+	self.questRewardContextFlags = questRewardContextFlags;
+	self:UpdateQuestRewardContextIcon();
+end
+
+function QuestInfoRewardItemMixin:UpdateQuestRewardContextIcon()
+	local contextIcon = GetBestQuestRewardContextIcon(self.questRewardContextFlags);
+	self.QuestRewardContextIcon:SetAtlas(contextIcon);
+	self.QuestRewardContextIcon:SetShown(contextIcon ~= nil);
+end
+
+SmallQuestInfoRewardItemMixin = CreateFromMixins(QuestInfoRewardItemMixin);
+
+function SmallQuestInfoRewardItemMixin:UpdateQuestRewardContextIcon()
+	QuestInfoRewardItemMixin.UpdateQuestRewardContextIcon(self);
+	self.Name:SetWidth(self.QuestRewardContextIcon:IsShown() and 85 or 92);
+end
+
+LargeQuestInfoRewardItemMixin = CreateFromMixins(QuestInfoRewardItemMixin);
+
+function LargeQuestInfoRewardItemMixin:UpdateQuestRewardContextIcon()
+	QuestInfoRewardItemMixin.UpdateQuestRewardContextIcon(self);
+	self.Name:SetWidth(self.QuestRewardContextIcon:IsShown() and 87 or 90);
 end
 
 QuestInfoReputationRewardButtonMixin = { };
@@ -1194,6 +1287,6 @@ end
 
 function QuestInfoRewardSpellCodeMixin:OnClick()
 	if IsModifiedClick("CHATLINK") then
-		ChatEdit_InsertLink(GetSpellLink(self.rewardSpellID));
+		ChatEdit_InsertLink(C_Spell.GetSpellLink(self.rewardSpellID));
 	end
 end

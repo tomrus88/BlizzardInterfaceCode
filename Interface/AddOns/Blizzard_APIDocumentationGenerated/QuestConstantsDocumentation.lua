@@ -3,6 +3,36 @@ local QuestConstants =
 	Tables =
 	{
 		{
+			Name = "CombinedQuestLogStatus",
+			Type = "Enumeration",
+			NumValues = 7,
+			MinValue = 0,
+			MaxValue = 6,
+			Fields =
+			{
+				{ Name = "Available", Type = "CombinedQuestLogStatus", EnumValue = 0 },
+				{ Name = "Complete", Type = "CombinedQuestLogStatus", EnumValue = 1 },
+				{ Name = "CompleteDaily", Type = "CombinedQuestLogStatus", EnumValue = 2 },
+				{ Name = "CompleteWeekly", Type = "CombinedQuestLogStatus", EnumValue = 3 },
+				{ Name = "CompleteMonthly", Type = "CombinedQuestLogStatus", EnumValue = 4 },
+				{ Name = "CompleteYearly", Type = "CombinedQuestLogStatus", EnumValue = 5 },
+				{ Name = "CompleteGameReset", Type = "CombinedQuestLogStatus", EnumValue = 6 },
+			},
+		},
+		{
+			Name = "CombinedQuestStatus",
+			Type = "Enumeration",
+			NumValues = 3,
+			MinValue = 0,
+			MaxValue = 2,
+			Fields =
+			{
+				{ Name = "Invalid", Type = "CombinedQuestStatus", EnumValue = 0 },
+				{ Name = "Completed", Type = "CombinedQuestStatus", EnumValue = 1 },
+				{ Name = "NotCompleted", Type = "CombinedQuestStatus", EnumValue = 2 },
+			},
+		},
+		{
 			Name = "QuestCompleteSpellType",
 			Type = "Enumeration",
 			NumValues = 8,
@@ -18,6 +48,19 @@ local QuestConstants =
 				{ Name = "Spell", Type = "QuestCompleteSpellType", EnumValue = 5 },
 				{ Name = "Unlock", Type = "QuestCompleteSpellType", EnumValue = 6 },
 				{ Name = "Companion", Type = "QuestCompleteSpellType", EnumValue = 7 },
+			},
+		},
+		{
+			Name = "QuestRewardContextFlags",
+			Type = "Enumeration",
+			NumValues = 3,
+			MinValue = 0,
+			MaxValue = 2,
+			Fields =
+			{
+				{ Name = "None", Type = "QuestRewardContextFlags", EnumValue = 0 },
+				{ Name = "FirstCompletionBonus", Type = "QuestRewardContextFlags", EnumValue = 1 },
+				{ Name = "RepeatCompletionBonus", Type = "QuestRewardContextFlags", EnumValue = 2 },
 			},
 		},
 		{
@@ -45,6 +88,19 @@ local QuestConstants =
 				{ Name = "Threat", Type = "QuestTagType", EnumValue = 14 },
 				{ Name = "CovenantCalling", Type = "QuestTagType", EnumValue = 15 },
 				{ Name = "DragonRiderRacing", Type = "QuestTagType", EnumValue = 16 },
+			},
+		},
+		{
+			Name = "QuestTreasurePickerType",
+			Type = "Enumeration",
+			NumValues = 3,
+			MinValue = 0,
+			MaxValue = 2,
+			Fields =
+			{
+				{ Name = "Visible", Type = "QuestTreasurePickerType", EnumValue = 0 },
+				{ Name = "Hidden", Type = "QuestTreasurePickerType", EnumValue = 1 },
+				{ Name = "Select", Type = "QuestTreasurePickerType", EnumValue = 2 },
 			},
 		},
 		{

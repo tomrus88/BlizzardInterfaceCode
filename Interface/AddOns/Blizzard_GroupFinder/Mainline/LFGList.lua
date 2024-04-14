@@ -51,6 +51,7 @@ LFG_LIST_PER_EXPANSION_TEXTURES = {
 	[7] = "battleforazeroth",
 	[8] = "shadowlands",
 	[9] = "dragonflight",
+	[10] = "classic",
 }
 
 LFG_LIST_GROUP_DATA_ATLASES = {
@@ -574,9 +575,9 @@ function LFGListCategorySelection_AddButton(self, btnIndex, categoryID, filters)
 
 	local atlasName = nil;
 	if ( bit.band(allFilters, Enum.LFGListFilter.Recommended) ~= 0 ) then
-		atlasName = "groupfinder-button-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "raids").."-"..LFG_LIST_PER_EXPANSION_TEXTURES[LFGListUtil_GetCurrentExpansion()];
+		atlasName = "groupfinder-button-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "raids").."-"..(LFG_LIST_PER_EXPANSION_TEXTURES[LFGListUtil_GetCurrentExpansion()] or "classic");
 	elseif ( bit.band(allFilters, Enum.LFGListFilter.NotRecommended) ~= 0 ) then
-		atlasName = "groupfinder-button-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "raids").."-"..LFG_LIST_PER_EXPANSION_TEXTURES[math.max(0,LFGListUtil_GetCurrentExpansion() - 1)];
+		atlasName = "groupfinder-button-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "raids").."-"..(LFG_LIST_PER_EXPANSION_TEXTURES[math.max(0,LFGListUtil_GetCurrentExpansion() - 1)] or "classic");
 	else
 		atlasName = "groupfinder-button-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "questing");
 	end
@@ -1590,9 +1591,9 @@ function LFGListApplicationViewer_UpdateInfo(self)
 	--Set the background
 	local atlasName = nil;
 	if ( categoryInfo.separateRecommended and bit.band(filters, Enum.LFGListFilter.Recommended) ~= 0 ) then
-		atlasName = "groupfinder-background-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "raids").."-"..LFG_LIST_PER_EXPANSION_TEXTURES[LFGListUtil_GetCurrentExpansion()];
+		atlasName = "groupfinder-background-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "raids").."-"..(LFG_LIST_PER_EXPANSION_TEXTURES[LFGListUtil_GetCurrentExpansion()] or "classic");
 	elseif ( categoryInfo.separateRecommended and bit.band(filters, Enum.LFGListFilter.NotRecommended) ~= 0 ) then
-		atlasName = "groupfinder-background-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "raids").."-"..LFG_LIST_PER_EXPANSION_TEXTURES[math.max(0,LFGListUtil_GetCurrentExpansion() - 1)];
+		atlasName = "groupfinder-background-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "raids").."-"..(LFG_LIST_PER_EXPANSION_TEXTURES[math.max(0,LFGListUtil_GetCurrentExpansion() - 1)] or "classic");
 	else
 		atlasName = "groupfinder-background-"..(LFG_LIST_CATEGORY_TEXTURES[categoryID] or "questing");
 	end
@@ -1719,12 +1720,15 @@ end
 
 function LFGListApplicationViewer_UpdateResults(self)
 	--If the mouse is over something in this frame, update it
-	local mouseover = GetMouseFocus();
-	local mouseoverParent = mouseover and mouseover:GetParent();
-	local parentParent = mouseoverParent and mouseoverParent:GetParent();
-	if ( mouseoverParent == self.ScrollFrame or parentParent == self.ScrollFrame ) then
-		--Just hide the tooltip. We should show it again inside the update function.
-		GameTooltip:Hide();
+	local mouseovers = GetMouseFoci();
+	for _, mouseover in ipairs(mouseovers) do
+		local mouseoverParent = mouseover and mouseover:GetParent();
+		local parentParent = mouseoverParent and mouseoverParent:GetParent();
+		if ( mouseoverParent == self.ScrollFrame or parentParent == self.ScrollFrame ) then
+			--Just hide the tooltip. We should show it again inside the update function.
+			GameTooltip:Hide();
+			break;
+		end
 	end
 
 	local dataProvider = CreateDataProvider();
@@ -1914,11 +1918,15 @@ function LFGListApplicationViewer_UpdateApplicantMember(member, appID, memberIdx
 		member:SetWidth(200);
 	end
 
-	local mouseFocus = GetMouseFocus();
-	if ( mouseFocus == member ) then
-		LFGListApplicantMember_OnEnter(member);
-	elseif ( mouseFocus == member.FriendIcon ) then
-		member.FriendIcon:GetScript("OnEnter")(member.FriendIcon);
+	local mouseFoci = GetMouseFoci();
+	for _, mouseFocus in ipairs(mouseFoci) do 
+		if ( mouseFocus == member ) then
+			LFGListApplicantMember_OnEnter(member);
+			break;
+		elseif ( mouseFocus == member.FriendIcon ) then
+			member.FriendIcon:GetScript("OnEnter")(member.FriendIcon);
+			break;
+		end
 	end
 end
 
@@ -2235,7 +2243,8 @@ end
 local function UpdateFilterRedX()
 	local redx = LFGListFrame.SearchPanel.FilterButton.ResetToDefaults;
 	local enabled = C_LFGList.GetAdvancedFilter();
-	if LFGListAdvancedFiltersIsDefault(enabled) then
+	if LFGListFrame.CategorySelection.selectedCategory ~= GROUP_FINDER_CATEGORY_ID_DUNGEONS 
+		or LFGListAdvancedFiltersIsDefault(enabled) then
 		redx:Hide();
 	else
 		redx:Show();
@@ -2292,6 +2301,10 @@ function LFGListSearchPanel_DoSearch(self)
 	local searchText = self.SearchBox:GetText();
 	local languages = C_LFGList.GetLanguageSearchFilter();
 	local advancedFilters = C_LFGList.GetAdvancedFilter();
+	if LFGListFrame.CategorySelection.selectedCategory ~= GROUP_FINDER_CATEGORY_ID_DUNGEONS then
+		advancedFilters = nil;
+	end
+	 
 
 	local filters = ResolveCategoryFilters(self.categoryID, self.filters);
 	C_LFGList.Search(self.categoryID, filters, self.preferredFilters, languages, nil, advancedFilters);
@@ -2642,6 +2655,48 @@ local function IsDeclined(appStatus)
 	return appStatus == "declined" or appStatus == "declined_delisted" or appStatus =="declined_full";
 end
 
+local function EntryStillSatisfiesFilters(enabled, displayData, searchResultInfo)
+	local _, classFilename = UnitClass("player");
+	local infoTable = C_LFGList.GetActivityInfoTable(searchResultInfo.activityID);
+
+	if enabled.needsTank and displayData["TANK"] ~= 0 then
+		return false;
+	elseif enabled.needsHealer and displayData["HEALER"] ~= 0 then
+		return false;
+	elseif enabled.needsDamage and displayData["DAMAGER"] ~= 0 then
+		return false;
+	elseif enabled.needsMyClass and displayData[classFilename] > 0 then
+		return false;
+	elseif enabled.hasTank and displayData["TANK"] == 0 then
+		return false;
+	elseif enabled.hasHealer and displayData["HEALER"] == 0 then
+		return false;
+	elseif enabled.minimumRating > searchResultInfo.leaderOverallDungeonScore then
+		return false;
+	elseif #enabled.activities > 0 then
+		local foundActivity = false;
+		for _, activityID in ipairs(enabled.activities) do
+			if activityID == infoTable.groupFinderActivityGroupID then
+				foundActivity = true;
+				break;
+			end
+		end
+		if not foundActivity then
+			return false;
+		end
+	end
+	if not LFGListAdvancedFiltersDifficultyNoneChecked(enabled) then
+		if (infoTable.isNormalActivity and not enabled.difficultyNormal)
+			or (infoTable.isHeroicActivity and not enabled.difficultyHeroic) 
+			or (infoTable.isMythicActivity and not enabled.difficultyMythic)
+			or (infoTable.isMythicPlusActivity and not enabled.difficultyMythicPlus) then
+			return false;
+		end
+	end
+
+	return true;
+end
+
 function LFGListSearchEntry_Update(self)
 	local resultID = self.resultID;
 
@@ -2657,7 +2712,7 @@ function LFGListSearchEntry_Update(self)
 
 	--Update visibility based on whether we're an application or not
 	self.isApplication = isApplication;
-	self.ApplicationBG:SetShown(isApplication and not isAppFinished);
+	self.BackgroundTexture:Show();
 	self.ResultBG:SetShown(not isApplication or isAppFinished);
 	self.DataDisplay:SetShown(not isApplication);
 	self.CancelButton:SetShown(isApplication and pendingStatus ~= "applied");
@@ -2665,7 +2720,7 @@ function LFGListSearchEntry_Update(self)
 	self.CancelButton.Icon:SetDesaturated(not LFGListUtil_IsAppEmpowered());
 	self.CancelButton.tooltip = (not LFGListUtil_IsAppEmpowered()) and LFG_LIST_APP_UNEMPOWERED;
 	self.Spinner:SetShown(pendingStatus == "applied");
-
+	
 	if ( pendingStatus == "applied" and C_LFGList.GetRoleCheckInfo() ) then
 		self.PendingLabel:SetText(LFG_LIST_ROLE_CHECK);
 		self.PendingLabel:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
@@ -2741,10 +2796,25 @@ function LFGListSearchEntry_Update(self)
 	local searchResultInfo = C_LFGList.GetSearchResultInfo(resultID);
 	local activityName = C_LFGList.GetActivityFullName(searchResultInfo.activityID, nil, searchResultInfo.isWarMode);
 
-	self.resultID = resultID;
-	local selected = panel.selectedResult == resultID and not isApplication and not searchResultInfo.isDelisted;
-	LFGListSearchEntry_SetSelected(self, selected);
+	local enabled = C_LFGList.GetAdvancedFilter();
+	local displayData = C_LFGList.GetSearchResultMemberCounts(resultID);
 
+	self.isNowFilteredOut = LFGListFrame.CategorySelection.selectedCategory == GROUP_FINDER_CATEGORY_ID_DUNGEONS and not EntryStillSatisfiesFilters(enabled, displayData, searchResultInfo);
+	self.isApplication = isApplication and not isAppFinished;
+	self.isSelected = panel.selectedResult == resultID and not isApplication and not searchResultInfo.isDelisted;
+
+	self.BackgroundTexture:Show();
+	if self.isNowFilteredOut then
+		self.BackgroundTexture:SetAtlas("groupfinder-highlightbar-red");
+	elseif self.isApplication then
+		self.BackgroundTexture:SetAtlas("groupfinder-highlightbar-green");
+	elseif self.isSelected then
+		self.BackgroundTexture:SetAtlas("groupfinder-highlightbar-yellow");
+	else
+		self.BackgroundTexture:Hide();
+	end
+
+	self.resultID = resultID;
 	local nameColor = NORMAL_FONT_COLOR;
 	local activityColor = GRAY_FONT_COLOR;
 	if isDeclined then
@@ -2764,7 +2834,6 @@ function LFGListSearchEntry_Update(self)
 	self.VoiceChat:SetShown(searchResultInfo.voiceChat ~= "");
 	self.VoiceChat.tooltip = searchResultInfo.voiceChat;
 
-	local displayData = C_LFGList.GetSearchResultMemberCounts(resultID);
 	local showClassesByRole = true;
 	LFGListGroupDataDisplay_Update(self.DataDisplay, searchResultInfo.activityID, displayData, searchResultInfo.isDelisted, showClassesByRole);
 
@@ -2777,12 +2846,16 @@ function LFGListSearchEntry_Update(self)
 	end
 	self.ActivityName:SetWidth(176);
 
-	local mouseFocus = GetMouseFocus();
-	if ( mouseFocus == self ) then
-		LFGListSearchEntry_OnEnter(self);
-	end
-	if ( mouseFocus == self.VoiceChat ) then
-		mouseFocus:GetScript("OnEnter")(mouseFocus);
+	local mouseFoci = GetMouseFoci();
+	for _, mouseFocus in ipairs(mouseFoci) do 
+		if ( mouseFocus == self ) then
+			LFGListSearchEntry_OnEnter(self);
+			break
+		end
+		if ( mouseFocus == self.VoiceChat ) then
+			mouseFocus:GetScript("OnEnter")(mouseFocus);
+			break;
+		end
 	end
 
 	if ( isApplication ) then
@@ -2791,10 +2864,6 @@ function LFGListSearchEntry_Update(self)
 	else
 		self:SetScript("OnUpdate", nil);
 	end
-end
-
-function LFGListSearchEntry_SetSelected(self, selected)
-	self.Selected:SetShown(selected);
 end
 
 function LFGListSearchEntry_UpdateExpiration(self)
@@ -2830,7 +2899,7 @@ function LFGListSearchEntry_OnEnter(self)
 		LFGListSearchPanel_EvaluateTutorial(LFGListFrame.SearchPanel, self);
 	end
 
-	if not self.Selected:IsShown() then
+	if self.isNowFilteredOut or self.isApplication or not self.isSelected then
 		self.Highlight:Show();
 	end
 end
@@ -3759,6 +3828,7 @@ function LFGListUTil_InitializeAdvancedFilter(dropdown)
 			entry.func = function(self,_,_,checked) 
 				enabled[key] = checked; 
 				C_LFGList.SaveAdvancedFilter(enabled); 
+				LFGListFrame.SearchPanel.ScrollBox:ForEachFrame(LFGListSearchEntry_Update);
 				UpdateFilterRedX();
 			end
 			UIDropDownMenu_AddButton(entry);
@@ -3805,6 +3875,7 @@ function LFGListUTil_InitializeAdvancedFilter(dropdown)
 							activitySet[activityId] = checked; 
 							ActivitiesSetToList();
 							C_LFGList.SaveAdvancedFilter(enabled); 
+							LFGListFrame.SearchPanel.ScrollBox:ForEachFrame(LFGListSearchEntry_Update);
 							UpdateFilterRedX();
 						end
 						UIDropDownMenu_AddButton(entry);
@@ -3828,6 +3899,7 @@ function LFGListUTil_InitializeAdvancedFilter(dropdown)
 		info.customFrame:SetMinRatingChangedCallback(function(self) 
 			enabled.minimumRating = self.MinRating:GetNumber();
 			C_LFGList.SaveAdvancedFilter(enabled); 
+			LFGListFrame.SearchPanel.ScrollBox:ForEachFrame(LFGListSearchEntry_Update);
 			UpdateFilterRedX();
 		end);
 		UIDropDownMenu_AddButton(info);

@@ -880,7 +880,7 @@ local function CreateCanonicalActions(entry, ...)
 			else
 				entry.spells[count] = action;
 				entry.spellNames[count] = gsub(action, "!*(.*)", "%1");
-				entry.spellID[count] = select(7, GetSpellInfo(action));
+				entry.spellID[count] = C_Spell.GetSpellIDForSpellIdentifier(action);
 			end
 		end
 	end
@@ -1109,7 +1109,7 @@ local function CastRandomManager_OnEvent(self, event, ...)
 	local unit, castID, spellID = ...;
 
 	if ( unit == "player" ) then
-		local name = strlower(GetSpellInfo(spellID));
+		local name = strlower(C_Spell.GetSpellName(spellID));
 		local rank = strlower(GetSpellSubtext(spellID) or "");
 		local nameplus = name.."()";
 		local fullname = name.."("..rank..")";
@@ -1224,7 +1224,7 @@ SecureCmdList["CAST"] = function(msg)
 
 	local action, target = SecureCmdOptionParse(msg);
 	if ( action ) then
-		local spellExists = DoesSpellExist(action)
+		local spellExists = C_Spell.DoesSpellExist(action)
 		local name, bag, slot = SecureCmdItemParse(action);
 		if ( spellExists ) then
 			CastSpellByName(action, target);
@@ -1607,21 +1607,21 @@ end
 SecureCmdList["PET_AUTOCASTON"] = function(msg)
 	local spell = SecureCmdOptionParse(msg);
 	if ( spell ) then
-		EnableSpellAutocast(spell);
+		C_Spell.SetSpellAutoCastEnabled(spell, true);
 	end
 end
 
 SecureCmdList["PET_AUTOCASTOFF"] = function(msg)
 	local spell = SecureCmdOptionParse(msg);
 	if ( spell ) then
-		DisableSpellAutocast(spell);
+		C_Spell.SetSpellAutoCastEnabled(spell, false);
 	end
 end
 
 SecureCmdList["PET_AUTOCASTTOGGLE"] = function(msg)
 	local spell = SecureCmdOptionParse(msg);
 	if ( spell ) then
-		ToggleSpellAutocast(spell);
+		C_Spell.ToggleSpellAutoCast(spell);
 	end
 end
 

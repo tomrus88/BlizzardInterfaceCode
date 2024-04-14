@@ -93,7 +93,6 @@ Import("GetTime");
 Import("UnitAffectingCombat");
 Import("GetCVar");
 Import("GMError");
-Import("GetMouseFocus");
 Import("Enum");
 Import("SecureMixin");
 Import("CreateFromSecureMixins");
@@ -1717,6 +1716,7 @@ function StoreFrame_OnHide(self)
 	PlaySound(SOUNDKIT.UI_IG_STORE_WINDOW_CLOSE_BUTTON);
 
 	C_StoreSecure.ClearPreGeneratedExternalTransactionID();
+	Outbound.TriggerHideEvent(self:GetAttribute("contextkey"));
 end
 
 function StoreFrame_OnMouseWheel(self, value)
@@ -1938,6 +1938,8 @@ function StoreFrame_OnAttributeChanged(self, name, value)
 	elseif ( name == "isvastransferproduct" ) then
 		local productID = value;
 		self:SetAttribute('isvastransferproductresult', IsVASTransferProduct(productID));
+	-- No handler necessary, this is strictly setting saved data to be used when the store is hidden.
+	-- elseif (name == "contextkey") then
 	end
 end
 

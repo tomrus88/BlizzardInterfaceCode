@@ -1995,7 +1995,7 @@ function Class_AddHunterTameSpells:OnBegin()
 		end
 	else
 		-- wait for the spells to show up in the spell book
-		Dispatcher:RegisterEvent("LEARNED_SPELL_IN_TAB", self);
+		Dispatcher:RegisterEvent("LEARNED_SPELL_IN_SKILL_LINE", self);
 	end
 end
 
@@ -2034,9 +2034,9 @@ function Class_AddHunterTameSpells:ACTIONBAR_SHOW_BOTTOMLEFT()
 	end
 end
 
-function Class_AddHunterTameSpells:LEARNED_SPELL_IN_TAB(spellID)
+function Class_AddHunterTameSpells:LEARNED_SPELL_IN_SKILL_LINE(spellID)
 	if self:KnowsRequiredSpells() then
-		Dispatcher:UnregisterEvent("LEARNED_SPELL_IN_TAB", self);
+		Dispatcher:UnregisterEvent("LEARNED_SPELL_IN_SKILL_LINE", self);
 		if self:CheckForSpellsOnActionBar() then
 			TutorialManager:Finished(self:Name());
 		else
@@ -2080,7 +2080,7 @@ end
 function Class_AddHunterTameSpells:OnComplete()	
 	Dispatcher:UnregisterEvent("SPELLS_CHANGED", self);
 	Dispatcher:UnregisterEvent("UPDATE_EXTRA_ACTIONBAR", self);
-	Dispatcher:UnregisterEvent("LEARNED_SPELL_IN_TAB", self);
+	Dispatcher:UnregisterEvent("LEARNED_SPELL_IN_SKILL_LINE", self);
 	Dispatcher:UnregisterEvent("ACTIONBAR_SHOW_BOTTOMLEFT", self);
 	if self.actionBarEventID then
 		Dispatcher:UnregisterEvent("ACTIONBAR_SLOT_CHANGED", self.actionBarEventID);

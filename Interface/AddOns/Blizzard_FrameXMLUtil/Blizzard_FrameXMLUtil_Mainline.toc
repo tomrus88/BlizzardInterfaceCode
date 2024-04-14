@@ -29,4 +29,6 @@ CampaignUtil.lua
 AnimationSystem.lua
 CurrencyContainer.lua
 Mainline\RAFUtil.lua
+Mainline\PlayerSpellsUtil.lua
 Mainline\ExpansionUtil.lua
+Mainline\Blizzard_QuestSuperTracking.lua

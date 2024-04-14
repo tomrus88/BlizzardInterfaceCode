@@ -875,7 +875,7 @@ function PTR_IssueReporter.SetBugButtonContext(context, buttonTooltip, bugIcon)
                 end
             end)
 
-            if (context ~= PTR_IssueReporter.Data.DefaultBugButtonContext) then
+            if (context ~= PTR_IssueReporter.Data.DefaultBugButtonContext) and (ActionButton_ShowOverlayGlow) then
                 ActionButton_ShowOverlayGlow(PTR_IssueReporter.ReportBug) -- Highlights the fact that the button has changed purpose
             end
         end

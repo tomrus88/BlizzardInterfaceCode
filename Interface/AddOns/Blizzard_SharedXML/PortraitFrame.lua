@@ -90,7 +90,7 @@ function PortraitFrameMixin:SetPortraitAtlasRaw(atlas, ...)
 end
 
 function PortraitFrameMixin:SetPortraitToClassIcon(classFilename)
-	self:SetPortraitToAsset("Interface/TargetingFrame/UI-Classes-Circles");
+	self:SetPortraitTextureRaw("Interface/TargetingFrame/UI-Classes-Circles");
 	local left, right, bottom, top = unpack(CLASS_ICON_TCOORDS[string.upper(classFilename)]);
 	self:SetPortraitTexCoord(left, right, bottom, top);
 end

@@ -24,6 +24,8 @@ function AccountLogin_OnLoad(self)
 
 	local year = date:sub(#date - 3, #date);
 	self.UI.BlizzDisclaimer:SetText(BLIZZ_DISCLAIMER_FORMAT:format(year));
+
+	self.UI.MenuButton:SetScript("OnClick", GenerateFlatClosure(GlueMenuFrameUtil.ShowMenu));
 end
 
 function AccountLogin_OnEvent(self, event, ...)
@@ -95,11 +97,8 @@ function AccountLogin_Update()
         shouldCheckSystemReqs = false;
 	end
 
-	if (isLauncherLogin or ShouldShowRegulationOverlay()) then
-		ServerAlert_Disable(ServerAlertFrame);
-	else
-		ServerAlert_Enable(ServerAlertFrame);
-	end
+	local shouldSuppressServerAlert = isLauncherLogin or ShouldShowRegulationOverlay();
+	ServerAlertFrame:SetSuppressed(shouldSuppressServerAlert);
 
 	EventRegistry:TriggerEvent("AccountLogin.Update", showButtonsAndStuff);
 
@@ -118,13 +117,11 @@ function AccountLogin_Update()
 		AccountLogin.UI.SaveAccountNameCheckButton:Hide();
 	end
 
-	if ( GetSavedAccountName() ~= "" and GetSavedAccountList() ~= "" and not isReconnectMode) then
-		AccountLogin.UI.PasswordEditBox:SetPoint("BOTTOM", -2, 255);
-		AccountLogin.UI.LoginButton:SetPoint("BOTTOM", 0, 160);
+	if (GetSavedAccountName() ~= "" and GetSavedAccountList() ~= "" and not isReconnectMode) then
+		AccountLogin.UI.PasswordEditBox:SetPoint("TOP", AccountLogin.UI.AccountsDropDown, "BOTTOM", 0, -30);
 		AccountLogin.UI.AccountsDropDown:SetShown(showButtonsAndStuff);
 	else
-		AccountLogin.UI.PasswordEditBox:SetPoint("BOTTOM", -2, 275);
-		AccountLogin.UI.LoginButton:SetPoint("BOTTOM", 0, 180);
+		AccountLogin.UI.PasswordEditBox:SetPoint("TOP", AccountLogin.UI.AccountEditBox, "BOTTOM", 0, -30);
 		AccountLogin.UI.AccountsDropDown:Hide();
 	end
 
@@ -178,7 +175,7 @@ function AccountLogin_Login()
 	end
 
 	AccountLogin.UI.PasswordEditBox:SetText("");
-	if ( AccountLogin.UI.SaveAccountNameCheckButton:GetChecked() ) then
+	if ( AccountLogin.UI.SaveAccountNameCheckButton:IsControlChecked() ) then
 		SetSavedAccountName(AccountLogin.UI.AccountEditBox:GetText());
 	else
 		SetSavedAccountName("");
@@ -328,7 +325,7 @@ end
 function AccountLoginDropDown_OnLoad(self)
 	UIDropDownMenu_SetWidth(self, 174);
 	UIDropDownMenu_SetSelectedValue(self, 1);
-	AccountLoginDropDownText:SetJustifyH("LEFT");
+	UIDropDownMenu_JustifyText(self, "LEFT")
 	AccountLoginDropDown_SetupList();
 	UIDropDownMenu_Initialize(self, AccountLoginDropDown_Initialize);
 end
@@ -534,4 +531,25 @@ function ChinaAgeAppropriatenessWarning_Close()
 	SHOW_CHINA_AGE_APPROPRIATENESS_WARNING = false;
 	AccountLogin_Update();
 	AccountLogin_CheckAutoLogin();
+end
+
+SaveAccountNameCheckButton = {};
+
+function SaveAccountNameCheckButton:OnLoad()
+	ResizeCheckButtonMixin.OnLoad(self);
+
+	self:SetControlChecked(GetSavedAccountName() ~= "");
+
+	local function OnBoxToggled(isChecked, unused_isUserInput)
+		if isChecked then
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+		else
+			SetSavedAccountName("");
+			ClearSavedAccountList();
+			AccountLogin_UpdateSavedData(AccountLogin);
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
+		end
+	end
+
+	self:SetCallback(OnBoxToggled);
 end

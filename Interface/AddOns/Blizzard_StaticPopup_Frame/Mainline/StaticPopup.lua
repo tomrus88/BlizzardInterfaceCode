@@ -1792,6 +1792,30 @@ StaticPopupDialogs["EQUIP_BIND_TRADEABLE"] = {
 	whileDead = 1,
 	hideOnEscape = 1
 };
+
+StaticPopupDialogs["CONVERT_TO_BIND_TO_ACCOUNT_CONFIRM"] = {
+	text = CONVERT_TO_BIND_TO_ACCOUNT_CONFIRM,
+	button1 = ACCEPT,
+	button2 = CANCEL,
+	OnAccept = function(self)
+		ConvertItemToBindToAccount();
+	end,
+	OnCancel = function(self)
+		ClearPendingBindConversionItem();
+	end,
+	OnHide = function(self)
+		ClearPendingBindConversionItem();
+	end,
+	OnUpdate = function (self)
+		if not CursorHasItem() then
+			self:Hide();
+		end
+	end,
+	timeout = 0,
+	exclusive = 1,
+	hideOnEscape = 1
+};
+
 StaticPopupDialogs["USE_BIND"] = {
 	text = USE_NO_DROP,
 	button1 = OKAY,
@@ -3755,7 +3779,7 @@ StaticPopupDialogs["CONFIRM_LEAVE_BATTLEFIELD"] = {
 		local ratedDeserterPenalty = C_PvP.GetPVPActiveRatedMatchDeserterPenalty();
 		if ( ratedDeserterPenalty ) then
 			local ratingChange = math.abs(ratedDeserterPenalty.personalRatingChange);
-			local queuePenaltySpellLink, queuePenaltyDuration = C_SpellBook.GetSpellLinkFromSpellID(ratedDeserterPenalty.queuePenaltySpellID), SecondsToTime(ratedDeserterPenalty.queuePenaltyDuration);
+			local queuePenaltySpellLink, queuePenaltyDuration = C_Spell.GetSpellLink(ratedDeserterPenalty.queuePenaltySpellID), SecondsToTime(ratedDeserterPenalty.queuePenaltyDuration);
 			self.text:SetText(CONFIRM_LEAVE_RATED_MATCH_WITH_PENALTY:format(ratingChange, queuePenaltyDuration, queuePenaltySpellLink));
 		elseif ( IsActiveBattlefieldArena() and not C_PvP.IsInBrawl() ) then
 			self.text:SetText(CONFIRM_LEAVE_ARENA);

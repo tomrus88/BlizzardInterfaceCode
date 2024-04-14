@@ -133,10 +133,12 @@ if ( InGlue() ) then
 	end
 
 	function UpdateAddonButton()
-		if ( C_AddOns.GetNumAddOns() > 0 ) then
-			CharacterSelectAddonsButton:Show();
-		else
-			CharacterSelectAddonsButton:Hide();
+		if CharacterSelectAddonsButton then
+			if ( C_AddOns.GetNumAddOns() > 0 ) then
+				CharacterSelectAddonsButton:Show();
+			else
+				CharacterSelectAddonsButton:Hide();
+			end
 		end
 	end
 else
@@ -173,15 +175,7 @@ function AddonList_HasNewVersion()
 	return hasNewVersion;
 end
 
-function AddonList_Show()
-	if ( InGlue() ) then
-		AddonList:Show();
-	else
-		ShowUIPanel(AddonList);
-	end
-end
-
-function AddonList_Hide(save)
+local function AddonList_Hide(save)
 	AddonList.save = save
 
 	if ( InGlue() ) then
@@ -494,6 +488,8 @@ function AddonList_OnHide(self)
 		C_AddOns.ResetAddOns();
 	end
 	self.save = false;
+
+	EventRegistry:TriggerEvent("AddonList.FrameHidden");
 end
 
 function AddonList_HasOutOfDate()

@@ -48,7 +48,7 @@ function TalentUtil.GetTalentName(overrideName, spellID)
 	end
 
 	if spellID then
-		local spellName = GetSpellInfo(spellID);
+		local spellName = C_Spell.GetSpellName(spellID);
 		if spellName then
 			return spellName;
 		end
@@ -97,8 +97,8 @@ end
 
 function TalentUtil.GetReplacesSpellNameFromInfo(definitionInfo)
 	if definitionInfo and definitionInfo.overriddenSpellID then
-		local overriddenSpellID = C_SpellBook.GetOverrideSpell(definitionInfo.overriddenSpellID);
-		local overriddenSpellName = GetSpellInfo(overriddenSpellID);
+		local overriddenSpellID = C_Spell.GetOverrideSpell(definitionInfo.overriddenSpellID);
+		local overriddenSpellName = C_Spell.GetSpellName(overriddenSpellID);
 		if overriddenSpellName then
 			return overriddenSpellName;
 		end
@@ -106,6 +106,103 @@ function TalentUtil.GetReplacesSpellNameFromInfo(definitionInfo)
 
 	return "";
 end
+
+-- Utils that take in a Talent Frame instance as the first argument
+-- If we ever refactor generalize the Get_Info functions into a data provider model, we can easily adjust and separate out functions that only use the TalentFrame for that
+TalentFrameUtil = {}
+
+function TalentFrameUtil.GetActiveSubTreeFromSubTreeSelectionNode(talentFrame, nodeInfo)
+	local activeEntryID = nodeInfo.activeEntry and nodeInfo.activeEntry.entryID or nil;
+	local activeEntryInfo = activeEntryID and talentFrame:GetAndCacheEntryInfo(activeEntryID);
+	return activeEntryInfo and activeEntryInfo.subTreeID;
+end
+
+function TalentFrameUtil.GetSubTreesIDsFromSubTreeSelectionNode(talentFrame, nodeInfo)
+	local subTreeIDs = {};
+	for _, entryID in ipairs(nodeInfo.entryIDs) do
+		local entryInfo = talentFrame:GetAndCacheEntryInfo(entryID);
+		if entryInfo and entryInfo.subTreeID then
+			table.insert(subTreeIDs, entryInfo.subTreeID);
+		end
+	end
+	return subTreeIDs;
+end
+
+function TalentFrameUtil.GetSubTreeCurrencyID(talentFrame, subTreeID)
+	local subTreeInfo = subTreeID and talentFrame:GetAndCacheSubTreeInfo(subTreeID) or nil;
+	return subTreeInfo and subTreeInfo.traitCurrencyID or nil;
+end
+
+function TalentFrameUtil.GetCurrencyAvailable(talentFrame, traitCurrencyID)
+	local currencyInfo = traitCurrencyID and talentFrame:GetTreeCurrencyInfo(traitCurrencyID) or nil;
+	return currencyInfo and currencyInfo.quantity or 0;
+end
+
+function TalentFrameUtil.GetCurrencySpent(talentFrame, traitCurrencyID)
+	local currencyInfo = traitCurrencyID and talentFrame:GetTreeCurrencyInfo(traitCurrencyID) or nil;
+	return currencyInfo and currencyInfo.spent or 0;
+end
+
+function TalentFrameUtil.GetSubTreeCurrencyAvailable(talentFrame, subTreeID)
+	local currencyID = TalentFrameUtil.GetSubTreeCurrencyID(talentFrame, subTreeID);
+	return TalentFrameUtil.GetCurrencyAvailable(talentFrame, currencyID);
+end
+
+function TalentFrameUtil.GetSubTreeCurrencySpent(talentFrame, subTreeID)
+	local currencyID = TalentFrameUtil.GetSubTreeCurrencyID(talentFrame, subTreeID);
+	return TalentFrameUtil.GetCurrencySpent(talentFrame, currencyID);
+end
+
+function TalentFrameUtil.GetFirstAvailableSubTreeSelectionNode(talentFrame, availableSubTreeIDs)
+	local treeInfo = talentFrame:GetTreeInfo();
+	if not availableSubTreeIDs then
+		return nil;
+	end
+	for _, subTreeID in ipairs(availableSubTreeIDs) do
+		local subTreeInfo = talentFrame:GetAndCacheSubTreeInfo(subTreeID);
+		if subTreeInfo and subTreeInfo.subTreeSelectionNodeIDs then
+			for _, selectionNodeID in ipairs(subTreeInfo.subTreeSelectionNodeIDs) do
+				local nodeInfo = talentFrame:GetAndCacheNodeInfo(selectionNodeID);
+				if nodeInfo and nodeInfo.isVisible and nodeInfo.isAvailable then
+					return nodeInfo;
+				end
+			end
+		end
+	end
+	return nil;
+end
+
+function TalentFrameUtil.GetFirstActiveSubTree(talentFrame, availableSubTreeIDs)
+	local treeInfo = talentFrame:GetTreeInfo();
+
+	if not availableSubTreeIDs then
+		return nil;
+	end
+
+	for _, subTreeID in ipairs(availableSubTreeIDs) do
+		local subTreeInfo = talentFrame:GetAndCacheSubTreeInfo(subTreeID);
+		if subTreeInfo and subTreeInfo.isActive then
+			return subTreeInfo;
+		end
+	end
+
+	return nil;
+end
+
+function TalentFrameUtil.GetNormalizedSubTreeNodePosition(talentFrame, nodeInfo)
+	-- Normalize the node's position values based on the subTree's normalized top center position
+	local tPosX = nodeInfo.posX;
+	local tPosY = nodeInfo.posY;
+
+	local subTreeInfo = talentFrame:GetAndCacheSubTreeInfo(nodeInfo.subTreeID);
+	if subTreeInfo and subTreeInfo.posX and subTreeInfo.posY then
+		tPosX = tPosX - subTreeInfo.posX;
+		tPosY = tPosY - subTreeInfo.posY;
+	end
+
+	return tPosX, tPosY;
+end
+
 
 TalentButtonUtil = {};
 
@@ -138,7 +235,8 @@ local HoverAlphaByVisualState = {
 };
 
 function TalentButtonUtil.GetTemplateForTalentType(nodeInfo, talentType, useLarge)
-	if nodeInfo and (nodeInfo.type == Enum.TraitNodeType.Selection) then
+	-- By default, any use of SubTreeSelection nodes without a bespoke override will treat them like regular Selection nodes
+	if nodeInfo and (nodeInfo.type == Enum.TraitNodeType.Selection or nodeInfo.type == Enum.TraitNodeType.SubTreeSelection) then
 		if FlagsUtil.IsSet(nodeInfo.flags, Enum.TraitNodeFlag.ShowMultipleIcons) then
 			return "TalentButtonChoiceTemplate";
 		end
@@ -153,7 +251,8 @@ function TalentButtonUtil.GetTemplateForTalentType(nodeInfo, talentType, useLarg
 end
 
 function TalentButtonUtil.GetSpecializedMixin(nodeInfo, talentType)
-	if nodeInfo and (nodeInfo.type == Enum.TraitNodeType.Selection) then
+	-- By default, any use of SubTreeSelection nodes without a bespoke override will treat them like regular Selection nodes
+	if nodeInfo and (nodeInfo.type == Enum.TraitNodeType.Selection or nodeInfo.type == Enum.TraitNodeType.SubTreeSelection) then
 		if FlagsUtil.IsSet(nodeInfo.flags, Enum.TraitNodeFlag.ShowMultipleIcons) then
 			return TalentButtonSplitSelectMixin;
 		else
@@ -169,11 +268,20 @@ function TalentButtonUtil.GetTemplateForEdgeVisualStyle(visualStyle)
 end
 
 function TalentButtonUtil.ApplyPosition(button, talentFrame, posX, posY)
-	local point, relativeTo, relativePoint = button:GetPoint();
 	local panOffsetX, panOffsetY = talentFrame:GetPanOffset();
-	local newX = (posX / 10) - panOffsetX;
-	local newY = (-posY / 10) + panOffsetY;
+	TalentButtonUtil.ApplyPositionAtOffset(button, posX, posY, panOffsetX, panOffsetY);
+end
+
+function TalentButtonUtil.ApplyPositionAtOffset(button, posX, posY, offsetX, offsetY)
+	local point, relativeTo, relativePoint = button:GetPoint();
+	local newX, newY = TalentButtonUtil.TranslateNodePositionsToAnchorPositions(posX, posY, offsetX, offsetY);
 	button:SetPoint(point, relativeTo, relativePoint, newX, newY);
+end
+
+function TalentButtonUtil.TranslateNodePositionsToAnchorPositions(posX, posY, offsetX, offsetY)
+	local newX = (posX / 10) - offsetX;
+	local newY = (-posY / 10) + offsetY;
+	return newX, newY;
 end
 
 function TalentButtonUtil.GetColorForBaseVisualState(visualState)
@@ -199,7 +307,7 @@ function TalentButtonUtil.CalculateIconTexture(definitionInfo, overrideSpellID)
 
 		local spellID = overrideSpellID or definitionInfo.spellID;
 		if spellID then
-			local spellIcon = select(8, GetSpellInfo(spellID));
+			local spellIcon = select(2, C_Spell.GetSpellTexture(spellID));
 			return spellIcon;
 		end
 	end
@@ -315,14 +423,15 @@ function TalentButtonUtil.GetTooltipForActionBarStatus(status)
 	return ActionBarStatusTooltips[status];
 end
 
-function TalentButtonUtil.GetActionbarStatusForSpell(spellID)
-	if not spellID or IsPassiveSpell(spellID) then
+function TalentButtonUtil.GetActionBarStatusForSpell(spellID)
+	if not spellID or C_Spell.IsSpellPassive(spellID) then
 		return TalentButtonUtil.ActionBarStatus.NotMissing;
 	end
 
 	-- First retrieve all action bars the spell is slotted on
 	local excludeNonPlayerBars = true;
-	local barsWithSpell = ActionButtonUtil.GetActionBarsForSpell(spellID, excludeNonPlayerBars);
+	local excludeSpecialPlayerBars = false;
+	local barsWithSpell = ActionButtonUtil.GetActionBarsForSpell(spellID, excludeNonPlayerBars, excludeSpecialPlayerBars);
 	if not barsWithSpell then
 		return TalentButtonUtil.ActionBarStatus.MissingFromAllBars;
 	end
@@ -358,7 +467,7 @@ function TalentButtonUtil.GetActionBarStatusForNode(nodeInfo, spellID)
 		return TalentButtonUtil.ActionBarStatus.NotMissing;
 	end
 
-	return TalentButtonUtil.GetActionbarStatusForSpell(spellID);
+	return TalentButtonUtil.GetActionBarStatusForSpell(spellID);
 end
 
 function TalentButtonUtil.GetActionBarStatusForNodeEntry(entryID, nodeInfo, spellID)
@@ -378,7 +487,7 @@ function TalentButtonUtil.GetActionBarStatusForNodeEntry(entryID, nodeInfo, spel
 		return TalentButtonUtil.ActionBarStatus.NotMissing;
 	end
 
-	return TalentButtonUtil.GetActionbarStatusForSpell(spellID);
+	return TalentButtonUtil.GetActionBarStatusForSpell(spellID);
 end
 
 -- TODO:: Replace this temp code that is supplying missing pieces to avoid Lua errors.
@@ -407,7 +516,8 @@ end;
 -- TODO:: replace this with a more formal wrapper around the API.
 local OriginalGetConditionInfo = C_Traits.GetConditionInfo;
 C_Traits.GetConditionInfo = function (...)
-	local condInfo = OriginalGetConditionInfo(...);
+	local configID, condID, ignoreFontColor = ...;
+	local condInfo = OriginalGetConditionInfo(configID, condID);
 	if condInfo then
 		local function EvaluateConditionTooltipText()
 			local tooltipFormat = condInfo.tooltipFormat;
@@ -437,7 +547,7 @@ C_Traits.GetConditionInfo = function (...)
 		end
 
 		local tooltipText = EvaluateConditionTooltipText();
-		condInfo.tooltipText = (tooltipText and not condInfo.isMet) and RED_FONT_COLOR:WrapTextInColorCode(tooltipText) or tooltipText;
+		condInfo.tooltipText = (tooltipText and not condInfo.isMet) and (not ignoreFontColor and RED_FONT_COLOR:WrapTextInColorCode(tooltipText)) or tooltipText;
 	end
 
 	return condInfo;

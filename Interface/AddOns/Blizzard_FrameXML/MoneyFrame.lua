@@ -31,6 +31,18 @@ MoneyTypeInfo["PLAYER"] = {
 	canPickup = 1,
 	showSmallerCoins = "Backpack"
 };
+MoneyTypeInfo["ACCOUNT"] = {
+	OnloadFunc = function(self)
+		self:RegisterEvent("ACCOUNT_MONEY");
+	end,
+
+	UpdateFunc = function(self)
+		return C_Bank.FetchDepositedMoney(Enum.BankType.Account);
+	end,
+
+	collapse = 1,
+	showSmallerCoins = "Backpack",
+};
 MoneyTypeInfo["STATIC"] = {
 	UpdateFunc = function(self)
 		return self.staticMoney;
@@ -167,6 +179,7 @@ MoneyTypeInfo["BLACKMARKET"] = {
 
 function MoneyFrame_OnLoad (self)
 	self:RegisterEvent("PLAYER_MONEY");
+	self:RegisterEvent("ACCOUNT_MONEY");
 	self:RegisterEvent("PLAYER_TRADE_MONEY");
 	self:RegisterEvent("TRADE_MONEY_CHANGED");
 	self:RegisterEvent("SEND_MAIL_MONEY_CHANGED");
@@ -189,6 +202,7 @@ function SmallMoneyFrame_OnLoad(self, moneyType)
 	else
 		--The old sucky way of doing things
 		self:RegisterEvent("PLAYER_MONEY");
+		self:RegisterEvent("ACCOUNT_MONEY");
 		self:RegisterEvent("PLAYER_TRADE_MONEY");
 		self:RegisterEvent("TRADE_MONEY_CHANGED");
 		self:RegisterEvent("SEND_MAIL_MONEY_CHANGED");
@@ -207,6 +221,8 @@ function MoneyFrame_OnEvent (self, event, ...)
 	local moneyType = self.moneyType;
 	
 	if ( event == "PLAYER_MONEY" and moneyType == "PLAYER" ) then
+		MoneyFrame_UpdateMoney(self);
+	elseif ( event == "ACCOUNT_MONEY" and moneyType == "ACCOUNT" ) then
 		MoneyFrame_UpdateMoney(self);
 	elseif ( event == "TRIAL_STATUS_UPDATE" and moneyType == "PLAYER" ) then
 		MoneyFrame_UpdateTrialErrorButton(self);

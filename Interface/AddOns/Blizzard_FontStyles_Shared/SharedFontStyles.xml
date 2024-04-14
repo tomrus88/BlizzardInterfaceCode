@@ -232,20 +232,20 @@
 		<Color r="1.0" g="1.0" b="1.0"/>
 	</Font>
 	<Font name="GameTooltipHeaderText" inherits="GameTooltipHeader" justifyH="LEFT" virtual="true">
-    <Color r="1.0" g="1.0" b="1.0"/>
-  </Font>
-  <Font name="GameTooltipText" inherits="Tooltip_Med" justifyH="LEFT" virtual="true">
-    <Color r="1.0" g="1.0" b="1.0"/>
-  </Font>
-  <Font name="GameTooltipTextSmall" inherits="Tooltip_Small" justifyH="LEFT" virtual="true">
-    <Color r="1.0" g="1.0" b="1.0"/>
-  </Font>
-  <Font name="IMENormal" inherits="System_IME" justifyH="LEFT" virtual="true">
-    <Color r="1.0" g="1.0" b="1.0"/>
-  </Font>
-  <Font name="IMEHighlight" inherits="System_IME" justifyH="LEFT" virtual="true">
-    <Color r="1.0" g="0.82" b="0"/>
-  </Font>
+	<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>
+	<Font name="GameTooltipText" inherits="Tooltip_Med" justifyH="LEFT" virtual="true">
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>
+	<Font name="GameTooltipTextSmall" inherits="Tooltip_Small" justifyH="LEFT" virtual="true">
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>
+	<Font name="IMENormal" inherits="System_IME" justifyH="LEFT" virtual="true">
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>
+	<Font name="IMEHighlight" inherits="System_IME" justifyH="LEFT" virtual="true">
+		<Color r="1.0" g="0.82" b="0"/>
+	</Font>
 	<Font name="MovieSubtitleFont" inherits="SystemFont22_Shadow_Outline" virtual="true">
 		<Color color="NORMAL_FONT_COLOR"/>
 	</Font>

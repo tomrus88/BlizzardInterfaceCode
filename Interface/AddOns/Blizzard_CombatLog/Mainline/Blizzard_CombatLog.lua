@@ -1689,7 +1689,7 @@ function Blizzard_CombatLog_SpellMenuClick(action, spellName, spellId, eventType
 			v.eventList[eventType] = false;
 		end
 	elseif ( action == "LINK" ) then
-		local spellLink = GetSpellLink(spellId);
+		local spellLink = C_Spell.GetSpellLink(spellId);
 
 		if ( ChatEdit_GetActiveWindow() ) then
 			ChatEdit_InsertLink(spellLink);
@@ -3504,7 +3504,7 @@ function SetItemRef(link, text, button, chatFrame)
 
 		if ( IsModifiedClick("CHATLINK") ) then
 			if ( spellId > 0 ) then
-				local spellLink = GetSpellLink(spellId, glyphId);
+				local spellLink = C_Spell.GetSpellLink(spellId, glyphId);
 				if ( ChatEdit_InsertLink(spellLink) ) then
 					return;
 				end

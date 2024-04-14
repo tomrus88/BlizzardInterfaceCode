@@ -57,3 +57,7 @@ end
 
 function GraphicsOverrides.CreateHiResOptions(category, layout)
 end
+
+function GraphicsOverrides.RunSettingsCallback(callback)
+	callback();
+end

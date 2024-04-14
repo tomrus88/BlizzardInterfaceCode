@@ -315,10 +315,10 @@ function CommunitiesListMixin:OnHide()
 	FrameUtil.UnregisterFrameForEvents(self, COMMUNITIES_LIST_EVENTS);
 end
 
-function CommunitiesListMixin:ScrollToClub(clubId, noScrollInterpolation)
+function CommunitiesListMixin:ScrollToClub(clubId)
 	self.ScrollBox:ScrollToElementDataByPredicate(function(elementData)
 		return elementData.clubInfo and elementData.clubInfo.clubId == clubId;
-	end, ScrollBoxConstants.AlignCenter, noScrollInterpolation);
+	end, ScrollBoxConstants.AlignCenter);
 end
 
 function CommunitiesListMixin:OnClubSelected(clubId)

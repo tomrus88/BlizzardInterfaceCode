@@ -754,7 +754,7 @@
 								<Scripts>
 									<OnClick>
 										ShowQuestComplete(C_QuestLog.GetSelectedQuest());
-										AutoQuestPopupTracker_RemovePopUp(QuestMapFrame.DetailsFrame.questID);
+										QuestObjectiveTracker:RemoveAutoQuestPopUp(QuestMapFrame.DetailsFrame.questID);
 									</OnClick>
 									<OnShow>
 										UIFrameFlash(self.Flash, 0.75, 0.75, -1, nil);

@@ -5,8 +5,10 @@ function TimerunningFirstTimeDialogMixin:OnLoad()
 	self.InfoPanel.CreateButton:SetText(TimerunningUtil.AddLargeIcon(TIMERUNNING_POPUP_CREATE));
 
 	self.InfoPanel.CreateButton:SetScript("OnClick", function()
-		self:Dismiss();
-		CharacterSelect_CreateNewCharacter(Enum.CharacterCreateType.Normal, GetActiveTimerunningSeasonID());
+		-- Don't show the popup with the create character choice since the player just selected timerunner.
+		local suppressPopup = true;
+		self:Dismiss(suppressPopup);
+		CharacterSelectUtil.CreateNewCharacter(Enum.CharacterCreateType.Normal, GetActiveTimerunningSeasonID());
 	end);
 	self.InfoPanel.CloseButton:SetScript("OnClick", function()
 		self:Dismiss();
@@ -49,12 +51,12 @@ function TimerunningFirstTimeDialogMixin:ShowFromClick(shownFromPopup)
 	self:DetermineVisibility();
 end
 
-function TimerunningFirstTimeDialogMixin:Dismiss()
+function TimerunningFirstTimeDialogMixin:Dismiss(suppressPopup)
 	SetCVar("seenTimerunningFirstLoginPopup", GetActiveTimerunningSeasonID());
 	self:Hide();
 
 	-- In character create this is opened only by the popup, so show the popup again when dismissed.
-	if GlueParent_GetCurrentScreen() == "charcreate" or self.shownFromPopup then
+	if not suppressPopup and ((GlueParent_GetCurrentScreen() == "charcreate") or self.shownFromPopup) then
 		TimerunningChoicePopup:Show();
 	end
 end
@@ -73,7 +75,7 @@ StaticPopupDialogs["TIMERUNNING_CHOICE_WARNING"] = {
 	text = TIMERUNNING_CHOICE_WARNING,
 	OnAccept = function()
 		TimerunningChoicePopup:Hide();
-		CharacterSelect_CreateNewCharacter(Enum.CharacterCreateType.Normal, GetActiveTimerunningSeasonID());
+		CharacterSelectUtil.CreateNewCharacter(Enum.CharacterCreateType.Normal, GetActiveTimerunningSeasonID());
 	end,
 };
 
@@ -95,7 +97,7 @@ function TimerunningChoiceDialogMixin:OnLoad()
 			GlueDialog_Show("TIMERUNNING_CHOICE_WARNING");
 		else
 			TimerunningChoicePopup:Hide();
-			CharacterSelect_CreateNewCharacter(Enum.CharacterCreateType.Normal, self.isTimerunning and GetActiveTimerunningSeasonID() or nil);
+			CharacterSelectUtil.CreateNewCharacter(Enum.CharacterCreateType.Normal, self.isTimerunning and GetActiveTimerunningSeasonID() or nil);
 		end
 	end);
 end

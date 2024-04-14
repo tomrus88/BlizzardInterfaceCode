@@ -318,6 +318,11 @@ local CurrencyInfo =
 	Events =
 	{
 		{
+			Name = "AccountMoney",
+			Type = "Event",
+			LiteralName = "ACCOUNT_MONEY",
+		},
+		{
 			Name = "CurrencyDisplayUpdate",
 			Type = "Event",
 			LiteralName = "CURRENCY_DISPLAY_UPDATE",
@@ -372,6 +377,7 @@ local CurrencyInfo =
 				{ Name = "description", Type = "cstring", Nilable = false },
 				{ Name = "isHeader", Type = "bool", Nilable = false },
 				{ Name = "isHeaderExpanded", Type = "bool", Nilable = false },
+				{ Name = "currencyListDepth", Type = "number", Nilable = false },
 				{ Name = "isTypeUnused", Type = "bool", Nilable = false },
 				{ Name = "isShowInBackpack", Type = "bool", Nilable = false },
 				{ Name = "quantity", Type = "number", Nilable = false },

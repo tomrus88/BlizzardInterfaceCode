@@ -441,6 +441,18 @@ NineSliceLayouts =
 		Center = { atlas = "Perks-Hold-NineSlice-Center", },
 	},
 
+	BankTabSettingsMenuLayout =
+	{
+		TopLeftCorner =	{ atlas = "macropopup-topleft2", },
+		TopRightCorner =	{ atlas = "macropopup-topright2", },
+		BottomLeftCorner =	{ atlas = "macropopup-bottomleft", },
+		BottomRightCorner =	{ atlas = "macropopup-bottomright", },
+		TopEdge = { atlas = "_macropopup-top2", },
+		BottomEdge = { atlas = "_macropopup-bottom", },
+		LeftEdge = { atlas = "!macropopup-left2", },
+		RightEdge = { atlas = "!macropopup-right2", },
+	},
+
 	ThreeSliceVerticalLayout =
 	{
 		threeSliceVertical = true,

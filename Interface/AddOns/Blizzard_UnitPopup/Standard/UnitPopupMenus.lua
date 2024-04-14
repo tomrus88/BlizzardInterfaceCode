@@ -3,6 +3,7 @@ function UnitPopupMenuSelf:GetMenuButtons()
 	return {
 		UnitPopupRaidTargetButtonMixin, 
 		UnitPopupSetFocusButtonMixin,
+		UnitPopupSelfHighlightSelectButtonMixin,
 		UnitPopupPvpFlagButtonMixin,
 		UnitPopupLootSubsectionTitle,
 		UnitPopupSelectLootSpecializationButtonMixin,

@@ -142,7 +142,8 @@ function SetupPlayerForModelScene(modelScene, overrideActorName, itemModifiedApp
 		hideWeapons = (hideWeapons == nil) or hideWeapons;
 		useNativeForm = (useNativeForm == nil) or useNativeForm;
 		if IsOnGlueScreen() then
-			actor:SetPlayerModelFromGlues(sheatheWeapons, autoDress, hideWeapons, useNativeForm);
+			local characterIndex = nil;  -- defaults to selected character.
+			actor:SetPlayerModelFromGlues(characterIndex, sheatheWeapons, autoDress, hideWeapons, useNativeForm);
 		else
 			actor:SetModelByUnit("player", sheatheWeapons, autoDress, hideWeapons, useNativeForm);
 		end

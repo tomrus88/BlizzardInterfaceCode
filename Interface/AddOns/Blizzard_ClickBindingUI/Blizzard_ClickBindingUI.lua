@@ -168,7 +168,9 @@ local function NameAndIconFromElementData(elementData)
 		local actionName, actionIcon, _;
 		if type == Enum.ClickBindingType.Spell or type == Enum.ClickBindingType.PetAction then
 			local overrideID = FindSpellOverrideByID(actionID);
-			actionName, _, actionIcon = GetSpellInfo(overrideID);
+			local spellInfo = C_Spell.GetSpellInfo(overrideID);
+			actionName = spellInfo.name;
+			actionIcon = spellInfo.iconID;
 		elseif type == Enum.ClickBindingType.Macro then
 			local macroName;
 			macroName, actionIcon = GetMacroInfo(actionID);
@@ -264,7 +266,7 @@ function ClickBindingLineMixin:OnEnter()
 end
 
 function ClickBindingLineMixin:OnLeave()
-	if GetMouseFocus() == self.DeleteButton then
+	if self.DeleteButton:IsMouseMotionFocus() then
 		return;
 	end
 
@@ -289,18 +291,28 @@ end
 
 function ClickBindingFramePortraitMixin:OnLoad()
 	self:SetSelectedState(false);
-	self.Portrait:SetTexture(self.PortraitTexture);
+	if self.PortraitTexture then
+		self.Portrait:SetTexture(self.PortraitTexture);
+	elseif self.PortraitAtlas then
+		self.Portrait:SetAtlas(self.PortraitAtlas);
+	end
 end
 
 function ClickBindingFramePortraitMixin:GetFrame()
-	return _G[self.FrameName];
+	local frame = _G[self.FrameName];
+	if not frame and self.FrameLoadFunc then
+		self.FrameLoadFunc();
+		frame = _G[self.FrameName];
+	end
+
+	return frame;
 end
 
 function ClickBindingFramePortraitMixin:GetTooltipText()
-	if self.FrameName == "SpellBookFrame" then
-		return MicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK");
-	elseif self.FrameName == "MacroFrame" then
+	if self.FrameName == "MacroFrame" then
 		return MACROS;
+	elseif self.FrameName == "PlayerSpellsFrame" then
+		return PLAYERSPELLS_BUTTON;
 	end
 end
 
@@ -555,7 +567,7 @@ function ClickBindingFrameMixin:OnShow()
 	self.TutorialFrame:SetShown(showTutorial);
 	-- Refresh() triggers ClickBindingFrame.UpdateFrames event through SetHasNewSlot()
 	self:Refresh();
-	self:SetFocusedFrame(SpellBookFrame);
+	self:SetFocusedFrame(self.FramePortraits[1]:GetFrame());
 	self:UpdateMouseoverCastUI();
 end
 
@@ -604,7 +616,7 @@ function ClickBindingFrameMixin:Refresh()
 end
 
 function ClickBindingFrameMixin:SetFocusedFrame(frame)
-	if (frame == self:GetFocusedFrame()) or not (frame == SpellBookFrame or frame == MacroFrame) then
+	if (frame == self:GetFocusedFrame()) or not (frame == MacroFrame or frame == PlayerSpellsFrame) then
 		return;
 	end
 

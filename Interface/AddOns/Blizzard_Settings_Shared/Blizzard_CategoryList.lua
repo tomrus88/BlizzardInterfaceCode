@@ -90,9 +90,12 @@ function SettingsCategoryListButtonMixin:Init(initializer)
 		end
 	end
 
-	self.NewFeature.BGLabel:SetPoint("RIGHT", 0.5, -0.5);
-	self.NewFeature.Label:SetPoint("RIGHT", 0, 0);
-	self.NewFeature:SetShown(anyNew);
+	local supportsNewFeatures = self.NewFeature.BGLabel and self.NewFeature.Label;
+	if supportsNewFeatures then
+		self.NewFeature.BGLabel:SetPoint("RIGHT", 0.5, -0.5);
+		self.NewFeature.Label:SetPoint("RIGHT", 0, 0);
+	end
+	self.NewFeature:SetShown(supportsNewFeatures and anyNew);
 
 	self:SetExpanded(category.expanded);
 	self:SetSelected(g_selectionBehavior:IsSelected(self));

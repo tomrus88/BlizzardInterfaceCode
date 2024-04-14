@@ -98,7 +98,7 @@ function ClassTrainerFrame_OnEvent(self, event, ...)
 			retainScrollPosition = false;
 		end
 
-		ClassTrainerFrame_Update(retainScrollPosition, ScrollBoxConstants.NoScrollInterpolation);
+		ClassTrainerFrame_Update(retainScrollPosition);
 	elseif ( event == "TRAINER_DESCRIPTION_UPDATE" ) then
 		ClassTrainer_SetSelection(GetTrainerSelectionIndex());
 	elseif ( event == "TRAINER_SERVICE_INFO_NAME_UPDATE" ) then
@@ -339,7 +339,7 @@ function ClassTrainer_SelectNearestLearnableSkill()
 
 		ClassTrainerFrame.ScrollBox:ScrollToElementDataByPredicate(function(elementData)
 			return elementData.skillIndex == ClassTrainerFrame.selectedService;
-		end, ScrollBoxConstants.AlignNearest, ScrollBoxConstants.NoScrollInterpolation);
+		end, ScrollBoxConstants.AlignNearest);
 	end
 end
 

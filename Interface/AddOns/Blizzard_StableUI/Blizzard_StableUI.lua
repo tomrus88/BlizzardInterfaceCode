@@ -576,8 +576,8 @@ function StableActivePetButtonTemplateMixin:RefreshTooltip()
 	if self.locked and not self.isSecondarySlot then
 		GameTooltip_SetTitle(GameTooltip, RED_FONT_COLOR:WrapTextInColorCode(PET_STABLE_SLOT_LOCKED));
 		local nextCallPetSpellID = CALL_PET_SPELL_IDS[self:GetID()];
-		local spellName = GetSpellInfo(nextCallPetSpellID);
-		if (spellName and spellName ~= "") then
+		local spellInfo = C_Spell.GetSpellInfo(nextCallPetSpellID);
+		if (spellInfo.name and spellInfo.name ~= "") then
 			GameTooltip_AddHighlightLine(GameTooltip, PET_STABLE_SLOT_LOCKED_TOOLTIP:format(spellName));
 		end
 	elseif not self:IsEnabled() and self.disabledTooltip then
@@ -932,8 +932,8 @@ function StableStabledPetListMixin:PetPassesSearch(pet)
 
 	-- pet abilities
 	for i, abilityID in ipairs(pet.abilities) do
-		local abilityName = GetSpellInfo(abilityID);
-		if string.find(string.lower(abilityName), searchString) then
+		local abilityInfo = C_Spell.GetSpellInfo(abilityID);
+		if string.find(string.lower(abilityInfo.name), searchString) then
 			foundPet = true;
 		end
 	end
@@ -1123,9 +1123,9 @@ function StablePetAbilityMixin:Initialize(spellID)
 		return;
 	end
 
-	local spellName, spellRank, spellIcon, spellCastTime, spellMinRange, spellMaxRange, spellID, spellOriginalIcon = GetSpellInfo(spellID);
-	self.Icon:SetTexture(spellIcon);
-	self.Name:SetText(spellName);
+	local spellInfo = C_Spell.GetSpellInfo(spellID);
+	self.Icon:SetTexture(spellInfo.iconID);
+	self.Name:SetText(spellInfo.name);
 
 	local padding = 10;
 	self:SetWidth(self.Name:GetWidth() + self.Icon:GetWidth() + padding);
@@ -1139,7 +1139,7 @@ function StablePetAbilityMixin:OnEnter()
 
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 	local spell = Spell:CreateFromSpellID(self.spellID);
-	spell:ContinueWithCancelOnSpellLoad(function()
+	self.spellCancelFunc = spell:ContinueWithCancelOnSpellLoad(function()
 		if GameTooltip:GetOwner() == self then	
 			GameTooltip:SetSpellByID(self.spellID, true, true);
 			GameTooltip:Show();
@@ -1148,6 +1148,10 @@ function StablePetAbilityMixin:OnEnter()
 end
 
 function StablePetAbilityMixin:OnLeave()
+	if self.spellCancelFunc then
+		self.spellCancelFunc();
+		self.spellCancelFunc = nil;
+	end
 	GameTooltip:Hide();
 end
 

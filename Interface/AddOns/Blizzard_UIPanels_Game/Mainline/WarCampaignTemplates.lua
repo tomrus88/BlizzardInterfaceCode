@@ -328,7 +328,7 @@ function CampaignHeaderMixin:HasLoreEntries()
 end
 
 function CampaignHeaderMixin:UpdateLoreButtonVisibility()
-	local mouseOver = RegionUtil.IsDescendantOfOrSame(GetMouseFocus(), self);
+	local mouseOver = RegionUtil.IsAnyDescendantOfOrSame(GetMouseFoci(), self);
 	local showLore = (mouseOver or self:IsLoreButtonLocked()) and self:HasLoreEntries();
 	self.LoreButton:SetShown(showLore);
 	self:SetDrawLayerEnabled("HIGHLIGHT", mouseOver);

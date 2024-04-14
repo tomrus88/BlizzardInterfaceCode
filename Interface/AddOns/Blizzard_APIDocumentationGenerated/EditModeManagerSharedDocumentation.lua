@@ -309,13 +309,14 @@ local EditModeManagerShared =
 		{
 			Name = "EditModeObjectiveTrackerSetting",
 			Type = "Enumeration",
-			NumValues = 2,
+			NumValues = 3,
 			MinValue = 0,
-			MaxValue = 1,
+			MaxValue = 2,
 			Fields =
 			{
 				{ Name = "Height", Type = "EditModeObjectiveTrackerSetting", EnumValue = 0 },
 				{ Name = "Opacity", Type = "EditModeObjectiveTrackerSetting", EnumValue = 1 },
+				{ Name = "TextSize", Type = "EditModeObjectiveTrackerSetting", EnumValue = 2 },
 			},
 		},
 		{

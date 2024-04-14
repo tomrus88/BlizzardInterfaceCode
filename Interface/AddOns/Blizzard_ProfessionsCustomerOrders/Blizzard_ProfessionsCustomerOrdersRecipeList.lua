@@ -51,7 +51,7 @@ function ProfessionsCustomerOrdersRecipeListElementMixin:OnLineEnter()
 end
 
 function ProfessionsCustomerOrdersRecipeListElementMixin:OnLineLeave()
-	if GetMouseFocus() == self.FavoriteButton then
+	if self.FavoriteButton:IsMouseMotionFocus() then
 		return;
 	end
 

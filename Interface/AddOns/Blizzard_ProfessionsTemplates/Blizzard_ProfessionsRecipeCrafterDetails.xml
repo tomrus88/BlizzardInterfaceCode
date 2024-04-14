@@ -46,7 +46,7 @@
 					</Anchors>
 					<Animations>
 						<AnimationGroup parentKey="Anim" looping="NONE">
-							<FlipBook smoothing="NONE" childKey="AppearIcon" duration=".5" order="1" flipBookRows="3" flipBookColumns="4" flipBookFrames="12" flipBookFrameWidth="0" flipBookFrameHeight="0"/>
+							<FlipBook smoothing="NONE" duration=".5" order="1" flipBookRows="3" flipBookColumns="4" flipBookFrames="12" flipBookFrameWidth="0" flipBookFrameHeight="0"/>
 						</AnimationGroup>
 						
 						<AnimationGroup parentKey="ScaleUp" looping="NONE">
@@ -67,7 +67,7 @@
 					</Anchors>
 					<Animations>
 						<AnimationGroup parentKey="Anim" looping="NONE">
-							<FlipBook parentKey="Flipbook" smoothing="NONE" childKey="DissolveIcon" duration=".5" order="1" flipBookRows="3" flipBookColumns="4" flipBookFrames="12" flipBookFrameWidth="0" flipBookFrameHeight="0"/>
+							<FlipBook parentKey="Flipbook" smoothing="NONE" duration=".5" order="1" flipBookRows="3" flipBookColumns="4" flipBookFrames="12" flipBookFrameWidth="0" flipBookFrameHeight="0"/>
 						</AnimationGroup>
 					</Animations>
 				</Texture>
@@ -201,7 +201,7 @@
 											</Anchors>
 											<Animations>
 												<AnimationGroup parentKey="Flipbook" looping="REPEAT" setToFinalAlpha="true">
-													<FlipBook parentKey="Flipbook" smoothing="NONE" childKey="BarFill" duration="1" order="1" flipBookRows="15" flipBookColumns="4" flipBookFrames="60" flipBookFrameWidth="0" flipBookFrameHeight="0"/>
+													<FlipBook parentKey="Flipbook" smoothing="NONE" duration="1" order="1" flipBookRows="15" flipBookColumns="4" flipBookFrames="60" flipBookFrameWidth="0" flipBookFrameHeight="0"/>
 												</AnimationGroup>
 											</Animations>
 										</Texture>

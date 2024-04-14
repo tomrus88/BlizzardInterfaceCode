@@ -96,6 +96,10 @@ local PartyInfo =
 			Documentation = { "Usually this will convert to raid immediately. In some cases (e.g. PartySync) the user will be prompted to confirm converting to raid, because it's potentially destructive." },
 		},
 		{
+			Name = "DelveTeleportOut",
+			Type = "Function",
+		},
+		{
 			Name = "DoCountdown",
 			Type = "Function",
 
@@ -213,6 +217,15 @@ local PartyInfo =
 			},
 		},
 		{
+			Name = "IsDelveComplete",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "isDelveComplete", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "IsPartyFull",
 			Type = "Function",
 
@@ -233,6 +246,15 @@ local PartyInfo =
 			Returns =
 			{
 				{ Name = "isPartyInJailersTower", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsPartyWalkIn",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "isPartyWalkIn", Type = "bool", Nilable = false },
 			},
 		},
 		{

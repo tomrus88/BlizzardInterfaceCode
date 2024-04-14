@@ -89,6 +89,7 @@ local eventToastTemplatesByToastType = {
 	[Enum.EventToastDisplayType.ScenarioClickExpand] = {template = "EventToastScenarioExpandToastTemplate", frameType = "BUTTON", hideAutomatically = false,},
 	[Enum.EventToastDisplayType.WeeklyRewardUnlock] = {template = "EventToastManagerWeeklyRewardToastUnlockTemplate", frameType = "FRAME", hideAutomatically = true,},
 	[Enum.EventToastDisplayType.WeeklyRewardUpgrade] = {template = "EventToastManagerWeeklyRewardToastUpgradeTemplate", frameType = "FRAME", hideAutomatically = true,},
+	[Enum.EventToastDisplayType.FlightpointDiscovered] = {template = "EventToastFlightpointDiscoveredTemplate", frameType = "FRAME", hideAutomatically = true,},
 };
 
 EventToastManagerMixin = { };
@@ -217,7 +218,7 @@ function EventToastManagerFrameMixin:IsCurrentlyToasting()
 end
 
 function EventToastManagerFrameMixin:OnUpdate()
-	local mouseOver = RegionUtil.IsDescendantOfOrSame(GetMouseFocus(), self);
+	local mouseOver = RegionUtil.IsAnyDescendantOfOrSame(GetMouseFoci(), self);
 	if (mouseOver) then 
 		self:PauseAnimations();
 	else
@@ -666,6 +667,31 @@ function EventToastWithIconLargeTextMixin:Setup(toastInfo)
 	self:AnimIn(); 
 end
 
+EventToastFlightpointDiscoveredMixin = { };
+function EventToastFlightpointDiscoveredMixin:Setup(toastInfo)
+	EventToastWithIconBaseMixin.Setup(self, toastInfo);
+	local parent = self:GetParent();
+
+	parent.BlackBG:SetAtlas("UI-World-Quest-Black-2x", false);
+	parent.BlackBG:SetSize(self:GetWidth(), self:GetHeight() - 3);
+
+	self:Show(); 
+	self:AnimIn(); 
+end
+
+function EventToastFlightpointDiscoveredMixin:SetupGLineAtlas(useWhiteGLineAtlas)
+	local parent = self:GetParent();
+	local atlas = "UI-World-Quest-golden-line-2x";
+	local glineWidth = self:GetWidth() + 35;
+
+	parent.GLine:SetAtlas(atlas, false);
+	parent.GLine:SetSize(glineWidth, 7);
+	parent.GLine:SetPoint("BOTTOM", 0, -3);
+
+	parent.GLine2:SetAtlas(atlas, false);
+	parent.GLine2:SetSize(glineWidth, 7);
+end
+
 EventToastWithIconWithRarityMixin = { };
 function EventToastWithIconWithRarityMixin:Setup(toastInfo)
 	EventToastWithIconBaseMixin.Setup(self, toastInfo); 
@@ -988,7 +1014,11 @@ local defaultAnimOutStartDelay = 1.8;
 local defaultAnimOutDuration = 0.5;
 
 function EventToastAnimationsMixin:BannerPlay()
-	self:GetParent():SetupGLineAtlas(self.useWhiteGlineAtlas);
+	if(self.SetupGLineAtlas) then
+		self:SetupGLineAtlas(self.useWhiteGLineAtlas);
+	else
+		self:GetParent():SetupGLineAtlas(self.useWhiteGlineAtlas);
+	end
 
 	self:SetAnimInStartDelay(self.animInStartDelay or defaultAnimInStartDelay);
 	self:GetParent():SetAnimStartDelay(self.animInStartDelay or defaultAnimInStartDelay);

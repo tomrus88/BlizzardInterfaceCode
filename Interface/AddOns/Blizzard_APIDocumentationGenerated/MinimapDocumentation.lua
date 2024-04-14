@@ -20,6 +20,20 @@ local Minimap =
 			Type = "Function",
 		},
 		{
+			Name = "GetDefaultTrackingValue",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "filterType", Type = "MinimapTrackingFilter", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "defaultValue", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "GetDrawGroundTextures",
 			Type = "Function",
 

@@ -9,16 +9,21 @@ GLUE_SCREENS = {
 };
 
 GLUE_SECONDARY_SCREENS = {
-	["cinematics"] =	{ frame = "CinematicsFrame", 	playMusic = true,	playAmbience = false,	fullScreen = false,	showSound = SOUNDKIT.GS_TITLE_OPTIONS },
+	["cinematics"] =	{ frame = "CinematicsMenu", 	playMusic = true,	playAmbience = false,	fullScreen = false,	showSound = SOUNDKIT.GS_TITLE_OPTIONS },
 	["credits"] = 		{ frame = "CreditsFrame", 		playMusic = false,	playAmbience = false,	fullScreen = true,	showSound = SOUNDKIT.GS_TITLE_CREDITS },
 	-- Bug 477070 We have some rare race condition crash in the sound engine that happens when the MovieFrame's "showSound" sound plays at the same time the movie audio is starting.
 	-- Removing the showSound from the MovieFrame in attempt to avoid the crash, until we can actually find and fix the bug in the sound engine.
 	["movie"] = 		{ frame = "MovieFrame", 		playMusic = false,	playAmbience = false,	fullScreen = true },
-	["options"] = 		{ frame = "SettingsPanel",		playMusic = true,	playAmbience = false,	fullScreen = false,	showSound = SOUNDKIT.GS_TITLE_OPTIONS },
+	["options"] = 		{ frame = "SettingsPanel",		playMusic = true,	playAmbience = false,	fullScreen = false,	showSound = SOUNDKIT.GS_TITLE_OPTIONS, checkFit = true, },
 };
 
 ACCOUNT_SUSPENDED_ERROR_CODE = 53;
 GENERIC_DISCONNECTED_ERROR_CODE = 319;
+
+local function GlueParent_SetSecondaryScreen(secondaryScreen, contextKey)
+	GlueParent.currentSecondaryScreen = secondaryScreen;
+	GlueParent.currentSecondaryScreenContextKey = contextKey;
+end
 
 local function OnDisplaySizeChanged(self)
 	local width = GetScreenWidth();
@@ -33,23 +38,26 @@ local function OnDisplaySizeChanged(self)
 	if ( currentAspect > MAX_ASPECT ) then
 		local maxWidth = height * MAX_ASPECT;
 		local barWidth = ( width - maxWidth ) / 2;
-		self:SetScale(1);
 		self:SetPoint("TOPLEFT", barWidth, 0);
 		self:SetPoint("BOTTOMRIGHT", -barWidth, 0);
 	elseif ( currentAspect < MIN_ASPECT ) then
 		local maxHeight = width / MIN_ASPECT;
 		local scale = currentAspect / MIN_ASPECT;
 		local barHeight = ( height - maxHeight ) / (2 * scale);
+
+		-- Note: we're overriding the default scaling behavior, but this is necessary for this edge case
 		self:SetScale(maxHeight/height);
+
 		self:SetPoint("TOPLEFT", 0, -barHeight);
 		self:SetPoint("BOTTOMRIGHT", 0, barHeight);
 	else
-		self:SetScale(1);
 		self:SetAllPoints();
 	end
 end
 
-function GlueParent_OnLoad(self)
+GlueParentMixin = {};
+
+function GlueParentMixin:OnLoad()
 	-- alias GlueParent to UIParent
 	UIParent = self;
 
@@ -57,6 +65,7 @@ function GlueParent_OnLoad(self)
 	self:RegisterEvent("LOGIN_STATE_CHANGED");
 	self:RegisterEvent("OPEN_STATUS_DIALOG");
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED");
+	self:RegisterEvent("UI_SCALE_CHANGED");
 	self:RegisterEvent("LUA_WARNING");
 	self:RegisterEvent("SUBSCRIPTION_CHANGED_KICK_IMMINENT");
 	self:RegisterEvent("GAME_ENVIRONMENT_SWITCHED");
@@ -69,15 +78,46 @@ function GlueParent_OnLoad(self)
 	self:RegisterEvent("KIOSK_SESSION_EXPIRATION_CHANGED");
 	self:RegisterEvent("SCRIPTED_ANIMATIONS_UPDATE");
 
+	self:AddStaticEventMethod(EventRegistry, "GlueParent.SecondaryScreenClosed", GlueParentMixin.OnSecondaryScreenClosed);
+	self:AddStaticEventMethod(EventRegistry, "AddonList.FrameHidden", GlueParentMixin.OnAddonListClosed);
+	self:AddStaticEventMethod(EventRegistry, "Store.FrameHidden", GlueParentMixin.OnStoreFrameClosed);
+
 	OnDisplaySizeChanged(self);
 end
 
-local function IsGlobalMouseEventHandled(buttonID, event)
-	local frame = GetMouseFocus();
-	return frame and frame.HandlesGlobalMouseEvent and frame:HandlesGlobalMouseEvent(buttonID, event);
+function GlueParentMixin:OnSecondaryScreenClosed(unused_secondaryScreen, contextKey, openingNewScreen)
+	if not openingNewScreen then
+		if contextKey == GlueMenuFrameUtil.GlueMenuContextKey then
+			GlueMenuFrameUtil.ShowMenu();
+		elseif contextKey == G_CinematicsMenuContextKey then
+			GlueParent_ShowCinematicsScreen(GlueMenuFrameUtil.GlueMenuContextKey);
+		end
+	end
 end
 
-function GlueParent_OnEvent(self, event, ...)
+function GlueParentMixin:OnAddonListClosed()
+	if GlueParent_GetCurrentScreen() == "charselect" then
+		GlueMenuFrameUtil.ShowMenu();
+	end
+end
+
+function GlueParentMixin:OnStoreFrameClosed(contextKey)
+	if (GlueParent_GetCurrentScreen() == "charselect") and (contextKey == GlueMenuFrameUtil.GlueMenuContextKey) then
+		GlueMenuFrameUtil.ShowMenu();
+	end
+end
+
+local function IsGlobalMouseEventHandled(buttonID, event)
+	local frames = GetMouseFoci();
+	for _, frame in ipairs(frames) do
+		if frame and frame.HandlesGlobalMouseEvent and frame:HandlesGlobalMouseEvent(buttonID, event) then
+			return true;
+		end
+	end
+	return false;
+end
+
+function GlueParentMixin:OnEvent(event, ...)
 	if ( event == "FRAMES_LOADED" ) then
 		LocalizeFrames();
 		GlueParent_EnsureValidScreen();
@@ -94,6 +134,13 @@ function GlueParent_OnEvent(self, event, ...)
 		GlueDialog_Show(dialog, text);
 	elseif ( event == "DISPLAY_SIZE_CHANGED" ) then
 		OnDisplaySizeChanged(self);
+	elseif ( event == "UI_SCALE_CHANGED" ) then
+		local secondaryScreen = GlueParent_GetSecondaryScreen();
+		if ( secondaryScreen ) then
+			GlueParent_CheckFitSecondaryScreen(secondaryScreen);
+		end
+
+		AccountUpgradePanel_UpdateExpandState();
 	elseif ( event == "LUA_WARNING" ) then
 		HandleLuaWarning(...);
 	elseif ( event == "SUBSCRIPTION_CHANGED_KICK_IMMINENT" ) then
@@ -331,8 +378,7 @@ local function GlueParent_UpdateScreenSound(screenInfo)
 end
 
 local function GlueParent_ChangeScreen(screenInfo, screenTable)
-	LogAuroraClient("ae", "Switching to screen ",
-			"screen", screenInfo.frame);
+	LogAuroraClient("ae", "Switching to screen ", "screen", screenInfo.frame);
 
 	--Hide all other screens
 	for key, info in pairs(screenTable) do
@@ -353,7 +399,7 @@ function GlueParent_GetCurrentScreen()
 end
 
 function GlueParent_GetSecondaryScreen()
-	return GlueParent.currentSecondaryScreen;
+	return GlueParent.currentSecondaryScreen, GlueParent.currentSecondaryScreenContextKey;
 end
 
 function GlueParent_IsSecondaryScreenOpen(screen)
@@ -387,15 +433,43 @@ function GlueParent_SetScreen(screen)
 	end
 end
 
-function GlueParent_OpenSecondaryScreen(screen)
+local function GlueParent_CloseSecondaryScreenInternal(openingNewScreen)
+	local secondaryScreen = GlueParent.currentSecondaryScreen;
+	if (secondaryScreen) then
+		local screenInfo = GLUE_SECONDARY_SCREENS[secondaryScreen];
+		local contextKey = GlueParent.currentSecondaryScreenContextKey;
+		GlueParent_SetSecondaryScreen(nil);
+
+		--The secondary screen may have started music. Start the primary screen's music if so
+		local primaryScreen = GlueParent.currentScreen;
+		if (primaryScreen and GLUE_SCREENS[primaryScreen]) then
+			GlueParent_UpdateScreenSound(GLUE_SCREENS[primaryScreen]);
+		end
+
+		_G[screenInfo.frame]:Hide();
+
+		--Show the original screen if we hid it. Have to do this last in case it opens a new secondary screen.
+		if (screenInfo.fullScreen) then
+			GlueParent.ScreenFrame:Show();
+			if (GlueParent.currentScreen) then
+				GlueParent_SetScreen(GlueParent.currentScreen);
+			end
+		end
+
+		EventRegistry:TriggerEvent("GlueParent.SecondaryScreenClosed", secondaryScreen, contextKey, openingNewScreen);
+	end
+end
+
+function GlueParent_OpenSecondaryScreen(screen, contextKey)
 	local screenInfo = GLUE_SECONDARY_SCREENS[screen];
 	if ( screenInfo ) then
 		--Close the last secondary screen
 		if ( GlueParent.currentSecondaryScreen ) then
-			GlueParent_CloseSecondaryScreen();
+			local openingNewScreen = true;
+			GlueParent_CloseSecondaryScreenInternal(openingNewScreen);
 		end
 
-		GlueParent.currentSecondaryScreen = screen;
+		GlueParent_SetSecondaryScreen(screen, contextKey);
 		if ( screenInfo.fullScreen ) then
 			GlueParent.ScreenFrame:Hide();
 
@@ -413,30 +487,38 @@ function GlueParent_OpenSecondaryScreen(screen)
 			PlaySound(screenInfo.showSound);
 		end
 		GlueParent_ChangeScreen(screenInfo, GLUE_SECONDARY_SCREENS);
+		GlueParent_CheckFitSecondaryScreen(screenInfo);
+	end
+end
+
+function GlueParent_CheckFitSecondaryScreen(screenInfo)
+	if ( screenInfo.checkFit ) then
+		local frame = _G[screenInfo.frame];
+		local extraSpacing = 10;
+		FrameUtil.UpdateScaleForFit(frame, extraSpacing, extraSpacing);
 	end
 end
 
 function GlueParent_CloseSecondaryScreen()
-	if ( GlueParent.currentSecondaryScreen ) then
-		local screenInfo = GLUE_SECONDARY_SCREENS[GlueParent.currentSecondaryScreen];
-		GlueParent.currentSecondaryScreen = nil;
+	local openingNewScreen = false;
+	GlueParent_CloseSecondaryScreenInternal(openingNewScreen);
+end
 
-		--The secondary screen may have started music. Start the primary screen's music if so
-		local primaryScreen = GlueParent.currentScreen;
-		if ( primaryScreen and GLUE_SCREENS[primaryScreen] ) then
-			GlueParent_UpdateScreenSound(GLUE_SCREENS[primaryScreen]);
-		end
-
-		_G[screenInfo.frame]:Hide();
-
-		--Show the original screen if we hid it. Have to do this last in case it opens a new secondary screen.
-		if ( screenInfo.fullScreen ) then
-			GlueParent.ScreenFrame:Show();
-			if ( GlueParent.currentScreen ) then
-				GlueParent_SetScreen(GlueParent.currentScreen);
+local function GetCinematicsIndexRangeForExpansion(expansion)
+	local firstEntry, lastEntry;
+	for i, movieEntry in ipairs(MOVIE_LIST) do
+		if movieEntry.expansion == expansion then
+			firstEntry = firstEntry or i;
+			lastEntry = i;
 			end
 		end
-	end
+
+	return firstEntry, lastEntry;
+end
+
+local function IsCinematicsAutoPlayDisabled(cinematicIndex)
+	local movieEntry = MOVIE_LIST[cinematicIndex];
+	return movieEntry and movieEntry.disableAutoPlay;
 end
 
 function GlueParent_GetCurrentScreenInfo()
@@ -458,7 +540,7 @@ end
 -- playIntroMovie CVar is set to the index of the last cinematic played.
 -- So we will play the cinematic at that index + 1 if there is one.
 function GlueParent_CheckCinematic()
-	local firstCinematicIndex, lastCinematicIndex = CinematicsFrame_GetIndexRangeForExpansion(LE_EXPANSION_LEVEL_CURRENT);
+	local firstCinematicIndex, lastCinematicIndex = GetCinematicsIndexRangeForExpansion(LE_EXPANSION_LEVEL_CURRENT);
 	if not firstCinematicIndex or not lastCinematicIndex then
 		return;
 	end
@@ -466,7 +548,7 @@ function GlueParent_CheckCinematic()
 	nextCinematicIndex = math.max(nextCinematicIndex, firstCinematicIndex);
 	while nextCinematicIndex <= lastCinematicIndex do
 		SetCVar("playIntroMovie", nextCinematicIndex);
-		if not CinematicFrame_IsAutoPlayDisabled(nextCinematicIndex) then
+		if not IsCinematicsAutoPlayDisabled(nextCinematicIndex) then
 			MovieFrame.version = C_Login.IsNewPlayer() and 1 or tonumber(GetCVar("playIntroMovie"));
 			GlueParent_OpenSecondaryScreen("movie");
 			break;
@@ -659,22 +741,22 @@ end
 -- Buttons
 -- =============================================================
 
-function GlueParent_ShowOptionsScreen()
-	GlueParent_OpenSecondaryScreen("options");
+function GlueParent_ShowOptionsScreen(contextKey)
+	GlueParent_OpenSecondaryScreen("options", contextKey);
 end
 
-function GlueParent_ShowCinematicsScreen()
+function GlueParent_ShowCinematicsScreen(contextKey)
 	local numMovies = GetClientDisplayExpansionLevel() + 1;
 	if ( numMovies == 1 ) then
 		MovieFrame.version = 1;
-		GlueParent_OpenSecondaryScreen("movie");
+		GlueParent_OpenSecondaryScreen("movie", contextKey);
 	else
-		GlueParent_OpenSecondaryScreen("cinematics");
+		GlueParent_OpenSecondaryScreen("cinematics", contextKey);
 	end
 end
 
-function GlueParent_ShowCreditsScreen()
-	GlueParent_OpenSecondaryScreen("credits");
+function GlueParent_ShowCreditsScreen(contextKey)
+	GlueParent_OpenSecondaryScreen("credits", contextKey);
 end
 
 -- =============================================================

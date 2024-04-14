@@ -16,7 +16,6 @@ end
 
 function BonusObjectiveDataProviderMixin:OnAdded(mapCanvas)
 	MapCanvasDataProviderMixin.OnAdded(self, mapCanvas);
-	self:RegisterEvent("SUPER_TRACKING_CHANGED");
 	self:RegisterEvent("QUEST_LOG_UPDATE");
 
 	self:GetMap():RegisterCallback("SetFocusedQuestID", self.OnSetFocusedQuestID, self);
@@ -125,7 +124,9 @@ function BonusObjectivePinMixin:OnAcquired(taskInfo)
 	elseif C_QuestLog.IsImportantQuest(self.questID) then
 		self.Texture:SetAtlas("importantavailablequesticon", false);
 	elseif taskInfo.isDaily then
-		self.Texture:SetAtlas("QuestDaily", false);
+		self.Texture:SetAtlas("UI-QuestPoiRecurring-QuestBang", false);
+	elseif taskInfo.isMeta then
+		self.Texture:SetAtlas("UI-QuestPoiWrapper-QuestBang", false);
 	elseif taskInfo.isQuestStart then
 		self.Texture:SetAtlas("QuestNormal", false);
 	else

@@ -10,4 +10,3 @@ Audio.xml
 Languages.xml
 Network.lua
 Mac.lua
-New.lua

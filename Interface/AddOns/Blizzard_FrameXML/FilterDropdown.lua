@@ -91,7 +91,12 @@ function FilterDropDownSystem.SetUpDropDownLevel(dropdown, filterSystem, level)
 			FilterDropDownSystem.AddTextButton(filterInfo.text, set, level, filterInfo.hideMenuOnClick);
 		elseif filterInfo.type == FilterComponent.Checkbox then
 			local set = function(_, _, _, value)
-						filterInfo.set(value);
+						if filterInfo.filter then
+							filterInfo.set(filterInfo.filter, value);
+						else
+							filterInfo.set(value);
+						end
+
 						if filterSystem.onUpdate then
 							filterSystem.onUpdate();
 						end
@@ -100,7 +105,11 @@ function FilterDropDownSystem.SetUpDropDownLevel(dropdown, filterSystem, level)
 			FilterDropDownSystem.AddCheckBoxButton(filterInfo.text, set, isSet, level, filterInfo.hideMenuOnClick);
 		elseif filterInfo.type == FilterComponent.Radio then
 			local set = function(_, _, _, value)
-						filterInfo.set(value);
+						if filterInfo.filter then
+							filterInfo.set(filterInfo.filter, value);
+						else
+							filterInfo.set(value);
+						end
 
 						-- Only one radio button should be turned on at a time, force a refresh so the others can turn themselves off 
 						if not filterInfo.hideMenuOnClick then

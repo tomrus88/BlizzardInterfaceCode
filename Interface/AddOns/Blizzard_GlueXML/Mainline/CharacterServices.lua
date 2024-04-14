@@ -82,21 +82,15 @@ local function CanBoostCharacter(class, level, boostInProgress, isTrialBoost, re
 	return IsBoostFlowValidForCharacter(CharacterUpgradeFlow.data, class, level, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter, raceFilename, hasWowToken, playerGUID);
 end
 
-local function clearButtonScripts(button)
-	button:SetScript("OnClick", nil);
-	button:SetScript("OnDoubleClick", nil);
-	button:SetScript("OnDragStart", nil);
-	button:SetScript("OnDragStop", nil);
-	button:SetScript("OnMouseDown", nil);
-	button:SetScript("OnMouseUp", nil);
-	button:SetScript("OnEnter", nil);
-	button:SetScript("OnLeave", nil);
-
-	-- Are these necessary?
-	button.upButton:SetScript("OnClick", nil);
-	button.downButton:SetScript("OnClick", nil);
-	button.upButton:Hide();
-	button.downButton:Hide();
+local function clearButtonScripts(frame)
+	frame:SetScript("OnClick", nil);
+	frame:SetScript("OnDoubleClick", nil);
+	frame:SetScript("OnDragStart", nil);
+	frame:SetScript("OnDragStop", nil);
+	frame:SetScript("OnMouseDown", nil);
+	frame:SetScript("OnMouseUp", nil);
+	frame:SetScript("OnEnter", nil);
+	frame:SetScript("OnLeave", nil);
 end
 
 CharacterSelectBlockBase = {};
@@ -219,14 +213,14 @@ function CharacterSelectBlockBase:LayoutOptionFrames()
 end
 
 function CharacterSelectBlockBase:SaveResultInfo(characterSelectButton, playerguid)
-	self.index = characterSelectButton:GetElementData().index;
-	self.charid = GetCharIDFromIndex(self.index);
+	self.charid = characterSelectButton:GetElementData().characterID;
+	self.index = CharacterSelectListUtil.GetIndexFromCharID(self.charid);
 	self.playerguid = playerguid;
 end
 
 function CharacterSelectBlockBase:ClearResultInfo()
-	self.index = nil;
 	self.charid = nil;
+	self.index = nil;
 	self.playerguid = nil;
 end
 
@@ -236,12 +230,17 @@ end
 
 function CharacterSelectBlockBase:GetServiceInfoByCharacterID(characterID)
 	local serviceInfo = { checkAutoSelect = true, checkTrialBoost = true };
-	local raceFilename, _, class, _, level, _, _, _, _, _, _, _, playerguid, _, _, _, boostInProgress, _, _, isTrialBoost, _, revokedCharacterUpgrade, vasServiceInProgress, _, _, isExpansionTrialCharacter, _, _, _, _, _, characterServiceRequiresLogin, _, _, _, hasWowToken = select(3, GetCharacterInfo(characterID));
-	serviceInfo.playerguid = playerguid;
-	serviceInfo.requiresLogin = characterServiceRequiresLogin;
-	serviceInfo.isTrialBoost = isTrialBoost;
-	serviceInfo.isEligible = CanBoostCharacter(class, level, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter, raceFilename, hasWowToken, playerguid);
-	serviceInfo.hasBonus = IsCharacterEligibleForVeteranBonus(level, isTrialBoost, revokedCharacterUpgrade);
+	local guid = GetCharacterGUID(characterID);
+	local hasWowToken = select(38, GetCharacterInfo(characterID));
+	if guid then
+		local basicInfo = GetBasicCharacterInfo(guid);
+		local serviceCharacterInfo = GetServiceCharacterInfo(guid);
+		serviceInfo.playerguid = guid;
+		serviceInfo.requiresLogin = serviceCharacterInfo.characterServiceRequiresLogin;
+		serviceInfo.isTrialBoost = serviceCharacterInfo.isTrialBoost;
+		serviceInfo.isEligible = CanBoostCharacter(basicInfo.className, basicInfo.experienceLevel, serviceCharacterInfo.boostInProgress, serviceCharacterInfo.isTrialBoost, serviceCharacterInfo.isRevokedCharacterUpgrade, serviceCharacterInfo.vasServiceInProgress, serviceCharacterInfo.isExpansionTrialCharacter, basicInfo.raceFilename, hasWowToken, guid);
+		serviceInfo.hasBonus = IsCharacterEligibleForVeteranBonus(basicInfo.experienceLevel, serviceCharacterInfo.isTrialBoost, serviceCharacterInfo.isRevokedCharacterUpgrade);
+	end
 	return serviceInfo;
 end
 
@@ -266,7 +265,7 @@ function CharacterSelectBlockBase:Initialize(results)
 	end
 	self.seenPopup = false;
 	self.frame.NoBonusResult:Hide();
-	CharacterSelect_SetScrollEnabled(true);
+	CharacterSelectCharacterFrame:SetScrollEnabled(true);
 
 	self:ClearResultInfo();
 	self.lastSelectedIndex = CharacterSelect.selectedIndex;
@@ -278,18 +277,23 @@ function CharacterSelectBlockBase:Initialize(results)
 		CharacterSelect_UpdateButtonState();
 
 		if (self.createNum < numCharacters) then
-			CharacterSelectCharacterFrame.ScrollBox:ScrollToEnd(ScrollBoxConstants.NoScrollInterpolation);
+			local scrollBox = CharacterSelectCharacterFrame.ScrollBox;
+			scrollBox:ScrollToEnd();
 
 			CharacterSelect.selectedIndex = numCharacters;
-			UpdateCharacterSelection(CharacterSelect);
+			CharacterSelectCharacterFrame:UpdateCharacterSelection();
 
 			self.index = CharacterSelect.selectedIndex;
-			self.charid = GetCharIDFromIndex(CharacterSelect.selectedIndex);
-			self.playerguid = select(15, GetCharacterInfo(self.charid));
+			self.charid = CharacterSelectListUtil.GetCharIDFromIndex(CharacterSelect.selectedIndex);
+			self.playerguid = GetCharacterGUID(self.charid);
 
-			local buttons = CharacterSelectCharacterFrame.ScrollBox:GetFrames();
-			local button = buttons[#buttons];
-			clearButtonScripts(button);
+			local frame = scrollBox:FindFrameByPredicate(function(frame, elementData)
+				return CharacterSelectListUtil.GetCharacterPositionData(self.playerguid, elementData) ~= nil;
+			end);
+
+			if frame then
+				clearButtonScripts(frame);
+			end
 
 			CharacterServicesMaster_Update();
 
@@ -325,22 +329,23 @@ function CharacterSelectBlockBase:Initialize(results)
 end
 
 function CharacterSelectBlockBase:ShouldShowPopup()
-	local _, _, raceFilename = GetCharacterInfo(self.charid);
-	local raceData = C_CharacterCreation.GetRaceDataByID(C_CharacterCreation.GetRaceIDFromName(raceFilename));
+	local guid = GetCharacterGUID(self.charid);
+	local basicInfo = GetBasicCharacterInfo(guid);
+	local serviceInfo = GetServiceCharacterInfo(guid);
+	local raceData = C_CharacterCreation.GetRaceDataByID(C_CharacterCreation.GetRaceIDFromName(basicInfo.raceFilename));
 	local seenPopupBefore = self.seenPopup;
 	self.seenPopup = true;
-	local isTrialBoost = select(22, GetCharacterInfo(self.charid));
-	return not isTrialBoost and raceData.isAlliedRace and not raceData.hasHeritageArmor and not seenPopupBefore;
+	return not serviceInfo.isTrialBoost and raceData.isAlliedRace and not raceData.hasHeritageArmor and not seenPopupBefore;
 end
 
 function CharacterSelectBlockBase:GetPopupText()
-	local _, _, raceFilename, _, _, _, _, _, _, _, _, _, _, _, _, _, _, gender = GetCharacterInfo(self.charid);
-	local raceData = C_CharacterCreation.GetRaceDataByID(C_CharacterCreation.GetRaceIDFromName(raceFilename));
+	local basicInfo = GetBasicCharacterInfo(GetCharacterGUID(self.charid));
+	local raceData = C_CharacterCreation.GetRaceDataByID(C_CharacterCreation.GetRaceIDFromName(basicInfo.raceFilename));
 
 	if GetCurrentRegionName() == "CN" then
-		return ReplaceGenderTokens(BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING_CN:format(raceData.name), gender+1);
+		return ReplaceGenderTokens(BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING_CN:format(raceData.name), basicInfo.genderID+1);
 	else
-		return ReplaceGenderTokens(BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING:format(raceData.name), gender+1);
+		return ReplaceGenderTokens(BOOST_ALLIED_RACE_HERITAGE_ARMOR_WARNING:format(raceData.name), basicInfo.genderID+1);
 	end
 end
 
@@ -353,12 +358,12 @@ function CharacterSelectBlockBase:GetResult()
 end
 
 function CharacterSelectBlockBase:FormatResult()
-	local name, _, _, class, classFileName, _, level, _, _, _, _, _, _, _, _, prof1, prof2, _, _, _, _, isTrialBoost, _, revokedCharacterUpgrade = GetCharacterInfo(self.charid);
+	local basicInfo = GetBasicCharacterInfo(GetCharacterGUID(self.charid));
 	local classColor = NORMAL_FONT_COLOR;
-	if classFileName and RAID_CLASS_COLORS[classFileName] then
-		classColor = RAID_CLASS_COLORS[classFileName];
+	if basicInfo.classFilename and RAID_CLASS_COLORS[basicInfo.classFilename] then
+		classColor = RAID_CLASS_COLORS[basicInfo.classFilename];
 	end
-	return SELECT_CHARACTER_RESULTS_FORMAT:format(classColor.colorStr, name, level, class);
+	return SELECT_CHARACTER_RESULTS_FORMAT:format(classColor.colorStr, basicInfo.name, basicInfo.experienceLevel, basicInfo.className);
 end
 
 function CharacterSelectBlockBase:OnHide()
@@ -371,14 +376,14 @@ function CharacterSelectBlockBase:OnHide()
 end
 
 function CharacterSelectBlockBase:OnAdvance()
-	CharacterSelect_SetScrollEnabled(false);
+	CharacterSelectCharacterFrame:SetScrollEnabled(false);
 	CharacterServicesCharacterSelector:Hide();
 
-	CharacterSelectCharacterFrame.ScrollBox:ForEachFrame(function(button)
-		local enable = button:GetElementData().index == self.index;
-		CharacterSelect_SetCharacterButtonEnabled(button, enable);
-		CharacterSelect_SetButtonSelected(button, enable);
-		CharacterSelect_SetArrowButtonShown(button, enable);
+	CharacterSelectListUtil.ForEachCharacterDo(function(frame)
+		local enable = frame.characterID == self.charid;
+		frame.InnerContent:SetEnabledState(enable);
+		frame:SetSelectedState(enable);
+		frame:SetArrowButtonShown(enable);
 	end);
 end
 
@@ -594,15 +599,15 @@ function SpecSelectBlockBase:SpecSelectBlockInitializeHelper(results, wasFromRew
 
 	self.specButtonClickedCallback = callback;
 
-	local _, _, _, _, classFilename, classID, experienceLevel, _, _, _, _, _, _, _, playerguid, _, _, gender, _, _, _, _, _, _, _, _, specID = GetCharacterInfo(results.charid);
-	self.classID = classID;
-	self.frame.ControlsFrame.classFilename = classFilename;
+	local basicInfo = GetBasicCharacterInfo(GetCharacterGUID(results.charid));
+	self.classID = basicInfo.classID;
+	self.frame.ControlsFrame.classFilename = basicInfo.classFilename;
 
-	local isNewCharacter = experienceLevel < 10;
+	local isNewCharacter = basicInfo.experienceLevel < 10;
 	if isNewCharacter then
 		self.currentSpecID = nil;
 	else
-		self.currentSpecID = specID;
+		self.currentSpecID = basicInfo.specID;
 	end
 
 	-- When boosting to level 100, prevent the selection of non-recommended specs, but still auto-select from
@@ -610,7 +615,7 @@ function SpecSelectBlockBase:SpecSelectBlockInitializeHelper(results, wasFromRew
 	local flags = flow.data.flags or 0;
 	local restrictToRecommendedSpecs = bit.band(flags, Enum.CharacterServiceInfoFlag.RestrictToRecommendedSpecs) == Enum.CharacterServiceInfoFlag.RestrictToRecommendedSpecs;
 
-	return CharacterServices_UpdateSpecializationButtons(classID, gender+1, parent, self, not restrictToRecommendedSpecs, nil, self.currentSpecID, allowAutoSelectSpec);
+	return CharacterServices_UpdateSpecializationButtons(basicInfo.classID, basicInfo.genderID+1, parent, self, not restrictToRecommendedSpecs, nil, self.currentSpecID, allowAutoSelectSpec);
 end
 
 function SpecSelectBlockBase:OnUpdateSpecButtons(autoSelectedSpecID)
@@ -704,8 +709,7 @@ function CharacterUpgradeFlow:IsUnrevoke()
 		return nil;
 	end
 
-	local revokedCharacterUpgrade = select(24, GetCharacterInfo(results.charid));
-	return revokedCharacterUpgrade;
+	return GetServiceCharacterInfo(GetCharacterGUID(results.charid)).isRevokedCharacterUpgrade;
 end
 
 function CharacterUpgradeFlow:ShouldSkipSpecSelect()
@@ -722,7 +726,7 @@ function CharacterUpgradeFlow:ShouldSkipSpecSelect()
 		return nil;
 	end
 
-	local experienceLevel = select(7, GetCharacterInfo(results.charid));
+	local experienceLevel = GetBasicCharacterInfo(GetCharacterGUID(results.charid)).experienceLevel;
 	return experienceLevel >= self.data.level;
 end
 
@@ -747,7 +751,7 @@ end
 
 function CharacterUpgradeFlow:OnAdvance(controller, results)
 	if (self.step == 1) then
-		local level = select(7, GetCharacterInfo(results.charid));
+		local level = GetBasicCharacterInfo(GetCharacterGUID(results.charid)).experienceLevel;
 		if (level >= UPGRADE_BONUS_LEVEL) then
 			self.Steps[2].ExtraOffset = 45;
 		else
@@ -769,9 +773,9 @@ end
 
 local function ValidateSpec(results)
 	if not results.spec and CharacterUpgradeFlow:ShouldSkipSpecSelect() then
-		local _, _, _, _, classFilename, classID, experienceLevel, _, _, _, _, _, _, _, playerguid, _, _, gender, _, _, _, _, _, _, _, _, specID = GetCharacterInfo(results.charid);
-		results.spec = specID;
-		results.classId = classID;
+		local basicInfo = GetBasicCharacterInfo(GetCharacterGUID(results.charid));
+		results.spec = basicInfo.specID;
+		results.classId = basicInfo.classID;
 	end
 end
 
@@ -798,8 +802,8 @@ function CharacterUpgradeFlow:Finish(controller)
 	end
 
 	local results = self:BuildResults(self:GetNumSteps());
+	local guid = GetCharacterGUID(results.charid);
 	if self:IsUnrevoke() then
-		local guid = select(15, GetCharacterInfo(results.charid));
 		C_CharacterServices.RequestManualUnrevoke(guid);
 	else
 
@@ -807,7 +811,6 @@ function CharacterUpgradeFlow:Finish(controller)
 			-- Non neutral character, convert faction group to id.
 			results.faction = PLAYER_FACTION_GROUP[C_CharacterServices.GetFactionGroupByIndex(results.charid)];
 		end
-		local guid = select(15, GetCharacterInfo(results.charid));
 		if (guid ~= results.playerguid) then
 			-- Bail because guid has changed!
 			message(CHARACTER_UPGRADE_CHARACTER_LIST_CHANGED_ERROR);
@@ -838,10 +841,6 @@ function CharacterUpgradeFlow:GetFinishLabel()
 	return CharacterServicesFlowMixin.GetFinishLabel(self);
 end
 
-local function clearAllButtonScripts()
-	CharacterSelectCharacterFrame.ScrollBox:ForEachFrame(clearButtonScripts);
-end
-
 function CharacterUpgrade_IsCreatedCharacterUpgrade()
 	return C_CharacterCreation.GetCharacterCreateType() == Enum.CharacterCreateType.Boost;
 end
@@ -856,17 +855,18 @@ function CharacterUpgrade_ResetBoostData()
 end
 
 function IsExpansionTrialCharacter(characterGUID)
-	local isExpansionTrialCharacter = select(28, GetCharacterInfoByGUID(characterGUID));
-	return isExpansionTrialCharacter;
+	local serviceInfo = GetServiceCharacterInfo(characterGUID);
+	return serviceInfo.isExpansionTrialCharacter;
 end
 
 function GetAvailableBoostTypesForCharacterByGUID(characterGUID)
 	local availableBoosts = {};
 	local upgradeDistributions = C_SharedCharacterServices.GetUpgradeDistributions();
 	if upgradeDistributions then
-		local raceFilename, _, class, _, level, _, _, _, _, _, _, _, playerguid, _, _, _, boostInProgress, _, _, isTrialBoost, _, revokedCharacterUpgrade, vasServiceInProgress = select(3, GetCharacterInfoByGUID(characterGUID));
+		local basicInfo = GetBasicCharacterInfo(characterGUID);
+		local serviceInfo = GetServiceCharacterInfo(characterGUID);
 		for boostType, data in pairs(upgradeDistributions) do
-			if IsBoostFlowValidForCharacter(C_CharacterServices.GetCharacterServiceDisplayData(boostType), class, level, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, raceFilename) then
+			if IsBoostFlowValidForCharacter(C_CharacterServices.GetCharacterServiceDisplayData(boostType), basicInfo.classFilename, basicInfo.experienceLevel, serviceInfo.boostInProgress, serviceInfo.isTrialBoost, serviceInfo.isRevokedCharacterUpgrade, serviceInfo.vasServiceInProgress, basicInfo.raceFilename) then
 				availableBoosts[#availableBoosts + 1] = boostType;
 			end
 		end
@@ -884,9 +884,16 @@ function CharacterUpgradeCharacterSelectBlock_SetFilteringByBoostable(boostsOnly
 	g_filteringByBoostsOnly = boostsOnly;
 end
 
-function CharacterUpgradeCharacterSelectBlock_IsCharacterBoostable(characterIndex)
-	local raceFilename, _, class, _, level, _, _, _, _, _, _, _, playerguid, _, _, _, boostInProgress, _, _, isTrialBoost, _, revokedCharacterUpgrade, vasServiceInProgress, _, _, isExpansionTrialCharacter, _, _, _, _, _, characterServiceRequiresLogin, _, _, _, hasWowToken = select(3, GetCharacterInfo(GetCharIDFromIndex(characterIndex)));
-	local canBoostCharacter = CanBoostCharacter(class, level, boostInProgress, isTrialBoost, revokedCharacterUpgrade, vasServiceInProgress, isExpansionTrialCharacter, raceFilename, hasWowToken);
+function CharacterUpgradeCharacterSelectBlock_IsCharacterBoostable(characterID)
+	
+	local guid = GetCharacterGUID(characterID);
+	if not guid then
+		return false;
+	end
+	local basicInfo = GetBasicCharacterInfo(guid);
+	local serviceInfo = GetServiceCharacterInfo(guid);
+	local hasWowToken = select(3, GetCharacterInfo(characterID));
+	local canBoostCharacter = CanBoostCharacter(basicInfo.classFileName, basicInfo.experienceLevel, serviceInfo.boostInProgress, serviceInfo.isTrialBoost, serviceInfo.isRevokedCharacterUpgrade, serviceInfo.vasServiceInProgress, serviceInfo.isExpansionTrialCharacter, basicInfo.raceFilename, hasWowToken);
 	return canBoostCharacter;
 end
 
@@ -911,7 +918,7 @@ end
 
 function CharacterUpgrade_BeginNewCharacterCreation(characterType)
 	CharacterUpgrade_SetupFlowForNewCharacter(characterType);
-	CharacterSelect_CreateNewCharacter(characterType);
+	CharacterSelectUtil.CreateNewCharacter(characterType);
 end
 
 function CharacterUpgradeCreateCharacter_OnClick(self)
@@ -1072,6 +1079,14 @@ function RPEUpgradeFlow:UsesSelector()
 	return false;
 end
 
+function RPEUpgradeFlow:AllowCharacterReordering()
+	return true;
+end
+
+function RPEUpgradeFlow:CanInitialize()
+	return CharacterSelectListUtil:GetSelectedCharacterFrame() ~= nil;
+end
+
 local function SetKeepQuestsAndContinue(keepQuests)
 	return function()
 		GlueDialog.data.keepQuests = keepQuests;
@@ -1095,11 +1110,11 @@ StaticPopupDialogs["RPE_UPGRADE_CONFIRM"] = {
     OnAccept = function()
         local results = GlueDialog.data;
 		C_CharacterServices.RPEResetCharacter(results.playerguid, results.faction, results.spec, results.keepQuests);
-		CharacterSelect_UpdateCharacterMatchingGUID(results.playerguid); --update the character button so it says 'processing'
+		CharacterSelectCharacterFrame:UpdateCharacterMatchingGUID(results.playerguid); --update the character button so it says 'processing'
     end,
     OnCancel = function()
 		BeginCharacterServicesFlow(RPEUpgradeFlow, {});
-		CharacterServicesMaster.flow:Advance(CharacterServicesMaster);
+		CharacterServicesMaster.flow:Advance(CharacterServicesMaster); 
 	end,
 }
 
@@ -1109,7 +1124,7 @@ function RPEUpgradeFlow:Finish(controller)
 		-- Non neutral character, convert faction group to id.
 		results.faction = PLAYER_FACTION_GROUP[C_CharacterServices.GetFactionGroupByIndex(results.charid)];
 	end
-	local guid = select(15, GetCharacterInfo(results.charid));
+	local guid = GetCharacterGUID(results.charid);
 	if (guid ~= results.playerguid) then
 		-- Bail because guid has changed!
 		message(CHARACTER_UPGRADE_CHARACTER_LIST_CHANGED_ERROR);
@@ -1120,8 +1135,8 @@ function RPEUpgradeFlow:Finish(controller)
 	CharacterServicesMaster.pendingGuid = results.playerguid;
 
 	ValidateSpec(results);
-	local questClearAvailable = select(37, GetCharacterInfo(results.charid));
-	if questClearAvailable then
+	local serviceInfo = GetServiceCharacterInfo(guid);
+	if serviceInfo.rpeResetQuestClearAvailable then
 		GlueDialog_Show("RPE_UPGRADE_QUEST_CLEAR_CONFIRM", nil, results);
 		return false; --flow will be closed by the RPE_UPGRADE_QUEST_CLEAR_CONFIRM dialog.
 	else
@@ -1140,23 +1155,30 @@ local RPEUPgradeInfoBlockSubFrameText = {
 
 function RPEUPgradeInfoBlock:Initialize(results)
 	self.seenPopup = false;
-	CharacterSelect_SetScrollEnabled(true);
+	CharacterSelectCharacterFrame:SetScrollEnabled(true);
 
 	--dont clear results
 	--self:ClearResultInfo();
 
-	local button = CharacterSelectCharacterFrame.ScrollBox:FindFrameByPredicate(function(frame, elementData)
-		return frame.index == CharacterSelect.selectedIndex;
-	end);
+	local frame = CharacterSelectListUtil:GetSelectedCharacterFrame();
+	if frame then
+		local characterID = CharacterSelectListUtil.GetCharIDFromIndex(CharacterSelect.selectedIndex);
+		local characterSelectButton = frame;
+		local frameElementData = frame:GetElementData();
+		if frameElementData.isGroup then
+			for _, character in ipairs(frame.groupButtons) do
+				if character:GetCharacterID() == characterID then
+					characterSelectButton = character;
+					break;
+				end
+			end
+		end
 
-	if button then
-		local serviceInfo = self:GetServiceInfoByCharacterID(button.characterID);
-		self:SaveResultInfo(button, serviceInfo.playerguid)
-	else
-		EndCharacterServicesFlow(); --if there's anything wrong with CharacterSelect.selectedIndex, abort.
+		local serviceInfo = self:GetServiceInfoByCharacterID(characterID);
+		self:SaveResultInfo(characterSelectButton, serviceInfo.playerguid);
 	end
 
-	local controlsFrame = self.frame.ControlsFrame
+	local controlsFrame = self.frame.ControlsFrame;
 	controlsFrame:Show();
 
 	for k,v in pairs(RPEUPgradeInfoBlockSubFrameText) do
@@ -1165,13 +1187,16 @@ function RPEUPgradeInfoBlock:Initialize(results)
 end
 
 function RPEUPgradeInfoBlock:GetServiceInfoByCharacterID(characterID)
-	local serviceInfo = { checkAutoSelect = false, checkTrialBoost = false };
-	local raceFilename, _, class, _, level, _, _, _, _, _, _, _, playerguid, _, _, _, boostInProgress, _, _, isTrialBoost, _, revokedCharacterUpgrade, vasServiceInProgress, _, _, isExpansionTrialCharacter, _, _, _, _, _, characterServiceRequiresLogin = select(3, GetCharacterInfo(characterID));
-	serviceInfo.playerguid = playerguid
-	serviceInfo.requiresLogin = characterServiceRequiresLogin
-	serviceInfo.isTrialBoost = isTrialBoost
-	serviceInfo.isEligible = true;
-	serviceInfo.hasBonus = false;
+	local serviceInfo = { checkAutoSelect = true, checkTrialBoost = true };
+	local guid = GetCharacterGUID(characterID);
+	if guid then
+		local serviceCharacterInfo = GetServiceCharacterInfo(guid);
+		serviceInfo.playerguid = guid;
+		serviceInfo.requiresLogin = serviceCharacterInfo.characterServiceRequiresLogin;
+		serviceInfo.isTrialBoost = serviceCharacterInfo.isTrialBoost;
+		serviceInfo.isEligible = true;
+		serviceInfo.hasBonus = false;
+	end
 	return serviceInfo;
 end
 
@@ -1248,10 +1273,10 @@ function RPEUpgradeSpecSelectBlock:Initialize(results, wasFromRewind)
 
 	specBlock:SetSize(250, 30 + 50*numSpecs);
 
-	local name, _, _, className, _, _, experienceLevel = GetCharacterInfo(results.charid);
+	local basicInfo = GetBasicCharacterInfo(GetCharacterGUID(results.charid));
 
-	characterBlock.Name:SetText(name);
-	characterBlock.Level:SetText(string.format(RPE_CHARACTER_LVL, experienceLevel, className));
+	characterBlock.Name:SetText(basicInfo.name);
+	characterBlock.Level:SetText(string.format(RPE_CHARACTER_LVL, basicInfo.experienceLevel, basicInfo.className));
 end
 
 function RPEUpgradeSpecSelectBlock:GetSpecButtonContainer()

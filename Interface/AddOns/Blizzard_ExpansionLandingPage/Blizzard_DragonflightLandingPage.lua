@@ -189,7 +189,7 @@ function DragonflightLandingOverlayMixin:SetUpMajorFactionList()
 	self.MajorFactionList.ScrollBar:SetFrameLevel(self.ScrollFadeOverlay:GetFrameLevel() + 10);
 
 
-	self.MajorFactionList:SetExpansionFilter(LE_EXPANSION_DRAGONFLIGHT);
+	self.MajorFactionList:SetExpansionFilter(--[[LE_EXPANSION_DRAGONFLIGHT Temporary removal for alpha testing]]);
 end
 
 ------------------------- Dragonriding Skills Button -------------------------
@@ -230,6 +230,7 @@ function DragonridingPanelSkillsButtonMixin:OnClick()
 	GenericTraitUI_LoadUI();
 
 	GenericTraitFrame:SetSystemID(DRAGONRIDING_TRAIT_SYSTEM_ID);
+	GenericTraitFrame:SetTreeID(DRAGONRIDING_TREE_ID);
 	ToggleFrame(GenericTraitFrame);
 
 	HelpTip:Acknowledge(ExpansionLandingPageMinimapButton, DRAGONFLIGHT_LANDING_PAGE_UNSPENT_GLYPHS);

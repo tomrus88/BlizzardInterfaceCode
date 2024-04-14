@@ -352,7 +352,7 @@ function ArenaUnitFrameCcRemoverMixin:SetSpellId(spellId)
 		return;
 	end
 
-	local texture = select(3, GetSpellInfo(newSpellId)) or QUESTION_MARK_ICON;
+	local texture = C_Spell.GetSpellTexture(newSpellId) or QUESTION_MARK_ICON;
 	self.Icon:SetTexture(texture);
 	self.spellId = newSpellId;
 	self:UpdateShownState();
@@ -514,7 +514,7 @@ function ArenaUnitFrameDebuffMixin:Update()
 end
 
 function ArenaUnitFrameDebuffMixin:UpdateIcon()
-	local texture = self.shownData and select(3, GetSpellInfo(self.shownData.spellID)) or QUESTION_MARK_ICON;
+	local texture = self.shownData and C_Spell.GetSpellTexture(self.shownData.spellID) or QUESTION_MARK_ICON;
 	self.Icon:SetTexture(texture);
 end
 

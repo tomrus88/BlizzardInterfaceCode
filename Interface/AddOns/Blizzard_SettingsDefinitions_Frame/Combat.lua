@@ -38,11 +38,14 @@ local function Register()
 		buffsInitializer:SetParentInitializer(nameplateInitializer, IsModifiable);
 	end
 
-	-- Raid Self Highlight
+	-- Self Highlight
 	do
 		local setting, initializer = CombatOverrides.CreateRaidSelfHighlightSetting(category)
 		Settings.RaidSelfHighlightInitializer = initializer;
 	end
+
+	-- Show Silhouette when Obscured
+	Settings.SetupCVarCheckBox(category, "occludedSilhouettePlayer", SHOW_SILHOUETTE_OPTION, OPTION_TOOLTIP_SHOW_SILHOUETTE);
 
 	-- Target of Target
 	Settings.SetupCVarCheckBox(category, "showTargetOfTarget", SHOW_TARGET_OF_TARGET_TEXT, OPTION_TOOLTIP_SHOW_TARGET_OF_TARGET);

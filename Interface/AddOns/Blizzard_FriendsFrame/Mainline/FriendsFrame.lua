@@ -1517,7 +1517,7 @@ function FriendsFrame_UpdatePartyInviteButton(button, elementData)
 	button.Name:SetText(playerName);
 	button.inviteID = inviterGUID;
 	button.inviteIndex = button.id;
-end
+	end
 
 function FriendsFrame_UpdatePartyInviteHeaderButton(button, elementData)
 	button.buttonType = FRIENDS_BUTTON_TYPE_PARTY_INVITE_HEADER;
@@ -1659,7 +1659,7 @@ function FriendsFrame_UpdateFriendButton(button, elementData)
 		button:Hide();
 	end
 	-- update the tooltip if hovering over a button
-	if (FriendsTooltip.button == button) or (GetMouseFocus() == button) then
+	if (FriendsTooltip.button == button) or (button:IsMouseMotionFocus()) then
 		button:OnEnter();
 	end
 

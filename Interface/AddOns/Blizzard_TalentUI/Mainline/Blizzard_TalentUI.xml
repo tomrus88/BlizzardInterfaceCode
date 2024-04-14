@@ -40,13 +40,13 @@
 					if (self.isPet) then
 						PickupPetSpell(self.spellID);
 					else
-						PickupSpell(self.spellID);
+						C_Spell.PickupSpell(self.spellID);
 					end
 				end
 			</OnDragStart>
 			<OnReceiveDrag>
 				if ( not self.disabled ) then
-					PickupSpell(self.spellID);
+					C_Spell.PickupSpell(self.spellID);
 				end
 			</OnReceiveDrag>
 			<OnEnter function="PlayerSpecSpellTemplate_OnEnter"/>

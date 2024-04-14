@@ -3,7 +3,7 @@
 ## GuardedAddOn: 1
 ## AllowLoad: game
 ## AllowLoadGameType: mainline
-..\Blizzard_SharedXML\Pools.lua
+..\Blizzard_SharedXMLBase\Pools.lua
 ..\Blizzard_SharedXMLGame\Tooltip\TooltipUtil.lua
 ..\Blizzard_SharedXMLGame\Tooltip\TooltipDataHandler.lua
 ..\Blizzard_SharedXMLGame\Tooltip\TooltipDataRules.lua

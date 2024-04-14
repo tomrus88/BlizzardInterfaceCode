@@ -966,7 +966,7 @@ end
 function NewRecipeLearnedAlertFrame_SetUp(self, recipeID, recipeLevel)
 	local tradeSkillID, skillLineName, parentTradeSkillID = C_TradeSkillUI.GetTradeSkillLineForRecipe(recipeID);
 	if tradeSkillID then
-		local recipeName = GetSpellInfo(recipeID);
+		local recipeName = C_Spell.GetSpellName(recipeID);
 		if recipeName then
 			if recipeLevel ~= nil then
 				recipeName = TRADESKILL_RECIPE_LEVEL_RECIPE_FORMAT:format(recipeName, recipeLevel);

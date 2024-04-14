@@ -182,22 +182,21 @@ function VASCharacterSelectBlockBase:SetResultsShown(shown)
 end
 
 function VASCharacterSelectBlockBase:OnAdvance()
-	CharacterSelect_SetScrollEnabled(false);
+	CharacterSelectCharacterFrame:SetScrollEnabled(false);
 	CharacterServicesCharacterSelector:Hide();
 	self:SetResultsShown(true);
 
 	local selectedCharacterGUID = self:GetSelectedCharacterGUID();
-	local selectedButton = CharacterSelectCharacterFrame.ScrollBox:FindFrameByPredicate(function(frame, elementData)
-		local guid = select(15, GetCharacterInfo(frame.index));
-		return guid == selectedCharacterGUID;
+	local characterID;
+	local selectedFrame = CharacterSelectCharacterFrame.ScrollBox:FindFrameByPredicate(function(frame, elementData)
+		characterID = CharacterSelectListUtil.GetCharacterPositionData(selectedCharacterGUID, elementData);
+		return characterID ~= nil;
 	end);
 
-	if selectedButton then
-		for _, button in ipairs(CharacterSelectCharacterFrame.ScrollBox:GetFrames()) do
-			if button ~= selectedButton then
-				CharacterSelect_SetCharacterButtonEnabled(button, false);
-			end
-		end
+	if selectedFrame then
+		CharacterSelectListUtil.ForEachCharacterDo(function(frame)
+			frame.InnerContent:SetEnabledState(frame.characterID ~= characterID);
+		end);
 	end
 end
 

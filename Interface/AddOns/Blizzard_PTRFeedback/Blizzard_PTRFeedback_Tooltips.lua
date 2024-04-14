@@ -28,8 +28,8 @@ function PTR_IssueReporter.SetupSpellTooltips()
 
     hooksecurefunc("SetItemRef", function(link, ...)
         local id = tonumber(link:match("spell:(%d+)"))
-        local name = GetSpellInfo(id)
         if (id) then
+            local name = C_Spell.GetSpellName(id)
             PTR_IssueReporter.HookIntoTooltip(ItemRefTooltip, PTR_IssueReporter.TooltipTypes.spell, id, name)
         end
     end)
@@ -47,9 +47,10 @@ function PTR_IssueReporter.SetupSpellTooltips()
     local bindingFunc = function(self, talentFrame, tooltip)
         if (talentFrame) and (tooltip) then
             local spellID = talentFrame:GetSpellID()
-            local name = GetSpellInfo(spellID)
-
-            PTR_IssueReporter.HookIntoTooltip(tooltip, PTR_IssueReporter.TooltipTypes.spell, spellID, name)
+            if (spellID) then
+                local name = C_Spell.GetSpellName(spellID)
+                PTR_IssueReporter.HookIntoTooltip(tooltip, PTR_IssueReporter.TooltipTypes.spell, spellID, name)
+            end
         end
     end
 

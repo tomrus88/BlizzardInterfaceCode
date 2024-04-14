@@ -280,6 +280,16 @@ function CharacterServicesFlowMixin:ShouldDisableButtons()
 	return true;
 end
 
+function CharacterServicesFlowMixin:AllowCharacterReordering()
+	-- Override as needed
+	return false;
+end
+
+function CharacterServicesFlowMixin:CanInitialize()
+	-- Override as needed
+	return true;
+end
+
 StaticPopupDialogs["CHARACTER_SERVICES_CHECK_APPLY"] = {
 	text = "",
 	button1 = "",

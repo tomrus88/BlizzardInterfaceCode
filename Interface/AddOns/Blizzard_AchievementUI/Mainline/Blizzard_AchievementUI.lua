@@ -613,7 +613,7 @@ function AchievementFrameCategories_SelectDefaultElementData()
 		AchievementFrameCategories_UpdateDataProvider();
 	end
 
-	local elementData = AchievementFrameCategories.ScrollBox:ScrollToElementDataIndex(1, ScrollBoxConstants.AlignCenter, ScrollBoxConstants.NoScrollInterpolation);
+	local elementData = AchievementFrameCategories.ScrollBox:ScrollToElementDataIndex(1, ScrollBoxConstants.AlignCenter);
 	if elementData then
 		AchievementFrameCategories_SelectElementData(elementData);
 	end
@@ -2534,7 +2534,7 @@ function AchievementFrame_UpdateAndSelectCategory(category)
 		end);
 		if elementData then
 			AchievementFrameCategories_SelectElementData(elementData);
-			scrollBox:ScrollToElementData(elementData, ScrollBoxConstants.AlignCenter, ScrollBoxConstants.NoScrollInterpolation);
+			scrollBox:ScrollToElementData(elementData, ScrollBoxConstants.AlignCenter);
 		end
 	end
 end
@@ -2576,7 +2576,7 @@ function AchievementFrame_SelectAndScrollToAchievementId(scrollBox, achievementI
 			g_achievementSelectionBehavior:SelectElementData(elementData);
 			-- Selection expands and modifies the size. We need to update the scroll box for the alignment to be correct.
 			scrollBox:FullUpdate(ScrollBoxConstants.UpdateImmediately);
-			scrollBox:ScrollToElementData(elementData, ScrollBoxConstants.AlignCenter, ScrollBoxConstants.NoScrollInterpolation);
+			scrollBox:ScrollToElementData(elementData, ScrollBoxConstants.AlignCenter);
 		end
 	end
 end
@@ -2594,7 +2594,7 @@ function AchievementFrame_ViewStatisticByAchievementID(achievementID)
 
 	local achievementElementData = scrollBox:ScrollToElementDataByPredicate(function(elementData)
 		return elementData.id == achievementID;
-	end, ScrollBoxConstants.AlignCenter, ScrollBoxConstants.NoScrollInterpolation);
+	end, ScrollBoxConstants.AlignCenter);
 end
 
 AchievementComparisonTemplateMixin = {};
@@ -3369,7 +3369,7 @@ function AchievementFrameSearchBox_OnLoad(self)
 	SearchBoxTemplate_OnLoad(self);
 	self.HasStickyFocus = function()
 		local ancestry = self:GetParent().SearchPreviewContainer;
-		return DoesAncestryInclude(ancestry, GetMouseFocus());
+		return DoesAncestryIncludeAny(ancestry, GetMouseFoci());
 	end
 end
 

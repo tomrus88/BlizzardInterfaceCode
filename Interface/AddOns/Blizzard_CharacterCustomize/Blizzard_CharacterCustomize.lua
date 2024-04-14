@@ -1,6 +1,8 @@
 ﻿CHAR_CUSTOMIZE_MAX_SCALE = 0.75;
 CHAR_CUSTOMIZE_LOCK_WIDTH = 24;
 
+local POPOUT_CLEARANCE = 60;
+
 local showDebugTooltipInfo = GetCVarBool("debugTargetInfo");
 
 CharCustomizeOptionFrameBaseMixin = {};
@@ -505,9 +507,12 @@ function CharCustomizeOptionSliderMixin:OnSliderValueChanged(value, userInput)
 		self:AddTooltipLine("Choice ID: "..newChoiceData.id, HIGHLIGHT_FONT_COLOR);
 	end
 
-	local mouseFocus = GetMouseFocus();
-	if DoesAncestryInclude(self, mouseFocus) and (mouseFocus:GetObjectType() ~= "Button") then
-		self:OnEnter();
+	local mouseFoci = GetMouseFoci();
+	for _, mouseFocus in ipairs(mouseFoci) do
+		if DoesAncestryInclude(self, mouseFocus) and (mouseFocus:GetObjectType() ~= "Button") then
+			self:OnEnter();
+			break;
+		end
 	end
 
 	if needToUpdateModel then
@@ -795,8 +800,6 @@ function CharCustomizeOptionSelectionPopoutMixin:OnEntryMouseLeave(entry)
 		self:GetAudioInterface():StopAudio();
 	end
 end
-
-local POPOUT_CLEARANCE = 100;
 
 function CharCustomizeOptionSelectionPopoutMixin:GetMaxPopoutHeight()
 	return self:GetBottom() - POPOUT_CLEARANCE;
@@ -1123,6 +1126,8 @@ function CharCustomizeMixin:OnLoad()
 	self.alteredFormsPools = CreateFramePoolCollection();
 	self.alteredFormsPools:CreatePool("CHECKBUTTON", self.AlteredForms, "CharCustomizeAlteredFormButtonTemplate");
 	self.alteredFormsPools:CreatePool("CHECKBUTTON", self.AlteredForms, "CharCustomizeAlteredFormSmallButtonTemplate");
+
+	self.Categories:SetFixedMaxSpace(400);
 end
 
 function CharCustomizeMixin:OnEvent(event, ...)
@@ -1151,6 +1156,12 @@ end
 function CharCustomizeMixin:AttachToParentFrame(parentFrame)
 	self.parentFrame = parentFrame;
 	self:SetParent(parentFrame);
+end
+
+-- Used to set up spacing adjustments when resolution and UI scale don't leave enough room.
+function CharCustomizeMixin:SetOptionsSpacingConfiguration(topFrame, bottomFrame)
+	self.Options:SetTopFrame(topFrame);
+	self.Options:SetBottomFrame(bottomFrame, POPOUT_CLEARANCE);
 end
 
 function CharCustomizeMixin:OnButtonClick()
@@ -1518,6 +1529,17 @@ function CharCustomizeMixin:UpdateOptionButtons(forceReset)
 	end
 
 	self.Categories:Layout();
+
+	-- Push options up into categories a little bit if we don't have enough
+	-- vertical space for spacing at all.
+	self.Options:UpdateSpacing();
+	if self.Options:GetSpacing() < 0 then
+		self.Options:SetPoint("TOPRIGHT", -33, -267);
+	else
+		self.Options:SetPoint("TOPRIGHT", -33, -297);
+	end
+
+	-- This will update the spacing again based on the adjusted point above.
 	self.Options:Layout();
 
 	for optionFrame, optionData in pairs(optionsToSetup) do
@@ -1534,7 +1556,10 @@ function CharCustomizeMixin:UpdateOptionButtons(forceReset)
 
 	if self.numSubcategories > 1 then
 		self.Categories:Show();
-		self.RandomizeAppearanceButton:SetPoint("RIGHT", self.Categories, "LEFT", -20, 0);
+
+		-- Push the randomize button together with categories too if we're collapsing category buttons.
+		local xOffset = self.Categories:IsSpacingAdjusted() and 15 or -20;
+		self.RandomizeAppearanceButton:SetPoint("RIGHT", self.Categories, "LEFT", xOffset, 0);
 	else
 		self.Categories:Hide();
 		self.Categories:SetSize(1, 105);

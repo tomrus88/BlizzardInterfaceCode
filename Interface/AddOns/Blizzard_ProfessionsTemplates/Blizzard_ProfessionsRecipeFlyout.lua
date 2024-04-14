@@ -151,12 +151,12 @@ function ProfessionsItemFlyoutMixin:OnEvent(event, ...)
 		local buttonName = ...;
 		local isRightButton = buttonName == "RightButton";
 
-		local mouseFocus = GetMouseFocus();
-		if not isRightButton and DoesAncestryInclude(self.owner, mouseFocus) then
+		local mouseFoci = GetMouseFoci();
+		if not isRightButton and DoesAncestryIncludeAny(self.owner, mouseFoci) then
 			return;
 		end
 
-		if isRightButton or (not DoesAncestryInclude(self, mouseFocus) and mouseFocus ~= self) then
+		if isRightButton or (not DoesAncestryIncludeAny(self, mouseFoci) and not self:IsMouseMotionFocus()) then
 			CloseProfessionsItemFlyout();
 		end
 	end

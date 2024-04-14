@@ -6,11 +6,11 @@ function ContributionRewardMixin:Setup(rewardID, isEnabled)
 	self.rewardID = rewardID;
 	self.isEnabled = isEnabled;
 
-	local name, _, icon = GetSpellInfo(rewardID);
-	self.Icon:SetTexture(icon);
+	local spellInfo = C_Spell.GetSpellInfo(rewardID);
+	self.Icon:SetTexture(spellInfo.iconID);
 	self.Icon:SetDesaturated(not isEnabled);
 	self.PadLock:SetShown(not isEnabled);
-	self.RewardName:SetText(name);
+	self.RewardName:SetText(spellInfo.name);
 	self:Show();
 end
 
@@ -42,10 +42,10 @@ function ContributionRewardMixin:OnEnter()
 	ContributionBuffTooltip:ClearAllPoints();
 	ContributionBuffTooltip:SetPoint("BOTTOMLEFT", self.Icon, "TOPRIGHT", 0, 0);
 
-	local name, _, icon = GetSpellInfo(self.rewardID);
+	local spellInfo = C_Spell.GetSpellInfo(self.rewardID);
 
-	ContributionBuffTooltip.Icon:SetTexture(icon);
-	ContributionBuffTooltip.Name:SetText(name);
+	ContributionBuffTooltip.Icon:SetTexture(spellInfo.iconID);
+	ContributionBuffTooltip.Name:SetText(spellInfo.name);
 	ContributionBuffTooltip.Description:SetText(GetSpellDescription(self.rewardID));
 
 	ContributionBuffTooltip.Footer:SetShown(not self.isEnabled);

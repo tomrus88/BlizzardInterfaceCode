@@ -32,7 +32,6 @@ Import("string");
 Import("strtrim");
 Import("PlaySound");
 Import("SetPortraitToTexture");
-Import("GetMouseFocus");
 Import("Enum");
 Import("SecureMixin");
 Import("CreateFromSecureMixins");
@@ -86,7 +85,7 @@ function VerticalLargeStoreCardMixin:OnEnter()
 end
 
 function VerticalLargeStoreCardMixin:OnLeave()
-	if GetMouseFocus() == self.Magnifier then
+	if self.Magnifier:IsMouseMotionFocus() then
 		return;
 	end
 	self.Magnifier:Hide();

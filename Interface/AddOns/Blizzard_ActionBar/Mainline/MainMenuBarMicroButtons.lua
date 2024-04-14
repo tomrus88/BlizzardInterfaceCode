@@ -1,7 +1,7 @@
 MICRO_BUTTONS = {
 	"CharacterMicroButton",
-	"SpellbookMicroButton",
-	"TalentMicroButton",
+	"ProfessionMicroButton",
+	"PlayerSpellsMicroButton",
 	"AchievementMicroButton",
 	"QuestLogMicroButton",
 	"GuildMicroButton",
@@ -32,7 +32,7 @@ local g_processAlertCloseCallback = true;
 local g_flashingMicroButtons = {};
 
 local LOWEST_TALENT_FRAME_PRIORITY = 1000;
-local TALENT_FRAME_PRIORITIES =
+local PLAYERSPELLS_FRAME_PRIORITIES =
 {
 	TALENT_MICRO_BUTTON_SPEC_TUTORIAL = 1,
 	TALENT_MICRO_BUTTON_TALENT_TUTORIAL = 2,
@@ -40,6 +40,7 @@ local TALENT_FRAME_PRIORITIES =
 	TALENT_MICRO_BUTTON_UNSPENT_TALENTS = 4,
 	TALENT_MICRO_BUTTON_UNSPENT_PVP_TALENT_SLOT = 5,
 	TALENT_MICRO_BUTTON_NEW_PVP_TALENT = 6,
+	SPEC_CHANGED_HAS_NEW_ABILITIES = 7,
 }
 
 local EJMicroButtonEvents = {
@@ -126,11 +127,11 @@ local function DisableMicroButtons(disableMainMenu)
 	CharacterMicroButton.disabledTooltip = nil;
 	CharacterMicroButton:Disable();
 	
-	SpellbookMicroButton.disabledTooltip = nil;
-	SpellbookMicroButton:Disable();
+	ProfessionMicroButton.disabledTooltip = nil;
+	ProfessionMicroButton:Disable();
 
-	TalentMicroButton.disabledTooltip = nil;
-	TalentMicroButton:Disable();
+	PlayerSpellsMicroButton.disabledTooltip = nil;
+	PlayerSpellsMicroButton:Disable();
 
 	QuestLogMicroButton.disabledTooltip = nil;
 	QuestLogMicroButton:Disable();
@@ -162,8 +163,8 @@ local function EnableMicroButtons()
 	MICRO_BUTTONS_DISABLED = false;
 
 	CharacterMicroButton:Enable();
-	SpellbookMicroButton:Enable();
-	TalentMicroButton:Enable();
+	ProfessionMicroButton:Enable();
+	PlayerSpellsMicroButton:Enable();
 	QuestLogMicroButton:Enable();
 	GuildMicroButton:Enable();
 	LFDMicroButton:Enable();
@@ -185,8 +186,8 @@ function UpdateMicroButtons()
 	end
 
 	CharacterMicroButton:UpdateMicroButton();
-	SpellbookMicroButton:UpdateMicroButton();
-	TalentMicroButton:UpdateMicroButton();
+	ProfessionMicroButton:UpdateMicroButton();
+	PlayerSpellsMicroButton:UpdateMicroButton();
 	QuestLogMicroButton:UpdateMicroButton();
 	GuildMicroButton:UpdateMicroButton();
 	LFDMicroButton:UpdateMicroButton();
@@ -221,7 +222,7 @@ end
 
 --Alerts
 function MainMenuMicroButton_Init()
-	g_microButtonAlertPriority = { CollectionsMicroButton, SpellBookMicroButton, TalentMicroButton, EJMicroButton, GuildMicroButton };
+	g_microButtonAlertPriority = { CollectionsMicroButton, ProfessionMicroButton, PlayerSpellsMicroButton, EJMicroButton, GuildMicroButton };
 end
 
 function MainMenuMicroButton_SetAlertsEnabled(enabled, reason)
@@ -503,94 +504,48 @@ function CharacterMicroButtonMixin:SetNormal()
 end
 
 
-SpellbookMicroButtonMixin = {};
+ProfessionMicroButtonMixin = {};
 
-function SpellbookMicroButtonMixin:OnLoad()
+function ProfessionMicroButtonMixin:OnLoad()
 	self:RegisterForClicks("AnyUp");
 	self:RegisterEvent("UPDATE_BINDINGS");
-	self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player");
-	self:RegisterEvent("PLAYER_ENTERING_WORLD");
-	LoadMicroButtonTextures(self, "SpellbookAbilities");
-	self.tooltipText = MicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK");
+	LoadMicroButtonTextures(self, "Professions");
+	self.tooltipText = MicroButtonTooltipText(PROFESSIONS_BUTTON, "TOGGLEPROFESSIONBOOK");
 end
 
-function SpellbookMicroButtonMixin:OnClick(button, down)
+function ProfessionMicroButtonMixin:OnClick(button, down)
 	if ( not KeybindFrames_InQuickKeybindMode() ) then
-		HelpTip:Hide(UIParent, SPEC_CHANGED_HAS_NEW_ABILITIES);
-
-		if self.jumpToSpellID then
-			SpellBookFrame_OpenToSpell(self.jumpToSpellID, false, nil);
-			self.jumpToSpellID = nil;
-		else
-			ToggleSpellBook(BOOKTYPE_SPELL);
-		end
+		ToggleProfessionsBook();
 	end
 end
 
-function SpellbookMicroButtonMixin:UpdateMicroButton()
-	if ( SpellBookFrame and SpellBookFrame:IsShown() ) then
-		self:SetPushed(); 
+function ProfessionMicroButtonMixin:UpdateMicroButton()
+	if ( ProfessionsBookFrame and ProfessionsBookFrame:IsShown() ) then
+		self:SetPushed();
 	else
 		self:SetNormal();
 	end
 end
 
-function SpellbookMicroButtonMixin:OnEvent(event, ...)
+function ProfessionMicroButtonMixin:OnEvent(event, ...)
 	if ( event == "UPDATE_BINDINGS" ) then
-		self.tooltipText = MicroButtonTooltipText(SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK");
-	elseif ( event == "PLAYER_SPECIALIZATION_CHANGED") then
-		self:EvaluateAlertVisibility();
-	elseif (event == "PLAYER_ENTERING_WORLD") then
-		self.oldSpecID = GetSpecialization();
+		self.tooltipText = MicroButtonTooltipText(PROFESSIONS_BUTTON, "TOGGLEPROFESSIONBOOK");
 	end
 end
 
-function SpellbookMicroButtonMixin:EvaluateAlertVisibility()
-	local newSpecID = GetSpecialization();
-	local playerAtMax = UnitLevel("player") >= GetMaxLevelForLatestExpansion();
-	local specUsedAlready = GetCVarBitfield("maxLevelSpecsUsed", newSpecID);
-
-	--Makes sure that alerts are only shown when the spec is changed and not when talent is changed. Also makes sure the player hasn't switched to the spec at max already
-	if newSpecID == self.oldSpecID or (playerAtMax and specUsedAlready) then
-		return;
-	end
-
-	if playerAtMax and not specUsedAlready then
-		SetCVarBitfield("maxLevelSpecsUsed", newSpecID, true);
-	end
-
-	self.oldSpecID = newSpecID;
-
-	local alertText = SPEC_CHANGED_HAS_NEW_ABILITIES;
-	local hasUndraggedSpell, firstUndraggedId = SpellBookFrame_SpecHasUnDraggedSpells();
-	if hasUndraggedSpell then
-		if not SpellBookFrame or not SpellBookFrame:IsShown() then
-			if MainMenuMicroButton_ShowAlert(self, alertText) then
-				MicroButtonPulse(self);
-				self.jumpToSpellID = firstUndraggedId;
-			end
-		elseif SpellBookFrame:IsShown() then
-			SpellBookFrame_OpenToSpell(firstUndraggedId, false, nil);
-			self.jumpToSpellID = nil;
-		end
-	end
-
+function ProfessionMicroButtonMixin:EvaluateAlertVisibility()
 	return false;
 end
 
 
-TalentMicroButtonMixin = {};
+PlayerSpellsMicroButtonMixin = CreateFromMixins(DirtiableMixin);
 
-function TalentMicroButtonMixin:OnLoad()
+function PlayerSpellsMicroButtonMixin:OnLoad()
 	LoadMicroButtonTextures(self, "SpecTalents");
-	self.tooltipText = MicroButtonTooltipText(TALENTS_BUTTON, "TOGGLETALENTS");
+	self.tooltipText = MicroButtonTooltipText(PLAYERSPELLS_BUTTON, "TOGGLETALENTS");
 	self.newbieText = NEWBIE_TOOLTIP_TALENTS;
 
-	self.disabledTooltip =	function()
-		local _, failureReason = C_SpecializationInfo.CanPlayerUseTalentSpecUI();
-		return failureReason;
-	end
-
+	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterForClicks("AnyUp");
 	self:RegisterEvent("UPDATE_BINDINGS");
 	self:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT");
@@ -599,116 +554,164 @@ function TalentMicroButtonMixin:OnLoad()
 	self:RegisterEvent("UPDATE_BATTLEFIELD_STATUS");
 	self:RegisterEvent("HONOR_LEVEL_UPDATE");
 	self:RegisterEvent("PLAYER_LEVEL_CHANGED");
+
+	-- Many talent/spell events fire back-to-back on the same frame when changing talents/specs/level
+	-- So to prevent repeat alert evaluations from stomping each other, using a dirty flag to ensure we
+	-- only evaluate alerts once via calls to MakeDirty in OnEvent
+	self:SetDirtyMethod(self.EvaluateAlertVisibility);
 end
 
-function TalentMicroButtonMixin:HasTalentAlertToShow()
+function PlayerSpellsMicroButtonMixin:GetAnyTalentAlert()
 	if not IsPlayerInWorld() then
-		return nil, LOWEST_TALENT_FRAME_PRIORITY;
+		return nil;
 	end
 
-	local canUseTalentSpecUI = C_SpecializationInfo.CanPlayerUseTalentSpecUI();
-	if self.canUseTalentSpecUI == nil then
-		self.canUseTalentSpecUI = canUseTalentSpecUI;
+	if not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_TALENT_CHANGES) or not C_SpecializationInfo.CanPlayerUseTalentUI() then
+		return nil;
 	end
 
-	local canUseTalentUI = C_SpecializationInfo.CanPlayerUseTalentUI();
-	if self.canUseTalentUI == nil then
-		self.canUseTalentUI = canUseTalentUI;
+	if not C_ClassTalents.HasUnspentTalentPoints() and not C_ClassTalents.HasUnspentHeroTalentPoints() then
+		return nil;
 	end
 
-	local alert;
+	local alert = "TALENT_MICRO_BUTTON_UNSPENT_TALENTS";
 
-	if GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_TALENT_CHANGES) and canUseTalentUI and C_ClassTalents.HasUnspentTalentPoints() then
-		alert = "TALENT_MICRO_BUTTON_UNSPENT_TALENTS";
-	end
+	local suggestedTab = IsPlayerInitialSpec() and PlayerSpellsUtil.FrameTabs.ClassSpecializations or PlayerSpellsUtil.FrameTabs.ClassTalents;
 
-	self.canUseTalentSpecUI = canUseTalentSpecUI;
-	self.canUseTalentUI = canUseTalentUI;
-
-	return _G[alert], TALENT_FRAME_PRIORITIES[alert] or LOWEST_TALENT_FRAME_PRIORITY;
+	return {text = _G[alert], priority = PLAYERSPELLS_FRAME_PRIORITIES[alert] or LOWEST_TALENT_FRAME_PRIORITY, suggestedTab = suggestedTab};
 end
 
-function TalentMicroButtonMixin:HasPvpTalentAlertToShow()
+function PlayerSpellsMicroButtonMixin:GetAnyPvpTalentAlert()
 	local isInterestedInPvP = C_PvP.IsWarModeDesired() or PVPUtil.IsInActiveBattlefield();
 	if not isInterestedInPvP or not IsPlayerInWorld() or not C_SpecializationInfo.CanPlayerUsePVPTalentUI() then
-		return nil, LOWEST_TALENT_FRAME_PRIORITY;
+		return nil;
 	end
 
 	local alert;
 
 	local hasEmptySlot, hasNewTalent = C_SpecializationInfo.GetPvpTalentAlertStatus();
-	if (hasEmptySlot) then
+	if hasEmptySlot then
 		alert = "TALENT_MICRO_BUTTON_UNSPENT_PVP_TALENT_SLOT";
-	elseif (hasNewTalent) then
+	elseif hasNewTalent then
 		alert = "TALENT_MICRO_BUTTON_NEW_PVP_TALENT";
+	else
+		return nil;
 	end
 
-	return _G[alert], TALENT_FRAME_PRIORITIES[alert] or LOWEST_TALENT_FRAME_PRIORITY;
+	return {text = _G[alert], priority = PLAYERSPELLS_FRAME_PRIORITIES[alert] or LOWEST_TALENT_FRAME_PRIORITY, suggestedTab = PlayerSpellsUtil.FrameTabs.ClassTalents};
 end
 
-function TalentMicroButtonMixin:EvaluateAlertVisibility()
-	local alertText, alertPriority = self:HasTalentAlertToShow();
-	local pvpAlertText, pvpAlertPriority = self:HasPvpTalentAlertToShow();
-
-	if not alertText or pvpAlertPriority < alertPriority then
-		-- pvpAlert is higher priority, use that instead
-		alertText = pvpAlertText;
+function PlayerSpellsMicroButtonMixin:GetAnySpellBookAlert()
+	if not IsPlayerInWorld() or IsPlayerInitialSpec() then
+		return nil;
 	end
+
+	local newSpecID = GetSpecialization();
+	local playerAtMax = UnitLevel("player") >= GetMaxLevelForLatestExpansion();
+	local specUsedAlready = GetCVarBitfield("maxLevelSpecsUsed", newSpecID);
+
+	-- Makes sure that alerts are only shown when the spec is changed and not when talent is changed.
+	-- Also makes sure the player hasn't switched to the spec at max already
+	if newSpecID == nil or self.oldSpecID == nil or newSpecID == self.oldSpecID or (playerAtMax and specUsedAlready) then
+		self.oldSpecID = newSpecID;
+		return nil;
+	end
+
+	if playerAtMax and not specUsedAlready then
+		SetCVarBitfield("maxLevelSpecsUsed", newSpecID, true);
+	end
+
+	self.oldSpecID = newSpecID;
+
+	local firstUndraggedSpecSpell = nil;
+	local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(Enum.SpellBookSkillLineIndex.MainSpec);
+	for i = 1, skillLineInfo.numSpellBookItems do
+		local itemType, _, spellID = C_SpellBook.GetSpellBookItemType(i + skillLineInfo.itemIndexOffset, Enum.SpellBookSpellBank.Player);
+		if spellID and itemType ~= Enum.SpellBookItemType.FutureSpell and not C_Spell.IsSpellPassive(spellID) and not C_ActionBar.IsOnBarOrSpecialBar(spellID) then
+			firstUndraggedSpecSpell = spellID;
+			break;
+		end
+	end
+
+	if not firstUndraggedSpecSpell then
+		return nil;
+	end
+
+	local alert = "SPEC_CHANGED_HAS_NEW_ABILITIES";
+
+	return {text = _G[alert], priority = PLAYERSPELLS_FRAME_PRIORITIES[alert], suggestedTab = PlayerSpellsUtil.FrameTabs.SpellBook, jumpToSpellID = firstUndraggedSpecSpell};
+end
+
+function PlayerSpellsMicroButtonMixin:GetHighestPriorityAlert()
+	local alerts = { self:GetAnyTalentAlert(), self:GetAnyPvpTalentAlert(), self:GetAnySpellBookAlert() }
+	local highestPriorityAlert = nil;
+	for _, alert in pairs(alerts) do -- Intentionally pairs rather than ipairs since one or more alerts may be nil
+		if not highestPriorityAlert or alert.priority > highestPriorityAlert.priority then
+			highestPriorityAlert = alert;
+		end
+	end
+
+	return highestPriorityAlert;
+end
+
+function PlayerSpellsMicroButtonMixin:EvaluateAlertVisibility()
+	local alert = self:GetHighestPriorityAlert();
 
 	MainMenuMicroButton_HideAlert(self);
 	MicroButtonPulseStop(self);
 
-	if not alertText then
+	self.jumpToSpellID = alert and alert.jumpToSpellID or nil;
+	self.suggestedTab = alert and alert.suggestedTab or nil;
+
+	if not alert then
 		return false;
 	end
 
-	if not ClassTalentFrame or not ClassTalentFrame:IsShown() then
-		if MainMenuMicroButton_ShowAlert(self, alertText) then
+	if not PlayerSpellsFrame or not PlayerSpellsFrame:IsShown() then
+		if MainMenuMicroButton_ShowAlert(self, alert.text) then
 			MicroButtonPulse(self);
-			if IsPlayerInitialSpec() then
-				TalentMicroButton.suggestedTab = 1;
-			else
-				TalentMicroButton.suggestedTab = 2;
-			end
 			return true;
 		end
 	end
 
-    TalentMicroButton.suggestedTab = nil;
+	-- SpellBookRevampTODO: As part of setting up new revamp tutorials, reevaluate how we want to handle the "Spec change with undragged spells" alert
+	-- while PlayerSpellsFrame is already open (old behavior would force switch to SpellBook tab, which is very disruptive)
+
+	self.jumpToSpellID = nil;
+    self.suggestedTab = nil;
 	return false;
 end
 
-function TalentMicroButtonMixin:OnEvent(event, ...)
-	if ( event == "PLAYER_SPECIALIZATION_CHANGED" or event == "PLAYER_LEVEL_CHANGED" or event == "UPDATE_BATTLEFIELD_STATUS" ) then
-		self:EvaluateAlertVisibility();
-	elseif ( event == "PLAYER_TALENT_UPDATE" or event == "NEUTRAL_FACTION_SELECT_RESULT" or event == "HONOR_LEVEL_UPDATE" ) then
+function PlayerSpellsMicroButtonMixin:OnEvent(event, ...)
+	if event == "PLAYER_SPECIALIZATION_CHANGED" or event == "PLAYER_LEVEL_CHANGED" or event == "UPDATE_BATTLEFIELD_STATUS" then
+		self:MarkDirty();
+	elseif event == "PLAYER_TALENT_UPDATE" or event == "NEUTRAL_FACTION_SELECT_RESULT" or event == "HONOR_LEVEL_UPDATE" then
 		UpdateMicroButtons();
-		self:EvaluateAlertVisibility();
-	elseif ( event == "UPDATE_BINDINGS" ) then
-		self.tooltipText =  MicroButtonTooltipText(TALENTS_BUTTON, "TOGGLETALENTS");
+		self:MarkDirty();
+	elseif event == "UPDATE_BINDINGS" then
+		self.tooltipText =  MicroButtonTooltipText(PLAYERSPELLS_BUTTON, "TOGGLETALENTS");
+	elseif event == "PLAYER_ENTERING_WORLD" then
+		self.oldSpecID = GetSpecialization();
 	end
 end
 
-function TalentMicroButtonMixin:OnClick(button, down)
-    if ( not KeybindFrames_InQuickKeybindMode() ) then
-		ToggleTalentFrame(self.suggestedTab);
+function PlayerSpellsMicroButtonMixin:OnClick(button, down)
+    if not KeybindFrames_InQuickKeybindMode() then
+		if self.jumpToSpellID and (not self.suggestedTab or self.suggestedTab == PlayerSpellsUtil.FrameTabs.SpellBook) then
+			local knownSpellsOnly, toggleFlyout, flyoutReason = true, false, nil;
+			PlayerSpellsUtil.OpenToSpellBookTabAtSpell(self.jumpToSpellID, knownSpellsOnly, toggleFlyout, flyoutReason)
+			self.jumpToSpellID = nil;
+		else
+			PlayerSpellsUtil.TogglePlayerSpellsFrame(self.suggestedTab);
+		end
 	end
 end
 
-function TalentMicroButtonMixin:UpdateMicroButton()
-	if (ClassTalentFrame and ClassTalentFrame:IsShown()) then
+function PlayerSpellsMicroButtonMixin:UpdateMicroButton()
+	if (PlayerSpellsFrame and PlayerSpellsFrame:IsShown()) then
 		self:SetPushed();
 	else
-		if not C_SpecializationInfo.CanPlayerUseTalentSpecUI() then
-			self.disabledTooltip =	function()
-				local _, failureReason = C_SpecializationInfo.CanPlayerUseTalentSpecUI();
-				return failureReason;
-			end
-			self:Disable();
-		else
-			self:Enable();
-			self:SetNormal();
-		end
+		self:SetNormal();
 	end
 end
 
@@ -1598,8 +1601,9 @@ function MicroMenuMixin:InitializeButtons()
 	-- Button, plus GameModeFeatureSetting that controls whether it is shown.
 	local buttonInfos = {
 		{ CharacterMicroButton, Enum.GameModeFeatureSetting.CharacterPanel, },
-		{ SpellbookMicroButton, Enum.GameModeFeatureSetting.SpellbookPanel, },
-		{ TalentMicroButton, Enum.GameModeFeatureSetting.TalentsPanel, },
+		-- SpellBookRevampTODO: Once the old spellbook is deleted & replaced with professions only frame, this feature handling must be reworked accordingly
+		{ ProfessionMicroButton, Enum.GameModeFeatureSetting.SpellbookPanel, },
+		{ PlayerSpellsMicroButton, Enum.GameModeFeatureSetting.TalentsPanel, },
 		{ AchievementMicroButton, Enum.GameModeFeatureSetting.AchievementsPanel, },
 		{ QuestLogMicroButton, Enum.GameModeFeatureSetting.QuestLogMicroButton, },
 		{ GuildMicroButton, Enum.GameModeFeatureSetting.CommunitiesPanel, },

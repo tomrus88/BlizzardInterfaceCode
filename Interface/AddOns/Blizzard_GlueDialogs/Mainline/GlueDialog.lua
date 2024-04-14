@@ -149,7 +149,7 @@ StaticPopupDialogs["REALM_IS_FULL"] = {
 	end,
 	OnCancel = function()
 		C_RealmList.ClearRealmList();
-		CharacterSelect_ChangeRealm();
+		CharacterSelectUtil.ChangeRealm();
 	end,
 }
 
@@ -233,7 +233,7 @@ StaticPopupDialogs["CHARACTER_BOOST_NO_CHARACTERS_WARNING"] = {
 
 	OnAccept = function ()
 		CharSelectServicesFlowFrame:Hide();
-		CharacterSelect_CreateNewCharacter(Enum.CharacterCreateType.Normal);
+		CharacterSelectUtil.CreateNewCharacter(Enum.CharacterCreateType.Normal);
 	end,
 
 	OnCancel = function ()

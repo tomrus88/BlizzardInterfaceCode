@@ -32,7 +32,6 @@ Import("string");
 Import("strtrim");
 Import("PlaySound");
 Import("SetPortraitToTexture");
-Import("GetMouseFocus");
 Import("Enum");
 Import("SecureMixin");
 Import("CreateFromSecureMixins");

@@ -18,6 +18,16 @@ function QuestTextPreviewMixin:UpdatePreview(value)
 	self.BodyText:SetTextColor(textColor[1], textColor[2], textColor[3]);
 end
 
+ArachnophobiaMixin = {};
+
+function ArachnophobiaMixin:OnLoad()
+	SettingsCheckBoxControlMixin.OnLoad(self);
+
+	self.SubTextContainer:SetPoint("TOPLEFT", self.CheckBox, "TOPRIGHT", 0, 0);
+	self.SubTextContainer.SubText:ClearAllPoints();
+	self.SubTextContainer.SubText:SetPoint("LEFT", self.CheckBox, "RIGHT", 8, 0);
+end
+
 local function Register()
 	local category, layout = Settings.RegisterVerticalLayoutCategory(ACCESSIBILITY_GENERAL_LABEL);
 
@@ -252,6 +262,16 @@ local function Register()
 		local setting = Settings.RegisterProxySetting(category, "PROXY_INTERACT_ICONS", Settings.DefaultVarLocation,
 			Settings.VarType.Number, INTERACT_ICONS_OPTION, defaultValue, GetValue, SetValue);
 		Settings.CreateDropDown(category, setting, GetOptions, OPTION_TOOLTIP_INTERACT_ICONS);
+	end
+
+	-- Arachnophobia 
+	do
+		local setting = Settings.RegisterCVarSetting(category, "arachnophobiaMode", Settings.VarType.Boolean, ARACHNOPHOBIA_MODE_CHECKBOX);
+		local options = nil;
+		local data = Settings.CreateSettingInitializerData(setting, options, ARACHNOPHOBIA_MODE_CHECKBOX_TOOLTIP);
+		local initializer = Settings.CreateSettingInitializer("ArachnophobiaTemplate", data);
+
+		layout:AddInitializer(initializer);
 	end
 
 	Settings.RegisterCategory(category, SETTING_GROUP_ACCESSIBILITY);

@@ -454,7 +454,7 @@ function UIWidgetBaseSpellTemplateMixin:ShouldContinueOnUpdate()
 	return self.updateTimeRemaining and (self.updateTimeRemaining > 0);
 end
 
-function UIWidgetBaseSpellTemplateMixin:Setup(widgetContainer, spellInfo, enabledState, width, textureKit, isLootObject)
+function UIWidgetBaseSpellTemplateMixin:Setup(widgetContainer, spellInfo, enabledState, width, textureKit)
 	UIWidgetTemplateTooltipFrameMixin.Setup(self, widgetContainer);
 	SetupTextureKitsFromRegionInfo(textureKit, self, spellTextureKitRegionInfo);
 	local hasAmountBorderTexture = self.AmountBorder:IsShown();
@@ -467,8 +467,8 @@ function UIWidgetBaseSpellTemplateMixin:Setup(widgetContainer, spellInfo, enable
 		self.StackCount:SetPoint("BOTTOMRIGHT", self.Icon, -2, 2);
 	end
 
-	local name, _, icon = GetSpellInfo(spellInfo.spellID);
-	self.Icon:SetTexture(icon);
+	local spellData = C_Spell.GetSpellInfo(spellInfo.spellID);
+	self.Icon:SetTexture(spellData.iconID);
 	self.Icon:SetDesaturated(enabledState == Enum.WidgetEnabledState.Disabled);
 
 	local iconSize = GetWidgetIconSize(spellInfo.iconSizeType);
@@ -511,10 +511,6 @@ function UIWidgetBaseSpellTemplateMixin:Setup(widgetContainer, spellInfo, enable
 					hasBorderTexture = true;
 				end
 			end
-			local color = spellBorderColorFromTintValue[spellInfo.borderColor];
-			if color then 
-				self.Border:SetVertexColor(color:GetRGB());
-			end
 		end
 	end
 
@@ -531,7 +527,7 @@ function UIWidgetBaseSpellTemplateMixin:Setup(widgetContainer, spellInfo, enable
 	self.Text:SetWidth(textWidth);
 	self.Text:SetHeight(0);
 
-	local textShown = ( spellInfo.textShownState == Enum.SpellDisplayTextShownStateType.Shown ) and not isLootObject;
+	local textShown = ( spellInfo.textShownState == Enum.SpellDisplayTextShownStateType.Shown );
 	self.Text:SetShown(textShown);
 
 	if textShown then
@@ -557,6 +553,23 @@ function UIWidgetBaseSpellTemplateMixin:Setup(widgetContainer, spellInfo, enable
 	end
 
 	local showBorder = (spellInfo.iconDisplayType == Enum.SpellDisplayIconDisplayType.Buff) or ((spellInfo.iconDisplayType == Enum.SpellDisplayIconDisplayType.Circular) and hasBorderTexture);
+
+	if spellInfo.tint ~= Enum.SpellDisplayTint.None then
+		if spellInfo.tint == Enum.SpellDisplayTint.Red then
+			self.Icon:SetVertexColor(1, 0, 0);
+			if showBorder then
+				self.Border:SetVertexColor(1, 0, 0);
+			end
+		end
+	else
+		local color = spellBorderColorFromTintValue[spellInfo.borderColor];
+		self.Icon:SetVertexColor(1, 1, 1);
+		if showBorder and color then
+			self.Border:SetVertexColor(color:GetRGB());
+		elseif showBorder and not color then
+			self.Border:SetVertexColor(1, 1, 1);
+		end
+	end
 
 	self.Border:SetShown(showBorder);
 	self.DebuffBorder:SetShown(spellInfo.iconDisplayType == Enum.SpellDisplayIconDisplayType.Debuff);
@@ -765,7 +778,7 @@ function UIWidgetBaseStatusBarTemplateMixin:DisplayBarValue()
 
 	local statusBarTexture = self:GetStatusBarTexture();
 	if statusBarTexture then
-		local currentAlpha = Lerp(self.barMinFillAlpha, self.barMaxFillAlpha, ClampedPercentageBetween(self.displayedValue, self.barMin, self.barMax));
+	local currentAlpha = Lerp(self.barMinFillAlpha, self.barMaxFillAlpha, ClampedPercentageBetween(self.displayedValue, self.barMin, self.barMax));
 		statusBarTexture:SetAlpha(currentAlpha);
 	end
 end
@@ -1562,7 +1575,7 @@ function UIWidgetBaseIconTemplateMixin:Setup(widgetContainer, textureKit, iconIn
 	self.Glow:SetSize(iconFrameSize, iconFrameSize);
 
 	if iconInfo.sourceType == Enum.WidgetIconSourceType.Spell then
-		local iconTexture = select(3, GetSpellInfo(iconInfo.sourceID));
+		local iconTexture =	C_Spell.GetSpellTexture(iconInfo.sourceID);
 		if iconTexture then
 			self.Icon:SetTexture(iconTexture);
 			self:Show();

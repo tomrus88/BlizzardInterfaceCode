@@ -31,8 +31,8 @@ end
 function TutorialHelper:FormatString(str)
 	-- Spell Names and Icons e.g. {$1234}
 	str = string.gsub(str, "{%$(%d+)}", function(spellID)
-			local name, _, icon = GetSpellInfo(spellID);
-			return string.format("|cFF00FFFF%s|r |T%s:16|t", name, icon);
+			local spellInfo = C_Spell.GetSpellInfo(spellID);
+			return string.format("|cFF00FFFF%s|r |T%s:16|t", spellInfo.name, spellInfo.iconID);
 		end);
 
 	-- Spell Keybindings e.g. {KB|1234}
@@ -962,10 +962,10 @@ function Class_ActionBarCallout:HighlightPointer(spellID, textID)
 		self.SpellID = spellID;
 
 		-- Prompt the user to use the spell
-		local name, _, icon = GetSpellInfo(spellID);
+		local spellInfo = C_Spell.GetSpellInfo(spellID);
 		local prompt = formatStr(TutorialHelper:GetClassString(textID or "NPE_ABILITYINITIAL"));
 		local binding = GetBindingKey("ACTIONBUTTON" .. btn.action) or NPE_UNBOUND_KEYBIND;
-		local finalString = string.format(prompt, binding, name, icon);
+		local finalString = string.format(prompt, binding, spellInfo.name, spellInfo.iconID);
 
 		self:ShowPointerTutorial(finalString, "DOWN", btn);
 		ActionButton_ShowOverlayGlow(btn);
@@ -2208,9 +2208,9 @@ function Class_AbilityUse_AbilityReminder:OnBegin()
 	self.SpellID = TutorialHelper:FilterByClass(TutorialData.StartingAbility);
 	local btn = TutorialHelper:GetActionButtonBySpellID(self.SpellID);
 	if (btn) then
-		local name, _, icon = GetSpellInfo(self.SpellID);
+		local spellInfo = C_Spell.GetSpellInfo(self.SpellID);
 		local prompt = formatStr(TutorialHelper:GetClassString("NPE_ABILITYREMINDER"));
-		self:ShowPointerTutorial(string.format(prompt, name, icon), "DOWN", btn);
+		self:ShowPointerTutorial(string.format(prompt, spellInfo.name, spellInfo.iconID), "DOWN", btn);
 
 		Dispatcher:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", self);
 

@@ -65,7 +65,7 @@ function TalentSearchPreviewContainerMixin:DisableDefaultResultButton()
 end
 
 function TalentSearchPreviewContainerMixin:OnShow()
-	self.ScrollBox:ScrollToBegin(ScrollBoxConstants.NoScrollInterpolation);
+	self.ScrollBox:ScrollToBegin();
 end
 
 function TalentSearchPreviewContainerMixin:SetPreviewResults(previewResults)
@@ -224,11 +224,11 @@ function TalentSearchBoxMixin:OnLoad()
 
 	self.HasStickyFocus = function()
 		local searchPreviewContainer = self:GetSearchPreviewContainer();
-		local mouseFocus = GetMouseFocus();
+		local mouseFoci = GetMouseFoci();
 		-- Ensure OnFocusLost doesn't precede Search Preview result clicks
-		return (searchPreviewContainer and DoesAncestryInclude(searchPreviewContainer, mouseFocus)) or
+		return (searchPreviewContainer and DoesAncestryIncludeAny(searchPreviewContainer, mouseFoci)) or
 		-- Ensure OnFocusLost doesn't precede our ClearButton clicks
-				DoesAncestryInclude(self, mouseFocus);
+				DoesAncestryIncludeAny(self, mouseFoci);
 	end
 
 	self.clearButton:SetScript("OnClick", function(btn)

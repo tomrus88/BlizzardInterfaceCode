@@ -162,10 +162,9 @@ function WardrobeOutfitFrameMixin:Toggle(dropDown)
 end
 
 function WardrobeOutfitFrameMixin:OnUpdate(elapsed)
-	local mouseFocus = GetMouseFocus();
 	for i = 1, #self.Buttons do
 		local button = self.Buttons[i];
-		if ( button == mouseFocus or button:IsMouseOver() ) then
+		if ( button:IsMouseMotionFocus() or button:IsMouseOver() ) then
 			if ( button.outfitID ) then
 				button.EditButton:Show();
 			else
@@ -349,7 +348,7 @@ function WardrobeOutfitFrameMixin:EvaluateAppearance(appearanceID, category, tra
 		preferredAppearanceID, hasAllData, canCollect = CollectionWardrobeUtil.GetPreferredSourceID(appearanceID, nil, category, transmogLocation);
 	else
 		preferredAppearanceID = appearanceID;
-		hasAllData, canCollect = CollectionWardrobeUtil.PlayerCanCollectSource(appearanceID);
+		hasAllData, canCollect = C_TransmogCollection.PlayerCanCollectSource(appearanceID);
 	end
 
 	if canCollect then

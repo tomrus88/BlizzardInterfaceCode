@@ -426,7 +426,7 @@
 	<Button name="UIPanelButtonTemplate" inherits="UIPanelButtonNoTooltipTemplate" virtual="true">
 		<Scripts>
 			<OnEnter>
-				if(self.tooltipText ~= nil) then
+				if(self.tooltipText ~= nil and not self.tooltipDisabled) then
 					GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 					GameTooltip_SetTitle(GameTooltip, self.tooltipText);
 					GameTooltip:Show();
@@ -1282,6 +1282,13 @@
 			<TexCoords left="0" right="1.0" top="0.03" bottom="0.7175"/>
 		</HighlightTexture>
 	</Button>
+
+	<Button name="UIResetFiltersButtonTemplate" hidden="true" virtual="true">
+		<Size x="23" y="23"/>
+		<NormalTexture atlas="auctionhouse-ui-filter-redx" setAllPoints="true"/>
+		<HighlightTexture atlas="auctionhouse-ui-filter-redx" alphaMode="ADD" alpha="0.4" setAllPoints="true"/>
+	</Button>
+
 	<!-- Based on UIMenuButtonStretchTemplate.
 		Includes a Reset button (red cicle with yellow x) that appears on the top right of the dropdown button (hidden by default).
 		You can specify a "resetFunction" on the dropdown button as a keyValue and the Reset button will call it on click.
@@ -1300,20 +1307,6 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<Frames>
-			<Button parentKey="ResetButton" hidden="true">
-				<Size x="23" y="23"/>
-				<Anchors>
-					<Anchor point="CENTER" relativeKey="$parent" relativePoint="TOPRIGHT" x="-3" y="0"/>
-				</Anchors>
-				<NormalTexture atlas="auctionhouse-ui-filter-redx">
-					<Size x="23" y="23"/>
-				</NormalTexture>
-				<HighlightTexture atlas="auctionhouse-ui-filter-redx" alphaMode="ADD" alpha="0.4">
-					<Size x="23" y="23"/>
-				</HighlightTexture>
-			</Button>
-		</Frames>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
 		</Scripts>
@@ -2094,6 +2087,28 @@
 		<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
 	</Button>
 
+	<Button name="CommonSquareIconButtonTemplate" mixin="SquareIconButtonMixin" inherits="SquareIconButtonTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="iconSize" value="24" type="number"/>
+		</KeyValues>
+		<Size x="48" y="48"/>
+		<HitRectInsets left="6" right="6" top="6" bottom="6"/>
+		<NormalTexture parentKey="NormalTexture" atlas="common-button-square-gray-up"/>
+		<HighlightTexture parentKey="HighlightTexture" alphaMode="ADD" alpha="0.4">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeKey="$parent.Icon" relativePoint="TOPLEFT"/>
+				<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Icon" relativePoint="BOTTOMRIGHT"/>
+			</Anchors>
+		</HighlightTexture>
+		<PushedTexture parentKey="PushedTexture" atlas="common-button-square-gray-down">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="1" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" x="1" y="-1"/>
+			</Anchors>
+		</PushedTexture>
+		<DisabledTexture parentKey="NormalTexture" atlas="common-button-square-gray-up"/>
+	</Button>
+
 	<Button name="RefreshButtonTemplate" inherits="SquareIconButtonTemplate" virtual="true">
 		<KeyValues>
 			<KeyValue key="iconAtlas" value="UI-RefreshButton" type="string"/>
@@ -2105,9 +2120,11 @@
 		onBoxToggled: a function that takes two arguments: a boolean for whether the box is checked or not, and a boolean for whether it
 						was toggled by the user or programmatically. Called when the checked state changes.
 		labelText: The text to use on the label
+		labelFont: The font to use for the label
 		<KeyValues>
 			<KeyValue key="onBoxToggled" value="nop" type="global"/>
 			<KeyValue key="labelText" value="CHARACTER_TYPE_FRAME_TRIAL_BOOST_CHARACTER" type="global"/>
+			<KeyValue key="labelFont" value="GameFontHighlightLarge" type="string"/>
 		</KeyValues>
 		-->
 		<Scripts>
@@ -2117,6 +2134,7 @@
 	</Frame>
 
 	<Frame name="ResizeCheckButtonTemplate" inherits="ResizeCheckButtonBehaviorTemplate" virtual="true">
+		<Size x="1" y="1"/>
 		<Frames>
 			<CheckButton parentKey="Button" inherits="UICheckButtonTemplate">
 				<Size x="28" y="28"/>
@@ -2139,6 +2157,10 @@
 				</FontString>
 			</Layer>
 		</Layers>
+		<Scripts>
+			<OnEnter method="OnEnter"/>
+			<OnLeave method="OnLeave"/>
+		</Scripts>
 	</Frame>
 
 	<Frame name="SubFrameMouseoverButtonTemplate" mixin="SubFrameMouseoverButtonMixin" virtual="true">
@@ -2389,7 +2411,7 @@
 
 	<!--The DefaultScaleFrame template is used to allow a frame to appear to be "unscaled"
 		That means that all the textures/fonts used should appear as the same size they do in Photoshop when authored.
-		It is most useful in Glues, where we ALWAYS apply a UIScale, with no way to turn it off.
+		This was primarily added for Glues, where we used to apply a UIScale at 1.0, with no way to turn it off.
 		But it can also be used in game in order to attain a consistent look on a panel.
 		If you choose to use it in-game, remember that when you use it, the player will no longer be able to scale that panel up for accessibility reasons.-->
 
@@ -2400,6 +2422,15 @@
 		<Scripts>
 			<OnLoad method="OnDefaultScaleFrameLoad" inherit="prepend"/>
 			<OnEvent method="OnDefaultScaleFrameEvent" inherit="prepend"/>
+		</Scripts>
+	</Frame>
+
+	<!-- Useful if you want scaling behavior to match UIParent/GlueParent but you don't want a
+		 frame to be parented to the appropriate top level parent. -->
+	<Frame name="TopLevelParentScaleFrameTemplate" mixin="TopLevelParentScaleFrameMixin" virtual="true">
+		<Scripts>
+			<OnLoad method="OnScaleFrameLoad" inherit="prepend"/>
+			<OnEvent method="OnScaleFrameEvent" inherit="prepend"/>
 		</Scripts>
 	</Frame>
 
@@ -3161,6 +3192,75 @@
 			<OnClick method="OnClick" inherit="prepend"/>
 		</Scripts>
 	</CheckButton>
+
+	<Button name="MainMenuFrameButtonTemplate" inherits="BigRedThreeSliceButtonTemplate" virtual="true">
+		<Size x="200" y="36"/>
+		<NormalFont style="GameFontHighlightLarge"/>
+		<HighlightFont style="GameFontHighlightLarge"/>
+		<DisabledFont style="GameFontDisableLarge"/>
+	</Button>
+
+	<Frame name="MainMenuFrameTemplate" mixin="MainMenuFrameMixin" inherits="VerticalLayoutFrame" toplevel="true" frameStrata="DIALOG" enableMouse="true" virtual="true">
+		<KeyValues>
+			<KeyValue key="buttonTemplate" value="MainMenuFrameButtonTemplate" type="string"/>
+
+			<KeyValue key="topPadding" value="48" type="number"/>
+			<KeyValue key="bottomPadding" value="34" type="number"/>
+			<KeyValue key="leftPadding" value="28" type="number"/>
+			<KeyValue key="rightPadding" value="28" type="number"/>
+			<KeyValue key="spacing" value="0" type="number"/>
+
+			<!-- 
+			dialogHeaderFont: font for the header text
+			<KeyValue key="dialogHeaderFont" value="GameFontNormal" type="string"/>
+			-->
+		</KeyValues>
+		<Size x="260" y="1"/>
+		<Frames>
+			<Frame parentKey="Border" inherits="DialogBorderTemplate">
+				<KeyValues>
+					<KeyValue key="ignoreInLayout" value="true" type="boolean"/>
+				</KeyValues>
+			</Frame>
+			<Frame parentKey="Header" inherits="DialogHeaderTemplate">
+				<KeyValues>
+					<KeyValue key="ignoreInLayout" value="true" type="boolean"/>
+					<KeyValue key="textString" value="MAINMENU_BUTTON" type="global"/>
+				</KeyValues>
+				<Anchors>
+					<Anchor point="TOP" x="0" y="11"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
+	</Frame>
+
+	<Button name="SquareExpandButtonTemplate" mixin="SquareExpandButtonMixin" inherits="UIButtonTemplate" virtual="true">
+		<Size x="20" y="20"/>
+		<Scripts>
+			<OnClick method="OnClick"/>
+		</Scripts>
+		<HighlightTexture file="Interface\Buttons\UI-PlusButton-Hilight" alphaMode="ADD"/>
+	</Button>
+
+	<Button name="ExpandBarTemplate" mixin="ExpandBarMixin" virtual="true">
+		<Size x="280" y="44"/>
+		<Frames>
+			<Button parentKey="ExpandButton" inherits="SquareExpandButtonTemplate">
+				<Anchors>
+					<Anchor point="RIGHT" x="-13" y="0"/>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+			<OnEnter method="OnEnter"/>
+			<OnLeave method="OnLeave"/>
+			<OnClick method="OnClick"/>
+		</Scripts>
+	</Button>
 
 <!--
 *******************************************************************************

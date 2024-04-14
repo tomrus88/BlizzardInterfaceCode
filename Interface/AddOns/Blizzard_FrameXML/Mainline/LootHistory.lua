@@ -533,7 +533,7 @@ function LootHistoryFrameMixin:DoFullRefresh()
 
 		if itemData then
 			self.ScrollBox:FullUpdate(ScrollBoxConstants.UpdateImmediately);
-			self.ScrollBox:ScrollToElementData(itemData, ScrollBoxConstants.AlignCenter, ScrollBoxConstants.NoScrollInterpolation);
+			self.ScrollBox:ScrollToElementData(itemData, ScrollBoxConstants.AlignCenter);
 
 			local itemFrame = self.ScrollBox:FindFrame(itemData);
 			local currDropInfo = drops[self.ScrollBox:FindElementDataIndex(itemData)];

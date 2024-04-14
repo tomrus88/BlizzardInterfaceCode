@@ -179,13 +179,13 @@
 				</Layers>
 				<Frames>
 					<EditBox parentKey="AccountEditBox" parentArray="ManualLoginRegions" letters="320" inherits="AccountLoginEditBoxBehaviorTemplate AccountLoginBackdropTemplate">
-						<Size x="200" y="37"/>
+						<Size x="320" y="42"/>
 						<Anchors>
-							<Anchor point="BOTTOM" x="-2" y="345"/>
+							<Anchor point="CENTER" x="0" y="50"/>
 						</Anchors>
 						<Layers>
 							<Layer level="BACKGROUND">
-								<FontString parentKey="Label" inherits="GlueFontNormal" justifyH="CENTER" text="ACCOUNT_NAME">
+								<FontString parentKey="Label" inherits="GlueFontNormalLarge" justifyH="CENTER" text="ACCOUNT_NAME">
 									<Size x="600" y="64"/>
 									<Anchors>
 										<Anchor point="BOTTOM" relativePoint="TOP" x="0" y="-23"/>
@@ -228,13 +228,13 @@
 						</TextInsets>
 					</EditBox>
 					<EditBox parentKey="PasswordEditBox" parentArray="ManualLoginRegions" letters="128" password="1" inherits="AccountLoginEditBoxBehaviorTemplate AccountLoginBackdropTemplate">
-						<Size x="200" y="37"/>
+						<Size x="320" y="42"/>
 						<Anchors>
-							<Anchor point="BOTTOM" x="-2" y="275"/>
+							<Anchor point="TOP" relativeKey="$parent.AccountEditBox" relativePoint="BOTTOM" x="0" y="-30"/>
 						</Anchors>
 						<Layers>
 							<Layer level="BACKGROUND">
-								<FontString inherits="GlueFontNormal" justifyH="CENTER" text="PASSWORD">
+								<FontString inherits="GlueFontNormalLarge" justifyH="CENTER" text="PASSWORD">
 									<Size x="256" y="64"/>
 									<Anchors>
 										<Anchor point="BOTTOM" relativePoint="TOP" x="0" y="-23"/>
@@ -258,10 +258,9 @@
 							<AbsInset left="12" right="5" bottom="5"/>
 						</TextInsets>
 					</EditBox>
-					<Button parentKey="LoginButton" parentArray="ManualLoginRegions" inherits="GlueButtonTemplate" text="LOG_IN">
-						<Size x="200" y="30"/>
+					<Button parentKey="LoginButton" parentArray="ManualLoginRegions" inherits="GlueButtonBigTemplate" text="LOG_IN">
 						<Anchors>
-							<Anchor point="BOTTOM" x="0" y="185"/>
+							<Anchor point="TOP" relativeKey="$parent.PasswordEditBox" relativePoint="BOTTOM" x="0" y="-50"/>
 						</Anchors>
 						<Scripts>
 							<OnClick function="AccountLogin_Login"/>
@@ -274,58 +273,18 @@
 							</OnUpdate>
 						</Scripts>
 					</Button>
-					<CheckButton parentKey="SaveAccountNameCheckButton" parentArray="ManualLoginRegions">
-						<Size x="20" y="20"/>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString parentKey="Label" inherits="GlueFontNormalSmall" text="SAVE_ACCOUNT_NAME">
-									<Anchors>
-										<Anchor point="LEFT" x="20" y="0"/>
-									</Anchors>
-									<FontHeight>
-										<AbsValue val="10"/>
-									</FontHeight>
-									<Shadow>
-										<Offset>
-											<AbsDimension x="1" y="-1"/>
-										</Offset>
-										<Color r="0" g="0" b="0"/>
-									</Shadow>
-									<Color color="NORMAL_FONT_COLOR"/>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								local width = self.Label:GetWidth();
-								self:SetPoint("TOP", self:GetParent().LoginButton, "BOTTOM", -width / 2, -11);
-								if ( GetSavedAccountName() ~= "" ) then
-									self:SetChecked(true);
-								else
-									self:SetChecked(false);
-								end
-							</OnLoad>
-							<OnClick>
-								if ( self:GetChecked() ) then
-									SetSavedAccountName("");
-									ClearSavedAccountList();
-									AccountLogin_UpdateSavedData(AccountLogin);
-									PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
-								else
-									PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-								end
-							</OnClick>
-						</Scripts>
-						<NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
-						<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
-						<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
-						<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
-						<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
-					</CheckButton>
-					<Button parentKey="ReconnectLoginButton" parentArray="ReconnectLoginRegions" inherits="GlueButtonTemplate" text="RECONNECT_BUTTON">
-						<Size x="226" y="48"/>
+					<CheckButton parentKey="SaveAccountNameCheckButton" mixin="SaveAccountNameCheckButton" inherits="ResizeCheckButtonTemplate" parentArray="ManualLoginRegions">
+						<KeyValues>
+							<KeyValue key="labelText" value="SAVE_ACCOUNT_NAME" type="global"/>
+							<KeyValue key="labelFont" value="GlueFontNormalLarge" type="string"/>
+						</KeyValues>
 						<Anchors>
-							<Anchor point="BOTTOM" y="300"/>
+							<Anchor point="BOTTOM" relativeKey="$parent.LoginButton" relativePoint="TOP" x="0" y="2"/>
+						</Anchors>
+					</CheckButton>
+					<Button parentKey="ReconnectLoginButton" parentArray="ReconnectLoginRegions" inherits="GlueButtonBigTemplate" text="RECONNECT_BUTTON">
+						<Anchors>
+							<Anchor point="CENTER"/>
 						</Anchors>
 						<Scripts>
 							<OnClick function="AccountLogin_ReconnectLogin"/>
@@ -338,10 +297,10 @@
 							</OnUpdate>
 						</Scripts>
 					</Button>
-					<Button parentKey="ReconnectSwitchButton" parentArray="ReconnectLoginRegions" inherits="GlueButtonSmallTemplate" text="SWITCH_ACCOUNTS_BUTTON">
-						<Size x="180" y="30"/>
+					<Button parentKey="ReconnectSwitchButton" parentArray="ReconnectLoginRegions" inherits="GlueButtonTemplate" text="SWITCH_ACCOUNTS_BUTTON">
+						<Size x="200" y="30"/>
 						<Anchors>
-							<Anchor point="BOTTOM" y="180"/>
+							<Anchor point="CENTER" x="0" y="-100"/>
 						</Anchors>
 						<Scripts>
 							<OnClick function="AccountLogin_ClearReconnectLogin"/>
@@ -354,64 +313,28 @@
 							</OnUpdate>
 						</Scripts>
 					</Button>
-					<Button parentKey="ExitButton" inherits="GlueButtonSmallTemplate" text="QUIT">
+					<Button parentKey="ExitButton" inherits="GlueButtonTemplate" text="QUIT">
 						<Anchors>
-							<Anchor point="BOTTOMRIGHT" x="-12" y="34"/>
+							<Anchor point="BOTTOMRIGHT" x="-24" y="56"/>
 						</Anchors>
 						<Scripts>
 							<OnClick function="AccountLogin_Exit"/>
 						</Scripts>
 					</Button>
-					<Button parentKey="CreditsButton" parentArray="NormalLoginRegions" inherits="GlueButtonSmallTemplate" text="CREDITS">
+					<Button parentKey="CreateAccountButton" parentArray="NormalLoginRegions" inherits="GlueButtonTemplate" text="CREATE_ACCOUNT">
 						<Anchors>
-							<Anchor point="BOTTOM" relativeKey="$parent.ExitButton" relativePoint="TOP" x="0" y="87"/>
-						</Anchors>
-						<Scripts>
-							<OnClick function="GlueParent_ShowCreditsScreen"/>
-						</Scripts>
-					</Button>
-					<Button parentKey="CinematicsButton" parentArray="NormalLoginRegions" inherits="GlueButtonSmallTemplate" text="CINEMATICS">
-						<Anchors>
-							<Anchor point="BOTTOM" relativeKey="$parent.CreditsButton" relativePoint="TOP" x="0" y="10"/>
-						</Anchors>
-						<Scripts>
-							<OnClick function="GlueParent_ShowCinematicsScreen"/>
-						</Scripts>
-					</Button>
-					<Button parentKey="OptionsButton" parentArray="NormalLoginRegions" inherits="GlueButtonSmallTemplate" text="SYSTEMOPTIONS_MENU">
-						<Anchors>
-							<Anchor point="BOTTOM" relativeKey="$parent.CinematicsButton" relativePoint="TOP" x="0" y="10"/>
-						</Anchors>
-						<Scripts>
-							<OnClick function="GlueParent_ShowOptionsScreen"/>
-						</Scripts>
-					</Button>
-					<Button parentKey="CommunityButton" parentArray="NormalLoginRegions" inherits="GlueButtonSmallTemplate" text="COMMUNITY_SITE">
-						<Anchors>
-							<Anchor point="BOTTOMLEFT" x="17" y="89"/>
-						</Anchors>
-						<Scripts>
-							<OnClick function="AccountLogin_LaunchCommunitySite"/>
-						</Scripts>
-					</Button>
-					<Button parentKey="ManageAccountButton" parentArray="NormalLoginRegions" inherits="GlueButtonSmallTemplate" text="MANAGE_ACCOUNT">
-						<Anchors>
-							<Anchor point="BOTTOM" relativeKey="$parent.CommunityButton" relativePoint="TOP" y="10"/>
+							<Anchor point="BOTTOM" relativeKey="$parent.ExitButton" relativePoint="TOP" x="0" y="10"/>
 						</Anchors>
 						<Scripts>
 							<OnClick function="AccountLogin_ManageAccount"/>
 						</Scripts>
 					</Button>
-					<Button parentKey="CreateAccountButton" parentArray="NormalLoginRegions" inherits="GlueButtonSmallTemplate" text="CREATE_ACCOUNT">
+					<Button parentKey="MenuButton" parentArray="NormalLoginRegions" inherits="GlueButtonTemplate" text="MAINMENU">
 						<Anchors>
-							<Anchor point="BOTTOM" relativeKey="$parent.ManageAccountButton" relativePoint="TOP" y="10"/>
+							<Anchor point="BOTTOM" relativeKey="$parent.CreateAccountButton" relativePoint="TOP" x="0" y="10"/>
 						</Anchors>
-						<Scripts>
-							<OnClick function="AccountLogin_ManageAccount"/>
-						</Scripts>
 					</Button>
-					<Frame name="ServerAlertFrame" hidden="true" inherits="ServerAlertTemplate">
-						<Size x="352" y="400"/>
+					<Frame name="ServerAlertFrame" hidden="true" inherits="CollapsibleServerAlertTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="10" y="-130"/>
 						</Anchors>
@@ -679,9 +602,9 @@
 							<OnKeyDown function="TokenEntry_OnKeyDown"/>
 						</Scripts>
 					</Frame>
-					<Frame parentKey="AccountsDropDown" name="AccountLoginDropDown" inherits="UIDropDownMenuTemplate">
+					<Frame parentKey="AccountsDropDown" name="AccountLoginDropDown" inherits="LargeUIDropDownMenuTemplate">
 						<Anchors>
-							<Anchor point="TOP" relativeKey="$parent.AccountEditBox" relativePoint="BOTTOM" x="2" y="5"/>
+							<Anchor point="TOP" relativeKey="$parent.AccountEditBox" relativePoint="BOTTOM" x="2" y="-2"/>
 						</Anchors>
 						<Scripts>
 							<OnLoad function="AccountLoginDropDown_OnLoad"/>

@@ -659,6 +659,18 @@ local UIWidgetManager =
 			},
 		},
 		{
+			Name = "SpellDisplayTint",
+			Type = "Enumeration",
+			NumValues = 2,
+			MinValue = 0,
+			MaxValue = 1,
+			Fields =
+			{
+				{ Name = "None", Type = "SpellDisplayTint", EnumValue = 0 },
+				{ Name = "Red", Type = "SpellDisplayTint", EnumValue = 1 },
+			},
+		},
+		{
 			Name = "StatusBarColorTintValue",
 			Type = "Enumeration",
 			NumValues = 9,
@@ -1888,7 +1900,7 @@ local UIWidgetManager =
 				{ Name = "textFontType", Type = "UIWidgetFontType", Nilable = false },
 				{ Name = "textSizeType", Type = "UIWidgetTextSizeType", Nilable = false },
 				{ Name = "hAlignType", Type = "WidgetTextHorizontalAlignmentType", Nilable = false },
-				{ Name = "isLootObject", Type = "bool", Nilable = false },
+				{ Name = "tint", Type = "SpellDisplayTint", Nilable = false },
 			},
 		},
 		{

@@ -531,6 +531,11 @@ local SimpleFrameAPI =
 			{
 				{ Name = "delegate", Type = "SimpleFrame", Nilable = false },
 			},
+
+			Returns =
+			{
+				{ Name = "success", Type = "bool", Nilable = false },
+			},
 		},
 		{
 			Name = "IsClampedToScreen",

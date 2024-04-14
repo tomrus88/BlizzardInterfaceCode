@@ -23,7 +23,25 @@ local function GetStoryLinePinType(questLineInfo)
 end
 
 function StorylineQuestDataProviderMixin:ShouldShowQuestLine(questLineInfo)
-	return questLineInfo and (not C_QuestLog.IsOnQuest(questLineInfo.questID) and (not questLineInfo.isHidden or C_Minimap.IsTrackingHiddenQuests()));
+	if not questLineInfo then
+		return false;
+	end
+
+	if C_QuestLog.IsOnQuest(questLineInfo.questID) then
+		return false;
+	end
+
+	if questLineInfo.isHidden and not C_Minimap.IsTrackingHiddenQuests() then
+		return false;
+	end
+
+	if questLineInfo.isAccountCompleted and not GetCVarBool("showAccountCompletedQuests") then
+		if not C_QuestLine.QuestLineIgnoresAccountCompletedFiltering(self:GetMap():GetMapID(), questLineInfo.questLineID) and not C_QuestLog.QuestIgnoresAccountCompletedFiltering(questLineInfo.questID) then
+			return false;
+		end
+	end
+
+	return true;
 end
 
 function StorylineQuestDataProviderMixin:CheckAddPin(questLineInfo)

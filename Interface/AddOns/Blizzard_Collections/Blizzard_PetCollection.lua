@@ -238,9 +238,9 @@ end
 
 function PetJournalHealPetButton_OnLoad(self)
 	self.spellID = HEAL_PET_SPELL;
-	local spellName, _, spellIcon = GetSpellInfo(self.spellID);
-	self.texture:SetTexture(spellIcon);
-	self.spellname:SetText(spellName);
+	local spellInfo = C_Spell.GetSpellInfo(self.spellID);
+	self.texture:SetTexture(spellInfo.iconID);
+	self.spellname:SetText(spellInfo.name);
 end
 
 function PetJournalHealPetButton_OnShow(self)
@@ -262,7 +262,7 @@ function PetJournalHealPetButton_OnHide(self)
 end
 
 function PetJournalHealPetButton_OnDragStart(self)
-	PickupSpell(self.spellID);
+	C_Spell.PickupSpell(self.spellID);
 end
 
 function PetJournalHealPetButton_UpdateUsability(self)
@@ -303,8 +303,12 @@ end
 
 function PetJournalHealPetButton_UpdateCooldown(self)
 	local cooldown = self.cooldown;
-	local start, duration, enable = GetSpellCooldown(self.spellID);
-	CooldownFrame_Set(cooldown, start, duration, enable);
+	local cooldownInfo = C_Spell.GetSpellCooldown(self.spellID);
+	if ( cooldownInfo ) then
+		CooldownFrame_Set(cooldown, cooldownInfo.startTime, cooldownInfo.duration, cooldownInfo.isEnabled);
+	else
+		CooldownFrame_Clear(cooldown);
+	end
 end
 
 function PetJournalHealPetButton_OnEnter(self)
@@ -328,7 +332,7 @@ end
 function PetJournalSummonRandomFavoritePetButton_OnLoad(self)
 	self.spellID = SUMMON_RANDOM_FAVORITE_PET_SPELL;
 	self.petID = C_PetJournal.GetSummonRandomFavoritePetGUID();
-	local spellName, _, spellIcon = GetSpellInfo(self.spellID);
+	local spellIcon = C_Spell.GetSpellTexture(self.spellID);
 	self.texture:SetTexture(spellIcon);
 	self.spellname:SetText(PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET);
 end
@@ -587,7 +591,7 @@ function PetJournal_UpdatePetLoadOut(forceSceneChange)
 				loadoutPlate.requirement.str:SetText(GetAchievementLink(UNLOCK_REQUIREMENTS[i].id));
 				loadoutPlate.requirement.achievementID = UNLOCK_REQUIREMENTS[i].id;
 			elseif (UNLOCK_REQUIREMENTS[i].requirement == "SPELL" and UNLOCK_REQUIREMENTS[i].id) then
-				local spellLink = GetSpellLink(UNLOCK_REQUIREMENTS[i].id);
+				local spellLink = C_Spell.GetSpellLink(UNLOCK_REQUIREMENTS[i].id);
 				loadoutPlate.requirement.str:SetText(spellLink);
 				loadoutPlate.requirement.spellID = UNLOCK_REQUIREMENTS[i].id;
 			end

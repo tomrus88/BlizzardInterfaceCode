@@ -58,6 +58,7 @@ local TradeSkillUI =
 				{ Name = "recipeSpellID", Type = "number", Nilable = false },
 				{ Name = "numCasts", Type = "number", Nilable = false, Default = 1 },
 				{ Name = "itemTarget", Type = "ItemLocation", Mixin = "ItemLocationMixin", Nilable = false },
+				{ Name = "craftingReagents", Type = "table", InnerType = "CraftingReagentInfo", Nilable = true },
 			},
 		},
 		{

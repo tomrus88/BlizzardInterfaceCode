@@ -856,7 +856,7 @@ function MountListDragButton_OnClick(self, button)
 	elseif ( IsModifiedClick("CHATLINK") ) then
 		local id = parent.spellID;
 		if ( MacroFrame and MacroFrame:IsShown() ) then
-			local spellName = GetSpellInfo(id);
+			local spellName = C_Spell.GetSpellName(id);
 			ChatEdit_InsertLink(spellName);
 		else
 			local mountLink = C_MountJournal.GetMountLink(id);
@@ -876,7 +876,7 @@ function MountListItem_OnClick(self, button)
 	elseif ( IsModifiedClick("CHATLINK") ) then
 		local id = self.spellID;
 		if ( MacroFrame and MacroFrame:IsShown() ) then
-			local spellName = GetSpellInfo(id);
+			local spellName = C_Spell.GetSpellName(id);
 			ChatEdit_InsertLink(spellName);
 		else
 			local mountLink = C_MountJournal.GetMountLink(id);
@@ -1007,27 +1007,60 @@ function MountJournal_AddInMountTypes(filterSystem, level)
 	end
 end
 
-function MountJournalSummonRandomFavoriteButton_OnLoad(self)
+--------------------------------------------------
+-- Random Favorite Mount Button Mixin
+MountJournalSummonRandomFavoriteButtonMixin = {};
+
+function MountJournalSummonRandomFavoriteButtonMixin:OnLoad()
 	self.spellID = SUMMON_RANDOM_FAVORITE_MOUNT_SPELL;
-	local spellName, _, spellIcon = GetSpellInfo(self.spellID);
+	local spellIcon = C_Spell.GetSpellTexture(self.spellID);
 	self.texture:SetTexture(spellIcon);
 	-- Use the global string instead of the spellName from the db here so that we can have custom newlines in the string
 	self.spellname:SetText(MOUNT_JOURNAL_SUMMON_RANDOM_FAVORITE_MOUNT);
 	self:RegisterForDrag("LeftButton");
 end
 
-function MountJournalSummonRandomFavoriteButton_OnClick(self)
+function MountJournalSummonRandomFavoriteButtonMixin:OnClick()
 	C_MountJournal.SummonByID(0);
 end
 
-function MountJournalSummonRandomFavoriteButton_OnDragStart(self)
+function MountJournalSummonRandomFavoriteButtonMixin:OnDragStart()
 	C_MountJournal.Pickup(0);
 end
 
-function MountJournalSummonRandomFavoriteButton_OnEnter(self)
+function MountJournalSummonRandomFavoriteButtonMixin:OnEnter()
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 	GameTooltip:SetMountBySpellID(self.spellID);
 end
+
+--------------------------------------------------
+-- Flight Mode Button Mixin
+MountJournalDynamicFlightModeButtonMixin = {};
+
+function MountJournalDynamicFlightModeButtonMixin:OnLoad()
+	self.spellID = C_MountJournal.GetDynamicFlightModeSpellID();
+	local spellIcon = C_Spell.GetSpellTexture(self.spellID);
+	self.texture:SetTexture(spellIcon);
+	self.spellname:SetText(C_Spell.GetSpellName(self.spellID));
+	self:RegisterForDrag("LeftButton");
+end
+
+function MountJournalDynamicFlightModeButtonMixin:OnClick()
+	C_MountJournal.SwapDynamicFlightMode();
+end
+
+function MountJournalDynamicFlightModeButtonMixin:OnDragStart()
+	C_MountJournal.PickupDynamicFlightMode();
+end
+
+function MountJournalDynamicFlightModeButtonMixin:OnEnter()
+	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+	GameTooltip:SetSpellByID(self.spellID);
+	GameTooltip_AddBlankLineToTooltip(GameTooltip);
+	GameTooltip_AddColoredLine(GameTooltip, FLIGHT_MODE_TOGGLE_TOOLTIP_SUBTEXT, GREEN_FONT_COLOR);
+	GameTooltip:Show();
+end
+--------------------------------------------------------
 
 function MountOptionsMenu_Init(self, level)
 	if not MountJournal.menuMountIndex then

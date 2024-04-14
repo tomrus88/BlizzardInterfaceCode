@@ -49,6 +49,16 @@ function RegionUtil.IsDescendantOfOrSame(potentialDescendant, potentialAncestorO
 	return RegionUtil.IsDescendantOf(potentialDescendant, potentialAncestorOrSame);
 end
 
+function RegionUtil.IsAnyDescendantOfOrSame(potentialDescendants, potentialAncestorOrSame)
+	for _, potentialDescendant in ipairs(potentialDescendants) do
+		if RegionUtil.IsDescendantOfOrSame(potentialDescendant, potentialAncestorOrSame) then
+			return true;
+		end
+	end
+
+	return false;
+end
+
 function RegionUtil.CalculateDistanceSqBetween(region1, region2)
 	local x1, y1 = region1:GetCenter();
 	local x2, y2 = region2:GetCenter();

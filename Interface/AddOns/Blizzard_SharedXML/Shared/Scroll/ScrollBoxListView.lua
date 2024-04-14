@@ -116,6 +116,10 @@ function ScrollBoxListViewMixin:AssignAccessors(frame, elementData)
 		return elementData;
 	end;
 	
+	frame.GetElementDataIndex = function(self)
+		return view:FindElementDataIndex(elementData);
+	end;
+
 	frame.ElementDataMatches = function(self, elementData)
 		return self:GetElementData() == elementData;
 	end;
@@ -128,10 +132,12 @@ function ScrollBoxListViewMixin:AssignAccessors(frame, elementData)
 	frame.SetOrderIndex = function(self, orderIndex)
 		index = orderIndex;
 	end;
+
 end
 
 function ScrollBoxListViewMixin:UnassignAccessors(frame)
 	frame.GetElementData = nil;
+	frame.GetElementDataIndex = nil;
 	frame.GetData = nil;
 	frame.ElementDataMatches = nil;
 	frame.GetOrderIndex = nil;
@@ -425,18 +431,18 @@ function ScrollBoxListViewMixin:AcquireRange(dataIndices)
 end
 
 function ScrollBoxListViewMixin:Release(frame)
-	local oldElementData = frame:GetElementData();
+	local elementData = frame:GetElementData();
 
+	if self.frameResetter then
+		self.frameResetter(frame, elementData);
+	end
+
+	self:TriggerEvent(ScrollBoxListViewMixin.Event.OnReleasedFrame, frame, elementData);
+	
 	tDeleteItem(self:GetFrames(), frame);
 	self.poolCollection:Release(frame);
 
-	if self.frameResetter then
-		self.frameResetter(frame, oldElementData);
-	end
-
 	self:UnassignAccessors(frame);
-
-	self:TriggerEvent(ScrollBoxListViewMixin.Event.OnReleasedFrame, frame, oldElementData);
 end
 
 function ScrollBoxListViewMixin:GetFrameCount()

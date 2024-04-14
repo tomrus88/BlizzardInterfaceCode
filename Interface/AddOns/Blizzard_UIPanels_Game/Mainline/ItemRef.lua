@@ -147,16 +147,16 @@ function SetItemRef(link, text, button, chatFrame)
 		ToggleLFDParentFrame();
 		return;
 	elseif ( strsub(link, 1, 8) == "specpane" ) then
-		ToggleTalentFrame(SPECIALIZATION_TAB);
+		PlayerSpellsUtil.OpenToClassSpecializationsTab();
 		return;
 	elseif ( strsub(link, 1, 10) == "talentpane" ) then
-		ToggleTalentFrame(TALENTS_TAB);
+		PlayerSpellsUtil.OpenToClassTalentsTab();
 		return;
 	elseif ( strsub(link, 1, 14) == "mountequipment" ) then
 		ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS);
 		return;
 	elseif ( strsub(link, 1, 11) == "honortalent" ) then
-		ToggleTalentFrame(PVP_TALENTS_TAB);
+		PlayerSpellsUtil.OpenToClassTalentsTab();
 		return;
 	elseif ( strsub(link, 1, 10) == "worldquest" ) then
 		OpenWorldMap();
@@ -253,6 +253,9 @@ function SetItemRef(link, text, button, chatFrame)
 		if ( IsModifiedClick("CHATLINK") ) then
 			local itemLink = select(6, C_TransmogCollection.GetAppearanceSourceInfo(sourceID));
 			HandleModifiedItemClick(itemLink);
+		elseif ( IsModifiedClick("DRESSUP") ) then
+			local itemLink = select(6, C_TransmogCollection.GetAppearanceSourceInfo(sourceID));
+			DressUpItemLink(itemLink);
 		else
 			TransmogUtil.OpenCollectionToItem(sourceID);
 		end
@@ -434,11 +437,11 @@ function SetItemRef(link, text, button, chatFrame)
 			local specID, level, inspectString = string.split(":", linkData);
 			level = tonumber(level);
 
-			ClassTalentFrame_LoadUI();
+			PlayerSpellsFrame_LoadUI();
 
-			ClassTalentFrame:SetInspectString(inspectString, level);
-			if not ClassTalentFrame:IsShown() then
-				ShowUIPanel(ClassTalentFrame);
+			PlayerSpellsFrame:SetInspectString(inspectString, level);
+			if not PlayerSpellsFrame:IsShown() then
+				ShowUIPanel(PlayerSpellsFrame);
 			end
 		end
 		return;

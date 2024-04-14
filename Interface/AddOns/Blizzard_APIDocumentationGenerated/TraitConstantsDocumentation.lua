@@ -234,14 +234,15 @@ local TraitConstants =
 		{
 			Name = "TraitNodeType",
 			Type = "Enumeration",
-			NumValues = 3,
+			NumValues = 4,
 			MinValue = 0,
-			MaxValue = 2,
+			MaxValue = 3,
 			Fields =
 			{
 				{ Name = "Single", Type = "TraitNodeType", EnumValue = 0 },
 				{ Name = "Tiered", Type = "TraitNodeType", EnumValue = 1 },
 				{ Name = "Selection", Type = "TraitNodeType", EnumValue = 2 },
+				{ Name = "SubTreeSelection", Type = "TraitNodeType", EnumValue = 3 },
 			},
 		},
 		{

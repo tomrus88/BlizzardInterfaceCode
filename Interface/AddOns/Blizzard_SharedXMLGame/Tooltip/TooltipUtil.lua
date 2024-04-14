@@ -72,8 +72,8 @@ if tbl then
 	Import("GetCVarBool");
 	Import("C_CVar");
 	Import("C_Item");
+	Import("C_Spell");
 	Import("GetItemInfo");
-	Import("GetSpellInfo");
 	Import("UnitTokenFromGUID");
 	Import("UnitName");
 
@@ -115,7 +115,7 @@ function TooltipUtil.GetDisplayedSpell(tooltip)
 	if tooltip:IsTooltipType(Enum.TooltipDataType.Spell) then
 		local tooltipData = tooltip:GetPrimaryTooltipData();
 		local id = tooltipData.id;
-		local name = GetSpellInfo(id);
+		local name = C_Spell.GetSpellName(id);
 		return name, id;
 	end
 end

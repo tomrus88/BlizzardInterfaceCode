@@ -97,8 +97,7 @@ function ItemUpgradeMixin:OnEvent(event, ...)
 		local buttonName = ...;
 		local isRightButton = buttonName == "RightButton";
 
-		local mouseFocus = GetMouseFocus();
-		local flyoutSelected = not isRightButton and DoesAncestryInclude(EquipmentFlyout_GetFrame(), mouseFocus);
+		local flyoutSelected = not isRightButton and DoesAncestryIncludeAny(EquipmentFlyout_GetFrame(), GetMouseFoci());
 		if not flyoutSelected then
 			EquipmentFlyout_Hide();
 		end

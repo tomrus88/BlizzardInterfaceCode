@@ -1449,10 +1449,9 @@ end
 
 function PaperDollFrame_OnShow(self)
 	CharacterStatsPane.initialOffsetY = 0;
-	CharacterFrame:SetTitle(UnitPVPName("player"));
 	PaperDollFrame_SetLevel();
 	PaperDollFrame_UpdateStats();
-	CharacterFrame_Expand();
+	CharacterFrame:Expand();
 
 	SetPaperDollBackground(CharacterModelScene, "player");
 	PaperDollBgDesaturate(true);
@@ -1467,7 +1466,7 @@ end
 
 function PaperDollFrame_OnHide(self)
 	CharacterStatsPane.initialOffsetY = 0;
-	CharacterFrame_Collapse();
+	CharacterFrame:Collapse();
 	PaperDollSidebarTabs:Hide();
 	PaperDollFrame_HideInventoryFixupComplete(self);
 	self:UnregisterEvent("UNIT_MODEL_CHANGED");

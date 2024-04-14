@@ -4,14 +4,14 @@
 ## AllowLoadGameType: mainline
 ## LoadOnDemand: 1
 
-..\Blizzard_SharedXML\Mixin.lua
-..\Blizzard_SharedXML\MathUtil.lua
-..\Blizzard_SharedXML\EnumUtil.lua
-..\Blizzard_SharedXML\TableUtil.lua
-..\Blizzard_SharedXML\Flags.lua
-..\Blizzard_SharedXML\CallbackRegistry.lua
+..\Blizzard_SharedXMLBase\Mixin.lua
+..\Blizzard_SharedXMLBase\MathUtil.lua
+..\Blizzard_SharedXMLBase\EnumUtil.lua
+..\Blizzard_SharedXMLBase\TableUtil.lua
+..\Blizzard_SharedXMLBase\Flags.lua
+..\Blizzard_SharedXMLBase\CallbackRegistry.lua
 ..\Blizzard_SharedXML\Interpolator.lua
-..\Blizzard_SharedXML\ButtonStateBehavior.lua
+..\Blizzard_SharedXMLBase\ButtonStateBehavior.lua
 ..\Blizzard_SharedXML\Shared\Frame\EventButton.lua
 ..\Blizzard_SharedXML\Shared\Frame\EventFrame.lua
 ..\Blizzard_SharedXML\Shared\Frame\EventScrollFrame.lua

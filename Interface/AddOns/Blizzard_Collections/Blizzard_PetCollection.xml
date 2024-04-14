@@ -144,11 +144,12 @@
 		<Size x="29" y="29"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture name="$parentBackground" inherits="Spellbook-EmptySlot">
+				<Texture name="$parentBackground" file="Interface\Spellbook\Spellbook-Parts">
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
 					<Size x="33" y="33"/>
+					<TexCoords left="0.79296875" right="0.96093750" top="0.00390625" bottom="0.17187500"/>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">

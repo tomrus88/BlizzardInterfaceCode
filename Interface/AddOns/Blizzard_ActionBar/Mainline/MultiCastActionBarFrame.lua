@@ -703,7 +703,7 @@ function MultiCastFlyoutFrame_LoadPageSpells(self)
 			button.page = i;
 			spellId = TOTEM_MULTI_CAST_SUMMON_SPELLS[i];
 			button.spellId = spellId;
-			name, _, icon = GetSpellInfo(spellId);
+			icon = C_Spell.GetSpellTexture(spellId);
 			button.icon:SetTexture(icon);
 			button.icon:SetTexCoord(0.0, 1.0, 0.0, 1.0);
 
@@ -773,7 +773,7 @@ function MultiCastFlyoutFrame_LoadSlotSpells(self, slot, ...)
 			tcoordLeft, tcoordRight, tcoordTop, tcoordBottom = tcoords.left, tcoords.right, tcoords.top, tcoords.bottom;
 		else
 			spellId = select(i - 1, ...);
-			name, _, icon = GetSpellInfo(spellId);
+			icon = C_Spell.GetSpellTexture(spellId);
 			tcoordLeft, tcoordRight, tcoordTop, tcoordBottom = 0.0, 1.0, 0.0, 1.0;
 		end
 		button.spellId = spellId;
@@ -886,8 +886,12 @@ end
 
 function MultiCastSpellButton_UpdateCooldown(self)
 	local cooldown = _G[self:GetName().."Cooldown"];
-	local start, duration, enable = GetSpellCooldown(self.spellId);
-	CooldownFrame_Set(cooldown, start, duration, enable);
+	local cooldownInfo = C_Spell.GetSpellCooldown(self.spellId);
+	if ( cooldownInfo ) then
+		CooldownFrame_Set(cooldown, cooldownInfo.startTime, cooldownInfo.duration, cooldownInfo.isEnabled);
+	else
+		CooldownFrame_Clear(cooldown);
+	end
 end
 
 function MultiCastSpellButton_UpdateState(self)
@@ -952,7 +956,7 @@ function MultiCastSummonSpellButton_Update(self)
 	local spellId = knownMultiCastSummonSpells[self:GetID()];
 	self.spellId = spellId;
 	if ( HasMultiCastActionBar() and spellId ) then
-		local name, _, icon, cost, isFunnel, powerType, castTime, minRage, maxRange = GetSpellInfo(spellId);
+		local icon = C_Spell.GetSpellTexture(spellId);
 		local buttonName = self:GetName();
 		_G[buttonName.."Icon"]:SetTexture(icon);
 
@@ -1031,7 +1035,7 @@ function MultiCastRecallSpellButton_Update(self)
 	local spellId = knownMultiCastRecallSpells[self:GetID()];
 	self.spellId = spellId;
 	if ( HasMultiCastActionBar() and spellId ) then
-		local name, _, icon, cost, isFunnel, powerType, castTime, minRage, maxRange = GetSpellInfo(spellId);
+		local icon = C_Spell.GetSpellTexture(spellId);
 		local buttonName = self:GetName();
 		_G[buttonName.."Icon"]:SetTexture(icon);
 

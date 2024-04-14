@@ -850,7 +850,7 @@ function TruncatedTooltipFontStringWrapperMixin:OnEnter()
 	if self.Text:IsTruncated() then
 		local tooltip = GetAppropriateTooltip();
 		tooltip:SetOwner(self, "ANCHOR_RIGHT");
-		tooltip:SetText(self.Text:GetText());
+		tooltip:SetText(self.Text:GetText(), self.Text:GetTextColor());
 		tooltip:Show();
 	end
 end
@@ -860,36 +860,6 @@ function TruncatedTooltipFontStringWrapperMixin:OnLeave()
 	if tooltip:GetOwner() == self then
 		tooltip:Hide();
 	end
-end
-
-local alternateTopLevelParent;
-function SetAlternateTopLevelParent(parent)
-	alternateTopLevelParent = parent;
-	EventRegistry:TriggerEvent("UI.AlternateTopLevelParentChanged", parent);
-end
-
-function ClearAlternateTopLevelParent()
-	alternateTopLevelParent = nil;
-	EventRegistry:TriggerEvent("UI.AlternateTopLevelParentChanged");
-end
-
-function GetAppropriateTopLevelParent()
-	if alternateTopLevelParent and alternateTopLevelParent:IsShown() then
-		return alternateTopLevelParent;
-	end
-
-	return UIParent or GlueParent;
-end
-
-function SetAppropriateTopLevelParent(frame)
-	local parent = GetAppropriateTopLevelParent();
-	if parent then
-		frame:SetParent(parent);
-	end
-end
-
-function GetAppropriateTooltip()
-	return UIParent and GameTooltip or GlueTooltip;
 end
 
 ColumnDisplayMixin = {};
@@ -1024,7 +994,13 @@ end
 UIResettableDropdownButtonMixin = {};
 
 function UIResettableDropdownButtonMixin:OnLoad()
+	self.ResetButton = CreateFrame("Button", nil, self, "UIResetFiltersButtonTemplate");
+	self.ResetButton:SetPoint("CENTER", self, "TOPRIGHT", -3, 0);
 	self.ResetButton:SetScript("OnClick", function(button, buttonName, down)
+		if not self:IsEnabled() then
+			return;
+		end
+
 		if self.resetFunction then
 			 self.resetFunction();
 		end
@@ -1033,9 +1009,17 @@ function UIResettableDropdownButtonMixin:OnLoad()
 	end);
 end
 
-function UIResettableDropdownButtonMixin:OnMouseDown()
+function UIResettableDropdownButtonMixin:OnMouseDown(button)
+	if self:IsEnabled() then
+		self:OnMouseDownInternal(button);
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+	end
+end
+
+function UIResettableDropdownButtonMixin:OnMouseDownInternal(button)
+	-- Override as needed:
+	-- Not all UIResettableDropdownButtonMixin inherit from something that uses UIMenuButtonStretchMixin.
 	UIMenuButtonStretchMixin.OnMouseDown(self, button);
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 end
 
 function UIResettableDropdownButtonMixin:SetResetFunction(resetFunction)
@@ -1052,6 +1036,15 @@ end
 
 function DialogHeaderMixin:Setup(text)
 	self.Text:SetText(text);
+	self:UpdateWidth();
+end
+
+function DialogHeaderMixin:SetHeaderFont(font)
+	self.Text:SetFontObject(font);
+	self:UpdateWidth();
+end
+
+function DialogHeaderMixin:UpdateWidth()
 	self:SetWidth(self.Text:GetWidth() + self.headerTextPadding);
 end
 
@@ -1122,6 +1115,10 @@ end
 function UIButtonMixin:SetOnClickHandler(onClickHandler, onClickSoundKit)
 	self.onClickHandler = onClickHandler;
 	self.onClickSoundKit = onClickSoundKit;
+end
+
+function UIButtonMixin:GetOnClickSoundKit()
+	return self.onClickSoundKit;
 end
 
 function UIButtonMixin:SetOnEnterHandler(onEnterHandler)
@@ -1420,6 +1417,10 @@ function ResizeCheckButtonMixin:OnLoad()
 
 	if self.Label ~= nil then
 		self.Label:SetText(self.labelText);
+
+		if self.labelFont then
+			self.Label:SetFontObject(self.labelFont);
+		end
 	end
 end
 
@@ -1449,6 +1450,18 @@ function ResizeCheckButtonMixin:SetLabelText(labelText)
 	if self.Label ~= nil then
 		self.Label:SetText(labelText);
 		self:MarkDirty();
+	end
+end
+
+function ResizeCheckButtonMixin:SetTooltipText(tooltipText)
+	self.tooltipText = tooltipText;
+end
+
+function ResizeCheckButtonMixin:SetTooltipDisabled(disabled)
+	self.tooltipDisabled = disabled;
+
+	if self.tooltipDisabled and GameTooltip:GetOwner() == self then
+		GameTooltip:Hide();
 	end
 end
 
@@ -1494,6 +1507,20 @@ function ResizeCheckButtonMixin:IsControlEnabled()
 	return self.Button:IsEnabled();
 end
 
+function ResizeCheckButtonMixin:OnEnter()
+	if(self.tooltipText ~= nil and not self.tooltipDisabled) then
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+		GameTooltip_SetTitle(GameTooltip, self.tooltipText);
+		GameTooltip:Show();
+	end
+end
+
+function ResizeCheckButtonMixin:OnLeave()
+	if(self.tooltipText ~= nil and not self.tooltipDisabled) then
+		GameTooltip:Hide();
+	end
+end
+
 SubFrameMouseoverButtonMixin = {};
 
 function SubFrameMouseoverButtonMixin:OnEnter()
@@ -1503,7 +1530,7 @@ end
 
 function SubFrameMouseoverButtonMixin:OnLeave()
 	local function DropDownMouseoverButton_OnUpdate(onUpdateSelf, dt)
-		if not onUpdateSelf:IsMouseOver() and not DoesAncestryInclude(self.subFrame, GetMouseFocus()) then
+		if not onUpdateSelf:IsMouseOver() and not DoesAncestryIncludeAny(self.subFrame, GetMouseFoci()) then
 			onUpdateSelf.timeSinceMouseOver = (onUpdateSelf.timeSinceMouseOver or 0) + dt;
 			if onUpdateSelf.timeSinceMouseOver > self.hideDelay then
 				onUpdateSelf.timeSinceMouseOver = nil;
@@ -1735,7 +1762,7 @@ function SelectionPopoutButtonMixin:HidePopout()
 	self.Popout:Hide();
 	self:TriggerEvent(SelectionPopoutButtonMixin.Event.OnPopoutHide);
 
-	if GetMouseFocus() == self then
+	if self:IsMouseMotionFocus() then
 		self.NormalTexture:SetAtlas("charactercreate-customize-dropdownbox-hover");
 	else
 		self.NormalTexture:SetAtlas("charactercreate-customize-dropdownbox");
@@ -1803,7 +1830,7 @@ function SelectionPopoutButtonMixin:GetMaxPopoutStride()
 	local maxPopoutHeight = self.parent.GetMaxPopoutHeight and self.parent:GetMaxPopoutHeight() or nil;
 	if maxPopoutHeight then
 		local selectionHeight = 20;
-
+		
 		-- Calculate the max stride, and clamp it to be at least one (to avoid div by zero errors).
 		return math.max(MIN_STRIDE, math.floor(maxPopoutHeight / selectionHeight));
 	end
@@ -2200,6 +2227,24 @@ function DefaultScaleFrameMixin:UpdateScale()
 	ApplyDefaultScale(self, self.minScale, self.maxScale);
 end
 
+TopLevelParentScaleFrameMixin = {};
+
+function TopLevelParentScaleFrameMixin:OnScaleFrameLoad()
+	self:RegisterEvent("UI_SCALE_CHANGED");
+	self:RegisterEvent("DISPLAY_SIZE_CHANGED");
+	self:UpdateScale();
+end
+
+function TopLevelParentScaleFrameMixin:OnScaleFrameEvent(event, ...)
+	if (event == "DISPLAY_SIZE_CHANGED") or (event == "UI_SCALE_CHANGED") then
+		self:UpdateScale();
+	end
+end
+
+function TopLevelParentScaleFrameMixin:UpdateScale()
+	self:SetScale(GetAppropriateTopLevelParent():GetScale());
+end
+
 -- Click to drag directly attached to frame itself.
 ClickToDragMixin = {};
 
@@ -2382,11 +2427,7 @@ end
 DropDownControlMixin = {};
 
 function DropDownControlMixin:OnLoad()
-	local function InitializeDropDownFrame(frame, level)
-		self:Initialize(level);
-	end
-
-	UIDropDownMenu_Initialize(self.DropDownMenu, InitializeDropDownFrame);
+	self:Initialize();
 
 	self:UpdateDropDownWidth(self:GetWidth());
 	self:UpdateSavedDefaultTextColor();
@@ -2420,7 +2461,17 @@ function DropDownControlMixin:UpdateDropDownWidth(width)
 	UIDropDownMenu_SetWidth(self.DropDownMenu, width - 20);
 end
 
-function DropDownControlMixin:Initialize(level)
+function DropDownControlMixin:Initialize()
+	local function InitializeDropDownFrame(frame, level)
+		self:PopulateDropDownEntries(level);
+	end
+
+	UIDropDownMenu_Initialize(self.DropDownMenu, InitializeDropDownFrame);
+end
+
+-- Never just call this function on its own!!
+-- ALWAYS go through Initialize so that UIDropDownMenu_Initialize is called, or we'll end up with thousands of garbage dropdown buttons being created and never cleared
+function DropDownControlMixin:PopulateDropDownEntries(level)
 	if self.options == nil then
 		return;
 	end
@@ -2504,10 +2555,18 @@ function DropDownControlMixin:UpdateSelectedText()
 	if selectedValue == nil then
 		UIDropDownMenu_SetText(self.DropDownMenu, self.noneSelectedText);
 	elseif self.options ~= nil then
+		local foundSelectedValue = false;
 		for i, option in ipairs(self.options) do
 			if option.value == selectedValue then
 				UIDropDownMenu_SetText(self.DropDownMenu, option.selectedText or option.text);
+				foundSelectedValue = true;
+				break;
 			end
+		end
+
+		-- Selected value might be some default value that isn't nil, so clear out so at least text isn't stuck at some weird old value
+		if not foundSelectedValue then
+			UIDropDownMenu_SetText(self.DropDownMenu, self.noneSelectedText);
 		end
 	end
 
@@ -2540,7 +2599,11 @@ end
 
 function DropDownControlMixin:SetOptions(options, defaultSelectedValue)
 	self.options = options;
-	self:Initialize();
+
+	-- If this dropdown menu is already open, make sure we re-populate its entries
+	if UIDropDownMenu_GetCurrentDropDown() == self.DropDownMenu then
+		self:Initialize();
+	end
 
 	if defaultSelectedValue then
 		self:SetSelectedValue(defaultSelectedValue);
@@ -2827,7 +2890,7 @@ end
 function IconSelectorPopupFrameTemplateMixin:OnEvent(event, ...)
 	if ( event == "CURSOR_CHANGED" ) then
 		self:UpdateStateFromCursorType();
-	elseif ( event == "GLOBAL_MOUSE_UP" and DoesAncestryInclude(self, GetMouseFocus())) then
+	elseif ( event == "GLOBAL_MOUSE_UP" and DoesAncestryIncludeAny(self, GetMouseFoci())) then
 		self:SetIconFromMouse();
 	end
 end
@@ -2858,7 +2921,7 @@ function IconSelectorPopupFrameTemplateMixin:SetIconFromMouse()
 			elseif ( cursorType == "spell" ) then
 				-- 'ID' field for spells would actually be the slot number, not the actual spellID, so we get this separately.
 				local spellID = select(4, GetCursorInfo());
-				icon = select(3, GetSpellInfo(spellID));
+				icon = C_Spell.GetSpellTexture(spellID);
 			elseif ( cursorType == "mount" ) then
 				icon = select(3, C_MountJournal.GetMountInfoByID(ID));
 			elseif ( cursorType == "battlepet" ) then
@@ -3070,7 +3133,7 @@ function SearchBoxListMixin:OnLoad()
 	end);
 
 	self.HasStickyFocus = function()
-		return DoesAncestryInclude(self, GetMouseFocus());
+		return DoesAncestryIncludeAny(self, GetMouseFoci());
 	end
 	self.selectedIndex = 1;
 end
@@ -3455,7 +3518,7 @@ end
 function RingedMaskedButtonMixin:OnMouseUp(button)
 	if button == "RightButton" and self.expandedTooltipFrame then
 		self.tooltipsExpanded = not self.tooltipsExpanded;
-		if GetMouseFocus() == self then
+		if self:IsMouseMotionFocus() then
 			self:OnEnter();
 		end
 	end
@@ -3477,6 +3540,161 @@ function RingedMaskedButtonMixin:UpdateHighlightTexture()
 		self.HighlightTexture:SetPoint("TOPLEFT", self.Ring);
 		self.HighlightTexture:SetPoint("BOTTOMRIGHT", self.Ring);
 	end
+end
+
+MainMenuFrameMixin = {};
+
+function MainMenuFrameMixin:OnLoad()
+	if self.dialogHeaderFont then
+		self.Header:SetHeaderFont(self.dialogHeaderFont);
+	end
+
+	self.buttonPool = CreateFramePool("BUTTON", self, self.buttonTemplate, FramePool_HideAndClearAnchorsAndLayoutIndex);
+	self:Reset();
+end
+
+function MainMenuFrameMixin:Reset()
+	self.buttonPool:ReleaseAll();
+	self.sectionSpacing = nil;
+	self.nextLayoutIndex = 1;
+end
+
+function MainMenuFrameMixin:AddButton(text, callback, isDisabled, disabledText)
+	local newButton = self.buttonPool:Acquire();
+
+	newButton.layoutIndex = self.nextLayoutIndex;
+	self.nextLayoutIndex = self.nextLayoutIndex + 1;
+	newButton.topPadding = self.sectionSpacing;
+	self.sectionSpacing = nil;
+
+	newButton:SetText(text);
+	newButton:SetScript("OnClick", callback);
+
+	newButton:SetMotionScriptsWhileDisabled(true);
+	newButton:SetEnabled(not isDisabled);
+	if isDisabled and disabledText then
+		newButton:SetScript("OnEnter", function()
+			local tooltip = GetAppropriateTooltip();
+			tooltip:SetOwner(newButton, "ANCHOR_RIGHT");
+			tooltip:SetText(text);
+			GameTooltip_AddErrorLine(tooltip, disabledText);
+			tooltip:Show();
+		end);
+
+		newButton:SetScript("OnLeave", function()
+			GetAppropriateTooltip():Hide();
+		end);
+	else
+		newButton:SetScript("OnEnter", nil);
+		newButton:SetScript("OnLeave", nil);
+	end
+
+	newButton:Show();
+
+	self:MarkDirty();
+
+	return newButton;
+end
+
+function MainMenuFrameMixin:AddSection(customSpacing)
+	self.sectionSpacing = customSpacing or 20;
+end
+
+function MainMenuFrameMixin:AddCloseButton(customText, customSpacing)
+	self:AddSection(customSpacing);
+	self:AddButton(customText or CLOSE, function()
+		PlaySound(SOUNDKIT.IG_MAINMENU_CONTINUE);
+		self:CloseMenu();
+	end);
+end
+
+function MainMenuFrameMixin:CloseMenu()
+	self:Hide();
+end
+
+SquareExpandButtonMixin = {};
+
+function SquareExpandButtonMixin:InitButton()
+	self:SetExpandedState(true);
+
+	local function OnClickHandler()
+		if self.toggleCallback then
+			self:SetExpandedState(self.toggleCallback())
+		end
+	end
+
+	self:SetOnClickHandler(OnClickHandler, self.onClickSoundKit or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+end
+
+function SquareExpandButtonMixin:SetToggleCallback(toggleCallback)
+	self.toggleCallback = toggleCallback;
+end
+
+function SquareExpandButtonMixin:SetExpandedState(isExpanded)
+	self:SetNormalAtlas(isExpanded and "Campaign_HeaderIcon_Open" or "Campaign_HeaderIcon_Closed");
+	self:SetPushedAtlas(isExpanded and "Campaign_HeaderIcon_OpenPressed" or "Campaign_HeaderIcon_ClosedPressed");
+end
+
+ExpandBarMixin = {};
+
+function ExpandBarMixin:OnLoad()
+	-- A callback from the expand button is always from user input.
+	local isUserInput = true;
+	self.ExpandButton:SetToggleCallback(GenerateFlatClosure(self.Toggle, self, isUserInput));
+end
+
+function ExpandBarMixin:OnEnter()
+	self.ExpandButton:LockHighlight();
+end
+
+function ExpandBarMixin:OnLeave()
+	self.ExpandButton:UnlockHighlight();
+end
+
+function ExpandBarMixin:OnClick()
+	PlaySound(self.ExpandButton:GetOnClickSoundKit());
+
+	local isUserInput = true;
+	self:Toggle(isUserInput);
+end
+
+function ExpandBarMixin:Toggle(isUserInput)
+	local shouldBeShown = not self.target:IsShown();
+	self.target:SetShown(shouldBeShown);
+	self:SetExpandedState(shouldBeShown);
+
+	if self.onToggleCallback then
+		self.onToggleCallback(shouldBeShown, isUserInput);
+	end
+
+	return shouldBeShown;
+end
+
+function ExpandBarMixin:SetExpanded(isExpanded, isUserInput)
+	if isExpanded ~= self:IsExpanded() then
+		self:Toggle(isUserInput);
+	end
+end
+
+function ExpandBarMixin:IsExpanded()
+	return self.target:IsShown();
+end
+
+function ExpandBarMixin:SetExpandedState(expanded)
+	self.ExpandButton:SetExpandedState(expanded);
+end
+
+function ExpandBarMixin:UpdateExpandedState()
+	self:SetExpandedState(self.target and self.target:IsShown());
+end
+
+function ExpandBarMixin:SetExpandTarget(target)
+	self.target = target;
+	self:UpdateExpandedState();
+end
+
+function ExpandBarMixin:SetOnToggleCallback(onToggleCallback)
+	self.onToggleCallback = onToggleCallback;
 end
 
 function Main_HelpPlate_Button_OnEnter(self)

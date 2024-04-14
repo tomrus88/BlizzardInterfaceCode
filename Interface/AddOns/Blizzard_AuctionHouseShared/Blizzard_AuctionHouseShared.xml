@@ -18,7 +18,7 @@
                 <Layer level="ARTWORK">
                     <FontString parentKey="Dash" inherits="GameFontHighlightSmall" text="-">
                         <Anchors>
-                            <Anchor point="LEFT" relativeKey="$parent.MinLevel" relativePoint="RIGHT" x="0" y="0"/>
+                            <Anchor point="LEFT" relativeKey="$parent" relativePoint="RIGHT" x="0" y="0"/>
                         </Anchors>
                     </FontString>
                 </Layer>

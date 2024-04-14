@@ -638,6 +638,39 @@ local function Register()
 		Settings.SetOnValueChangedCallback(resolutionSetting:GetVariable(), OnValueChanged);
 	end
 
+	-- NOTE: Classic doesn't use scale at glues
+	GraphicsOverrides.RunSettingsCallback(function()
+		-- UI Scale		
+		local function FormatPercentageRounded(value)
+			local roundToNearestInteger = true;
+			return FormatPercentage(value, roundToNearestInteger);
+		end
+
+		-- Use UI Scale
+		local getValue, setValue, getDefaultValue = Settings.CreateCVarAccessorClosures("useUiScale", Settings.VarType.Boolean);
+		local commitValue = setValue;
+		local useUIScaleSetting = Settings.RegisterProxySetting(category, "PROXY_USE_UI_SCALE", Settings.DefaultVarLocation,
+			Settings.VarType.Boolean, RENDER_SCALE, getDefaultValue(), getValue, nil, commitValue);
+		useUIScaleSetting:SetCommitFlags(Settings.CommitFlag.Apply, Settings.CommitFlag.Revertable);
+
+		-- Resolution Scale
+		local getValue, setValue, getDefaultValue = Settings.CreateCVarAccessorClosures("uiscale", Settings.VarType.Number);
+		local commitValue = setValue;
+		local uiScaleSliderSetting = Settings.RegisterProxySetting(category, "PROXY_UI_SCALE", Settings.DefaultVarLocation,
+			Settings.VarType.Number, RENDER_SCALE, getDefaultValue(), getValue, nil, commitValue);
+		uiScaleSliderSetting:SetCommitFlags(Settings.CommitFlag.Apply, Settings.CommitFlag.Revertable);
+
+		local minValue, maxValue, step = .65, 1.15, .01;
+		local options = Settings.CreateSliderOptions(minValue, maxValue, step);
+		options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentageRounded)
+
+		local initializer = CreateSettingsCheckBoxSliderInitializer(
+			useUIScaleSetting, USE_UISCALE, OPTION_TOOLTIP_USE_UISCALE,
+			uiScaleSliderSetting, options, UI_SCALE, OPTION_TOOLTIP_UI_SCALE);
+		initializer:AddSearchTags(USE_UISCALE, UI_SCALE);
+		layout:AddInitializer(initializer);
+	end);
+
 	-- Vertical Sync
 	do
 		local function GetOptions()
@@ -872,40 +905,6 @@ local function Register()
 			local options = Settings.CreateSliderOptions(minValue, maxValue, step);
 			options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right);
 			Settings.CreateSlider(category, setting, options, OPTION_TOOLTIP_CAMERA_FOV);
-		end
-	end
-
-	local function FormatPercentageRounded(value)
-		local roundToNearestInteger = true;
-		return FormatPercentage(value, roundToNearestInteger);
-	end
-
-	-- UI Scale
-	if not IsOnGlueScreen() then
-		do
-			-- Use UI Scale
-			local getValue, setValue, getDefaultValue = Settings.CreateCVarAccessorClosures("useUiScale", Settings.VarType.Boolean);
-			local commitValue = setValue;
-			local useUIScaleSetting = Settings.RegisterProxySetting(category, "PROXY_USE_UI_SCALE", Settings.DefaultVarLocation,
-				Settings.VarType.Boolean, RENDER_SCALE, getDefaultValue(), getValue, nil, commitValue);
-			useUIScaleSetting:SetCommitFlags(Settings.CommitFlag.Apply, Settings.CommitFlag.Revertable);
-
-			-- Resolution Scale
-			local getValue, setValue, getDefaultValue = Settings.CreateCVarAccessorClosures("uiscale", Settings.VarType.Number);
-			local commitValue = setValue;
-			local uiScaleSliderSetting = Settings.RegisterProxySetting(category, "PROXY_UI_SCALE", Settings.DefaultVarLocation,
-				Settings.VarType.Number, RENDER_SCALE, getDefaultValue(), getValue, nil, commitValue);
-			uiScaleSliderSetting:SetCommitFlags(Settings.CommitFlag.Apply, Settings.CommitFlag.Revertable);
-
-			local minValue, maxValue, step = .65, 1.15, .01;
-			local options = Settings.CreateSliderOptions(minValue, maxValue, step);
-			options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentageRounded)
-
-			local initializer = CreateSettingsCheckBoxSliderInitializer(
-				useUIScaleSetting, USE_UISCALE, OPTION_TOOLTIP_USE_UISCALE,
-				uiScaleSliderSetting, options, UI_SCALE, OPTION_TOOLTIP_UI_SCALE);
-			initializer:AddSearchTags(USE_UISCALE, UI_SCALE);
-			layout:AddInitializer(initializer);
 		end
 	end
 

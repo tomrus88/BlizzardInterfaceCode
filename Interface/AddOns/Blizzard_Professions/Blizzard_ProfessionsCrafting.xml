@@ -320,6 +320,24 @@
 					<Anchor point="TOPRIGHT" x="-26" y="-31"/>
 				</Anchors>
 			</ItemButton>
+			<ItemButton parentKey="FishingGear0Slot" inherits="ProfessionsGearSlotTemplate">
+				<KeyValues>
+					<KeyValue key="slotName" value="FishingGear0Slot" type="string"/>
+					<KeyValue key="slotID" value="29" type="number"/>
+				</KeyValues>
+				<Anchors>
+					<Anchor point="RIGHT" relativePoint="LEFT" relativeKey="$parent.FishingToolSlot" x="-21" y="0"/>
+				</Anchors>
+			</ItemButton>
+			<ItemButton parentKey="FishingGear1Slot" inherits="ProfessionsGearSlotTemplate">
+				<KeyValues>
+					<KeyValue key="slotName" value="FishingGear1Slot" type="string"/>
+					<KeyValue key="slotID" value="30" type="number"/>
+				</KeyValues>
+				<Anchors>
+					<Anchor point="RIGHT" relativePoint="LEFT" relativeKey="$parent.FishingGear0Slot" x="-5" y="0"/>
+				</Anchors>
+			</ItemButton>
 
 			<Frame parentKey="GearSlotDivider">
 				<Size x="5" y="37"/>

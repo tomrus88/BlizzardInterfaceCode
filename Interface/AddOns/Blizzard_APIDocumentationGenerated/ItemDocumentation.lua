@@ -1409,6 +1409,11 @@ local Item =
 			LiteralName = "CONFIRM_BEFORE_USE",
 		},
 		{
+			Name = "ConvertToBindToAccountConfirm",
+			Type = "Event",
+			LiteralName = "CONVERT_TO_BIND_TO_ACCOUNT_CONFIRM",
+		},
+		{
 			Name = "DeleteItemConfirm",
 			Type = "Event",
 			LiteralName = "DELETE_ITEM_CONFIRM",

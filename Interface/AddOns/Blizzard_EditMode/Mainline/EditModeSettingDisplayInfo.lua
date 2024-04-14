@@ -518,6 +518,17 @@ EditModeSettingDisplayInfoManager.systemSettingDisplayInfo = {
 			formatter = ShowAsPercentage,
 			hideSystemSelectionOnInteract = true,
 		},
+		-- Text Size
+		{
+			setting = Enum.EditModeObjectiveTrackerSetting.TextSize,
+			name = HUD_EDIT_MODE_SETTING_OBJECTIVE_TRACKER_TEXT_SIZE,
+			type = Enum.EditModeSettingDisplayType.Slider,
+			minValue = 12,
+			maxValue = 20,
+			stepSize = 1,
+			ConvertValue = ConvertValueDefault,
+			hideSystemSelectionOnInteract = true,
+		},
 	},
 
 	[Enum.EditModeSystem.MicroMenu] =

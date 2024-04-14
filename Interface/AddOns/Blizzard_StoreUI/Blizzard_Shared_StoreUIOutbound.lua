@@ -39,3 +39,7 @@ end
 function Outbound.CloseAllWindows()
 	securecall("CloseAllWindows");
 end
+
+function Outbound.TriggerHideEvent(contextKey)
+	securecallfunction(SecureOutboundUtil_TriggerEvent, "Store.FrameHidden", contextKey);
+end

@@ -8,7 +8,7 @@
 		</Scripts>
 	</Frame>
 
-	<DropDownToggleButton name="WorldMapTrackingOptionsButtonTemplate" frameStrata="HIGH" mixin="WorldMapTrackingOptionsButtonMixin" virtual="true">
+	<DropDownToggleButton name="WorldMapTrackingOptionsButtonTemplate" frameStrata="HIGH" mixin="UIResettableDropdownButtonMixin, WorldMapTrackingOptionsButtonMixin" virtual="true">
 		<Size x="32" y="32"/>
 		<Layers>
 			<Layer level="BACKGROUND" textureSubLevel="-1">
@@ -29,20 +29,11 @@
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<Texture parentKey="Icon" file="Interface\Minimap\Tracking\None">
+				<Texture parentKey="Icon" atlas="Map-Filter-Button">
 					<Size x="20" y="20"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" x="6" y="-6"/>
 					</Anchors>
-				</Texture>
-			</Layer>
-			<Layer level="OVERLAY">
-				<Texture parentKey="IconOverlay" hidden="true">
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.Icon"/>
-						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Icon"/>
-					</Anchors>
-					<Color r="0.0" g="0.0" b="0.0" a="0.5"/>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="1">
@@ -100,7 +91,7 @@
 						<Anchor point="TOPLEFT" relativeKey="$parent.Icon"/>
 						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Icon"/>
 					</Anchors>
-					<Color r="0.0" g="0.0" b="0.0" a="0.5"/>
+					<Color r="0.0" g="0.0" b="0.0" a="0.3"/>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="1">

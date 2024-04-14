@@ -603,9 +603,11 @@ end
 PlayerChoiceBaseOptionReputationRewardMixin = {};
 
 function PlayerChoiceBaseOptionReputationRewardMixin:Setup(repRewardInfo, fontColor)
-	local factionName = GetFactionInfoByID(repRewardInfo.factionId);
-	self.Text:SetText(REWARD_REPUTATION_WITH_AMOUNT:format(repRewardInfo.quantity, factionName));
-	self.Text:SetTextColor(fontColor:GetRGBA());
+	local factionData = C_Reputation.GetFactionDataByID(repRewardInfo.factionId);
+	if factionData then
+		self.Text:SetText(REWARD_REPUTATION_WITH_AMOUNT:format(repRewardInfo.quantity, factionData.name));
+		self.Text:SetTextColor(fontColor:GetRGBA());
+	end
 end
 
 PlayerChoiceBaseOptionRewardsMixin = {}

@@ -666,6 +666,20 @@ local QuestLog =
 			},
 		},
 		{
+			Name = "IsMetaQuest",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "questID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "isMeta", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "IsOnMap",
 			Type = "Function",
 
@@ -780,6 +794,20 @@ local QuestLog =
 			},
 		},
 		{
+			Name = "IsQuestFlaggedCompletedOnAccount",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "questID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "isCompletedOnAccount", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "IsQuestFromContentPush",
 			Type = "Function",
 
@@ -805,6 +833,20 @@ local QuestLog =
 			Returns =
 			{
 				{ Name = "isInvasion", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsQuestRepeatableType",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "questID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "isRepeatableType", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -962,6 +1004,20 @@ local QuestLog =
 			Returns =
 			{
 				{ Name = "hasBonus", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "QuestIgnoresAccountCompletedFiltering",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "questID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "questIgnoresAccountCompletedFiltering", Type = "bool", Nilable = false },
 			},
 		},
 		{

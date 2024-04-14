@@ -759,7 +759,7 @@ end
 
 UnitPopupPartyInstanceLeaveButtonMixin = CreateFromMixins(UnitPopupButtonBaseMixin);
 function UnitPopupPartyInstanceLeaveButtonMixin:GetText()
-	return INSTANCE_PARTY_LEAVE;
+	return C_PartyInfo.IsPartyWalkIn() and INSTANCE_WALK_IN_LEAVE or INSTANCE_PARTY_LEAVE;
 end
 
 -- Overload in UnitPopupButtons
@@ -767,11 +767,16 @@ function UnitPopupPartyInstanceLeaveButtonMixin:CanShow()
 end
 
 function UnitPopupPartyInstanceLeaveButtonMixin:IsEnabled()
-	return IsInGroup();
+	if IsInGroup() then
+		if C_PartyInfo.IsPartyWalkIn() then
+			return C_PartyInfo.IsDelveComplete();
+		end
+		return true;
+	end
 end
 
 function UnitPopupPartyInstanceLeaveButtonMixin:OnClick()
-	ConfirmOrLeaveLFGParty();
+	ConfirmOrLeaveParty();
 end
 
 UnitPopupFollowButtonMixin = CreateFromMixins(UnitPopupButtonBaseMixin);
@@ -2453,6 +2458,84 @@ end
 
 function UnitPopupRaidTargetNoneButtonMixin:GetColor()
 	return nil;
+end
+
+UnitPopupSelfHighlightSelectButtonMixin = CreateFromMixins(UnitPopupButtonBaseMixin);
+function UnitPopupSelfHighlightSelectButtonMixin:GetText()
+	return SELF_HIGHLIGHT_UNIT_FRAME;
+end
+
+function UnitPopupSelfHighlightSelectButtonMixin:IsNested()
+	return true;
+end
+
+function UnitPopupSelfHighlightSelectButtonMixin:GetButtons()
+	return {
+		UnitPopupSelfHighlightCircleButtonMixin,
+		UnitPopupSelfHighlightOutlineButtonMixin,
+		UnitPopupSelfHighlightIconButtonMixin,
+	};
+end
+
+UnitPopupSelfHighlightCommonMixin = CreateFromMixins(UnitPopupButtonBaseMixin);
+function UnitPopupSelfHighlightCommonMixin:IsCheckable()
+	return true;
+end
+
+function UnitPopupSelfHighlightCommonMixin:SetFindSelfAnywhere()
+	local shouldFindSelfAnywhere = GetCVarBool("findYourselfModeCircle") or
+		GetCVarBool("findYourselfModeOutline") or
+		GetCVarBool("findYourselfModeIcon");
+			
+	SetCVar("findYourselfAnywhere", shouldFindSelfAnywhere);
+end
+
+function UnitPopupSelfHighlightCommonMixin:OnClick()
+	local cvarName = self:GetCVarName();
+	SetCVar(cvarName, not GetCVarBool(cvarName));
+
+	self:SetFindSelfAnywhere();
+	EventRegistry:TriggerEvent("SelfHighlight.ValueChanged");
+end
+
+function UnitPopupSelfHighlightCommonMixin:IsChecked()
+	return GetCVarBool(self:GetCVarName());
+end
+
+function UnitPopupSelfHighlightCommonMixin:IsNotRadio()
+	return true;
+end
+
+function UnitPopupSelfHighlightCommonMixin:GetCVarName()
+	return "findYourselfMode";
+end
+
+
+UnitPopupSelfHighlightCircleButtonMixin = CreateFromMixins(UnitPopupSelfHighlightCommonMixin);
+function UnitPopupSelfHighlightCircleButtonMixin:GetText()
+	return SELF_HIGHLIGHT_CIRCLE;
+end
+
+function UnitPopupSelfHighlightCircleButtonMixin:GetCVarName()
+	return "findYourselfModeCircle";
+end
+
+UnitPopupSelfHighlightOutlineButtonMixin = CreateFromMixins(UnitPopupSelfHighlightCommonMixin);
+function UnitPopupSelfHighlightOutlineButtonMixin:GetText()
+	return SELF_HIGHLIGHT_OUTLINE;
+end
+
+function UnitPopupSelfHighlightOutlineButtonMixin:GetCVarName()
+	return "findYourselfModeOutline";
+end
+
+UnitPopupSelfHighlightIconButtonMixin = CreateFromMixins(UnitPopupSelfHighlightCommonMixin);
+function UnitPopupSelfHighlightIconButtonMixin:GetText()
+	return SELF_HIGHLIGHT_ICON;
+end
+
+function UnitPopupSelfHighlightIconButtonMixin:GetCVarName()
+	return "findYourselfModeIcon";
 end
 
 UnitPopupChatPromoteButtonMixin = CreateFromMixins(UnitPopupButtonBaseMixin);

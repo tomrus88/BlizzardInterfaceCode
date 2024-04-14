@@ -118,7 +118,7 @@ function EditModeDropdownLayoutEntryMixin:Init(layoutIndex, layoutData, isSelect
 end
 
 function EditModeDropdownLayoutEntryMixin:OnUpdate()
-	local mouseOver = EditModeManagerFrame:IsLayoutButtonLocked(self) or RegionUtil.IsDescendantOfOrSame(GetMouseFocus(), self);
+	local mouseOver = EditModeManagerFrame:IsLayoutButtonLocked(self) or RegionUtil.IsAnyDescendantOfOrSame(GetMouseFoci(), self);
 	self.Highlight:SetShown(mouseOver);
 	self.CopyLayoutButton:SetShown(mouseOver and self.isPresetLayout);
 	self.RenameOrCopyLayoutButton:SetShown(mouseOver and not self.isPresetLayout);
