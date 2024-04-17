@@ -173,6 +173,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
+			<OnShow method="OnShow"/>
 			<OnKeyDown method="OnKeyDown"/>
 			<OnEvent method="OnEvent"/>
 		</Scripts>
@@ -206,6 +207,7 @@
 		</Layers>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
+			<OnShow method="OnShow"/>
 		</Scripts>
 	</Frame>
 	<Button name="TimerunningChoiceInfoButtonTemplate" mixin="TimerunningChoiceInfoButtonMixin" virtual="true">

@@ -76,6 +76,7 @@ FrameAPIUnitPositionFrameDocumentation.lua
 FrameScriptDocumentation.lua
 GMTicketInfoDocumentation.lua
 GameCursorDocumentation.lua
+GameEnvironmentManagerDocumentation.lua
 GameErrorDocumentation.lua
 GamePadDocumentation.lua
 GameRulesDocumentation.lua
@@ -235,6 +236,7 @@ VideoDocumentation.lua
 VignetteInfoDocumentation.lua
 VoiceChatDocumentation.lua
 VoidStorageInfoDocumentation.lua
+WorldLootObjectDocumentation.lua
 WorldStateInfoDocumentation.lua
 WowEntitlementInfoDocumentation.lua
 WowTokenUIDocumentation.lua
@@ -290,6 +292,7 @@ PetBattlesDocumentation.lua
 PlayerChoiceDocumentation.lua
 PlayerMentorshipDocumentation.lua
 ProfessionSpecUIDocumentation.lua
+QuestHubInfoDocumentation.lua
 QuestItemUseDocumentation.lua
 ReturningPlayerUIDocumentation.lua
 ScenarioInfoDocumentation.lua
@@ -342,6 +345,7 @@ ExpansionLandingPageConstantsDocumentation.lua
 FrameAPIModelSceneFrameSharedDocumentation.lua
 GARRISON_FOLLOWER_TYPEConstantsDocumentation.lua
 GARRISON_TYPEConstantsDocumentation.lua
+GameEnvironmentConstantsDocumentation.lua
 GamePadConstDocumentation.lua
 GarrisonConstantsDocumentation.lua
 GossipConstantsDocumentation.lua
