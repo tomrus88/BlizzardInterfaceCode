@@ -133,9 +133,9 @@ local AccountConstants =
 		{
 			Name = "BnetAccountFlag",
 			Type = "Enumeration",
-			NumValues = 17,
+			NumValues = 18,
 			MinValue = 0,
-			MaxValue = 32768,
+			MaxValue = 65536,
 			Fields =
 			{
 				{ Name = "None", Type = "BnetAccountFlag", EnumValue = 0 },
@@ -155,6 +155,7 @@ local AccountConstants =
 				{ Name = "WasSecured", Type = "BnetAccountFlag", EnumValue = 8192 },
 				{ Name = "LockedForExport", Type = "BnetAccountFlag", EnumValue = 16384 },
 				{ Name = "CanBuyAhGameTimeTokens", Type = "BnetAccountFlag", EnumValue = 32768 },
+				{ Name = "PetAchievementFixUp", Type = "BnetAccountFlag", EnumValue = 65536 },
 			},
 		},
 		{

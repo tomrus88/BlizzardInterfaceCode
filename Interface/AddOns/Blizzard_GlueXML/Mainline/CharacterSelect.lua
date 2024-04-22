@@ -649,9 +649,6 @@ function CharacterSelect_SetSelectedCharacterName(name, timerunningSeasonID)
 	end
 end
 
--- Temporarily hide timerunning UI.
-GetActiveTimerunningSeasonID = nop;
-
 function CharacterSelect_UpdateTimerunning()
 	local season = GetActiveTimerunningSeasonID();
 	if season then
@@ -1167,10 +1164,7 @@ end
 
 function CharacterSelect_UpdateLogo()
 	-- For now, Timerunning overrides the event realms (plunderstorm) if both are active at once. Revisit if we have Plunderstorm and Timerunning at the same time.
-
-	-- Temporarily hide plunderstorm and timerunning UI.
-	--local showEnvironmentToggle = C_GameEnvironmentManager.GetCurrentEventRealmQueues() ~= Enum.EventRealmQueues.None and GetActiveTimerunningSeasonID() == nil;
-	local showEnvironmentToggle = false;
+	local showEnvironmentToggle = C_GameEnvironmentManager.GetCurrentEventRealmQueues() ~= Enum.EventRealmQueues.None and GetActiveTimerunningSeasonID() == nil;
 	CharacterSelectLogo:SetShown(not showEnvironmentToggle);
 	CharacterSelect.CharacterSelectUI.GameEnvironmentToggleFrame:SetShown(showEnvironmentToggle);
 	CharacterSelect.CharacterSelectUI.LimitedTimeEventFrame:SetShown(showEnvironmentToggle);

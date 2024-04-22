@@ -78,6 +78,7 @@ GMTicketInfoDocumentation.lua
 GameCursorDocumentation.lua
 GameEnvironmentManagerDocumentation.lua
 GameErrorDocumentation.lua
+GameModeManagerDocumentation.lua
 GamePadDocumentation.lua
 GameRulesDocumentation.lua
 GameUIDocumentation.lua
@@ -220,6 +221,7 @@ TraitConfigDocumentation.lua
 TransmogDocumentation.lua
 TutorialDocumentation.lua
 UIColorDocumentation.lua
+UIEventToastManagerDocumentation.lua
 UIGenericWidgetDisplayDocumentation.lua
 UIMacrosDocumentation.lua
 UIManagerDocumentation.lua
@@ -269,7 +271,6 @@ FrameAPIModelSceneFrameActorDocumentation.lua
 FrameAPIScenarioPOIDocumentation.lua
 FrameAPITabardModelDocumentation.lua
 FriendListDocumentation.lua
-GameModeManagerDocumentation.lua
 GarrisonInfoDocumentation.lua
 InGameNavigationDocumentation.lua
 IncomingSummonDocumentation.lua
@@ -280,6 +281,7 @@ ItemInteractionUIDocumentation.lua
 LegendaryCraftingDocumentation.lua
 LevelLinkDocumentation.lua
 LevelSquishDocumentation.lua
+LiveEventDocumentation.lua
 LootHistoryDocumentation.lua
 LootJournalDocumentation.lua
 LoreTextDocumentation.lua
@@ -309,7 +311,6 @@ TalkingHeadDocumentation.lua
 TradeSkillUIDocumentation.lua
 TransmogItemsDocumentation.lua
 TransmogSetsDocumentation.lua
-UIEventToastManagerDocumentation.lua
 UIFrameManagerDocumentation.lua
 UIModifiedInstanceDocumentation.lua
 WarCampaignDocumentation.lua
