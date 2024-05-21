@@ -75,7 +75,7 @@ end
 
 function DressUpVisualLink(forcedFrame, link, ...)
 	local frame = forcedFrame or GetFrameAndSetBackground();
-	local itemModifiedAppearanceIDs, forcePlayerRefresh = nil;
+	local itemModifiedAppearanceIDs, forcePlayerRefresh = nil, nil;
 	DressUpFrame_Show(frame, itemModifiedAppearanceIDs, forcePlayerRefresh, link);
 
 	local playerActor = frame.ModelScene:GetPlayerActor();
@@ -167,7 +167,8 @@ function DressUpBattlePetLink(link, forcedFrame)
 				return DressUpBattlePet(creatureID, displayID, speciesID, link, forcedFrame);
 			else
 				speciesID = tonumber(linkID);
-				local _, _, _, creatureID, _, _, _, _, _, _, _, displayID = C_PetJournal.GetPetInfoBySpeciesID(speciesID);
+				local _;
+				_, _, _, creatureID, _, _, _, _, _, _, _, displayID = C_PetJournal.GetPetInfoBySpeciesID(speciesID);
 				displayID = (battlePetDisplayID and battlePetDisplayID ~= "0") and battlePetDisplayID or displayID;
 				return DressUpBattlePet(creatureID, displayID, speciesID, link, forcedFrame);
 			end

@@ -390,7 +390,6 @@ function PerksProgramFrozenProductButtonMixin:SetupFreezeDraggedItem()
 	self:SetItemInfo(draggedVendorItemInfo);
 
 	-- If we don't have a frozen vendor item already then just instantly freeze the dragged item
-	local frozenVendorItem = PerksProgramFrame:GetFrozenPerksVendorItemInfo();
 	if not frozenVendorItem then
 		self:FreezeDraggedItem();
 		return;
@@ -496,7 +495,7 @@ end
 ----------------------------------------------------------------------------------
 FilterDropDownContainerMixin = {};
 function FilterDropDownContainerMixin:OnLoad()
-	UIDropDownMenu_Initialize(FilterDropDown, GenerateClosure(self.InitializeDropDown, self), "MENU");
+	UIDropDownMenu_Initialize(FilterDropDown, self.InitializeDropDown, "MENU");
 end
 
 local function IsSortAscending()
@@ -524,7 +523,7 @@ local function IsFilterStateChecked(filterInfo)
 	return PerksProgramFrame:GetFilterState(filterInfo);
 end
 
-function FilterDropDownContainerMixin:InitializeDropDown(self, level)
+function FilterDropDownContainerMixin:InitializeDropDown(level)
 	local categories = PerksProgramFrame:GetCategories();
 	
 
@@ -822,7 +821,7 @@ function PerksProgramSetDetailsListMixin:ClearData()
 end
 
 function PerksProgramSetDetailsListMixin:Init(data)
-	if not data or not #data.subItems == 0 or not data.subItemsLoaded then
+	if not data or #data.subItems == 0 or not data.subItemsLoaded then
 		self:ClearData();
 		self:Hide();
 		return;

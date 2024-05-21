@@ -197,6 +197,7 @@ function QuestInfo_ShowObjectives()
 	local text, type, finished;
 	local objectivesTable = QuestInfoObjectivesFrame.Objectives;
 	local numVisibleObjectives = 0;
+	local textColor, titleTextColor;
 
 	local function AcquireObjective(index)
 		local newObjective = objectivesTable[index];
@@ -404,7 +405,12 @@ function QuestInfo_ShowObjectivesText()
 end
 
 function QuestInfo_ShowSpacer()
+	QuestInfo_AdjustSpacerHeight(5);
 	return QuestInfoSpacerFrame;
+end
+
+function QuestInfo_AdjustSpacerHeight(height)
+	QuestInfoSpacerFrame:SetHeight(height);
 end
 
 function QuestInfo_ShowAnchor()
@@ -456,6 +462,9 @@ local QUEST_INFO_SPELL_REWARD_ORDERING = {
 	Enum.QuestCompleteSpellType.Aura,
 	Enum.QuestCompleteSpellType.Spell,
 	Enum.QuestCompleteSpellType.Unlock,
+	Enum.QuestCompleteSpellType.QuestlineUnlock,
+	Enum.QuestCompleteSpellType.QuestlineReward,
+	Enum.QuestCompleteSpellType.QuestlineUnlockPart,
 };
 
 local QUEST_INFO_SPELL_REWARD_TO_HEADER = {
@@ -466,6 +475,9 @@ local QUEST_INFO_SPELL_REWARD_TO_HEADER = {
 	[Enum.QuestCompleteSpellType.Aura] = REWARD_AURA,
 	[Enum.QuestCompleteSpellType.Spell] = REWARD_SPELL,
 	[Enum.QuestCompleteSpellType.Unlock] = REWARD_UNLOCK,
+	[Enum.QuestCompleteSpellType.QuestlineUnlock] = REWARD_QUESTLINE_UNLOCK,
+	[Enum.QuestCompleteSpellType.QuestlineReward] = REWARD_QUESTLINE_REWARD,
+	[Enum.QuestCompleteSpellType.QuestlineUnlockPart] = REWARD_QUESTLINE_UNLOCK_PART,
 };
 
 local function GetRewardSpellBucketType(spellInfo)
@@ -659,6 +671,9 @@ function QuestInfo_ShowRewards()
 		end
 	end
 
+	rewardsFrame.numHeaders = 0;
+	rewardsFrame.numRows = 0;
+
 	local totalRewards = numQuestRewards + numQuestChoices + numQuestCurrencies;
 	if ( totalRewards == 0 and money == 0 and xp == 0 and not playerTitle and #spellRewards == 0 and artifactXP == 0 and honor == 0 and not majorFactionRepRewards ) then
 		rewardsFrame:Hide();
@@ -672,7 +687,7 @@ function QuestInfo_ShowRewards()
 		rewardButtons[i]:Hide();
 	end
 
-	local questItem, name, texture, quality, isUsable, numItems, itemID;
+	local questItem, name, texture, quality, isUsable, itemID;
 	local rewardsCount = 0;
 
 	local totalHeight = rewardsFrame.Header:GetHeight();
@@ -691,7 +706,8 @@ function QuestInfo_ShowRewards()
 	local function AddRewardElement(rewardElement)
 		if not startNewSection and not rightSideElementPlaced and not useOneElementPerRow then
 			-- continue on same row
-			rewardElement:SetPoint("TOPLEFT", lastAnchorElement, "TOPRIGHT", 1, 0);
+			local separation = ACTIVE_TEMPLATE.horizontalRewardSeparation or 1;
+			rewardElement:SetPoint("TOPLEFT", lastAnchorElement, "TOPRIGHT", separation, 0);
 			rightSideElementPlaced = true;
 		else
 			-- make new row
@@ -705,11 +721,13 @@ function QuestInfo_ShowRewards()
 			rightSideElementPlaced = false;
 			-- inside a section now
 			startNewSection = false;
+			rewardsFrame.numRows = rewardsFrame.numRows + 1;
 		end
 		rewardElement:Show();
 	end
 
 	local function AddHeaderElement(rewardElement)
+		rewardsFrame.numHeaders = rewardsFrame.numHeaders + 1;
 		local largeElements = true;
 		BeginRewardsSection(largeElements);
 		AddRewardElement(rewardElement);
@@ -718,7 +736,7 @@ function QuestInfo_ShowRewards()
 
 	rewardsFrame.ArtifactXPFrame:ClearAllPoints();
 	if ( artifactXP > 0 ) then
-		local name, icon = C_ArtifactUI.GetArtifactXPRewardTargetInfo(artifactCategory);
+		local _name, icon = C_ArtifactUI.GetArtifactXPRewardTargetInfo(artifactCategory);
 		rewardsFrame.ArtifactXPFrame.Name:SetText(BreakUpLargeNumbers(artifactXP));
 		rewardsFrame.ArtifactXPFrame.Icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark");
 		rewardsFrame.ArtifactXPFrame:Show();
@@ -749,7 +767,6 @@ function QuestInfo_ShowRewards()
 			questItem = QuestInfo_GetRewardButton(rewardsFrame, index);
 			questItem.questID = questID;
 			questItem.type = "choice";
-			numItems = 1;
 
 			local lootType = 0; -- LOOT_LIST_ITEM
 			if ( QuestInfoFrame.questLog ) then
@@ -868,7 +885,10 @@ function QuestInfo_ShowRewards()
 				rewardsFrame.XPFrame:Hide();
 			end
 			if ( money > 0 ) then
-				rewardsFrame.MoneyFrame.Name:SetText(GetMoneyString(money));
+				local separateThousands = false;
+				local checkGoldThreshold = true;
+
+				rewardsFrame.MoneyFrame.Name:SetText(GetMoneyString(money, separateThousands, checkGoldThreshold));
 				AddRewardElement(rewardsFrame.MoneyFrame);
 			else
 				rewardsFrame.MoneyFrame:Hide();
@@ -1027,6 +1047,11 @@ function QuestInfo_ShowRewards()
 	return rewardsFrame, lastAnchorElement;
 end
 
+function QuestInfo_GetNumRewardRows()
+	local rewardsFrame = QuestInfoFrame.rewardsFrame;
+	return rewardsFrame.numRows - rewardsFrame.numHeaders;
+end
+
 function QuestInfo_OnHyperlinkEnter(self, link, text, region, left, bottom, width, height)
 	local linkType, linkData = LinkUtil.SplitLinkData(link);
 	local title, body;
@@ -1095,7 +1120,7 @@ QUEST_TEMPLATE_REWARD = { questLog = nil, chooseItems = true, contentWidth = 285
 	}
 }
 
-QUEST_TEMPLATE_MAP_DETAILS = { questLog = true, chooseItems = nil, contentWidth = 244,
+QUEST_TEMPLATE_MAP_DETAILS = { questLog = true, chooseItems = nil, contentWidth = 289,
 	canHaveSealMaterial = true, sealXOffset = 156, sealYOffset = -6,
 	elements = {
 		QuestInfo_ShowTitle, 5, -5,
@@ -1113,9 +1138,9 @@ QUEST_TEMPLATE_MAP_DETAILS = { questLog = true, chooseItems = nil, contentWidth 
 	}
 }
 
-QUEST_TEMPLATE_MAP_REWARDS = { questLog = true, chooseItems = nil, contentWidth = 244,
+QUEST_TEMPLATE_MAP_REWARDS = { questLog = true, chooseItems = nil, contentWidth = 289, horizontalRewardSeparation = 8,
 	elements = {
-		QuestInfo_ShowRewards, 8, 0,
+		QuestInfo_ShowRewards, 12, -52,
 	}
 }
 

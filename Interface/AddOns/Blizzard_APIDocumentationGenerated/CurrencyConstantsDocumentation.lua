@@ -3,6 +3,23 @@ local CurrencyConstants =
 	Tables =
 	{
 		{
+			Name = "AccountCurrencyTransferResult",
+			Type = "Enumeration",
+			NumValues = 7,
+			MinValue = 0,
+			MaxValue = 6,
+			Fields =
+			{
+				{ Name = "Success", Type = "AccountCurrencyTransferResult", EnumValue = 0 },
+				{ Name = "InvalidCharacter", Type = "AccountCurrencyTransferResult", EnumValue = 1 },
+				{ Name = "CharacterLoggedIn", Type = "AccountCurrencyTransferResult", EnumValue = 2 },
+				{ Name = "InsufficientCurrency", Type = "AccountCurrencyTransferResult", EnumValue = 3 },
+				{ Name = "MaxQuantity", Type = "AccountCurrencyTransferResult", EnumValue = 4 },
+				{ Name = "InvalidCurrency", Type = "AccountCurrencyTransferResult", EnumValue = 5 },
+				{ Name = "NoValidSourceCharacter", Type = "AccountCurrencyTransferResult", EnumValue = 6 },
+			},
+		},
+		{
 			Name = "CurrencyFlags",
 			Type = "Enumeration",
 			NumValues = 32,

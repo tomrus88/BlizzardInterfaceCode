@@ -18,7 +18,6 @@ CVarCallbackRegistry:SetCVarCachable("showDispelDebuffs");
 UIChildWindows = {
 	"OpenMailFrame",
 	"GuildMemberDetailFrame",
-	"TokenFramePopup",
 	"GuildBankPopupFrame",
 	"GearManagerDialog",
 };
@@ -180,6 +179,8 @@ function UIParent_OnLoad(self)
 	self:RegisterEvent("VARIABLES_LOADED");
 	self:RegisterEvent("GROUP_ROSTER_UPDATE");
 	self:RegisterEvent("RAID_INSTANCE_WELCOME");
+	self:RegisterEvent("DAILY_RESET_INSTANCE_WELCOME");
+	self:RegisterEvent("INSTANCE_RESET_WARNING");
 	self:RegisterEvent("RAISED_AS_GHOUL");
 	self:RegisterEvent("SPELL_CONFIRMATION_PROMPT");
 	self:RegisterEvent("SPELL_CONFIRMATION_TIMEOUT");
@@ -367,6 +368,12 @@ function UIParent_OnLoad(self)
 
 	-- Event(s) for PlayerSpells
 	self:RegisterEvent("USE_GLYPH");
+
+	-- Event(s) for Enchanting
+	self:RegisterEvent("ENCHANT_SPELL_SELECTED");
+
+	-- Events(s) for updating spell based item contexts
+	self:RegisterEvent("UPDATE_SPELL_TARGET_ITEM_CONTEXT");
 end
 
 function UIParent_OnShow(self)
@@ -2058,6 +2065,20 @@ function UIParent_OnEvent(self, event, ...)
 		local info = ChatTypeInfo["SYSTEM"];
 		DEFAULT_CHAT_FRAME:AddMessage(message, info.r, info.g, info.b, info.id);
 
+	elseif ( event == "DAILY_RESET_INSTANCE_WELCOME" ) then
+		local instanceName = arg1;
+		local resetTime = arg2;
+		message = format(DAILY_RESET_INSTANCE_WELCOME, instanceName, SecondsToTime(resetTime, nil, 1));
+		local info = ChatTypeInfo["SYSTEM"];
+		DEFAULT_CHAT_FRAME:AddMessage(message, info.r, info.g, info.b, info.id);
+
+	elseif ( event == "INSTANCE_RESET_WARNING" ) then
+		local warningString = arg1;
+		local resetTime = arg2;
+		message = format(warningString, SecondsToTime(resetTime, nil, 1));
+		local info = ChatTypeInfo["SYSTEM"];
+		DEFAULT_CHAT_FRAME:AddMessage(message, info.r, info.g, info.b, info.id);
+
 	-- Events for taxi benchmarking
 	elseif ( event == "ENABLE_TAXI_BENCHMARK" ) then
 		FramerateFrame:BeginBenchmark();
@@ -2382,6 +2403,11 @@ function UIParent_OnEvent(self, event, ...)
 			PlayerSpellsUtil.OpenToSpellBookTab();
 			PlayerSpellsFrame.SpellBookFrame:OnEvent(event, ...);
 		end
+	elseif event == "ENCHANT_SPELL_SELECTED" then
+		ItemButtonUtil.OpenAndFilterBags(self);
+		ItemButtonUtil.OpenAndFilterCharacterFrame();
+	elseif event == "UPDATE_SPELL_TARGET_ITEM_CONTEXT" then
+		ItemButtonUtil.TriggerEvent(ItemButtonUtil.Event.ItemContextChanged);
 	end
 end
 
@@ -3263,9 +3289,9 @@ function RefreshBuffs(frame, unit, numBuffs, suffix, checkCVar)
 
 	for i=numFrames + 1,numBuffs do
 		local buffName = frameName..suffix..i;
-		local frame = _G[buffName];
-		if frame then
-			frame:Hide();
+		local buffFrame = _G[buffName];
+		if buffFrame then
+			buffFrame:Hide();
 		else
 			break;
 		end
@@ -3504,100 +3530,7 @@ function AnimatedShine_OnUpdate(elapsed)
 end
 
 
--- Autocast shine stuff --
 
-AUTOCAST_SHINE_R = .95;
-AUTOCAST_SHINE_G = .95;
-AUTOCAST_SHINE_B = .32;
-
-AUTOCAST_SHINE_SPEEDS = { 2, 4, 6, 8 };
-AUTOCAST_SHINE_TIMERS = { 0, 0, 0, 0 };
-
-local AUTOCAST_SHINES = {};
-
-
-function AutoCastShine_OnLoad(self)
-	self.sparkles = {};
-
-	local name = self:GetName();
-
-	for i = 1, 16 do
-		tinsert(self.sparkles, _G[name .. i]);
-	end
-end
-
-function AutoCastShine_AutoCastStart(button, r, g, b)
-	if ( AUTOCAST_SHINES[button] ) then
-		return;
-	end
-
-	AUTOCAST_SHINES[button] = true;
-
-	if ( not r ) then
-		r, g, b = AUTOCAST_SHINE_R, AUTOCAST_SHINE_G, AUTOCAST_SHINE_B;
-	end
-
-	for _, sparkle in next, button.sparkles do
-		sparkle:Show();
-		sparkle:SetVertexColor(r, g, b);
-	end
-end
-
-function AutoCastShine_AutoCastStop(button)
-	AUTOCAST_SHINES[button] = nil;
-
-	for _, sparkle in next, button.sparkles do
-		sparkle:Hide();
-	end
-end
-
-function AutoCastShine_OnUpdate(self, elapsed)
-	for i in next, AUTOCAST_SHINE_TIMERS do
-		AUTOCAST_SHINE_TIMERS[i] = AUTOCAST_SHINE_TIMERS[i] + elapsed;
-		if ( AUTOCAST_SHINE_TIMERS[i] > AUTOCAST_SHINE_SPEEDS[i]*4 ) then
-			AUTOCAST_SHINE_TIMERS[i] = 0;
-		end
-	end
-
-	for button in next, AUTOCAST_SHINES do
-		self = button;
-		local parent, distance = self, self:GetWidth();
-
-		-- This is local to this function to save a lookup. If you need to use it elsewhere, might wanna make it global and use a local reference.
-		local AUTOCAST_SHINE_SPACING = 6;
-
-		for i = 1, 4 do
-			local timer = AUTOCAST_SHINE_TIMERS[i];
-			local speed = AUTOCAST_SHINE_SPEEDS[i];
-
-			if ( timer <= speed ) then
-				local basePosition = timer/speed*distance;
-				self.sparkles[0+i]:SetPoint("CENTER", parent, "TOPLEFT", basePosition, 0);
-				self.sparkles[4+i]:SetPoint("CENTER", parent, "BOTTOMRIGHT", -basePosition, 0);
-				self.sparkles[8+i]:SetPoint("CENTER", parent, "TOPRIGHT", 0, -basePosition);
-				self.sparkles[12+i]:SetPoint("CENTER", parent, "BOTTOMLEFT", 0, basePosition);
-			elseif ( timer <= speed*2 ) then
-				local basePosition = (timer-speed)/speed*distance;
-				self.sparkles[0+i]:SetPoint("CENTER", parent, "TOPRIGHT", 0, -basePosition);
-				self.sparkles[4+i]:SetPoint("CENTER", parent, "BOTTOMLEFT", 0, basePosition);
-				self.sparkles[8+i]:SetPoint("CENTER", parent, "BOTTOMRIGHT", -basePosition, 0);
-				self.sparkles[12+i]:SetPoint("CENTER", parent, "TOPLEFT", basePosition, 0);
-			elseif ( timer <= speed*3 ) then
-				local basePosition = (timer-speed*2)/speed*distance;
-				self.sparkles[0+i]:SetPoint("CENTER", parent, "BOTTOMRIGHT", -basePosition, 0);
-				self.sparkles[4+i]:SetPoint("CENTER", parent, "TOPLEFT", basePosition, 0);
-				self.sparkles[8+i]:SetPoint("CENTER", parent, "BOTTOMLEFT", 0, basePosition);
-				self.sparkles[12+i]:SetPoint("CENTER", parent, "TOPRIGHT", 0, -basePosition);
-			else
-				local basePosition = (timer-speed*3)/speed*distance;
-				self.sparkles[0+i]:SetPoint("CENTER", parent, "BOTTOMLEFT", 0, basePosition);
-				self.sparkles[4+i]:SetPoint("CENTER", parent, "TOPRIGHT", 0, -basePosition);
-				self.sparkles[8+i]:SetPoint("CENTER", parent, "TOPLEFT", basePosition, 0);
-				self.sparkles[12+i]:SetPoint("CENTER", parent, "BOTTOMRIGHT", -basePosition, 0);
-			end
-		end
-	end
-end
 
 function ConsolePrint(...)
 	ConsoleAddMessage(strjoin(" ", tostringall(...)));

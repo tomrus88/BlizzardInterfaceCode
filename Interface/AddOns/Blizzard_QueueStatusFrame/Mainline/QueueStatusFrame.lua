@@ -1090,8 +1090,8 @@ function QueueStatusEntry_OnUpdate(self, elapsed)
 	--Also can't do slightly less than 1 second (0.9) because we'll end up with some lingering numbers
 	self.updateThrottle = (self.updateThrottle or 0.1) - elapsed;
 	if ( self.updateThrottle <= 0 ) then
-		local elapsed = GetTime() - self.queuedTime;
-		self.TimeInQueue:SetFormattedText(TIME_IN_QUEUE, (elapsed >= 60) and SecondsToTime(elapsed) or LESS_THAN_ONE_MINUTE);
+		local queuedElapsed = GetTime() - self.queuedTime;
+		self.TimeInQueue:SetFormattedText(TIME_IN_QUEUE, (queuedElapsed >= 60) and SecondsToTime(queuedElapsed) or LESS_THAN_ONE_MINUTE);
 		self.updateThrottle = 0.1;
 	end
 end
@@ -1280,7 +1280,7 @@ function QueueStatusDropDown_AddBattlefieldButtons(idx)
 		info.arg2 = 1;
 		UIDropDownMenu_AddButton(info);
 
-		if ( teamSize == 0 and not queueType == "RATEDSHUFFLE") then
+		if ( teamSize == 0 and queueType ~= "RATEDSHUFFLE") then
 			info.text = LEAVE_QUEUE;
 			info.func = wrapFunc(LeaveQueueWithMatchReadyCheck);
 			info.arg1 = idx;

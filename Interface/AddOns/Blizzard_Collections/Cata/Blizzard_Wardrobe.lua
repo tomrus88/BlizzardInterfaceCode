@@ -692,7 +692,6 @@ function TransmogSlotButtonMixin:Update()
 			end
 		end
 
-		local baseTexture = GetInventoryItemTexture("player", self.transmogLocation.slotID);
 		self.Icon:SetTexture(baseTexture);
 	else
 		if ( self.HiddenVisualIcon ) then
@@ -1861,8 +1860,8 @@ end
 function WardrobeItemsCollectionMixin:UpdateItems()
 	local isArmor;
 	local cameraID;
-	local appearanceVisualID;	-- for weapon when looking at enchants
-	local appearanceVisualSubclass;
+	local appearanceVisualID = nil;	-- for weapon when looking at enchants
+	local appearanceVisualSubclass = nil;
 	local changeModel = false;
 	local isAtTransmogrifier = C_Transmog.IsAtTransmogNPC();
 

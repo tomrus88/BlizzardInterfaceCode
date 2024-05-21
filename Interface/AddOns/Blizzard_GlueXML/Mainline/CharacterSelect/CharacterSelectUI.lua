@@ -10,20 +10,26 @@ function CharacterSelectUIMixin:OnLoad()
 	self.RotationStartX = nil;
 	self.RotationConstant = 0.6;
 	self.ClampedHeightTopPercent = 0.8;
-	self.ClampedHeightBottomPercent = 0.3;
+	self.ClampedHeightBottomPercent = 0.2;
 	self.BottomOffsetYPercent = 0.05;
 	self.ListToggle:SetExpandTarget(self.CharacterList);
 
-	self.CharacterHeaderFramePool = CreateFramePool("FRAME", self, "CharacterHeaderFrameTemplate", nil);
+	self.CharacterHeaderFramePool = CreateFramePool("BUTTON", self, "CharacterHeaderFrameTemplate", nil);
 	self.CharacterFooterFramePool = CreateFramePool("FRAME", self, "CharacterFooterFrameTemplate", nil);
 
 	self.CharacterBoundingBoxInfo = {};
+
+	self.currentMapSceneHoverGUID = nil;
+	self.mouseDownMapSceneHoverGUID = nil;
 
     SetCharSelectModelFrame(self.ModelFFX:GetName());
     SetCharSelectMapSceneFrame(self.MapScene:GetName());
 
 	self:RegisterEvent("UI_SCALE_CHANGED");
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED");
+	self:RegisterEvent("MAP_SCENE_CHARACTER_ON_MOUSE_ENTER");
+	self:RegisterEvent("MAP_SCENE_CHARACTER_ON_MOUSE_LEAVE");
+	self:RegisterEvent("CVAR_UPDATE");
 end
 
 function CharacterSelectUIMixin:OnEvent(event, ...)
@@ -31,6 +37,37 @@ function CharacterSelectUIMixin:OnEvent(event, ...)
 		if CharacterSelect.selectedIndex > 0 then
 			self:ReleaseCharacterOverlayFrames();
 			self:SetupCharacterOverlayFrames();
+		end
+	elseif event == "MAP_SCENE_CHARACTER_ON_MOUSE_ENTER" then
+		local guid = ...;
+
+		self.currentMapSceneHoverGUID = guid;
+
+		-- Trigger any updates on the character model UI
+		for headerFrame in self.CharacterHeaderFramePool:EnumerateActive() do
+			if headerFrame.characterInfo.guid == guid then
+				headerFrame:SetTooltipAndShow();
+				break;
+			end
+		end
+
+		-- Trigger any updates on the character list entry, if visible.
+		local isHighlight = true;
+		CharacterSelectListUtil:UpdateCharacterHighlight(guid, isHighlight);
+	elseif event == "MAP_SCENE_CHARACTER_ON_MOUSE_LEAVE" then
+		local guid = ...;
+
+		self.currentMapSceneHoverGUID = nil;
+
+		GlueTooltip:Hide();
+
+		-- Trigger any updates on the character list entry, if visible.
+		local isHighlight = false;
+		CharacterSelectListUtil:UpdateCharacterHighlight(guid, isHighlight);
+	elseif event == "CVAR_UPDATE" then
+		local cvarName, cvarValue = ...;
+		if cvarName == "debugTargetInfo" then
+			CharacterSelectUtil.UpdateShowDebugTooltipInfo(cvarValue == "1");
 		end
 	end
 end
@@ -46,19 +83,22 @@ function CharacterSelectUIMixin:OnUpdate()
 	if self.mapSceneLoading and IsMapSceneLoaded() then
 		self.mapSceneLoading = false;
 
-		-- Set up the model scene first, so that valid model info is at the ready for character UI to reference if needed.
-		self:ShowModelScene();
-
-		-- Set up character UI before any animations are applied.
-		self:SetupCharacterOverlayFrames();
-
-		-- Set poses for each character slot.
 		local selectedCharacterID = CharacterSelectListUtil.GetCharIDFromIndex(CharacterSelect.selectedIndex);
 		local elementData = CharacterSelectCharacterFrame.ScrollBox:FindElementDataByPredicate(function(elementData)
 			return CharacterSelectListUtil.ContainsCharacterID(selectedCharacterID, elementData);
 		end);
 
 		if elementData and elementData.isGroup then
+			for index, childElementData in ipairs(elementData.characterData) do
+				SetMapSceneCharPos(childElementData.characterID, index);
+			end
+
+			-- Set up the model scene first, so that valid model info is at the ready for character UI to reference if needed.
+			self:ShowModelScene();
+
+			-- Set up character UI before any animations are applied.
+			self:SetupCharacterOverlayFrames();
+
 			for _, childElementData in ipairs(elementData.characterData) do
 				if childElementData.characterID == selectedCharacterID then
 					PlayRandomAnimation(childElementData.characterID, Enum.WarbandSceneAnimationEvent.Select);
@@ -74,12 +114,19 @@ function CharacterSelectUIMixin:OnMouseDown(button)
     if button == "LeftButton" then
         self.RotationStartX = GetCursorPosition();
     end
+
+	self.mouseDownMapSceneHoverGUID = self.currentMapSceneHoverGUID;
 end
 
 function CharacterSelectUIMixin:OnMouseUp(button)
 	if button == "LeftButton" then
         self.RotationStartX = nil
     end
+
+	if self.mouseDownMapSceneHoverGUID and self.mouseDownMapSceneHoverGUID == self.currentMapSceneHoverGUID then
+		CharacterSelectListUtil:ClickCharacterFrameByGUID(self.mouseDownMapSceneHoverGUID);
+	end
+	self.mouseDownMapSceneHoverGUID = nil;
 end
 
 function CharacterSelectUIMixin:SetCharacterDisplay(selectedCharacterID)
@@ -90,14 +137,13 @@ function CharacterSelectUIMixin:SetCharacterDisplay(selectedCharacterID)
 	if selectedElementData then
 		if selectedElementData.isGroup then
 			local mapSceneID = 1;
-
-			for index, childElementData in ipairs(selectedElementData.characterData) do
-				SetMapSceneCharPos(childElementData.characterID, index-1);
-			end
-
 			local loadedMapScene = GetLoadedMapScene();
 			local mapSceneLoaded = loadedMapScene and loadedMapScene == mapSceneID;
 			if mapSceneLoaded then
+				for index, childElementData in ipairs(selectedElementData.characterData) do
+					SetMapSceneCharPos(childElementData.characterID, index);
+				end
+
 				-- Set up the model scene first, so that valid model info is at the ready for character UI to reference if needed.
 				self:ShowModelScene();
 
@@ -221,8 +267,8 @@ function CharacterSelectUIMixin:SetupOverlayFrameForCharacter(index, characterID
 
 		-- Now that positions are calculated, actually set up any UI we need.
 		local headerFrame = self.CharacterHeaderFramePool:Acquire();
-		headerFrame:ClearAllPoints();
 
+		headerFrame:ClearAllPoints();
 		headerFrame:SetPoint("BOTTOM", self, "BOTTOMLEFT", centerPoint2D.x, clampedTopY);
 		headerFrame:Initialize(characterID);
 		headerFrame:Show();
@@ -296,13 +342,29 @@ end
 CharacterSelectHeaderMixin = {};
 
 function CharacterSelectHeaderMixin:OnEnter()
-	GlueTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 5, 0);
-	CharacterSelectUtil.SetTooltipForCharacterInfo(self.characterInfo);
-	GlueTooltip:Show();
+	self:SetTooltipAndShow();
+
+	-- Trigger any updates on the character list entry, if visible.
+	local isHighlight = true;
+	CharacterSelectListUtil:UpdateCharacterHighlight(self.characterInfo.guid, isHighlight);
+
+	-- Update character model as needed.
+	MapSceneCharacterHighlightStart(self.characterInfo.guid);
 end
 
 function CharacterSelectHeaderMixin:OnLeave()
 	GlueTooltip:Hide();
+
+	-- Trigger any updates on the character list entry, if visible.
+	local isHighlight = false;
+	CharacterSelectListUtil:UpdateCharacterHighlight(self.characterInfo.guid, isHighlight);
+
+	-- Update character model as needed.
+	MapSceneCharacterHighlightEnd(self.characterInfo.guid);
+end
+
+function CharacterSelectHeaderMixin:OnClick()
+	CharacterSelectListUtil:ClickCharacterFrameByGUID(self.characterInfo.guid);
 end
 
 function CharacterSelectHeaderMixin:Initialize(characterID)
@@ -318,7 +380,19 @@ function CharacterSelectHeaderMixin:Initialize(characterID)
 	if self.characterInfo then
 		self.Name:SetText(self.characterInfo.name);
 		self.Level:SetText(CHARACTER_SELECT_HEADER_INFO:format(self.characterInfo.experienceLevel));
+
+		local guid = self.characterInfo.guid;
+		local timerunningSeasonID = guid and GetCharacterTimerunningSeasonID(guid) or nil;
+		self.TimerunningIcon:SetShown(timerunningSeasonID ~= nil);
+	else
+		self.TimerunningIcon:Hide();
 	end
 
 	self:SetWidth(math.max(self.Name:GetStringWidth(), self.Level:GetStringWidth()));
+end
+
+function CharacterSelectHeaderMixin:SetTooltipAndShow()
+	GlueTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 5, 0);
+	CharacterSelectUtil.SetTooltipForCharacterInfo(self.characterInfo);
+	GlueTooltip:Show();
 end

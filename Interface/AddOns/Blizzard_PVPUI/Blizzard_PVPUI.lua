@@ -189,6 +189,7 @@ function PVPUIFrame_EvaluateHelpTips(self)
 			cvarBitfield = "closedInfoFramesAccountWide",
 			bitfieldFlag = LE_FRAME_TUTORIAL_ACCOUNT_LFG_LIST,
 			targetPoint = HelpTip.Point.TopEdgeCenter,
+			checkCVars = true,
 		};
 		HelpTip:Show(self, helpTipInfo, PVPQueueFrameCategoryButton3);
 	end
@@ -642,7 +643,7 @@ function HonorFrame_UpdateQueueButtons()
 	local HonorFrame = HonorFrame;
 	local canQueue;
 	local arenaID;
-	local isBrawl;
+	local isBrawl, isSpecialBrawl;
 	if ( HonorFrame.type == "specific" ) then
 		if ( HonorFrame.SpecificScrollBox.selectionID ) then
 			canQueue = true;
@@ -705,7 +706,7 @@ function HonorFrame_UpdateQueueButtons()
 		local _, _, playerPvPItemLevel = GetAverageItemLevel();
 		if (brawlHasMinItemLevelRequirement and playerPvPItemLevel < brawlInfo.minItemLevel) then
 			canQueue = false;
-			disabledReason = INSTANCE_UNAVAILABLE_SELF_PVP_GEAR_TOO_LOW:format("", brawlInfo.minItemLevel, playerPvPItemLevel);
+			disabledReason = INSTANCE_UNAVAILABLE_SELF_PVP_GEAR_TOO_LOW:format(brawlInfo.minItemLevel, playerPvPItemLevel);
 		end
 	end
 
@@ -1272,7 +1273,6 @@ local function GetFirstAvailableConquestButton()
 end
 
 function ConquestFrame_Update(self)
-	local isOffseason = GetCurrentArenaSeason() == NO_ARENA_SEASON;
 	if self.seasonState == SEASON_STATE_PRESEASON then
 		ConquestFrame.NoSeason:Show();
 		ConquestFrame.Disabled:Hide();
@@ -1388,17 +1388,30 @@ function ConquestFrame_UpdateJoinButton()
 			local minItemLevel = C_PvP.GetRatedSoloShuffleMinItemLevel();
 			local _, _, playerPvPItemLevel = GetAverageItemLevel();
 			if (playerPvPItemLevel < minItemLevel) then
-				button.tooltip = format(_G["INSTANCE_UNAVAILABLE_SELF_PVP_GEAR_TOO_LOW"], "", minItemLevel, playerPvPItemLevel);
+				button.tooltip = INSTANCE_UNAVAILABLE_SELF_PVP_GEAR_TOO_LOW:format(minItemLevel, playerPvPItemLevel);
 			else
 				button.tooltip = nil;
 				button:Enable();
 				return;
 			end
 		elseif ( ConquestFrame.selectedButton.id == RATED_BG_BLITZ_BUTTON_ID ) then
+			local minItemLevel = C_PvP.GetRatedSoloRBGMinItemLevel();
+			local _, _, playerPvPItemLevel = GetAverageItemLevel();
 			local inGroup = groupSize >= 1;
-			if inGroup and not UnitIsGroupLeader("player") then 
-				button.tooltip = PVP_NOT_LEADER;
-			else
+			local partyMinItemLevel, playerWithLowestItemLevel = C_PartyInfo.GetMinItemLevel(Enum.AvgItemLevelCategories.PvP);
+			local isGroupLeader = UnitIsGroupLeader("player");
+			local playerItemLevelBelowMinimum = (playerPvPItemLevel < minItemLevel);
+			if inGroup and isGroupLeader and (partyMinItemLevel < minItemLevel) then
+				button.tooltip = INSTANCE_UNAVAILABLE_OTHER_GEAR_TOO_LOW:format(playerWithLowestItemLevel, minItemLevel, partyMinItemLevel);
+			elseif inGroup and not isGroupLeader then
+				if playerItemLevelBelowMinimum then
+					button.tooltip = INSTANCE_UNAVAILABLE_SELF_PVP_GEAR_TOO_LOW:format(minItemLevel, playerPvPItemLevel);
+				else 
+					button.tooltip = PVP_NOT_LEADER;
+				end
+			elseif not inGroup and playerItemLevelBelowMinimum then
+				button.tooltip = INSTANCE_UNAVAILABLE_SELF_PVP_GEAR_TOO_LOW:format(minItemLevel, playerPvPItemLevel);
+			else	
 				button.tooltip = nil;
 				button:Enable();
 				return;
@@ -1671,15 +1684,15 @@ end
 function PVPRewardEnlistmentBonus_OnEnter(self)
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 	local spellName = C_Spell.GetSpellName(BATTLEGROUND_ENLISTMENT_BONUS);
-	local spellDesc = GetSpellDescription(BATTLEGROUND_ENLISTMENT_BONUS);
+	local spellDesc = C_Spell.GetSpellDescription(BATTLEGROUND_ENLISTMENT_BONUS);
 	GameTooltip:SetText(spellName);
 	GameTooltip:AddLine(spellDesc, 1, 1, 1, true);
 	GameTooltip:Show();
 end
 
 function PvPObjectiveBannerFrame_PlayBanner(self, data)
-	name = data.name or "";
-	description = data.description or "";
+	local name = data.name or "";
+	local description = data.description or "";
 
 	self.Title:SetText(name);
 	self.TitleFlash:SetText(name);
@@ -2379,6 +2392,7 @@ function PVPQuestRewardMixin:Init(questID)
 			local reward = { };
 			reward.texture = texture;
 			reward.quality = quality;
+			tinsert(rewards.itemRewards, reward);
 		end
 
 		if (rewards.itemRewards and #rewards.itemRewards > 1) then

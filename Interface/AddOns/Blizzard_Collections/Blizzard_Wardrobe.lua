@@ -829,7 +829,6 @@ function TransmogSlotButtonMixin:Update()
 			end
 		end
 
-		local baseTexture = GetInventoryItemTexture("player", self.transmogLocation.slotID);
 		self.Icon:SetTexture(baseTexture);
 	else
 		if ( self.HiddenVisualIcon ) then
@@ -1620,6 +1619,7 @@ function WardrobeItemsCollectionMixin:CheckHelpTip()
 			cvarBitfield = "closedInfoFramesAccountWide",
 			bitfieldFlag = LE_FRAME_TUTORIAL_ACCOUNT_TRANSMOG_SETS_TAB,
 			targetPoint = HelpTip.Point.BottomEdgeCenter,
+			checkCVars = true,
 		};
 		HelpTip:Show(WardrobeCollectionFrame, helpTipInfo, WardrobeCollectionFrame.SetsTab);
 	end
@@ -2609,8 +2609,6 @@ function WardrobeItemsModelMixin:GetSourceInfoForTracking()
 		local index = CollectionWardrobeUtil.GetValidIndexForNumSources(sourceIndex, #sources);
 		return sources[index];
 	end
-
-	return nil;
 end
 
 function WardrobeItemsModelMixin:OnMouseDown(button)
@@ -4676,7 +4674,7 @@ function WardrobeSetsTransmogMixin:UpdateSets()
 			if ( model.setID ~= set.setID ) then
 				model:Undress();
 				local sourceData = SetsDataProvider:GetSetSourceData(set.setID);
-				for i, primaryAppearance in ipairs(sourceData.primaryAppearances) do
+				for _, primaryAppearance in ipairs(sourceData.primaryAppearances) do
 					model:TryOn(primaryAppearance.appearanceID);
 				end
 			end
@@ -4738,7 +4736,7 @@ function WardrobeSetsTransmogMixin:LoadSet(setID)
 	local waitingOnData = false;
 	local transmogSources = { };
 	local primaryAppearances = C_TransmogSets.GetSetPrimaryAppearances(setID);
-	for i, primaryAppearance in ipairs(primaryAppearances) do
+	for _, primaryAppearance in ipairs(primaryAppearances) do
 		local sourceID = primaryAppearance.appearanceID;
 		local sourceInfo = C_TransmogCollection.GetSourceInfo(sourceID);
 		local slot = C_Transmog.GetSlotForInventoryType(sourceInfo.invType);
@@ -4747,7 +4745,7 @@ function WardrobeSetsTransmogMixin:LoadSet(setID)
 		local index = CollectionWardrobeUtil.GetDefaultSourceIndex(slotSources, sourceID);
 		transmogSources[slot] = slotSources[index].sourceID;
 
-		for i, slotSourceInfo in ipairs(slotSources) do
+		for _, slotSourceInfo in ipairs(slotSources) do
 			if ( not slotSourceInfo.name ) then
 				waitingOnData = true;
 			end

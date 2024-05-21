@@ -623,7 +623,7 @@ function UIDropDownMenu_AddButton(info, level)
 	end
 
 	-- If no open frame then set the frame to the currently initialized frame
-	frame = frame or UIDROPDOWNMENU_INIT_MENU;
+	local frame = frame or UIDROPDOWNMENU_INIT_MENU;
 
 	if ( info.leftPadding ) then
 		xPos = xPos + info.leftPadding;
@@ -735,7 +735,7 @@ function UIDropDownMenu_AddButton(info, level)
 	local customFrameCount = listFrame.customFrames and #listFrame.customFrames or 0;
 	local height = ((index - customFrameCount) * buttonHeight) + (UIDROPDOWNMENU_BORDER_HEIGHT * 2);
 	for frameIndex = 1, customFrameCount do
-		local frame = listFrame.customFrames[frameIndex];
+		frame = listFrame.customFrames[frameIndex];
 		height = height + frame:GetPreferredEntryHeight();
 	end
 
@@ -1068,6 +1068,7 @@ function ToggleDropDownMenu(level, value, dropDownFrame, anchorName, xOffset, yO
 	end
 	if ( listFrame:IsShown() and (UIDROPDOWNMENU_OPEN_MENU == tempFrame) ) then
 		listFrame:Hide();
+		return false;
 	else
 		-- Set the dropdownframe scale
 		local uiScale;
@@ -1192,7 +1193,7 @@ function ToggleDropDownMenu(level, value, dropDownFrame, anchorName, xOffset, yO
 		UIDropDownMenu_Initialize(dropDownFrame, dropDownFrame.initialize, nil, level, menuList);
 		-- If no items in the drop down don't show it
 		if ( listFrame.numButtons == 0 ) then
-			return;
+			return false;
 		end
 
 		listFrame.onShow = dropDownFrame.listFrameOnShow;
@@ -1204,7 +1205,7 @@ function ToggleDropDownMenu(level, value, dropDownFrame, anchorName, xOffset, yO
 		-- Hack will fix this in next revision of dropdowns
 		if ( not x or not y ) then
 			listFrame:Hide();
-			return;
+			return false;
 		end
 
 		listFrame.onHide = dropDownFrame.onHide;
@@ -1277,6 +1278,7 @@ function ToggleDropDownMenu(level, value, dropDownFrame, anchorName, xOffset, yO
 			listFrame.parentID = anchorFrame:GetID();
 			listFrame:SetPoint(point, anchorFrame, relativePoint, xOffset, yOffset);
 		end
+		return true;
 	end
 end
 

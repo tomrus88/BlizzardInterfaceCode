@@ -189,7 +189,7 @@ local PartyInfo =
 
 			Returns =
 			{
-				{ Name = "restrictToAssistants", Type = "bool", Nilable = false },
+				{ Name = "restrictTo", Type = "RestrictPingsTo", Nilable = false },
 			},
 		},
 		{
@@ -218,6 +218,15 @@ local PartyInfo =
 		},
 		{
 			Name = "IsDelveComplete",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "isDelveComplete", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsDelveInProgress",
 			Type = "Function",
 
 			Returns =
@@ -286,7 +295,7 @@ local PartyInfo =
 
 			Arguments =
 			{
-				{ Name = "restrictToAssistants", Type = "bool", Nilable = false },
+				{ Name = "restrictTo", Type = "RestrictPingsTo", Nilable = false },
 			},
 		},
 	},
