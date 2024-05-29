@@ -1,6 +1,27 @@
 
 MAX_REPUTATION_REACTION = 8;
 
+local ReputationFilterSortTypeOrder = {
+	Enum.ReputationSortType.None,
+	Enum.ReputationSortType.Account,
+	Enum.ReputationSortType.Character,
+};
+
+local function GetReputationSortTypeName(sortType)
+	local ReputationSortTypeNames = {
+		[Enum.ReputationSortType.None] = REPUTATION_SORT_TYPE_SHOW_ALL,
+		[Enum.ReputationSortType.Account] = REPUTATION_SORT_TYPE_ACCOUNT,
+		-- [Enum.ReputationSortType.Character] = UnitName("player"),
+	};
+
+	-- We don't store the player's name in case it is modified/updated during a play session
+	if sortType == Enum.ReputationSortType.Character then
+		return UnitName("player");
+	end
+
+	return ReputationSortTypeNames[sortType];
+end
+
 ReputationFrameMixin = {};
 
 function ReputationFrameMixin:OnLoad()
@@ -48,6 +69,10 @@ function ReputationFrameMixin:OnLoad()
 	view:SetPadding(topPadding, bottomPadding, leftPadding, rightPadding, elementSpacing);
 
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.ScrollBox, self.ScrollBar, view);
+
+	self.ScrollBox:RegisterCallback(ScrollBoxListMixin.Event.OnDataRangeChanged, GenerateClosure(self.RefreshAccountWideReputationTutorial), self);
+
+	self.filterDropDown:SetWidth(130);
 end
 
 local ReputationFrameEvents = {
@@ -56,6 +81,22 @@ local ReputationFrameEvents = {
 	"QUEST_LOG_UPDATE",
 	"UPDATE_FACTION",
 }
+
+local function IsSortTypeSelected(sortType)
+	return C_Reputation.GetReputationSortType() == sortType;
+end
+
+local function SetSortTypeSelected(sortType)
+	C_Reputation.SetReputationSortType(sortType);
+end
+
+local function IsLegacyRepSelected()
+	return C_Reputation.AreLegacyReputationsShown();
+end
+
+local function SetLegacyRepSelected()
+	C_Reputation.SetLegacyReputationsShown(not IsLegacyRepSelected()); 
+end
 
 function ReputationFrameMixin:OnShow()
 	FrameUtil.RegisterFrameForEvents(self, ReputationFrameEvents);
@@ -66,6 +107,21 @@ function ReputationFrameMixin:OnShow()
 		HelpTip:Hide(parent, REPUTATION_EXALTED_PLUS_HELP);
 		SetCVarBitfield("closedInfoFrames",	LE_FRAME_TUTORIAL_REPUTATION_EXALTED_PLUS, true);
 	end
+
+	self.filterDropDown:SetupMenu(function(dropdown, rootDescription)
+		rootDescription:SetTag("MENU_REPUTATION_FRAME_FILTER");
+
+		for index, sortType in ipairs(ReputationFilterSortTypeOrder) do
+			rootDescription:CreateRadio(GetReputationSortTypeName(sortType), IsSortTypeSelected, SetSortTypeSelected, sortType);
+		end
+
+		local playerOwnsCurrentExpansion = GetExpansionLevel() == GetServerExpansionLevel();
+		if playerOwnsCurrentExpansion then
+			rootDescription:CreateDivider();
+			local checkbox = rootDescription:CreateCheckbox(REPUTATION_CHECKBOX_SHOW_LEGACY_REPUTATIONS, IsLegacyRepSelected, SetLegacyRepSelected);
+			checkbox:SetSelectionIgnored();
+		end
+	end);
 end
 
 function ReputationFrameMixin:OnHide()
@@ -93,88 +149,31 @@ function ReputationFrameMixin:Update()
 	self.ReputationDetailFrame:Refresh();
 end
 
-ReputationFilterDropDownMixin = {};
+function ReputationFrameMixin:RefreshAccountWideReputationTutorial()
+	HelpTip:Hide(self, ACCOUNT_WIDE_REPUTATION_TUTORIAL);
 
-function ReputationFilterDropDownMixin:OnLoad()
-	local width, height = 90, 40;
-	UIDropDownMenu_SetWidth(self, width, height, padding);
-
-	local xOffset, yOffset = 0, 0;
-	UIDropDownMenu_SetAnchor(self, xOffset, yOffset, "TOPRIGHT", self, "BOTTOMRIGHT");
-
-	self:SetUpDropDownText();
-end
-
-function ReputationFilterDropDownMixin:SetUpDropDownText()
-	self.Text:ClearAllPoints();
-	local xOffset, yOffset = -43, 2;
-	self.Text:SetPoint("RIGHT", self.Right, "RIGHT", xOffset, yOffset);
-	xOffset, yOffset = 5, 2;
-	self.Text:SetPoint("LEFT", self.Left, "RIGHT", xOffset, yOffset);
-
-	self.Text:SetJustifyH("LEFT");
-end
-
-function ReputationFilterDropDownMixin:OnShow()	
-	UIDropDownMenu_Initialize(self, ReputationFilterDropDownMixin.InitializeDropDown);
-	UIDropDownMenu_Refresh(self);
-end
-
-local ReputationFilterSortTypeOrder = {
-	Enum.ReputationSortType.None,
-	Enum.ReputationSortType.Account,
-	Enum.ReputationSortType.Character,
-};
-
-local function GetReputationSortTypeName(sortType)
-	local ReputationSortTypeNames = {
-		[Enum.ReputationSortType.None] = REPUTATION_SORT_TYPE_SHOW_ALL,
-		[Enum.ReputationSortType.Account] = REPUTATION_SORT_TYPE_ACCOUNT,
-		-- [Enum.ReputationSortType.Character] = UnitName("player"),
-	};
-
-	-- We don't store the player's name in case it is modified/updated during a play session
-	if sortType == Enum.ReputationSortType.Character then
-		return UnitName("player");
-	end
-
-	return ReputationSortTypeNames[sortType];
-end
-
-function ReputationFilterDropDownMixin:InitializeDropDown()
-	for index, sortType in ipairs(ReputationFilterSortTypeOrder) do
-		local buttonInfo = UIDropDownMenu_CreateInfo();
-		buttonInfo.text = GetReputationSortTypeName(sortType);
-		buttonInfo.value = sortType;
-		buttonInfo.checked = function(button) return C_Reputation.GetReputationSortType() == button.value end;
-		buttonInfo.func = function(button) self:SetReputationSortType(button.value) end;
-		UIDropDownMenu_AddButton(buttonInfo);
-	end
-
-	local playerOwnsCurrentExpansion = GetExpansionLevel() == GetServerExpansionLevel();
-	if not playerOwnsCurrentExpansion then
+	local tutorialAcknowledged = GetCVarBitfield("closedInfoFramesAccountWide", LE_FRAME_TUTORIAL_ACCOUNT_WIDE_REPUTATION);
+	if tutorialAcknowledged then
 		return;
 	end
 
-	UIDropDownMenu_AddSeparator();
+	local accountWideReputation = self.ScrollBox:FindFrameByPredicate(function(button, elementData) return elementData.isAccountWide; end);
+	if not accountWideReputation then
+		return;
+	end
 
-	local buttonInfo = UIDropDownMenu_CreateInfo();
-	buttonInfo.text = REPUTATION_CHECKBOX_SHOW_LEGACY_REPUTATIONS;
-	buttonInfo.checked = C_Reputation.AreLegacyReputationsShown;
-	buttonInfo.func = function(_, _, _, currentValue) self:SetLegacyReputationsShown(not currentValue) end;
-	buttonInfo.isNotRadio = true;
-	buttonInfo.ignoreAsMenuSelection = true;
-	UIDropDownMenu_AddButton(buttonInfo);
-end
-
-function ReputationFilterDropDownMixin:SetReputationSortType(sortType)
-	C_Reputation.SetReputationSortType(sortType);
-	UIDropDownMenu_Refresh(self);
-end
-
-function ReputationFilterDropDownMixin:SetLegacyReputationsShown(value)
-	C_Reputation.SetLegacyReputationsShown(value); 
-	UIDropDownMenu_Refresh(self);
+	local helpTipInfo = {
+		text = ACCOUNT_WIDE_REPUTATION_TUTORIAL,
+		buttonStyle = HelpTip.ButtonStyle.Close,
+		cvarBitfield = "closedInfoFramesAccountWide",
+		bitfieldFlag = LE_FRAME_TUTORIAL_ACCOUNT_WIDE_REPUTATION,
+		targetPoint = HelpTip.Point.RightEdgeCenter,
+		offsetX = 40,
+		alignment = HelpTip.Alignment.Center,
+		acknowledgeOnHide = false,
+		checkCVars = true,
+	};
+	HelpTip:Show(self, helpTipInfo, accountWideReputation);
 end
 
 local ReputationType = EnumUtil.MakeEnum(

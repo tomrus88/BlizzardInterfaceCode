@@ -10,6 +10,10 @@ local CALL_PET_SPELL_IDS = { -- Each "active" pet slot corresponds to a "call pe
 local ANIMAL_COMPANION_NODE_ID = 79947; -- BM talent required for secondary pet slot
 local STABLE_FRAME_SWAP_TIMEOUT_SECONDS = 0.3; -- 300ms
 
+local STABLED_PETS_FIRST_SLOT_LUA_INDEX = Constants.PetConsts.STABLED_PETS_FIRST_SLOT_INDEX + 1;
+local EXTRA_PET_STABLE_SLOT_LUA_INDEX = Constants.PetConsts.EXTRA_PET_STABLE_SLOT + 1;
+local MAX_PET_SLOT_LUA_INDEX = Constants.PetConsts.NUM_PET_SLOTS + 1;
+
 local STABLE_FRAME_ON_LOAD_EVENTS = {
 	"PET_STABLE_SHOW",
 	"PET_STABLE_CLOSED",
@@ -34,6 +38,8 @@ local StableTogglePetButton = EnumUtil.MakeEnum(
 	"Stable",
 	"MakeActive"
 );
+
+local defaultSortMode = PetSortMode.Specialization;
 
 local backgroundForPetSpec = {
 	[STABLE_PET_SPEC_CUNNING] = "hunter-stable-bg-art_cunning",
@@ -72,7 +78,7 @@ local function SetPortraitTextureFromCreatureDisplayIDFlipped(texture, creatureD
 end
 
 local function IsActivePetSlot(slot)
-	return slot > 0 and slot < Constants.PetConsts.STABLED_PETS_FIRST_SLOT_INDEX;
+	return slot > 0 and slot < EXTRA_PET_STABLE_SLOT_LUA_INDEX;
 end
 
 local function GetSummonedPetStableSlot()
@@ -93,7 +99,7 @@ local function GetSummonedPet()
 end
 
 local function FindFirstPet()
-	for i=1, Constants.PetConsts.NUM_PET_SLOTS do
+	for i=1, MAX_PET_SLOT_LUA_INDEX do
 		local petInfo = C_StableInfo.GetStablePetInfo(i);
 		if petInfo then
 			return petInfo;
@@ -106,16 +112,28 @@ local function FindFirstUnusedStableSlot()
 		return;
 	end
 
-	for i=Constants.PetConsts.STABLED_PETS_FIRST_SLOT_INDEX, Constants.PetConsts.NUM_PET_SLOTS do
+	local targetSlot = nil;
+
+	for i=STABLED_PETS_FIRST_SLOT_LUA_INDEX, MAX_PET_SLOT_LUA_INDEX do
 		local petInfo = C_StableInfo.GetStablePetInfo(i);
 		if not petInfo then
-			StableFrame.swapTimeout = GetTime() + STABLE_FRAME_SWAP_TIMEOUT_SECONDS;
-			return i;
+			targetSlot = i;
+			break;
 		end
 	end
-	-- If all slots are full, and we're unable to get petData for the intended swap (e.g. on drag+hover)...
-	-- ... then just swap with the first stable slot.
-	return Constants.PetConsts.STABLED_PETS_FIRST_SLOT_INDEX;
+
+	if not targetSlot then
+		if not C_StableInfo.GetStablePetInfo(EXTRA_PET_STABLE_SLOT_LUA_INDEX) then
+			-- If we found no empty slots but the extra pet slot is open use that
+			targetSlot = EXTRA_PET_STABLE_SLOT_LUA_INDEX;
+		else
+			-- Otherwise just swap with the first stable slot
+			targetSlot = STABLED_PETS_FIRST_SLOT_LUA_INDEX;
+		end
+	end
+
+	StableFrame.swapTimeout = GetTime() + STABLE_FRAME_SWAP_TIMEOUT_SECONDS;
+	return targetSlot;
 end
 
 local function IsActivePetSlotUnlocked(activePetSlot)
@@ -139,7 +157,7 @@ local function FindFirstUnusedActivePetSlot()
 end
 
 local function GetBeastmasterSecondaryPet()
-	return C_StableInfo.GetStablePetInfo(Constants.PetConsts.STABLED_PETS_FIRST_SLOT_INDEX);
+	return C_StableInfo.GetStablePetInfo(EXTRA_PET_STABLE_SLOT_LUA_INDEX);
 end
 
 local function GetSelectedPet()
@@ -156,8 +174,12 @@ local function ClearSelectedPetNewSlot()
 	StableFrame.selectedPetNewSlot = nil;
 end
 
-local function GetStableFilterDropdown()
-	return StableFrame.StabledPetList.FilterBar.FilterButton.DropDown;
+local function GetSortMode()
+	return tonumber(GetCVar("petStableSort"));
+end
+
+local function GetShowExoticOnly()
+	return GetCVarBool("petStableShowExoticOnly");
 end
 
 local function ClearPetCursor()
@@ -185,6 +207,52 @@ function StableFrameMixin:OnLoad()
 	FrameUtil.RegisterFrameForEvents(self, STABLE_FRAME_ON_LOAD_EVENTS);
 	EventRegistry:RegisterCallback("StableFrameMixin.PetSelected", self.OnPetSelected, self);
 	EventRegistry:RegisterCallback("StableFrameMixin.PetSwapRequested", self.OnPetSwapRequested, self);
+	
+	EventUtil.ContinueOnVariablesLoaded(function()
+		-- Depends on server-stored variables.
+		self:InitFilterDropdown();
+	end)
+end
+
+function StableFrameMixin:InitFilterDropdown()
+	local petList = self.StabledPetList;
+	local dropdown = petList.FilterBar.FilterDropdown;
+	dropdown:SetIsDefaultCallback(function()
+		return (not GetShowExoticOnly()) and (GetSortMode() == defaultSortMode);
+	end);
+	
+	dropdown:SetDefaultCallback(function()
+		if GetShowExoticOnly() then
+			petList:ToggleShowExoticOnly();
+		end
+		petList:SetSortMode(defaultSortMode);
+	end);
+
+	local function IsSortChecked(sortMode)
+		return GetSortMode() == sortMode;
+	end
+
+	local function SetSortChecked(sortMode)
+		petList:SetSortMode(sortMode);
+	end
+
+	local function SetShowExoticOnly()
+		petList:ToggleShowExoticOnly();
+	end
+
+	dropdown:SetupMenu(function(dropdown, rootDescription)
+		rootDescription:SetTag("MENU_STABLE_FILTER");
+
+		rootDescription:CreateTitle(STABLE_FILTER_LABEL_TYPE);
+
+		rootDescription:CreateCheckbox(STABLE_EXOTIC_TYPE_LABEL, GetShowExoticOnly, SetShowExoticOnly);
+		
+		local submenu = rootDescription:CreateButton(STABLE_FILTER_SORT_BY_LABEL);
+		submenu:CreateRadio(STABLE_SORT_SPECIALIZATION_LABEL, IsSortChecked, SetSortChecked, PetSortMode.Specialization);
+		submenu:CreateRadio(STABLE_SORT_TYPE_LABEL, IsSortChecked, SetSortChecked, PetSortMode.Family);
+		submenu:CreateRadio(STABLE_SORT_NAME_LABEL, IsSortChecked, SetSortChecked, PetSortMode.Name);
+		submenu:CreateRadio(STABLE_SORT_NAME_REVERSE_LABEL, IsSortChecked, SetSortChecked, PetSortMode.NameReverse);
+	end);
 end
 
 function StableFrameMixin:OnPetSelected(pet)
@@ -760,35 +828,21 @@ function StableStabledPetListMixin:OnLoad()
 end
 
 function StableStabledPetListMixin:OnShow()
-	self.sortMode = tonumber(GetCVar("petStableSort")) or PetSortMode.Specialization;
-	self.showExoticOnly = GetCVarBool("petStableShowExoticOnly") or false;
 	self.collapsedCategories = {};
 
 	self.ScrollBox:ScrollToBegin();
-	StableFilterButton_UpdateVisibility();
 end
 
-function StableStabledPetListMixin:SetSortMode(mode)
+function StableStabledPetListMixin:SetSortMode(sortMode)
 	self.collapsedCategories = {};
 
-	local defaultMode = PetSortMode.Name;
-	self.sortMode = mode or defaultMode;
-	SetCVar("petStableSort", self.sortMode);
+	SetCVar("petStableSort", sortMode);
 	self:UpdateDisplayedPets();
-end
-
-function StableStabledPetListMixin:GetSortMode()
-	return self.sortMode;
 end
 
 function StableStabledPetListMixin:ToggleShowExoticOnly()
-	self.showExoticOnly = not self.showExoticOnly;
-	SetCVar("petStableShowExoticOnly", self.showExoticOnly and 1 or 0);
+	SetCVar("petStableShowExoticOnly", GetShowExoticOnly() and 0 or 1);
 	self:UpdateDisplayedPets();
-end
-
-function StableStabledPetListMixin:GetShowExoticOnly()
-	return self.showExoticOnly;
 end
 
 function StableStabledPetListMixin:SetSearchString(string)
@@ -801,7 +855,8 @@ function StableStabledPetListMixin:Refresh()
 
 	-- If category was collapsed before, keep it collapased
 	local dataProvider = self.ScrollBox:GetDataProvider();
-	local validSortMode = self.sortMode == PetSortMode.Specialization or self.sortMode == PetSortMode.Family;
+	local sortMode = GetSortMode();
+	local validSortMode = sortMode == PetSortMode.Specialization or sortMode == PetSortMode.Family;
 	if dataProvider and validSortMode then
 		for _, node in ipairs(dataProvider:GetRootNode().nodes) do
 			local data = node:GetData();
@@ -826,11 +881,12 @@ function StableStabledPetListMixin:BuildListCategories()
 		nonfavorites = {displayName = STABLE_PET_UNCATEGORIZED, sortOrder = nonFavoritesSortOrder}, -- nonfavorites is only displayed when sort mode is alphabetical or reverse alphabetical
 	};
 
-	if self.sortMode == PetSortMode.Specialization then
+	local sortMode = GetSortMode();
+	if sortMode == PetSortMode.Specialization then
 		for i, pet in ipairs(C_StableInfo.GetStabledPetList()) do
 			categories[pet.specialization] = {displayName = pet.specialization, sortOrder = defaultSortOrder};
 		end
-	elseif self.sortMode == PetSortMode.Family then
+	elseif sortMode == PetSortMode.Family then
 		for i, pet in ipairs(C_StableInfo.GetStabledPetList()) do 
 			categories[pet.familyName] = {displayName = pet.familyName, sortOrder = defaultSortOrder};
 		end
@@ -855,11 +911,13 @@ local sortFunctions = {
 function StableStabledPetListMixin:UpdateDisplayedPets()
 	local data = self:BuildListCategories();
 	local dataProvider = CreateTreeDataProvider();
-	local isNameSortMode = self.sortMode == PetSortMode.Name or self.sortMode == PetSortMode.NameReverse;
+	local sortMode = GetSortMode();
+	local showExoticOnly = GetShowExoticOnly();
+	local isNameSortMode = sortMode == PetSortMode.Name or sortMode == PetSortMode.NameReverse;
 
 	-- Put data in a shape dataProvider expects
 	for i, pet in ipairs(self.pets) do
-		if (self.showExoticOnly and pet.isExotic) or (not self.showExoticOnly) then
+		if (showExoticOnly and pet.isExotic) or (not showExoticOnly) then
 			if self:PetPassesSearch(pet) then
 				-- Name sort modes don't have categories, it is just a flat list
 				if C_StableInfo.IsPetFavorite(pet.slotID) then
@@ -867,9 +925,9 @@ function StableStabledPetListMixin:UpdateDisplayedPets()
 				elseif isNameSortMode then
 					tinsert(data.nonfavorites, pet);
 				-- When a sort mode has categories, put pets into those cateogry "buckets"
-				elseif self.sortMode == PetSortMode.Specialization then
+				elseif sortMode == PetSortMode.Specialization then
 					tinsert(data[pet.specialization], pet);
-				elseif self.sortMode == PetSortMode.Family then
+				elseif sortMode == PetSortMode.Family then
 					tinsert(data[pet.familyName], pet);
 				end
 			end
@@ -877,8 +935,8 @@ function StableStabledPetListMixin:UpdateDisplayedPets()
 	end
 
 	if isNameSortMode then
-		table.sort(data.favorites, sortFunctions[self.sortMode]);
-		table.sort(data.nonfavorites, sortFunctions[self.sortMode]);
+		table.sort(data.favorites, sortFunctions[sortMode]);
+		table.sort(data.nonfavorites, sortFunctions[sortMode]);
 	end
 
 	-- Insert into dataProvider
@@ -937,107 +995,6 @@ function StableStabledPetListMixin:PetPassesSearch(pet)
 	end
 
 	return foundPet;
-end
-
-StableFilterButtonMixin = {};
-
-function StableFilterButtonMixin:OnClick()
-	local dropDownLevel, value = 1, nil;
-	ToggleDropDownMenu(dropDownLevel, value, self.DropDown, self, 100, 25);
-end
-
-StableFilterDropDownMixin = {};
-
-function StableFilterDropDownMixin:OnLoad()
-	UIDropDownMenu_Initialize(self, self.InitializeDropDown, "MENU");
-end
-
-function StableFilterDropDownMixin:OnShow()
-	StableFilterButton_UpdateVisibility();
-end
-
-function StableFilterDropDownMixin:GetStabledPetList()
-	return self:GetParent():GetParent():GetParent();
-end
-
-function StableFilterDropDownMixin:SetStabledPetListSortMode(mode)
-	self:GetStabledPetList():SetSortMode(mode);
-end
-
-function StableFilterDropDownMixin:GetStabledPetListSortMode()
-	return self:GetStabledPetList():GetSortMode();
-end
-
-function StableFilterDropDownMixin:SetStabledPetListShowExoticOnly()
-	self:GetStabledPetList():ToggleShowExoticOnly();
-end
-
-function StableFilterDropDownMixin:GetStabledPetListShowExoticOnly()
-	return self:GetStabledPetList():GetShowExoticOnly();
-end
-
-function StableFilterButton_ResetFilters()
-	local filterDropdown = GetStableFilterDropdown();
-
-	if filterDropdown:GetStabledPetListShowExoticOnly() == true then
-		filterDropdown:SetStabledPetListShowExoticOnly();
-	end
-	filterDropdown:SetStabledPetListSortMode(PetSortMode.Specialization);
-	StableFrame.StabledPetList.FilterBar.FilterButton.ResetButton:Hide();
-end
-
-function StableFilterButton_UsingDefaultFilters()
-	local filterDropdown = GetStableFilterDropdown();
-	return filterDropdown:GetStabledPetListShowExoticOnly() == false and filterDropdown:GetStabledPetListSortMode() == PetSortMode.Specialization;
-end
-
-function StableFilterButton_UpdateVisibility()
-	StableFrame.StabledPetList.FilterBar.FilterButton.ResetButton:SetShown(not StableFilterButton_UsingDefaultFilters());
-end
-
-function StableFilterDropDownMixin:InitializeDropDown(level)
-	local filterSystem = {
-		onUpdate = StableFilterButton_UpdateVisibility,
-		filters = {
-			{ type = FilterComponent.Title, text = STABLE_FILTER_LABEL_TYPE, },
-			{ type = FilterComponent.Checkbox,
-			text = STABLE_EXOTIC_TYPE_LABEL, 
-			set=function() self:SetStabledPetListShowExoticOnly() end, 
-			isSet=function() return self:GetStabledPetListShowExoticOnly() == true; end, 
-			hideMenuOnClick = false,
-		  	},
-			{ type = FilterComponent.Submenu, text = STABLE_FILTER_SORT_BY_LABEL, value = 1, childrenInfo = {
-				filters = {
-					{ type = FilterComponent.Radio,
-						text = STABLE_SORT_SPECIALIZATION_LABEL, 
-						set=function() self:SetStabledPetListSortMode(PetSortMode.Specialization) end, 
-						isSet=function() return self:GetStabledPetListSortMode() == PetSortMode.Specialization; end, 
-						hideMenuOnClick = false,
-					},
-					{ type = FilterComponent.Radio, 
-						text = STABLE_SORT_TYPE_LABEL,
-						set=function() self:SetStabledPetListSortMode(PetSortMode.Family) end,
-						isSet=function() return self:GetStabledPetListSortMode() == PetSortMode.Family; end, 
-						hideMenuOnClick = false,
-					},
-					{ type = FilterComponent.Radio,
-						text = STABLE_SORT_NAME_LABEL, 
-						set=function() self:SetStabledPetListSortMode(PetSortMode.Name) end, 
-						isSet=function() return self:GetStabledPetListSortMode() == PetSortMode.Name; end, 
-						hideMenuOnClick = false,
-					},
-					{ type = FilterComponent.Radio,
-						text = STABLE_SORT_NAME_REVERSE_LABEL, 
-						set=function() self:SetStabledPetListSortMode(PetSortMode.NameReverse) end, 
-						isSet=function() return self:GetStabledPetListSortMode() == PetSortMode.NameReverse; end, 
-						hideMenuOnClick = false,
-					},
-				}
-			}},
-		},
-	};
-
-	FilterDropDownSystem.Initialize(self, filterSystem, level);
 end
 
 StableFrame_HelpPlate = {

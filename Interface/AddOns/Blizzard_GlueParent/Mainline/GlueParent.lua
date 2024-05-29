@@ -9,12 +9,13 @@ GLUE_SCREENS = {
 };
 
 GLUE_SECONDARY_SCREENS = {
-	["cinematics"] =	{ frame = "CinematicsMenu", 	playMusic = true,	playAmbience = false,	fullScreen = false,	showSound = SOUNDKIT.GS_TITLE_OPTIONS },
-	["credits"] = 		{ frame = "CreditsFrame", 		playMusic = false,	playAmbience = false,	fullScreen = true,	showSound = SOUNDKIT.GS_TITLE_CREDITS },
+	["cinematics"] =		{ frame = "CinematicsMenu", 				playMusic = true,	playAmbience = false,	fullScreen = false,	showSound = SOUNDKIT.GS_TITLE_OPTIONS },
+	["credits"] = 			{ frame = "CreditsFrame", 					playMusic = false,	playAmbience = false,	fullScreen = true,	showSound = SOUNDKIT.GS_TITLE_CREDITS },
 	-- Bug 477070 We have some rare race condition crash in the sound engine that happens when the MovieFrame's "showSound" sound plays at the same time the movie audio is starting.
 	-- Removing the showSound from the MovieFrame in attempt to avoid the crash, until we can actually find and fix the bug in the sound engine.
-	["movie"] = 		{ frame = "MovieFrame", 		playMusic = false,	playAmbience = false,	fullScreen = true },
-	["options"] = 		{ frame = "SettingsPanel",		playMusic = true,	playAmbience = false,	fullScreen = false,	showSound = SOUNDKIT.GS_TITLE_OPTIONS, checkFit = true, },
+	["movie"] = 			{ frame = "MovieFrame", 					playMusic = false,	playAmbience = false,	fullScreen = true },
+	["photosensitivity"] =	{ frame = "PhotosensitivityWarningFrame",	playMusic = false,	playAmbience = false,	fullScreen = true },
+	["options"] = 			{ frame = "SettingsPanel",					playMusic = true,	playAmbience = false,	fullScreen = false,	showSound = SOUNDKIT.GS_TITLE_OPTIONS, checkFit = true, },
 };
 
 ACCOUNT_SUSPENDED_ERROR_CODE = 53;
@@ -107,10 +108,10 @@ function GlueParentMixin:OnStoreFrameClosed(contextKey)
 	end
 end
 
-local function IsGlobalMouseEventHandled(buttonID, event)
+local function IsGlobalMouseEventHandled(buttonName, event)
 	local frames = GetMouseFoci();
 	for _, frame in ipairs(frames) do
-		if frame and frame.HandlesGlobalMouseEvent and frame:HandlesGlobalMouseEvent(buttonID, event) then
+		if frame and frame.HandlesGlobalMouseEvent and frame:HandlesGlobalMouseEvent(buttonName, event) then
 			return true;
 		end
 	end
@@ -122,7 +123,10 @@ function GlueParentMixin:OnEvent(event, ...)
 		LocalizeFrames();
 		GlueParent_EnsureValidScreen();
 		GlueParent_UpdateDialogs();
-		GlueParent_CheckCinematic();
+		if not GlueParent_CheckPhotosensitivity() then
+			GlueParent_CheckCinematic();
+		end
+
 		if ( AccountLogin:IsVisible() ) then
 			SetExpansionLogo(AccountLogin.UI.GameLogo, GetClientDisplayExpansionLevel());
 		end
@@ -162,7 +166,6 @@ function GlueParentMixin:OnEvent(event, ...)
 		local buttonID = ...;
 		if not IsGlobalMouseEventHandled(buttonID, event) then
 			UIDropDownMenu_HandleGlobalMouseEvent(buttonID, event);
-			SelectionPopouts:HandleGlobalMouseEvent(buttonID, event);
 		end
 	elseif (event == "KIOSK_SESSION_SHUTDOWN" or event == "KIOSK_SESSION_EXPIRED") then
 		GlueParent_SetScreen("kioskmodesplash");
@@ -557,6 +560,18 @@ function GlueParent_CheckCinematic()
 	end
 end
 
+function GlueParent_CheckPhotosensitivity()
+	local lastPhotosensitivityExpansionShown = (tonumber(GetCVar("showPhotosensitivityWarning")) or 0);
+	if LE_EXPANSION_LEVEL_CURRENT > lastPhotosensitivityExpansionShown then
+		SetCVar("showPhotosensitivityWarning", LE_EXPANSION_LEVEL_CURRENT);
+		GlueParent_OpenSecondaryScreen("photosensitivity");
+		
+		return true;
+	end
+
+	return false;
+end
+
 function ToggleFrame(frame)
 	frame:SetShown(not frame:IsShown());
 end
@@ -684,17 +699,20 @@ end
 local function UpdateGlueTag()
 	local currentScreen = GlueParent_GetCurrentScreen();
 
-	local race, class, faction, currentTag;
+	local race, class, faction;
 
 	-- Determine which API to use to get character information
-	if ( currentScreen == "charselect") then
-		class = select(5, GetCharacterInfo(GetCharacterSelection()));
-		race = select(2, GetCharacterRace(GetCharacterSelection()));
-		faction = ""; -- Don't need faction for character selection, its currently irrelevant
-
-	elseif ( currentScreen == "charcreate" ) then
+	if currentScreen == "charselect" then
+		local characterGuid = GetCharacterGUID(GetCharacterSelection());
+		if characterGuid then
+			local basicCharacterInfo = GetBasicCharacterInfo(characterGuid);
+			class = basicCharacterInfo.classFilename;
+			race = basicCharacterInfo.raceName;
+			faction = "";
+		end
+	elseif currentScreen == "charcreate" then
 		local classInfo = C_CharacterCreation.GetSelectedClass();
-		if (classInfo) then
+		if classInfo then
 			class = classInfo.fileName;
 		end
 		local raceID = C_CharacterCreation.GetSelectedRace();
@@ -703,16 +721,16 @@ local function UpdateGlueTag()
 	end
 
 	-- Once valid information is available, determine the current tag
-	if ( race and class and faction ) then
+	if race and class and faction then
 		race, class, faction = strupper(race), strupper(class), strupper(faction);
 
 		-- Try lookup from current screen (current screen may have fixed bg's)
-		if ( UpdateGlueTagWithOrdering(glueScreenTags[currentScreen], class, race, faction) ) then
+		if UpdateGlueTagWithOrdering(glueScreenTags[currentScreen], class, race, faction) then
 			return;
 		end
 
 		-- Try lookup from defaults
-		if ( UpdateGlueTagWithOrdering(glueScreenTags["default"], class, race, faction) ) then
+		if UpdateGlueTagWithOrdering(glueScreenTags["default"], class, race, faction) then
 			return;
 		end
 	end
@@ -875,7 +893,7 @@ end
 
 local GLUE_PrintHandler =
     function(...)
-		local printMsg = strjoin(" ", tostringall(...));
+		local printMsg = string.join(" ", tostringall(...));
 		ConsoleAddMessage(printMsg)
 	end
 

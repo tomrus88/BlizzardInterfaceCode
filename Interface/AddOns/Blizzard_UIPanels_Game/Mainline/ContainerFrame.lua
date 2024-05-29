@@ -14,6 +14,25 @@ local BACKPACK_BASE_SIZE = 16;
 local FRAME_THAT_OPENED_BAGS = nil;
 local CONTAINER_HELPTIP_SYSTEM = "ContainerFrame";
 
+local bagNames =
+{
+	[0] = BAG_NAME_BACKPACK,
+	[1] = BAG_NAME_BAG_1,
+	[2] = BAG_NAME_BAG_2,
+	[3] = BAG_NAME_BAG_3,
+	[4] = BAG_NAME_BAG_4,
+};
+
+-- Filters
+BAG_FILTER_LABELS = {
+	[Enum.BagSlotFlags.ClassEquipment] = BAG_FILTER_EQUIPMENT,
+	[Enum.BagSlotFlags.ClassConsumables] = BAG_FILTER_CONSUMABLES,
+	[Enum.BagSlotFlags.ClassProfessionGoods] = BAG_FILTER_PROFESSION_GOODS,
+	[Enum.BagSlotFlags.ClassJunk] = BAG_FILTER_JUNK,
+	[Enum.BagSlotFlags.ClassQuestItems] = BAG_FILTER_QUEST_ITEMS,
+	[Enum.BagSlotFlags.ClassReagents] = BAG_FILTER_REAGENTS,
+};
+
 local BagUpdaterMixin = {};
 
 function BagUpdaterMixin:MarkBagUpdateDirty(bag)
@@ -356,11 +375,11 @@ function ContainerFrame_IsTutorialShown()
 	return HelpTip:IsShowingAnyInSystem(CONTAINER_HELPTIP_SYSTEM);
 end
 
-function ContainerFrame_ShowTutorialForItemButton(itemButton, tutorialText, tutorialFlag)
+function ContainerFrame_ShowTutorialForItemButton(itemButton, tutorialText, tutorialFlag, cvarBitfield)
 	local helpTipInfo = {
 		text = tutorialText,
 		buttonStyle = HelpTip.ButtonStyle.Close,
-		cvarBitfield = "closedInfoFrames",
+		cvarBitfield = cvarBitfield,
 		bitfieldFlag = tutorialFlag,
 		targetPoint = HelpTip.Point.LeftEdgeCenter,
 		offsetX = -3,
@@ -384,14 +403,20 @@ function ContainerFrame_ConsiderItemButtonForUpgradeTutorial(itemButton, itemID)
 	return C_ItemUpgrade.CanUpgradeItem(ItemLocation:CreateFromBagAndSlot(itemButton:GetBagID(), itemButton:GetID()));
 end
 
+function ContainerFrame_ConsiderItemButtonForWarboundUntilEquipTutorial(itemButton, itemID)
+	return C_Item.IsBoundToAccountUntilEquip(ItemLocation:CreateFromBagAndSlot(itemButton:GetBagID(), itemButton:GetID()));
+end
+
 local ContainerFrameTutorialInfo = {
 	{ considerFunction = ContainerFrame_ConsiderItemButtonForAzeriteTutorial, tutorialText = AZERITE_TUTORIAL_ITEM_IN_SLOT, tutorialFlag = LE_FRAME_TUTORIAL_AZERITE_ITEM_IN_SLOT, },
 	{ considerFunction = ContainerFrame_ConsiderItemButtonForUpgradeTutorial, tutorialText = ITEM_UPGRADE_TUTORIAL_ITEM_IN_SLOT, tutorialFlag = LE_FRAME_TUTORIAL_UPGRADEABLE_ITEM_IN_SLOT, },
+	{ considerFunction = ContainerFrame_ConsiderItemButtonForWarboundUntilEquipTutorial, tutorialText = BIND_TO_ACCOUNT_UNTIL_EQUIP_TUTORIAL, tutorialFlag = LE_FRAME_TUTORIAL_BIND_TO_ACCOUNT_UNTIL_EQUIP, isAccountTutorial = true, },
 };
 
 function ContainerFrame_HasUnacknowledgedItemTutorial()
 	for i, tutorialInfo in ipairs(ContainerFrameTutorialInfo) do
-		if not GetCVarBitfield("closedInfoFrames", tutorialInfo.tutorialFlag) then
+		local cvarBitfield = tutorialInfo.isAccountTutorial and "closedInfoFramesAccountWide" or "closedInfoFrames";
+		if not GetCVarBitfield(cvarBitfield, tutorialInfo.tutorialFlag) then
 			return true;
 		end
 	end
@@ -410,173 +435,14 @@ function ContainerFrame_CheckItemButtonForTutorials(itemButton, itemID)
 
 	for i, tutorialInfo in ipairs(ContainerFrameTutorialInfo) do
 		local tutorialFlag = tutorialInfo.tutorialFlag;
-		if not GetCVarBitfield("closedInfoFrames", tutorialFlag) and tutorialInfo.considerFunction(itemButton, itemID) then
-			ContainerFrame_ShowTutorialForItemButton(itemButton, tutorialInfo.tutorialText, tutorialFlag);
+		local cvarBitfield = tutorialInfo.isAccountTutorial and "closedInfoFramesAccountWide" or "closedInfoFrames";
+		if not GetCVarBitfield(cvarBitfield, tutorialFlag) and tutorialInfo.considerFunction(itemButton, itemID) then
+			ContainerFrame_ShowTutorialForItemButton(itemButton, tutorialInfo.tutorialText, tutorialFlag, cvarBitfield);
 			return true;
 		end
 	end
 
 	return false;
-end
-
--- Filters
-BAG_FILTER_LABELS = {
-	[Enum.BagSlotFlags.ClassEquipment] = BAG_FILTER_EQUIPMENT,
-	[Enum.BagSlotFlags.ClassConsumables] = BAG_FILTER_CONSUMABLES,
-	[Enum.BagSlotFlags.ClassProfessionGoods] = BAG_FILTER_PROFESSION_GOODS,
-	[Enum.BagSlotFlags.ClassJunk] = BAG_FILTER_JUNK,
-	[Enum.BagSlotFlags.ClassQuestItems] = BAG_FILTER_QUEST_ITEMS,
-	[Enum.BagSlotFlags.ClassReagents] = BAG_FILTER_REAGENTS,
-};
-
-local ContainerFrameFilterDropDown_Initialize = nil;
-local ContainerFrameFilterDropDownCombined_Initialize = nil;
-
-do
-	local function OnBagFilterClicked(bagID, filterID, value)
-		C_Container.SetBagSlotFlag(bagID, filterID, value);
-		ContainerFrameSettingsManager:SetFilterFlag(bagID, filterID, value);
-	end
-
-	local function AddButtons_BagFilters(bagID, level)
-		if not ContainerFrame_CanContainerUseFilterMenu(bagID) then
-			return;
-		end
-
-		local info = UIDropDownMenu_CreateInfo();
-		info.text = BAG_FILTER_ASSIGN_TO;
-		info.isTitle = 1;
-		info.notCheckable = 1;
-		UIDropDownMenu_AddButton(info, level);
-
-		info = UIDropDownMenu_CreateInfo();
-
-		for i, flag in ContainerFrameUtil_EnumerateBagGearFilters() do
-			info.text = BAG_FILTER_LABELS[flag];
-			info.checked = C_Container.GetBagSlotFlag(bagID, flag);
-			info.isNotRadio = true;
-			info.func = function(_, _, _, value)
-				return OnBagFilterClicked(bagID, flag, not C_Container.GetBagSlotFlag(bagID, flag));
-			end
-
-			UIDropDownMenu_AddButton(info, level);
-		end
-	end
-
-	local function AddButtons_BagCleanup(bagID, level)
-		local info = UIDropDownMenu_CreateInfo();
-
-		info.text = BAG_FILTER_IGNORE;
-		info.isTitle = 1;
-		info.notCheckable = 1;
-		UIDropDownMenu_AddButton(info, level);
-
-		info = UIDropDownMenu_CreateInfo();
-		info.text = BAG_FILTER_CLEANUP;
-		info.isNotRadio = true;
-		info.func = function(_, _, _, value)
-			if ContainerFrame_IsMainBank(bagID) then
-				C_Container.SetBankAutosortDisabled(not value);
-			elseif ContainerFrame_IsBackpack(bagID) then
-				C_Container.SetBackpackAutosortDisabled(not value);
-			else
-				C_Container.SetBagSlotFlag(bagID, Enum.BagSlotFlags.DisableAutoSort, not value);
-			end
-		end
-
-		if ContainerFrame_IsMainBank(bagID) then
-			info.checked = C_Container.GetBankAutosortDisabled();
-		elseif ContainerFrame_IsBackpack(bagID) then
-			info.checked = C_Container.GetBackpackAutosortDisabled();
-		else
-			info.checked = C_Container.GetBagSlotFlag(bagID, Enum.BagSlotFlags.DisableAutoSort);
-		end
-
-		UIDropDownMenu_AddButton(info, level);
-
-		-- ignore junk selling from this bag or backpack
-		if not ContainerFrame_IsMainBank(bagID) then
-			info = UIDropDownMenu_CreateInfo();
-			info.text = SELL_ALL_JUNK_ITEMS_EXCLUDE_FLAG;
-			info.isNotRadio = true;
-			info.func = function(_, _, _, value)
-				if ContainerFrame_IsBackpack(bagID) then
-					C_Container.SetBackpackSellJunkDisabled(not value);
-				else
-					C_Container.SetBagSlotFlag(bagID, Enum.BagSlotFlags.ExcludeJunkSell, not value);
-				end
-			end
-
-			if ContainerFrame_IsBackpack(bagID) then
-				info.checked = C_Container.GetBackpackSellJunkDisabled();
-			else
-				info.checked = C_Container.GetBagSlotFlag(bagID, Enum.BagSlotFlags.ExcludeJunkSell);
-			end
-
-			UIDropDownMenu_AddButton(info, level);
-		end
-	end
-
-	local function AddButtons_BagModeToggle(containerFrame, level)
-		if containerFrame:IsCombinedBagContainer() or ContainerFrame_IsGenericHeldBag(containerFrame:GetBagID()) then
-			local info = UIDropDownMenu_CreateInfo();
-			info.text = ContainerFrameSettingsManager:IsUsingCombinedBags() and BAG_COMMAND_CONVERT_TO_INDIVIDUAL or BAG_COMMAND_CONVERT_TO_COMBINED;
-			info.notCheckable = 1;
-			info.func = function(_, _, _, value)
-				SetCVar("combinedBags", GetCVarBool("combinedBags") and 0 or 1);
-			end
-
-			UIDropDownMenu_AddSeparator();
-			UIDropDownMenu_AddButton(info);
-		end
-	end
-
-	ContainerFrameFilterDropDown_Initialize = function(self, level, addFiltersForAllBags)
-		local frame = self:GetParent();
-		local bagID = frame:GetBagID();
-
-		if not (ContainerFrame_IsHeldBag(bagID) or ContainerFrame_IsBankBag(bagID)) then
-			return;
-		end
-
-		AddButtons_BagFilters(bagID, level);
-		AddButtons_BagCleanup(bagID, level);
-		AddButtons_BagModeToggle(frame, level);
-	end
-
-	local bagNames =
-	{
-		[0] = BAG_NAME_BACKPACK,
-		[1] = BAG_NAME_BAG_1,
-		[2] = BAG_NAME_BAG_2,
-		[3] = BAG_NAME_BAG_3,
-		[4] = BAG_NAME_BAG_4,
-	};
-
-	ContainerFrameFilterDropDownCombined_Initialize = function(self, level)
-		if level == 1 then
-			local info = UIDropDownMenu_CreateInfo();
-
-			info.text = BAG_FILTER_TITLE_SORTING;
-			info.isTitle = 1;
-			info.notCheckable = 1;
-			UIDropDownMenu_AddButton(info, level);
-
-			for i = 0, Constants.InventoryConstants.NumBagSlots do
-				info = UIDropDownMenu_CreateInfo();
-				info.text = bagNames[i];
-				info.hasArrow = true;
-				info.notCheckable = true;
-				info.value = i; -- save off the bagID to use on level 2, it will be stored in the global UIDROPDOWNMENU_MENU_VALUE
-				UIDropDownMenu_AddButton(info, level);
-			end
-
-			AddButtons_BagModeToggle(self:GetParent(), level);
-		elseif level == 2 then
-			AddButtons_BagFilters(UIDROPDOWNMENU_MENU_VALUE, level);
-			AddButtons_BagCleanup(UIDROPDOWNMENU_MENU_VALUE, level);
-		end
-	end
 end
 
 BaseContainerFrameMixin = {};
@@ -690,13 +556,112 @@ function ContainerFrame_OnEvent(self, event, ...)
 	end
 end
 
+local function AddButtons_BagFilters(description, bagID)
+	if not ContainerFrame_CanContainerUseFilterMenu(bagID) then
+		return;
+	end
+
+	description:CreateTitle(BAG_FILTER_ASSIGN_TO);
+
+	local function IsSelected(flag)
+		return C_Container.GetBagSlotFlag(bagID, flag);
+	end
+
+	local function SetSelected(flag)
+		local value = not IsSelected(flag);
+		C_Container.SetBagSlotFlag(bagID, flag, value);
+		ContainerFrameSettingsManager:SetFilterFlag(bagID, flag, value);
+	end
+
+	for i, flag in ContainerFrameUtil_EnumerateBagGearFilters() do
+		local checkbox = description:CreateCheckbox(BAG_FILTER_LABELS[flag], IsSelected, SetSelected, flag);
+		checkbox:SetResponse(MenuResponse.Close);
+	end
+end
+
+local function AddButtons_BagCleanup(description, bagID)
+	description:CreateTitle(BAG_FILTER_IGNORE);
+
+	do
+		local function IsSelected()
+			if ContainerFrame_IsMainBank(bagID) then
+				return C_Container.GetBankAutosortDisabled();
+			elseif ContainerFrame_IsBackpack(bagID) then
+				return C_Container.GetBackpackAutosortDisabled();
+			end
+			return C_Container.GetBagSlotFlag(bagID, Enum.BagSlotFlags.DisableAutoSort);
+		end
+
+		local function SetSelected()
+			local value = not IsSelected();
+			if ContainerFrame_IsMainBank(bagID) then
+				C_Container.SetBankAutosortDisabled(value);
+			elseif ContainerFrame_IsBackpack(bagID) then
+				C_Container.SetBackpackAutosortDisabled(value);
+			else
+				C_Container.SetBagSlotFlag(bagID, Enum.BagSlotFlags.DisableAutoSort, value);
+			end
+		end
+
+		local checkbox = description:CreateCheckbox(BAG_FILTER_CLEANUP, IsSelected, SetSelected);
+		checkbox:SetResponse(MenuResponse.Close);
+	end
+
+	-- ignore junk selling from this bag or backpack
+	if not ContainerFrame_IsMainBank(bagID) then
+		local function IsSelected()
+			if ContainerFrame_IsBackpack(bagID) then
+				return C_Container.GetBackpackSellJunkDisabled();
+			end
+			return C_Container.GetBagSlotFlag(bagID, Enum.BagSlotFlags.ExcludeJunkSell);
+		end
+
+		local function SetSelected()
+			local value = not IsSelected();
+			if ContainerFrame_IsBackpack(bagID) then
+				C_Container.SetBackpackSellJunkDisabled(value);
+			else
+				C_Container.SetBagSlotFlag(bagID, Enum.BagSlotFlags.ExcludeJunkSell, value);
+			end
+		end
+
+		local checkbox = description:CreateCheckbox(SELL_ALL_JUNK_ITEMS_EXCLUDE_FLAG, IsSelected, SetSelected);
+		checkbox:SetResponse(MenuResponse.Close);
+	end
+end
+
+local function AddButtons_BagModeToggle(description, containerFrame)
+	if not (containerFrame:IsCombinedBagContainer() or ContainerFrame_IsGenericHeldBag(containerFrame:GetBagID())) then
+		return;
+	end
+
+	description:CreateDivider();
+
+	local text = ContainerFrameSettingsManager:IsUsingCombinedBags() and BAG_COMMAND_CONVERT_TO_INDIVIDUAL or BAG_COMMAND_CONVERT_TO_COMBINED;
+	description:CreateButton(text, function()
+		SetCVar("combinedBags", GetCVarBool("combinedBags") and 0 or 1);
+	end);
+end
+
 function ContainerFrame_OnLoad(self)
 	self:RegisterEvent("BAG_OPEN");
 	self:RegisterEvent("BAG_CLOSED");
 	self:RegisterEvent("QUEST_ACCEPTED");
 	self:RegisterEvent("UNIT_QUEST_LOG_CHANGED");
 
-	UIDropDownMenu_SetInitializeFunction(self.FilterDropDown, ContainerFrameFilterDropDown_Initialize);
+	self.PortraitButton:SetupMenu(function(dropdown, rootDescription)
+		rootDescription:SetTag("MENU_CONTAINER_FRAME");
+
+		local bagID = self:GetBagID();
+		if not (ContainerFrame_IsHeldBag(bagID) or ContainerFrame_IsBankBag(bagID)) then
+			return;
+		end
+
+		AddButtons_BagFilters(rootDescription, bagID);
+		AddButtons_BagCleanup(rootDescription, bagID);
+		AddButtons_BagModeToggle(rootDescription, self);
+	end);
+
 	self:SetPortraitTextureSizeAndOffset(36, -4, 1);
 	self:SetTitleOffsets(35);
 
@@ -1832,8 +1797,6 @@ end
 ContainerFramePortraitButtonMixin = {};
 
 function ContainerFramePortraitButtonMixin:OnMouseDown()
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-	ToggleDropDownMenu(1, nil, self:GetParent().FilterDropDown, self, 0, 0);
 	if ContainerFrame_IsBackpack(self:GetID()) then
 		HelpTip:Hide(UIParent, TUTORIAL_HUD_REVAMP_BAG_CHANGES);
 	end
@@ -2572,7 +2535,19 @@ function ContainerFrameCombinedBagsMixin:OnLoad()
 	self:RegisterEvent("BAG_CONTAINER_UPDATE");
 	self.PortraitButton:SetPoint("CENTER", self:GetPortrait() , "CENTER", 3, -3);
 
-	UIDropDownMenu_SetInitializeFunction(self.FilterDropDown, ContainerFrameFilterDropDownCombined_Initialize);
+	self.PortraitButton:SetupMenu(function(dropdown, rootDescription)
+		rootDescription:SetTag("MENU_CONTAINER_FRAME_COMBINED");
+
+		rootDescription:CreateTitle(BAG_FILTER_TITLE_SORTING);
+
+		for bagID = 0, Constants.InventoryConstants.NumBagSlots do
+			local submenu = rootDescription:CreateButton(bagNames[bagID]);
+			AddButtons_BagFilters(submenu, bagID);
+			AddButtons_BagCleanup(submenu, bagID);
+		end
+
+		AddButtons_BagModeToggle(rootDescription, self);
+	end);
 end
 
 function ContainerFrameCombinedBagsMixin:OnShow()

@@ -20,6 +20,7 @@ local settings = {
 	lineSpacing = 4,			-- the vertical spacing between lines
 	bottomSpacing = 0,			-- spacing between last block and bottom of module
 	rightEdgeFrameSpacing = 0,	-- spacing between rightEdgeFrames, or between one and the lines
+	leftMargin = 0,				-- margin for module from left side of container, used at container level
 	hasDisplayPriority = false,	-- modules with priority will consume available space first, regardless of their uiOrder
 	mustFit = false,			-- modules that must fit will adjust the height of custom-placed containers if needed, overriding the height specified by the user
 
@@ -73,7 +74,7 @@ function ObjectiveTrackerModuleMixin:SetContainer(container)
 		self:InitModule();
 	end
 end
-	
+
 function ObjectiveTrackerModuleMixin:InitModule()
 	-- override in your mixin, called the first time the module is added to a container
 end
@@ -455,8 +456,8 @@ function ObjectiveTrackerModuleMixin:IsCollapsed()
 	return self.isCollapsed;
 end
 
-function ObjectiveTrackerModuleMixin:ToggleDropDown(block)
-	ObjectiveTrackerManager:ToggleDropDown(self, block, GenerateClosure(self.InitDropDown, self, block));
+function ObjectiveTrackerModuleMixin:GetContextMenuParent()
+	return ObjectiveTrackerManager:GetContainerForModule(self);
 end
 
 function ObjectiveTrackerModuleMixin:GetTimerBar(key)

@@ -30,6 +30,8 @@ function CharacterSelectUIMixin:OnLoad()
 	self:RegisterEvent("MAP_SCENE_CHARACTER_ON_MOUSE_ENTER");
 	self:RegisterEvent("MAP_SCENE_CHARACTER_ON_MOUSE_LEAVE");
 	self:RegisterEvent("CVAR_UPDATE");
+	self:RegisterEvent("CHARACTER_LIST_RESTRICTIONS_RECEIVED");
+	self:RegisterEvent("CHARACTER_LIST_MAIL_RECEIVED");
 end
 
 function CharacterSelectUIMixin:OnEvent(event, ...)
@@ -45,7 +47,7 @@ function CharacterSelectUIMixin:OnEvent(event, ...)
 
 		-- Trigger any updates on the character model UI
 		for headerFrame in self.CharacterHeaderFramePool:EnumerateActive() do
-			if headerFrame.characterInfo.guid == guid then
+			if headerFrame.basicCharacterInfo and headerFrame.basicCharacterInfo.guid == guid then
 				headerFrame:SetTooltipAndShow();
 				break;
 			end
@@ -69,6 +71,12 @@ function CharacterSelectUIMixin:OnEvent(event, ...)
 		if cvarName == "debugTargetInfo" then
 			CharacterSelectUtil.UpdateShowDebugTooltipInfo(cvarValue == "1");
 		end
+	elseif event == "CHARACTER_LIST_RESTRICTIONS_RECEIVED" then
+		-- Visually refresh character rendering.
+		CharacterSelectCharacterFrame:UpdateCharacterSelection();
+	elseif event == "CHARACTER_LIST_MAIL_RECEIVED" then
+		-- Visually refresh character rendering.
+		CharacterSelectCharacterFrame:UpdateCharacterSelection();
 	end
 end
 
@@ -99,11 +107,13 @@ function CharacterSelectUIMixin:OnUpdate()
 			-- Set up character UI before any animations are applied.
 			self:SetupCharacterOverlayFrames();
 
+			local isSceneChange = true;
+
 			for _, childElementData in ipairs(elementData.characterData) do
 				if childElementData.characterID == selectedCharacterID then
-					PlayRandomAnimation(childElementData.characterID, Enum.WarbandSceneAnimationEvent.Select);
+					PlayRandomAnimation(childElementData.characterID, Enum.WarbandSceneAnimationEvent.Select, isSceneChange);
 				elseif not childElementData.isEmpty then
-					PlayRandomAnimation(childElementData.characterID, Enum.WarbandSceneAnimationEvent.StartingPose);
+					PlayRandomAnimation(childElementData.characterID, Enum.WarbandSceneAnimationEvent.StartingPose, isSceneChange);
 				end
 			end
 		end
@@ -144,6 +154,8 @@ function CharacterSelectUIMixin:SetCharacterDisplay(selectedCharacterID)
 					SetMapSceneCharPos(childElementData.characterID, index);
 				end
 
+				local isSceneChange = self.ModelFFX:IsShown();
+
 				-- Set up the model scene first, so that valid model info is at the ready for character UI to reference if needed.
 				self:ShowModelScene();
 
@@ -153,9 +165,9 @@ function CharacterSelectUIMixin:SetCharacterDisplay(selectedCharacterID)
 				-- Note that just because we are attempting to play deselect, does not mean it necessarily will happen. See PlayRandomAnimation for details.
 				for _, childElementData in ipairs(selectedElementData.characterData) do
 					if childElementData.characterID == selectedCharacterID then
-						PlayRandomAnimation(childElementData.characterID, Enum.WarbandSceneAnimationEvent.Select);
+						PlayRandomAnimation(childElementData.characterID, Enum.WarbandSceneAnimationEvent.Select, isSceneChange);
 					elseif not childElementData.isEmpty then
-						PlayRandomAnimation(childElementData.characterID, Enum.WarbandSceneAnimationEvent.Deselect);
+						PlayRandomAnimation(childElementData.characterID, Enum.WarbandSceneAnimationEvent.Deselect, isSceneChange);
 					end
 				end
 			else
@@ -176,6 +188,8 @@ end
 function CharacterSelectUIMixin:ShowModelScene()
 	self.ModelFFX:Hide();
 	self.MapScene:Show();
+
+	PlayGlueAmbience(GLUE_AMBIENCE_TRACKS["WARBANDS_MAPSCENE"], 4.0);
 
 	CharacterSelectRotateLeft:Hide();
 	CharacterSelectRotateRight:Hide();
@@ -342,57 +356,72 @@ end
 CharacterSelectHeaderMixin = {};
 
 function CharacterSelectHeaderMixin:OnEnter()
+	if not self.basicCharacterInfo then
+		return;
+	end
+
 	self:SetTooltipAndShow();
 
 	-- Trigger any updates on the character list entry, if visible.
 	local isHighlight = true;
-	CharacterSelectListUtil:UpdateCharacterHighlight(self.characterInfo.guid, isHighlight);
+	CharacterSelectListUtil:UpdateCharacterHighlight(self.basicCharacterInfo.guid, isHighlight);
 
 	-- Update character model as needed.
-	MapSceneCharacterHighlightStart(self.characterInfo.guid);
+	MapSceneCharacterHighlightStart(self.basicCharacterInfo.guid);
 end
 
 function CharacterSelectHeaderMixin:OnLeave()
+	if not self.basicCharacterInfo then
+		return;
+	end
+
 	GlueTooltip:Hide();
 
 	-- Trigger any updates on the character list entry, if visible.
 	local isHighlight = false;
-	CharacterSelectListUtil:UpdateCharacterHighlight(self.characterInfo.guid, isHighlight);
+	CharacterSelectListUtil:UpdateCharacterHighlight(self.basicCharacterInfo.guid, isHighlight);
 
 	-- Update character model as needed.
-	MapSceneCharacterHighlightEnd(self.characterInfo.guid);
+	MapSceneCharacterHighlightEnd(self.basicCharacterInfo.guid);
 end
 
 function CharacterSelectHeaderMixin:OnClick()
-	CharacterSelectListUtil:ClickCharacterFrameByGUID(self.characterInfo.guid);
+	if not self.basicCharacterInfo then
+		return;
+	end
+
+	CharacterSelectListUtil:ClickCharacterFrameByGUID(self.basicCharacterInfo.guid);
 end
 
 function CharacterSelectHeaderMixin:Initialize(characterID)
-	self.characterInfo = CharacterSelectUtil.GetCharacterInfoTable(characterID);
+	local characterGuid = GetCharacterGUID(characterID);
+	if characterGuid then
+		self.basicCharacterInfo = GetBasicCharacterInfo(characterGuid);
 
-	local selectedCharacterID = CharacterSelectListUtil.GetCharIDFromIndex(CharacterSelect.selectedIndex);
-	self.SelectedBackdrop:SetShown(characterID == selectedCharacterID);
-	local nameFontStyle = characterID == selectedCharacterID and "GlueFontNormalHuge" or "GlueFontNormalLarge";
-	local levelFontStyle = characterID == selectedCharacterID and "GlueFontHighlightLarge" or "GlueFontHighlight";
-	self.Name:SetFontObject(nameFontStyle);
-	self.Level:SetFontObject(levelFontStyle);
+		local selectedCharacterID = CharacterSelectListUtil.GetCharIDFromIndex(CharacterSelect.selectedIndex);
+		self.SelectedBackdrop:SetShown(characterID == selectedCharacterID);
+		local nameFontStyle = characterID == selectedCharacterID and "GlueFontNormalHuge" or "GlueFontNormalLarge";
+		local levelFontStyle = characterID == selectedCharacterID and "GlueFontHighlightLarge" or "GlueFontHighlight";
+		self.Name:SetFontObject(nameFontStyle);
+		self.Level:SetFontObject(levelFontStyle);
 
-	if self.characterInfo then
-		self.Name:SetText(self.characterInfo.name);
-		self.Level:SetText(CHARACTER_SELECT_HEADER_INFO:format(self.characterInfo.experienceLevel));
+		self.Name:SetText(self.basicCharacterInfo.name);
+		self.Level:SetText(CHARACTER_SELECT_HEADER_INFO:format(self.basicCharacterInfo.experienceLevel));
 
-		local guid = self.characterInfo.guid;
+		local guid = self.basicCharacterInfo.guid;
 		local timerunningSeasonID = guid and GetCharacterTimerunningSeasonID(guid) or nil;
 		self.TimerunningIcon:SetShown(timerunningSeasonID ~= nil);
-	else
-		self.TimerunningIcon:Hide();
-	end
 
-	self:SetWidth(math.max(self.Name:GetStringWidth(), self.Level:GetStringWidth()));
+		self:SetWidth(math.max(self.Name:GetStringWidth(), self.Level:GetStringWidth()));
+	end
 end
 
 function CharacterSelectHeaderMixin:SetTooltipAndShow()
+	if not self.basicCharacterInfo then
+		return;
+	end
+
 	GlueTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 5, 0);
-	CharacterSelectUtil.SetTooltipForCharacterInfo(self.characterInfo);
+	CharacterSelectUtil.SetTooltipForCharacterInfo(self.basicCharacterInfo);
 	GlueTooltip:Show();
 end

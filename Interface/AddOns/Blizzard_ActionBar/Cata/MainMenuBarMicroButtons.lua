@@ -152,7 +152,6 @@ function UpdateMicroButtons()
 	end
 
 	if ( ( GameMenuFrame and GameMenuFrame:IsShown() )
-		or ( InterfaceOptionsFrame:IsShown())
 		or ( KeyBindingFrame and KeyBindingFrame:IsShown())
 		or ( MacroFrame and MacroFrame:IsShown()) ) then
 		MainMenuMicroButton:SetButtonState("PUSHED", true);
@@ -169,7 +168,7 @@ function UpdateMicroButtons()
 	end
 
 	-- Keyring microbutton
-	if (KeyRingButton) then
+	if (IsKeyRingEnabled() and KeyRingButton) then
 		if ( IsBagOpen(KEYRING_CONTAINER) ) then
 			KeyRingButton:SetButtonState("PUSHED", 1);
 		else

@@ -187,7 +187,7 @@ function CharacterSelectFrameMixin:OnShow()
     CharacterSelectUI.FadeIn:Play();
 
     --Clear out the addons selected item
-    UIDropDownMenu_SetSelectedValue(AddonCharacterDropDown, true);
+	AddonList_ClearCharacterDropdown();
 
     AccountUpgradePanel_Update(CharSelectAccountUpgradeButton.isExpanded);
 
@@ -237,7 +237,6 @@ end
 function CharacterSelectFrameMixin:OnHide()
 	CallbackRegistrantMixin.OnHide(self);
 
-    CharacterSelectListUtil.SaveCharacterOrder();
     CharacterDeleteDialog:Hide();
     CharacterRenameDialog:Hide();
     AccountReactivate_CloseDialogs();
@@ -266,6 +265,8 @@ function CharacterSelectFrameMixin:OnHide()
 	end
 
 	SocialContractFrame:Hide();
+
+	GlueTooltip:Hide();
 
     AccountReactivate_CloseDialogs();
     SetInCharacterSelect(false);
@@ -456,10 +457,12 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
 		else
 			local index = CharacterSelectListUtil.GetIndexFromCharID(charID);
 		    self.selectedIndex = index;
-			local basicInfo = GetBasicCharacterInfo(GetCharacterGUID(charID));
 			local guid = GetCharacterGUID(charID);
-			local timerunningSeasonID = guid and GetCharacterTimerunningSeasonID(guid);
-		    CharacterSelect_SetSelectedCharacterName(basicInfo.name, timerunningSeasonID);
+			if guid then
+				local basicInfo = GetBasicCharacterInfo(guid);
+				local timerunningSeasonID = guid and GetCharacterTimerunningSeasonID(guid);
+				CharacterSelect_SetSelectedCharacterName(basicInfo.name, timerunningSeasonID);
+			end
 		end
 		CharacterSelectCharacterFrame:UpdateCharacterSelection();
 
@@ -710,13 +713,13 @@ function UpdateCharacterList(skipSelect)
 		CharacterSelect.selectLast = false;
 	elseif CharacterSelect.selectGuid or CharacterSelect.undeleteGuid then
 		for i = 1, numChars do
-			local characterInfo = CharacterSelectUtil.GetCharacterInfoTable(i);
+			local characterGuid = GetCharacterGUID(i);
 
 			-- Check each entry if it's an empty character.
-			if characterInfo and (characterInfo.guid == CharacterSelect.selectGuid or characterInfo.guid == CharacterSelect.undeleteGuid) then
+			if characterGuid and (characterGuid == CharacterSelect.selectGuid or characterGuid == CharacterSelect.undeleteGuid) then
 				CharacterSelect.selectedIndex = i;
-				if characterInfo.guid == CharacterSelect.undeleteGuid then
-					local serviceInfo = GetServiceCharacterInfo(characterInfo.guid);
+				if characterGuid == CharacterSelect.undeleteGuid then
+					local serviceInfo = GetServiceCharacterInfo(characterGuid);
 					CharacterSelect.undeleteSucceeded = true;
 					CharacterSelect.undeletePendingRename = serviceInfo.hasNameChange;
 				end
@@ -802,15 +805,15 @@ function CharacterSelect_SelectCharacter(index, noCreate)
 			return; --character selection is zero on startup.
 		end
 		local serviceInfo = GetServiceCharacterInfo(guid);
-        if ( serviceInfo.isTrialBoostLocked ) then
+        if serviceInfo.isTrialBoostCompleted then
             text = ENTER_WORLD_UNLOCK_TRIAL_CHARACTER;
-		elseif ( serviceInfo.revokedCharacterUpgrade ) then
+		elseif serviceInfo.revokedCharacterUpgrade then
 			text = ENTER_WORLD_UNLOCK_REVOKED_CHARACTER_UPGRADE;
         end
 
         CharSelectEnterWorldButton:SetText(text);
 
-		if not serviceInfo.boostInProgress and (not CharacterServicesFlow_IsShowing() or not CharacterServicesMaster.flow:UsesSelector()) then
+		if serviceInfo.boostInProgress == false and (not CharacterServicesFlow_IsShowing() or not CharacterServicesMaster.flow:UsesSelector()) then
 			if IsRPEBoostEligible(selectedCharacterID) then
 				BeginCharacterServicesFlow(RPEUpgradeFlow, {});
 				if IsVeteranTrialAccount() then
@@ -828,7 +831,12 @@ function CharacterSelect_SelectCharacter(index, noCreate)
 end
 
 function CharacterDeleteDialog_OnShow()
-	local basicInfo = GetBasicCharacterInfo(GetCharacterGUID(CharacterSelectListUtil.GetCharIDFromIndex(CharacterSelect.selectedIndex)));
+	local characterGuid = GetCharacterGUID(CharacterSelectListUtil.GetCharIDFromIndex(CharacterSelect.selectedIndex));
+	if not characterGuid then
+		return;
+	end
+
+	local basicInfo = GetBasicCharacterInfo(characterGuid);
     CharacterDeleteText1:SetFormattedText(CONFIRM_CHAR_DELETE, basicInfo.name, basicInfo.experienceLevel, basicInfo.className);
     CharacterDeleteBackground:SetHeight(16 + CharacterDeleteText1:GetHeight() + CharacterDeleteText2:GetHeight() + 23 + CharacterDeleteEditBox:GetHeight() + 8 + CharacterDeleteButton1:GetHeight() + 16);
     CharacterDeleteButton1:Disable();
@@ -854,7 +862,12 @@ function CharacterSelect_EnterWorld()
     end
 
 	CharacterSelectListUtil.SaveCharacterOrder();
-	local serviceInfo = GetServiceCharacterInfo(GetCharacterGUID(GetCharacterSelection()));
+	local characterGuid = GetCharacterGUID(GetCharacterSelection());
+	if not characterGuid then
+		return;
+	end
+
+	local serviceInfo = GetServiceCharacterInfo(characterGuid);
 
     if ( serviceInfo.isLocked ) then
         SubscriptionRequestDialog_Open();
@@ -869,8 +882,9 @@ function CharacterSelect_EnterWorld()
 end
 
 function CharacterSelect_Exit()
-    PlaySound(SOUNDKIT.GS_CHARACTER_SELECTION_EXIT);
-    C_Login.DisconnectFromServer();
+	CharacterSelectListUtil.SaveCharacterOrder();
+	PlaySound(SOUNDKIT.GS_CHARACTER_SELECTION_EXIT);
+	C_Login.DisconnectFromServer();
 end
 
 function CharacterSelect_AccountOptions()
@@ -1276,23 +1290,38 @@ function CharacterTemplatesFrame_Update()
 	CharacterSelectUI.ToolTray:SetToolFrameShown(CharacterTemplatesFrame, isShown);
 end
 
-function CharacterTemplatesFrame_OnShow(self)
-            UIDropDownMenu_SetWidth(self.dropDown, 160);
-            UIDropDownMenu_Initialize(self.dropDown, CharacterTemplatesFrameDropDown_Initialize);
-            UIDropDownMenu_SetSelectedID(self.dropDown, 1);
+function CharacterTemplatesFrame_OnLoad(self)
+	self.Dropdown:SetWidth(180);
+	self.characterIndex = 1;
+
+	self.CreateTemplateButton:SetScript("OnClick", function()
+		PlaySound(SOUNDKIT.GS_CHARACTER_SELECTION_CREATE_NEW);
+		C_CharacterCreation.SetCharacterTemplate(self.characterIndex);
+		GlueParent_SetScreen("charcreate");
+	end);
 end
 
-function CharacterTemplatesFrameDropDown_Initialize()
-    local info = UIDropDownMenu_CreateInfo();
-    for i = 1, C_CharacterCreation.GetNumCharacterTemplates() do
-        local name, description = C_CharacterCreation.GetCharacterTemplateInfo(i);
-        info.text = name;
-        info.checked = nil;
-        info.func = CharacterTemplatesFrameDropDown_OnClick;
-        info.tooltipTitle = name;
-        info.tooltipText = description;
-        UIDropDownMenu_AddButton(info);
-    end
+function CharacterTemplatesFrame_OnShow(self)
+	local function IsSelected(characterIndex)
+		return self.characterIndex == characterIndex;
+	end
+
+	local function SetSelected(characterIndex)
+		self.characterIndex = characterIndex;
+	end
+
+	self.Dropdown:SetupMenu(function(dropdown, rootDescription)
+		rootDescription:SetTag("MENU_CHARACTER_SELECT_TEMPLATE");
+
+		for characterIndex = 1, C_CharacterCreation.GetNumCharacterTemplates() do
+		    local name, description = C_CharacterCreation.GetCharacterTemplateInfo(characterIndex);
+			local radio = rootDescription:CreateRadio(name, IsSelected, SetSelected, characterIndex);
+			radio:SetTooltip(function(tooltip, elementDescription)
+				GameTooltip_SetTitle(tooltip, name);
+				GameTooltip_AddNormalLine(tooltip, description);
+			end);
+		end
+	end);
 end
 
 function ToggleStoreUI(contextKey)
@@ -1312,10 +1341,6 @@ function SetStoreUIShown(shown)
 	end
 
 	StoreFrame_SetShown(shown);
-end
-
-function CharacterTemplatesFrameDropDown_OnClick(button)
-    UIDropDownMenu_SetSelectedID(CharacterTemplatesFrameDropDown, button:GetID());
 end
 
 function PlayersOnServer_Update()
@@ -1387,7 +1412,7 @@ function CharacterSelect_UpdateButtonState()
     local inCompetitiveMode = Kiosk.IsCompetitiveModeEnabled();
 	local inKioskMode = Kiosk.IsEnabled();
 	local guid = GetCharacterGUID(GetCharacterSelection());
-	local boostInProgress = guid and GetServiceCharacterInfo(guid).boostInProgress;
+	local boostInProgress = guid and GetServiceCharacterInfo(guid).boostInProgress == true;
 	local isAccountLocked = CharacterSelectUtil.IsAccountLocked();
 
 	-- Note: enterWorldError will be nil in most cases.
@@ -2434,27 +2459,27 @@ StaticPopupDialogs["UNDELETING_CHARACTER"] = {
 
 function CopyCharacterFromLive()
     if ( not IsGMClient() ) then
-		CopyAccountCharacterFromLive(UIDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID), CopyCharacterFrame.SelectedIndex);
+		CopyAccountCharacterFromLive(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.SelectedIndex);
 	else
-		CopyAccountCharacterFromLive(UIDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
+		CopyAccountCharacterFromLive(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
 	end
     GlueDialog_Show("COPY_IN_PROGRESS");
 end
 
 function CopyCharacter_AccountDataFromLive()
     if ( not IsGMClient() ) then
-        CopyAccountDataFromLive(UIDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID), CopyCharacterFrame.SelectedIndex);
+        CopyAccountDataFromLive(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.SelectedIndex);
     else
-        CopyAccountDataFromLive(UIDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
+        CopyAccountDataFromLive(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
     end
     GlueDialog_Show("COPY_IN_PROGRESS");
 end
 
 function CopyCharacter_KeyBindingsFromLive()
     if ( not IsGMClient() ) then
-        CopyKeyBindingsFromLive(UIDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID), CopyCharacterFrame.SelectedIndex);
+        CopyKeyBindingsFromLive(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.SelectedIndex);
     else
-        CopyKeyBindingsFromLive(UIDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
+        CopyKeyBindingsFromLive(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
     end
     GlueDialog_Show("COPY_IN_PROGRESS");
 end
@@ -2476,7 +2501,7 @@ end
 function CopyCharacterSearch_OnClick(self)
     ClearAccountCharacters();
     CopyCharacterFrame_Update(CopyCharacterFrame.scrollFrame);
-    RequestAccountCharacters(UIDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID), CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
+    RequestAccountCharacters(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
     self:Disable();
 end
 
@@ -2564,17 +2589,43 @@ function CopyCharacterFrame_OnLoad(self)
 	view:SetPadding(0,0,0,0,4);
 
 	ScrollUtil.InitScrollBoxListWithScrollBar(CopyCharacterFrame.ScrollBox, CopyCharacterFrame.ScrollBar, view);
+
+	self.RegionID:SetWidth(100);
 end
 
 function CopyCharacterFrame_OnShow(self)
    GlueParent_AddModalFrame(self);
 
-	self.SelectedIndex = nil;
 	self.CopyButton:SetEnabled(false);
 
-	UIDropDownMenu_SetWidth(self.RegionID, 80);
-	UIDropDownMenu_Initialize(self.RegionID, CopyCharacterFrameRegionIDDropdown_Initialize);
-	UIDropDownMenu_SetAnchor(self.RegionID, 0, 0, "TOPLEFT", self.RegionID, "BOTTOMLEFT");
+	local regions = C_CharacterServices.GetLiveRegionCharacterCopySourceRegions();
+	self.selectedRegion = regions[1];
+	
+	local function IsSelected(regionID)
+		return self.selectedRegion == regionID;
+	end
+
+	local function SetSelected(regionID)
+		self.selectedRegion = regionID;
+
+		if not IsGMClient() then
+			CopyCharacterFrame_SetSelected(nil);
+			CopyCharacterFrame.ScrollBox:SetDataProvider(CreateIndexRangeDataProvider(0), ScrollBoxConstants.RetainScrollPosition);
+			CopyCharacterFrame.CopyButton:Disable();
+			RequestAccountCharacters(regionID);
+		end
+	end
+
+	self.RegionID:SetupMenu(function(dropdown, rootDescription)
+		rootDescription:SetTag("MENU_CHARACTER_SELECT_REGION");
+
+		for index, regionID in ipairs(regions) do
+			local regionName = characterCopyRegions[regionID];
+			if regionName then
+				rootDescription:CreateRadio(regionName, IsSelected, SetSelected, regionID);
+			end
+		end
+	end);
 
 	ClearAccountCharacters();
 	CopyCharacterFrame_Update(self.scrollFrame);
@@ -2583,7 +2634,7 @@ function CopyCharacterFrame_OnShow(self)
 		self.RealmName:Hide();
 		self.CharacterName:Hide();
 		self.SearchButton:Hide();
-		RequestAccountCharacters(UIDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID));
+		RequestAccountCharacters(CopyCharacterFrame_GetSelectedRegionID());
 	else
 		self.RealmName:Show();
 		self.RealmName:SetFocus();
@@ -2601,45 +2652,6 @@ function CopyCharacterFrame_OnHide(self)
 	GlueParent_RemoveModalFrame(self);
 end
 
-function CopyCharacterFrameRegionIDDropdown_Initialize()
-    local info = UIDropDownMenu_CreateInfo();
-    local selectedValue = UIDropDownMenu_GetSelectedValue(CopyCharacterFrame.RegionID);
-	local newSelectedValue = nil;
-    info.func = CopyCharacterFrameRegionIDDropdown_OnClick;
-
-
-	local regions = C_CharacterServices.GetLiveRegionCharacterCopySourceRegions();
-	for i=1, #regions do
-		local regionID = regions[i];
-		local regionName = characterCopyRegions[regionID];
-
-		if (regionName) then
-			info.text = regionName;
-			info.value = regionID;
-			info.checked = (info.value == selectedValue) or (selectedValue == nil and i == 1);
-			if (not newSelectedValue) then
-				newSelectedValue = info.value;
-			end
-			UIDropDownMenu_AddButton(info);
-		end
-	end
-
-	if (selectedValue == nil and newSelectedValue ~= nil) then
-		UIDropDownMenu_SetSelectedValue(CopyCharacterFrame.RegionID, newSelectedValue);
-		UIDropDownMenu_Refresh(CopyCharacterFrame.RegionID);
-	end
-end
-
-function CopyCharacterFrameRegionIDDropdown_OnClick(button)
-	UIDropDownMenu_SetSelectedValue(CopyCharacterFrame.RegionID, button.value);
-	if ( not IsGMClient() ) then
-		CopyCharacterFrame_SetSelected(nil);
-		CopyCharacterFrame.ScrollBox:SetDataProvider(CreateIndexRangeDataProvider(0), ScrollBoxConstants.RetainScrollPosition);
-		CopyCharacterFrame.CopyButton:Disable();
-		RequestAccountCharacters(button.value);
-	end
-end
-
 function CopyCharacterFrame_OnEvent(self, event, ...)
     if ( event == "ACCOUNT_CHARACTER_LIST_RECIEVED" ) then
         CopyCharacterFrame_Update(self.scrollFrame);
@@ -2652,6 +2664,10 @@ function CopyCharacterFrame_OnEvent(self, event, ...)
             GlueDialog_Show("OKAY", COPY_FAILED);
         end
     end
+end
+
+function CopyCharacterFrame_GetSelectedRegionID()
+	return CopyCharacterFrame.selectedRegion;
 end
 
 function CopyCharacterFrame_Update(self)

@@ -1,16 +1,7 @@
 --! TODO sounds
 --! TODO art
 
--- TODO / NOTE : Some of these are going to be temporary while data is WIP, there's a task open to get this data with a new API
 --[[ LOCALS ]]
--- Brann data
-local BRANN_TREE_ID = 874;
-local BRANN_ROLE_NODE_ID = 99809;
-local BRANN_COMBAT_TRINKET_NODE_ID = 99855;
-local BRANN_UTILITY_TRINKET_NODE_ID = 99854;
-local BRANN_CREATURE_DISPLAY_ID = 115505;
-local BRANN_FACTION_ID = 2640;
-
 -- NOTE: This creature is used to open the companion config panel, but may be changed to a gameobject in the near future
 local DELVES_SUPPLIES_CREATURE_ID = 207283;
 local DELVES_SUPPLIES_MAX_DISTANCE = 10;
@@ -18,6 +9,7 @@ local DELVES_SUPPLIES_MAX_DISTANCE = 10;
 local COMPANION_CONFIG_ON_SHOW_EVENTS = {
     "TRAIT_SYSTEM_NPC_CLOSED",
     "UPDATE_FACTION",
+    "QUEST_LOG_UPDATE",
 };
 
 local ConfigSlotType = EnumUtil.MakeEnum(
@@ -81,16 +73,16 @@ function DelvesCompanionConfigurationFrameMixin:OnEvent(event)
 end
 
 function DelvesCompanionConfigurationFrameMixin:Refresh()
-    local companionRankInfo = C_GossipInfo.GetFriendshipReputationRanks(BRANN_FACTION_ID);
+    local companionRankInfo = C_GossipInfo.GetFriendshipReputationRanks(Constants.DelvesConsts.BRANN_FACTION_ID);
     DelvesCompanionConfigurationFrame.companionLevel = companionRankInfo and companionRankInfo.currentLevel or 0;
 
-    local companionRepInfo = C_GossipInfo.GetFriendshipReputation(BRANN_FACTION_ID);
+    local companionRepInfo = C_GossipInfo.GetFriendshipReputation(Constants.DelvesConsts.BRANN_FACTION_ID);
     DelvesCompanionConfigurationFrame.companionExperienceInfo = {
-        currentExperience = companionRepInfo.standing,
-        nextLevelAt = companionRepInfo.nextThreshold,
+        currentExperience = companionRepInfo.standing - companionRepInfo.reactionThreshold,
+        nextLevelAt = companionRepInfo.nextThreshold - companionRepInfo.reactionThreshold,
     };
 
-    local companionFactionInfo = C_Reputation.GetFactionDataByID(BRANN_FACTION_ID);
+    local companionFactionInfo = C_Reputation.GetFactionDataByID(Constants.DelvesConsts.BRANN_FACTION_ID);
     DelvesCompanionConfigurationFrame.companionInfo = {
         name = companionFactionInfo.name,
         description = companionFactionInfo.description,
@@ -105,7 +97,6 @@ end
 function DelvesCompanionConfigurationFrameMixin:OnHide()
     -- TODO / NOTE : GameObject we're using to open this frame currently uses gossip, this may need to change in the near future
     C_PlayerInteractionManager.ClearInteraction();
-    HideUIPanel(DelvesCompanionAbilityListFrame);
     FrameUtil.UnregisterFrameForEvents(self, COMPANION_CONFIG_ON_SHOW_EVENTS);
 end
 
@@ -113,7 +104,7 @@ end
 CompanionPortraitFrameMixin = {};
 
 function CompanionPortraitFrameMixin:Refresh()
-    SetPortraitTextureFromCreatureDisplayID(self.Icon, BRANN_CREATURE_DISPLAY_ID);
+    SetPortraitTextureFromCreatureDisplayID(self.Icon, Constants.DelvesConsts.BRANN_CREATURE_DISPLAY_ID);
 end
 
 -- TODO placeholder code, this is going to change
@@ -200,7 +191,7 @@ function CompanionConfigSlotTemplateMixin:OnLoad()
 end
 
 function CompanionConfigSlotTemplateMixin:OnShow()
-    self.configID = C_Traits.GetConfigIDByTreeID(BRANN_TREE_ID);
+    self.configID = C_Traits.GetConfigIDByTreeID(Constants.DelvesConsts.BRANN_TRAIT_TREE_ID);
     self.selectionNodeID = self:GetSelectionNodeID();
     self:Refresh();
 end
@@ -261,8 +252,18 @@ function CompanionConfigSlotTemplateMixin:Refresh()
 
     if self.selectionNodeInfo then
         if not self.selectionNodeInfo.isVisible then
+
+            local lockedText = DELVES_CURIO_LOCKED;
+            for _, conditionID in ipairs(self.selectionNodeInfo.conditionIDs) do
+                local conditionInfo = C_Traits.GetConditionInfo(self.configID, conditionID, true);
+                if conditionInfo.tooltipText then
+                    lockedText = conditionInfo.tooltipText;
+                    break;
+                end
+            end
+
             self:SetEnabled(false);
-            self.Value:SetText(DELVES_CURIO_LOCKED);
+            self.Value:SetText(lockedText);
             self.Value:SetTextColor(GRAY_FONT_COLOR:GetRGB());
             self.Label:SetTextColor(GRAY_FONT_COLOR:GetRGB());
             self.Border:SetAtlas("talents-node-pvp-locked"); -- todo art
@@ -340,11 +341,11 @@ end
 
 function CompanionConfigSlotTemplateMixin:GetSelectionNodeID()
     if ConfigSlotType[self.type] == ConfigSlotType.Role then
-        return BRANN_ROLE_NODE_ID;
+        return Constants.DelvesConsts.BRANN_ROLE_NODE_ID;
     elseif ConfigSlotType[self.type] == ConfigSlotType.UtilityTrinket then
-        return BRANN_UTILITY_TRINKET_NODE_ID;
+        return Constants.DelvesConsts.BRANN_UTILITY_TRINKET_NODE_ID;
     elseif ConfigSlotType[self.type] == ConfigSlotType.CombatTrinket then
-        return BRANN_COMBAT_TRINKET_NODE_ID;
+        return Constants.DelvesConsts.BRANN_COMBAT_TRINKET_NODE_ID;
     else
         return nil;
     end

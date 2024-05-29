@@ -4,7 +4,7 @@ function CharacterServicesCharacterSelectorMixin:OnLoad()
 	self.ButtonPools = CreateFramePoolCollection();
 
 	self.ButtonPools:CreatePool("Frame", self, "CharacterServicesBonusIconTemplate", function(pool, obj)
-		FramePool_HideAndClearAnchors(pool, obj);
+		Pool_HideAndClearAnchors(pool, obj);
 		obj:GetParent().SelectionBonusIcon = nil;
 	end);
 
@@ -20,7 +20,7 @@ function CharacterServicesCharacterSelectorMixin:InitializedFrameCallback(frame)
 end
 
 function CharacterServicesCharacterSelectorMixin:UpdateDisplay(block)
-	CharacterSelectCharacterFrame:SetScrollEnabled(true);
+	CharacterSelectListUtil.SetScrollListInteractiveState(true);
 	CharacterSelectListUtil.SaveCharacterOrder();
 
 	self:SetBlock(block);
@@ -184,7 +184,8 @@ end
 function CharacterServicesCharacterSelectorMixin:ResetState(selectedButtonIndex)
 	self:Hide();
 	self.ButtonPools:ReleaseAll();
-	CharacterSelectCharacterFrame:SetScrollEnabled(true);
+	CharacterSelectListUtil.SetScrollListInteractiveState(true);
+
 	CharacterUpgradeCharacterSelectBlock_SetFilteringByBoostable(false);
 
 	CharacterSelectCharacterFrame.ScrollBox:Rebuild(ScrollBoxConstants.RetainScrollPosition);

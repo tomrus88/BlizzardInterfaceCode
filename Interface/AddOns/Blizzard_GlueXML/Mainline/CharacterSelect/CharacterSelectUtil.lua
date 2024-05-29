@@ -41,6 +41,7 @@ function CharacterSelectUtil.CreateNewCharacter(characterType, timerunningSeason
 	if GlueParent_GetCurrentScreen() == "charcreate" then
 		CharacterCreateFrame:UpdateTimerunningChoice();
 	else
+		CharacterSelectListUtil.SaveCharacterOrder();
 		CharacterSelect_SelectCharacter(CharacterSelect.createIndex);
 	end
 end
@@ -72,56 +73,21 @@ function CharacterSelectUtil.GetVASQueueTime(guid)
 end
 
 function CharacterSelectUtil.GetCharacterInfoTable(characterIndex)
-	local name, raceName, raceFilename, className, classFilename, classID, experienceLevel, areaName, genderEnum, isGhost,
-		hasCustomize, hasRaceChange, hasFactionChange, deprecated1, guid, profession0, profession1, genderID, boostInProgress,
-	 	hasNameChange, isLocked, isTrialBoost, isTrialBoostCompleted, isRevokedCharacterUpgrade, vasServiceInProgress, lastLoginBuild,
-	 	specID, isExpansionTrialCharacter, faction, lockedByExpansion, mailSenders, customizeDisabled, deprecated2,
-		characterServiceRequiresLogin, raceID, rpeResetAvailable, rpeResetQuestClearAvailable, hasWowToken, hasVasRevoked, realmName = GetCharacterInfo(characterIndex);
+	local characterGuid = GetCharacterGUID(characterIndex);
 
-	if not name then
+	if not characterGuid then
 		return nil;
 	end
 
-	return {
-		name = name,
-		raceName = raceName,
-		raceFilename = raceFilename,
-		className = className,
-		classFilename = classFilename,
-		classID = classID,
-		experienceLevel = experienceLevel,
-		areaName = areaName,
-		genderEnum = genderEnum,
-		isGhost = isGhost,
-		hasCustomize = hasCustomize,
-		hasRaceChange = hasRaceChange,
-		hasFactionChange = hasFactionChange,
-		guid = guid,
-		profession0 = profession0,
-		profession1 = profession1,
-		genderID = genderID,
-		boostInProgress = boostInProgress,
-		hasNameChange = hasNameChange,
-		isLocked = isLocked,
-		isTrialBoost = isTrialBoost,
-		isTrialBoostCompleted = isTrialBoostCompleted,
-		isRevokedCharacterUpgrade = isRevokedCharacterUpgrade,
-		vasServiceInProgress = vasServiceInProgress,
-		lastLoginBuild = lastLoginBuild,
-		specID = specID,
-		isExpansionTrialCharacter = isExpansionTrialCharacter,
-		faction = faction,
-		lockedByExpansion = lockedByExpansion,
-		mailSenders = mailSenders,
-		customizeDisabled = customizeDisabled,
-		characterServiceRequiresLogin = characterServiceRequiresLogin,
-		raceID = raceID,
-		rpeResetAvailable = rpeResetAvailable,
-		rpeResetQuestClearAvailable = rpeResetQuestClearAvailable,
-		hasWowToken = hasWowToken,
-		hasVasRevoked = hasVasRevoked,
-		realmName = realmName
-	};
+	local characterInfo = GetBasicCharacterInfo(characterGuid);
+	if not characterInfo.name then
+		return nil;
+	end
+
+	local serviceCharacterInfo = GetServiceCharacterInfo(characterGuid);
+	MergeTable(characterInfo, serviceCharacterInfo);
+
+	return characterInfo;
 end
 
 function CharacterSelectUtil.FormatCharacterName(name, timerunningSeasonID, offsetX, offsetY)
@@ -162,10 +128,10 @@ function CharacterSelectUtil.SetTooltipForCharacterInfo(characterInfo)
 	-- PvP Rating
 
 	-- Block 4
-	-- Gold
+	local money = characterInfo.money;
 
 	GameTooltip_AddColoredLine(GlueTooltip, name, WHITE_FONT_COLOR);
-	GameTooltip_AddColoredLine(GlueTooltip, realmName, GRAY_FONT_COLOR);
+	GameTooltip_AddColoredLine(GlueTooltip, CHARACTER_SELECT_REALM_TOOLTIP:format(realmName), GRAY_FONT_COLOR);
 	if showDebugTooltipInfo then
 		GameTooltip_AddColoredLine(GlueTooltip, characterInfo.guid, GRAY_FONT_COLOR);
 	end
@@ -197,4 +163,27 @@ function CharacterSelectUtil.SetTooltipForCharacterInfo(characterInfo)
 			GameTooltip_AddColoredLine(GlueTooltip, professionName1, WHITE_FONT_COLOR);
 		end
 	end
+
+	-- Add a blank line only if we have populated fields for the next section.
+	if money then
+		GameTooltip_AddBlankLineToTooltip(GlueTooltip);
+
+		SetTooltipMoney(GlueTooltip, money);
+	end
+end
+
+function CharacterSelectUtil.GetFormattedCurrentRealmName()
+	local formattedRealmName;
+
+	local serverName, _, isRP = GetServerName();
+	local connected = IsConnectedToServer();
+	if serverName then
+		if not connected then
+			serverName = serverName .. " (" .. SERVER_DOWN .. ")";
+		end
+
+		formattedRealmName = isRP and (serverName .. " " .. RP_PARENTHESES) or serverName;
+	end
+
+	return formattedRealmName;
 end

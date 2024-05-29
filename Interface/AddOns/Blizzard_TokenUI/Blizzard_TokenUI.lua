@@ -128,7 +128,7 @@ function TokenEntryMixin:OnEnter()
 		local transferPercentage = self.elementData.transferPercentage;
 		local percentageLost = transferPercentage and (100 - transferPercentage) or 0;
 		if percentageLost > 0 then
-			GameTooltip_AddNormalLine(GameTooltip, CURRENCY_TRANSFER_LOSS:format(percentageLost));
+			GameTooltip_AddNormalLine(GameTooltip, CURRENCY_TRANSFER_LOSS:format(math.ceil(percentageLost)));
 		end
 	end
 
@@ -253,6 +253,35 @@ function TokenFrameMixin:Update(resetScrollPosition)
 	end
 
 	self.ScrollBox:SetDataProvider(CreateDataProvider(currencyList), not resetScrollPosition and ScrollBoxConstants.RetainScrollPosition);
+
+	self.ScrollBox:RegisterCallback(ScrollBoxListMixin.Event.OnDataRangeChanged, GenerateClosure(self.RefreshAccountTransferableCurrenciesTutorial), self);
+end
+
+function TokenFrameMixin:RefreshAccountTransferableCurrenciesTutorial()
+	HelpTip:Hide(self, ACCOUNT_TRANSFERABLE_CURRENCIES_TUTORIAL);
+
+	local tutorialAcknowledged = GetCVarBitfield("closedInfoFramesAccountWide", LE_FRAME_TUTORIAL_ACCOUNT_TRANSFERABLE_CURRENCIES);
+	if tutorialAcknowledged then
+		return;
+	end
+
+	local accountTransferableCurrency = self.ScrollBox:FindFrameByPredicate(function(button, elementData) return elementData.isAccountTransferable; end);
+	if not accountTransferableCurrency then
+		return;
+	end
+
+	local helpTipInfo = {
+		text = ACCOUNT_TRANSFERABLE_CURRENCIES_TUTORIAL,
+		buttonStyle = HelpTip.ButtonStyle.Close,
+		cvarBitfield = "closedInfoFramesAccountWide",
+		bitfieldFlag = LE_FRAME_TUTORIAL_ACCOUNT_TRANSFERABLE_CURRENCIES,
+		targetPoint = HelpTip.Point.RightEdgeCenter,
+		offsetX = 40,
+		alignment = HelpTip.Alignment.Center,
+		acknowledgeOnHide = false,
+		checkCVars = true,
+	};
+	HelpTip:Show(self, helpTipInfo, accountTransferableCurrency);
 end
 
 function TokenFrameMixin:SetTokenWatched(id, watched)
@@ -305,7 +334,7 @@ function TokenFrameMixin:UpdatePopup(button)
 	TokenFramePopup.BackpackCheckBox:SetChecked(button.elementData.isShowInBackpack);
 
 	TokenFramePopup.CurrencyTransferToggleButton:Refresh(button.elementData);
-	TokenFramePopup:SetHeight(TokenFramePopup.CurrencyTransferToggleButton:IsShown() and 135 or 100);
+	TokenFramePopup:SetHeight(button.elementData.isAccountTransferable and 135 or 100);
 end
 
 InactiveCurrencyCheckBoxMixin = {};
