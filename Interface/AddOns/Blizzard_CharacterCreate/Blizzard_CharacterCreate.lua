@@ -2202,6 +2202,7 @@ function CharacterCreateZoneChoiceMixin:Setup()
 		return;
 	end
 
+	self:SetUseNPE(true);
 	self.shouldShow = true;
 
 	-- If there is more than one choice, the normal starting zone will always be first

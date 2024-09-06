@@ -698,9 +698,11 @@ LIST_DELIMITER = ", "
 
 local function ShouldAppendSpecText(itemLink)
 	if C_Item.IsItemBindToAccountUntilEquip(itemLink) then
-		-- If the merchant item is "Warbound until equipped", then we only want to show a list of specs for weapons
-		local isWeapon = select(6, C_Item.GetItemInfoInstant(itemLink)) == Enum.ItemClass.Weapon;
-		return isWeapon;
+		local _itemID, _itemType, _itemSubType, _itemEquipLoc, _icon, classID, subclassID = C_Item.GetItemInfoInstant(itemLink) ;
+		-- If the merchant item is "Warbound until equipped", then we only want to show a list of specs for weapons and shields
+		local isWeapon = classID == Enum.ItemClass.Weapon;
+		local isShield = (classID == Enum.ItemClass.Armor) and (subclassID == Enum.ItemArmorSubclass.Shield);
+		return isWeapon or isShield;
 	end
 
 	return true;

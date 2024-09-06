@@ -320,6 +320,16 @@ end
 
 function CurrencyTransferBalancePreviewMixin:SetCurrencyBalance(amount)
 	self.BalanceInfo.Amount:SetText(amount and BreakUpLargeNumbers(amount) or 0);
+	self:RefreshTransferCostDisplay();
+end
+
+function CurrencyTransferBalancePreviewMixin:RefreshTransferCostDisplay()
+	if self.showTransferCost then
+		-- Reanchor the transfer cost display so it always stays next to the amount, regardless of how many digits it has
+		self.BalanceInfo.TransferCostDisplay:ClearAllPoints();
+		local padding = 2;
+		self.BalanceInfo.TransferCostDisplay:SetPoint("RIGHT", self.BalanceInfo.Amount, "RIGHT", -(self.BalanceInfo.Amount:GetStringWidth() + padding), 0);
+	end
 	self.BalanceInfo.TransferCostDisplay:SetShown(self.showTransferCost and self:GetCurrencyTransferMenu():GetCurrencyTransferLoss() ~= 0);
 end
 
@@ -338,10 +348,30 @@ function CurrencyTransferCancelButtonMixin:OnClick()
 	HideUIPanel(CurrencyTransferMenu);
 end
 
-CurrencyTransferAmountSelectorMixin = {};
+CurrencyTransferAmountSelectorMixin = CreateFromMixins(CallbackRegistryMixin);
+
+CurrencyTransferAmountSelectorMixin:GenerateCallbackEvents({
+	"RequestSetSourceCharacterMaxQuantity",
+});
+
+function CurrencyTransferAmountSelectorMixin:OnLoad()
+	CallbackRegistryMixin.OnLoad(self);
+	self:AddDynamicEventMethod(self, CurrencyTransferAmountSelectorMixin.Event.RequestSetSourceCharacterMaxQuantity, self.OnRequestSetSourceCharacterMaxQuantity);
+
+	self.MaxQuantityButton:SetScript("OnClick", function() 
+		self:TriggerEvent(CurrencyTransferAmountSelectorMixin.Event.RequestSetSourceCharacterMaxQuantity);
+	end);
+
+	self:Reset();
+end
 
 function CurrencyTransferAmountSelectorMixin:OnHide()
+	CallbackRegistrantMixin.OnHide(self);
 	self:Reset();
+end
+
+function CurrencyTransferAmountSelectorMixin:OnRequestSetSourceCharacterMaxQuantity()
+	self.InputBox:TrySetFullSourceCharacterCurrencyQuantity();
 end
 
 function CurrencyTransferAmountSelectorMixin:GetRequestedCurrencyTransferAmount()
@@ -368,18 +398,25 @@ end
 
 CurrencyTransferAmountInputBoxMixin = CreateFromMixins(CurrencyTransferSystemMixin);
 
-function CurrencyTransferAmountInputBoxMixin:OnShow()
-	self:SetNumber(0);
-end
-
 function CurrencyTransferAmountInputBoxMixin:OnEditFocusLost()
 	EditBox_ClearHighlight(self);
 	self:ValidateAndSetValue();
 end
 
 function CurrencyTransferAmountInputBoxMixin:ValidateAndSetValue()
-	self:SetNumber(self:GetClampedInputAmount(self:GetNumber()));
-	self:GetCurrencyTransferMenu():TriggerEvent(CurrencyTransferMenuMixin.Event.CurrencyTransferAmountUpdated, self:GetNumber());
+	local inputValue = self:GetNumber();
+	local clampedInputValue = self:GetClampedInputAmount(inputValue);
+	self:SetNumber(clampedInputValue);
+
+	-- We only need to update the transfer amount in the menu if it is going to change after being clamped
+	if self.currentValue ~= clampedInputValue then
+		self.currentValue = clampedInputValue;
+		self:GetCurrencyTransferMenu():TriggerEvent(CurrencyTransferMenuMixin.Event.CurrencyTransferAmountUpdated, self.currentValue);
+	end
+end
+
+function CurrencyTransferAmountInputBoxMixin:TrySetFullSourceCharacterCurrencyQuantity()
+	self:SetNumber(self:GetCurrencyTransferMenu():GetSourceCharacterCurrencyQuantity() or 0);
 end
 
 function CurrencyTransferAmountInputBoxMixin:GetClampedInputAmount(inputAmount)
@@ -404,7 +441,11 @@ function CurrencyTransferAmountInputBoxMixin:GetClampedInputAmount(inputAmount)
 end
 
 function CurrencyTransferAmountInputBoxMixin:Reset()
-	self:SetText("");
+	self:SetNumber(0);
+end
+
+function CurrencyTransferAmountInputBoxMixin:OnTextChanged()
+	self:ValidateAndSetValue();
 end
 
 CurrencyTransferCostDisplayMixin = CreateFromMixins(CurrencyTransferSystemMixin);

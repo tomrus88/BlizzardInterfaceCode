@@ -513,8 +513,9 @@ function UIWidgetBaseSpellTemplateMixin:Setup(widgetContainer, spellInfo, width,
 	end
 
 	local spellData = C_Spell.GetSpellInfo(spellInfo.spellID);
-	self.Icon:SetTexture(spellData.iconID);
-	self.Icon:SetDesaturated(spellInfo.enabledState == Enum.WidgetEnabledState.Disabled);
+
+	self.Icon:SetTexture(spellData and spellData.iconID or [[Interface\Icons\INV_Misc_QuestionMark]]);
+	self.Icon:SetDesaturated(enabledState == Enum.WidgetEnabledState.Disabled);
 
 	local iconSize = GetWidgetIconSize(spellInfo.iconSizeType);
 	self.Icon:SetSize(iconSize, iconSize);

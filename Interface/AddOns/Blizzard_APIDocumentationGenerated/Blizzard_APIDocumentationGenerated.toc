@@ -219,6 +219,7 @@ TradeInfoDocumentation.lua
 TrainerDocumentation.lua
 TraitConfigDocumentation.lua
 TransmogDocumentation.lua
+TransmogItemsDocumentation.lua
 TutorialDocumentation.lua
 UIColorDocumentation.lua
 UIEventToastManagerDocumentation.lua
@@ -311,7 +312,6 @@ SystemDocumentation.lua
 TalkingHeadDocumentation.lua
 TimerunningUIDocumentation.lua
 TradeSkillUIDocumentation.lua
-TransmogItemsDocumentation.lua
 TransmogSetsDocumentation.lua
 UIFrameManagerDocumentation.lua
 UIModifiedInstanceDocumentation.lua
@@ -323,6 +323,7 @@ AccountConstantsDocumentation.lua
 ActionDocumentation.lua
 AppearanceSourceDocumentation.lua
 ArrowCalloutConstantsDocumentation.lua
+AuctionHouseConstantsDocumentation.lua
 AuctionHouseEnumsDocumentation.lua
 AzeriteConstantsDocumentation.lua
 BagConstantsDocumentation.lua
@@ -344,6 +345,7 @@ ContentTrackingTypesDocumentation.lua
 CurrencyConstantsDocumentation.lua
 CursorConstDocumentation.lua
 DamageConstantsDocumentation.lua
+DelvesConstantsDocumentation.lua
 EditModeManagerSharedDocumentation.lua
 EncounterJournalConstantsDocumentation.lua
 ExpansionLandingPageConstantsDocumentation.lua
@@ -424,7 +426,6 @@ ValidateNameConstantsDocumentation.lua
 VectorSharedDocumentation.lua
 VignetteConstantsDocumentation.lua
 WeeklyRewardsSharedDocumentation.lua
-AuctionHouseConstants_MainlineDocumentation.lua
 ClickBindingsConstantsDocumentation.lua
 CovenantCallingsConstantsDocumentation.lua
 CovenantSanctumConstantsDocumentation.lua
@@ -432,7 +433,6 @@ CovenantsConstantsDocumentation.lua
 CraftingOrderUIConstantsDocumentation.lua
 CraftingOrderUISharedDocumentation.lua
 CurrencyConstants_MainlineDocumentation.lua
-DelvesConstantsDocumentation.lua
 GarrisonSharedDocumentation.lua
 ItemConstants_MainlineDocumentation.lua
 LegendaryCraftingTypesDocumentation.lua

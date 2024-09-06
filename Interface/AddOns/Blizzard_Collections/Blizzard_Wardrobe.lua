@@ -1198,9 +1198,12 @@ function WardrobeCollectionFrameMixin:InitItemsFilterButton()
 	self.FilterButton:SetDefaultCallback(function()
 		return C_TransmogCollection.SetDefaultFilters();
 	end);
-	
-	if C_Transmog.IsAtTransmogNPC() then
-		self.FilterButton:SetText(SOURCES);
+
+	local atTransmogNPC = C_Transmog.IsAtTransmogNPC();
+	local filterButtonText = atTransmogNPC and SOURCES or FILTER;
+	self.FilterButton:SetText(filterButtonText);
+
+	if atTransmogNPC then
 		self.FilterButton:SetupMenu(function(dropdown, rootDescription)
 			rootDescription:SetTag("MENU_WARDROBE_FILTER");
 
@@ -1426,6 +1429,11 @@ end
 
 function WardrobeCollectionFrameMixin:GoToSet(setID)
 	self:SetTab(TAB_SETS);
+	local classID = C_TransmogSets.GetValidClassForSet(setID);
+	if classID then
+		C_TransmogSets.SetTransmogSetsClassFilter(classID);
+		self.ClassDropdown:Update();
+	end
 	self.SetsCollectionFrame:SelectSet(setID);
 end
 

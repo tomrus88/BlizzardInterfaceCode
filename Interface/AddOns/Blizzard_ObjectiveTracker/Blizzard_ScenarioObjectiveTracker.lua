@@ -331,6 +331,9 @@ function ScenarioObjectiveTrackerMixin:SlideOutContents()
 end
 
 function ScenarioObjectiveTrackerMixin:OnEndSlide(slideOut, finished)
+	-- this label should only ever be visible during a slide, specifically the slide out
+	self.StageBlock.CompleteLabel:Hide();
+
 	if not finished then
 		return;
 	end
@@ -841,7 +844,7 @@ function ScenarioObjectiveTrackerProvingGroundsMixin:OnLoad()
 	self.CountdownAnimFrame.Anim:SetScript("OnFinished", GenerateClosure(self.OnAnimFinished, self));
 end
 
-function ScenarioObjectiveTrackerProvingGroundsMixin:OnEvent(...)
+function ScenarioObjectiveTrackerProvingGroundsMixin:OnEvent(event, ...)
 	local score = ...
 	self.Score:SetText(score);
 end

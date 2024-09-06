@@ -2342,7 +2342,7 @@ end
 
 function PVPRewardRoleShortageBonusMixin:OnEnter()
 	if self.rewardInfo then
-		self.rewardInfo.rewardSpell:ContinueOnSpellLoad(GenerateClosure(self.RefreshTooltip, self));
+		self.spellLoadCancel = self.rewardInfo.rewardSpell:ContinueWithCancelOnSpellLoad(GenerateClosure(self.RefreshTooltip, self));
 	end
 end
 
@@ -2358,4 +2358,8 @@ end
 
 function PVPRewardRoleShortageBonusMixin:OnLeave()
 	EmbeddedItemTooltip:Hide();
+	if self.spellLoadCancel then
+		self.spellLoadCancel();
+		self.spellLoadCancel = nil;
+	end
 end

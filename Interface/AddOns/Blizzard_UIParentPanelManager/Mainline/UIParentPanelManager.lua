@@ -304,7 +304,7 @@ function FramePositionDelegate:ShowUIPanel(frame, force, contextKey)
 				-- Push left to right
 				self:MoveUIPanel("left", "right", UIPANEL_SKIP_SET_POINT);
 			end
-		elseif ( centerFrame and CanShowRightUIPanel(centerFrame) ) then
+		elseif ( centerFrame ) then
 			self:MoveUIPanel("center", "right", UIPANEL_SKIP_SET_POINT);
 		end
 		self:SetUIPanel("doublewide", frame);

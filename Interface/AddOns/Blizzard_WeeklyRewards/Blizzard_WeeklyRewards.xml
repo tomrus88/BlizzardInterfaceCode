@@ -739,7 +739,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="WeeklyRewardExpirationWarningDialog" enableMouse="true" mixin="GreatVaultRetirementWarningFrameMixin" frameLevel="500" hidden="true">
+	<Frame name="WeeklyRewardExpirationWarningDialog" enableMouse="true" mixin="GreatVaultRetirementWarningFrameMixin" frameLevel="500" hidden="true" frameStrata="HIGH">
 		<Size x="420" y="69"/>
 		<KeyValues>
 			<KeyValue key="layoutType" value="TooltipMixedLayout" type="string"/>

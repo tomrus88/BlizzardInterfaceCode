@@ -54,10 +54,6 @@ local function IsBoostFlowValidForCharacter(flowData, level, boostInProgress, is
 		return false;
 	end
 
-	if (flowData.level < 70) and (raceFilename == "Dracthyr") then
-		return false;
-	end
-
 	local timerunningSeasonID = playerGUID and GetCharacterTimerunningSeasonID(playerGUID);
 	if timerunningSeasonID then
 		return false;
@@ -1322,7 +1318,8 @@ function RPEUpgradeSpecSelectBlock:Initialize(results, wasFromRewind)
 	end
 
 	-- Force expand character list if collapsed.
-	CharacterSelectUI:ExpandCharacterList();
+	local isExpanded = true;
+	CharacterSelectUI:ExpandCharacterList(isExpanded);
 	CharacterSelectUI:SetCharacterListToggleEnabled(false);
 
 	local basicInfo = GetBasicCharacterInfo(characterGuid);

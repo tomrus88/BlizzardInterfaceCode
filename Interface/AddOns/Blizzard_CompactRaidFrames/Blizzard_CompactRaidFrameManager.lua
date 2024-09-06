@@ -1178,6 +1178,10 @@ end
 
 LeaveInstanceGroupButtonMixin = {};
 
+function LeaveInstanceGroupButtonMixin:OnLoad()
+	self.Text:SetMaxLines(1);
+end
+
 function LeaveInstanceGroupButtonMixin:OnShow()
 	if C_PartyInfo.IsPartyWalkIn() then
 		self:SetText(INSTANCE_WALK_IN_LEAVE);
