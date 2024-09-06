@@ -3,6 +3,7 @@ PlayerSpellsFrameMixin = {};
 local PLAYER_SPELLS_HELP_SYSTEM = "PlayerSpellsHelpSystem"
 
 local PlayerSpellsFrameEvents = {
+	"PLAYER_LEAVING_WORLD",
 };
 
 local PlayerSpellsFrameUnitEvents = {
@@ -78,6 +79,9 @@ function PlayerSpellsFrameMixin:OnEvent(event)
 	if event == "PLAYER_SPECIALIZATION_CHANGED" then
 		self:UpdateTabs();
 		self:UpdatePortrait();
+	elseif event == "PLAYER_LEAVING_WORLD" then
+		-- There's a lot of player spell info thrashing while exiting/re-entering world, avoid displaying during it
+		self:Hide();
 	end
 end
 
@@ -246,6 +250,7 @@ function PlayerSpellsFrameMixin:SetInspecting(inspectUnit, inspectString, inspec
 		self.inspectStringClassID = nil;
 	end
 
+	-- Disabling minimizing entirely to ensure the frame doesn't get thrashed by frame closes & opens that clear the inspect data
 	self:SetMinimizingEnabled(not self:IsInspecting());
 
 	self:UpdateTabs();
@@ -498,15 +503,19 @@ end
 function PlayerSpellsFrameMixin:ForceMaximize()
 	-- Close and re-show with minimize attributes temporarily disabled to ensure this frame stays maximized and other frames get closed
 	self:SetMinimizingEnabled(false);
-	SetUIPanelAttribute(self, "autoMinimizeWithOtherPanels", false);
-	SetUIPanelAttribute(self, "area", "center");
 	self:SetMinimized(false);
 	-- Now re-enable minimizing so that, if another frame gets opened later, we can be re-minimized and pop back to a supporting tab as usual
 	self:SetMinimizingEnabled(true);
-	SetUIPanelAttribute(self, "autoMinimizeWithOtherPanels", true);
-	SetUIPanelAttribute(self, "area", "centerOrLeft");
 end
 
 function PlayerSpellsFrameMixin:SetMinimizingEnabled(enabled)
 	self.isMinimizingEnabled = enabled;
+
+	if enabled then
+		SetUIPanelAttribute(self, "autoMinimizeWithOtherPanels", true);
+		SetUIPanelAttribute(self, "area", "centerOrLeft");
+	else
+		SetUIPanelAttribute(self, "autoMinimizeWithOtherPanels", false);
+		SetUIPanelAttribute(self, "area", "center");
+	end
 end
