@@ -193,6 +193,7 @@ SimpleTextureBaseAPIDocumentation.lua
 SkillInfoDocumentation.lua
 SlashCommandDocumentation.lua
 SocialQueueDocumentation.lua
+SocialRestrictionsDocumentation.lua
 SoundDocumentation.lua
 SpecializationInfoDocumentation.lua
 SpecializationSharedDocumentation.lua
@@ -253,6 +254,7 @@ ArtifactUIDocumentation.lua
 CVarDocumentation.lua
 ChallengeModeInfoDocumentation.lua
 ChromieTimeUIDocumentation.lua
+CinematicListDocumentation.lua
 ClassColorDocumentation.lua
 ClassTalentsDocumentation.lua
 ClickBindingsDocumentation.lua
@@ -304,7 +306,6 @@ ScrappingMachineUIDocumentation.lua
 ScriptedAnimationsDocumentation.lua
 SeasonInfoDocumentation.lua
 SimpleMapSceneAPIDocumentation.lua
-SocialRestrictionsDocumentation.lua
 SoulbindsDocumentation.lua
 SplashScreenDocumentation.lua
 SuperTrackManagerDocumentation.lua
@@ -394,6 +395,7 @@ QuestSessionConstantsDocumentation.lua
 QueueSpecificDocumentation.lua
 RecruitAFriendSharedDocumentation.lua
 ReportSystemConstantsDocumentation.lua
+ScreenLocationConstantsDocumentation.lua
 ScriptRegionSharedDocumentation.lua
 SharedScriptObjectModelLightDocumentation.lua
 SharedScriptObjectUnitPositionFrameDocumentation.lua

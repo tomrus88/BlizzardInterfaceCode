@@ -753,6 +753,8 @@ function UpdateCharacterList(skipSelect)
 		end
 		CharacterSelect.selectGuid = nil;
 		CharacterSelect.undeleteGuid = nil;
+	else
+		CharacterSelect.selectedIndex = tonumber(GetCVar("lastCharacterIndex")) + 1;
 	end
 
     CharacterSelect_UpdateButtonState();
@@ -769,27 +771,27 @@ function UpdateCharacterList(skipSelect)
 	CharacterTemplatesFrame.CreateTemplateButton:Hide();
 
     local connected = IsConnectedToServer();
-    if (CanCreateCharacter() and not CharacterSelect.undeleting) then
+    if CanCreateCharacter() and not CharacterSelect.undeleting then
         CharacterSelect.createIndex = numChars + 1;
-        if ( connected ) then
+        if connected then
 			CharacterSelectUI.VisibilityFramesContainer.CharacterList:SetCharacterCreateEnabled(true);
             CharSelectUndeleteCharacterButton:Show();
 			CharacterTemplatesFrame.CreateTemplateButton:Show();
         end
     end
 
-    if ( numChars == 0 and not skipSelect ) then
+    if numChars == 0 and not skipSelect then
         CharacterSelect.selectedIndex = 0;
 		local noCreate = true;
         CharacterSelect_SelectCharacter(CharacterSelect.selectedIndex, noCreate);
         return;
     end
-
-    if ( (CharacterSelect.selectedIndex == 0) or (CharacterSelect.selectedIndex > numChars) ) then
+	
+    if CharacterSelect.selectedIndex == 0 or CharacterSelect.selectedIndex > numChars then
         CharacterSelect.selectedIndex = 1;
     end
 
-    if ( not skipSelect ) then
+    if not skipSelect then
 		local noCreate = true;
         CharacterSelect_SelectCharacter(CharacterSelect.selectedIndex, noCreate);
     end
@@ -813,14 +815,20 @@ function CharacterSelect_SelectCharacter(index, noCreate)
             GlueParent_SetScreen("charcreate");
         end
     else
-		local selectedCharacterID = CharacterSelectListUtil.GetCharIDFromIndex(index);
-		SelectCharacter(selectedCharacterID);
+		if (not C_WowTokenPublic.GetCurrentMarketPrice() or
+			not CAN_BUY_RESULT_FOUND or (CAN_BUY_RESULT_FOUND ~= LE_TOKEN_RESULT_ERROR_SUCCESS and CAN_BUY_RESULT_FOUND ~= LE_TOKEN_RESULT_ERROR_SUCCESS_NO) ) then
+			AccountReactivate_RecheckEligibility();
+		end
+		ReactivateAccountDialog_Open();
 
-        if (not C_WowTokenPublic.GetCurrentMarketPrice() or
-            not CAN_BUY_RESULT_FOUND or (CAN_BUY_RESULT_FOUND ~= LE_TOKEN_RESULT_ERROR_SUCCESS and CAN_BUY_RESULT_FOUND ~= LE_TOKEN_RESULT_ERROR_SUCCESS_NO) ) then
-            AccountReactivate_RecheckEligibility();
-        end
-        ReactivateAccountDialog_Open();
+		local selectedCharacterID = CharacterSelectListUtil.GetCharIDFromIndex(index);
+
+		-- This is an empty slot.
+		if selectedCharacterID == 0 then
+			return;
+		end
+
+		SelectCharacter(selectedCharacterID);
 
         -- Update the text of the EnterWorld button based on the type of character that's selected, default to "enter world"
         local text = ENTER_WORLD;

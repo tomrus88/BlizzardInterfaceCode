@@ -84,7 +84,10 @@ function DelvesDifficultyPickerFrameMixin:OnShow()
 	self.Dropdown:RegisterCallback(DropdownButtonMixin.Event.OnMenuOpen, function(dropdown)
 		local selectedOption = self:GetSelectedOption();
 		local index = selectedOption and selectedOption.orderIndex or 1;
-		dropdown.menu.ScrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin);
+
+		if dropdown.menu.ScrollBox:HasScrollableExtent() then
+			dropdown.menu.ScrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin);
+		end
 	end, self.Dropdown);
 	
 	PlaySound(SOUNDKIT.IG_CHARACTER_INFO_OPEN);
