@@ -434,6 +434,10 @@ function CharacterSelectUIMixin:ShouldStoreBeEnabled()
 	return self.shouldStoreBeEnabled;
 end
 
+function CharacterSelectUIMixin:SetGameEnvironmentEnabled(enabled)
+	self.VisibilityFramesContainer.NavBar:SetGameEnvironmentButtonEnabled(enabled);
+end
+
 function CharacterSelectUIMixin:SetMenuEnabled(enabled)
 	self.VisibilityFramesContainer.NavBar:SetMenuButtonEnabled(enabled);
 end

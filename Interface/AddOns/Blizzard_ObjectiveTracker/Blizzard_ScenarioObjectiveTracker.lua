@@ -505,9 +505,10 @@ end
 function ScenarioObjectiveTrackerStageMixin:UpdateStageBlock(scenarioID, scenarioType, widgetSetID, textureKit, flags, currentStage, stageName, numStages)
 	local normalBGAtlas, finalBGAtlas = self:GetBGAtlases(scenarioType, textureKit);
 
+	local stageTextWidth = textureKit == "evergreen-scenario" and 210 or 172;
 	if bit.band(flags, SCENARIO_FLAG_SUPRESS_STAGE_TEXT) == SCENARIO_FLAG_SUPRESS_STAGE_TEXT then
 		self.Stage:SetText(stageName);
-		self.Stage:SetSize(172, 36);
+		self.Stage:SetSize(stageTextWidth, 36);
 		self.Stage:SetPoint("TOPLEFT", 15, -18);
 		self.FinalBG:Hide();
 		self.Name:SetText("");
@@ -519,7 +520,7 @@ function ScenarioObjectiveTrackerStageMixin:UpdateStageBlock(scenarioID, scenari
 			self.Stage:SetFormattedText(SCENARIO_STAGE, currentStage);
 			self.FinalBG:Hide();
 		end
-		self.Stage:SetSize(172, 18);
+		self.Stage:SetSize(stageTextWidth, 18);
 		self.Name:SetText(stageName);
 		if self.Name:GetStringWidth() > self.Name:GetWrappedWidth() then
 			self.Stage:SetPoint("TOPLEFT", 15, -10);

@@ -1754,7 +1754,8 @@ local function GetBindWarning(itemLocation)
 		return;
 	end
 
-	local isArmor = select(6, C_Item.GetItemInfoInstant(item:GetItemID())) == Enum.ItemClass.Armor;
+	local _itemID, _itemType, _itemSubType, _itemEquipLoc, _icon, itemClassID, itemSubclassID = C_Item.GetItemInfoInstant(item:GetItemID());
+	local isArmor = (itemClassID == Enum.ItemClass.Armor) and (itemSubclassID ~= Enum.ItemArmorSubclass.Shield);
 	if isArmor and not IsItemPreferredArmorType(item:GetItemLocation()) then
 		return NOT_BEST_ARMOR_TYPE_WARNING;
 	end

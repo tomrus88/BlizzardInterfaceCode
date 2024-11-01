@@ -1,29 +1,29 @@
 ---------------------------------------------------
--- GAME MODE BUTTON MIXIN
-GameModeSelectionButtonMixin = {};
-function GameModeSelectionButtonMixin:OnLoad()
+-- QUEUE TYPE BUTTON MIXIN
+QueueTypeSelectionButtonMixin = {};
+function QueueTypeSelectionButtonMixin:OnLoad()
 	SelectableButtonMixin.OnLoad(self);
 
-	self.ButtonName:SetText(self.gameModeString);
-	self.Icon:SetAtlas(self.gameModeIcon);
+	self.ButtonName:SetText(self.queueTypeString);
+	self.Icon:SetAtlas(self.queueTypeIcon);
 end
 
-function GameModeSelectionButtonMixin:OnClick()
-	EventRegistry:TriggerEvent("GameMode.Selected", self, self.gameModeSelection);
+function QueueTypeSelectionButtonMixin:OnClick()
+	EventRegistry:TriggerEvent("MatchmakingQueueType.Selected", self, self.partyPlaylistEntry);
 end
 
-function GameModeSelectionButtonMixin:SetSelected(selected)
+function QueueTypeSelectionButtonMixin:SetSelected(selected)
 	SelectableButtonMixin.SetSelectedState(self, selected);
 	if selected then
-		self.Icon:SetAtlas(self.gameModeIconSelected);
+		self.Icon:SetAtlas(self.queueTypeIconSelected);
 		self.ButtonName:SetTextColor(WHITE_FONT_COLOR:GetRGB());		
 	else
-		self.Icon:SetAtlas(self.gameModeIcon);
+		self.Icon:SetAtlas(self.queueTypeIcon);
 		self.ButtonName:SetTextColor(NORMAL_FONT_COLOR:GetRGB());
 	end
 end
 
-function GameModeSelectionButtonMixin:SetEnabled(enabled)
+function QueueTypeSelectionButtonMixin:SetEnabled(enabled)
 	if enabled then
 		self:SetAlpha(1);
 		self.ButtonName:SetTextColor(NORMAL_FONT_COLOR:GetRGB());
@@ -36,91 +36,114 @@ function GameModeSelectionButtonMixin:SetEnabled(enabled)
 end
 
 ---------------------------------------------------
--- GAME MODE SETTINGS FRAME MIXIN
-GameModeSettingsFrameMixin = { };
-local GameModeSettingsFrameEvents =
+-- QUEUE TYPE SETTINGS FRAME MIXIN
+QueueTypeSettingsFrameMixin = { };
+local QueueTypeSettingsFrameEvents =
 {
 	"CLIENT_FEATURE_STATUS_CHANGED",
 };
 
-function GameModeSettingsFrameMixin:OnLoad()
-	self:AddDynamicEventMethod(EventRegistry, "GameMode.Selected", self.OnGameModeSelected);
+function QueueTypeSettingsFrameMixin:OnLoad()
+	self:AddDynamicEventMethod(EventRegistry, "MatchmakingQueueType.Selected", self.OnQueueTypeSelected);
+
+	-- Registering this event differently since it occurs while the frame is hidden
+	EventRegistry:RegisterCallback("MatchmakingQueue.LeaveQueue", self.OnLeaveQueue, self);
 end
 
-function GameModeSettingsFrameMixin:OnShow()
+function QueueTypeSettingsFrameMixin:OnShow()
 	CallbackRegistrantMixin.OnShow(self);
 
-	FrameUtil.RegisterFrameForEvents(self, GameModeSettingsFrameEvents);
+	FrameUtil.RegisterFrameForEvents(self, QueueTypeSettingsFrameEvents);
 
 	self:UpdateButtons();
 end
 
-function GameModeSettingsFrameMixin:OnHide()
+function QueueTypeSettingsFrameMixin:OnHide()
 	CallbackRegistrantMixin.OnHide(self);
 
-	FrameUtil.UnregisterFrameForEvents(self, GameModeSettingsFrameEvents);
+	FrameUtil.UnregisterFrameForEvents(self, QueueTypeSettingsFrameEvents);
 end
 
-function GameModeSettingsFrameMixin:OnEvent(event)
+function QueueTypeSettingsFrameMixin:OnEvent(event)
 	if event == "CLIENT_FEATURE_STATUS_CHANGED" then
 		self:UpdateButtons();
 	end
 end
 
-function GameModeSettingsFrameMixin:OnGameModeSelected(button, gameModeSelected)
+function QueueTypeSettingsFrameMixin:OnQueueTypeSelected(button, partyPlayIndex)
 	local isPartyLeader = C_WoWLabsMatchmaking.IsPartyLeader();
 	if isPartyLeader then
 		button:SetSelected(true);
-		local partyPlayIndex = gameModeSelected == "trio" and 2 or gameModeSelected == "duo" and 1 or 0;
-		
-		local result = C_WoWLabsMatchmaking.SetPartyPlaylistEntry(partyPlayIndex);
-		if result then 
-			EventRegistry:TriggerEvent("GameMode.PlayerUpdatedPartyList");
+		if self.TEMPuseLocalPlayIndex then
+			self.TEMPlocalPlayIndex = partyPlayIndex;
+		else
+			local result = C_WoWLabsMatchmaking.SetPartyPlaylistEntry(partyPlayIndex);
+			if result then 
+				EventRegistry:TriggerEvent("MatchmakingQueueType.PlayerUpdatedPartyList");
+			end
 		end
 	end
+
 	self:UpdateButtons();
 end
 
-function GameModeSettingsFrameMixin:UpdateButtons()
+function QueueTypeSettingsFrameMixin:OnLeaveQueue()
+	self:SetPlayerReady(false);
+	self.GameReadyButton:Update();
+end
+
+function QueueTypeSettingsFrameMixin:UpdateButtons()
 	local isPartyLeader = C_WoWLabsMatchmaking.IsPartyLeader();
 	local partySize = C_WoWLabsMatchmaking.GetPartySize();
 	local isAlone = C_WoWLabsMatchmaking.IsAloneInWoWLabsParty();
 	local currentEventRealmQueues = C_GameEnvironmentManager.GetCurrentEventRealmQueues();
 
+	local trainingActive = bit.band(currentEventRealmQueues, Enum.EventRealmQueues.PlunderstormTraining) == Enum.EventRealmQueues.PlunderstormTraining;
 	local trioActive = bit.band(currentEventRealmQueues, Enum.EventRealmQueues.PlunderstormTrio) == Enum.EventRealmQueues.PlunderstormTrio;
 	local duoActive = bit.band(currentEventRealmQueues, Enum.EventRealmQueues.PlunderstormDuo) == Enum.EventRealmQueues.PlunderstormDuo;
 	local soloActive = bit.band(currentEventRealmQueues, Enum.EventRealmQueues.PlunderstormSolo) == Enum.EventRealmQueues.PlunderstormSolo;
+	
+	local enableTraining = isPartyLeader and trainingActive;
 	local enableTrio = isPartyLeader and trioActive;
 	local enableDuo = isPartyLeader and (partySize == 2 or partySize == 1) and duoActive;
 	local enableSolo = isPartyLeader and (partySize == 1) and soloActive;
 
 	if isAlone or isPartyLeader then
+		self.QueueContainer.Training:Show();
 		self.QueueContainer.Trio:SetShown(trioActive);
 		self.QueueContainer.Duo:Show();
 		self.QueueContainer.Solo:Show();
+		self.QueueContainer.Training:SetEnabled(enableTraining);
 		self.QueueContainer.Trio:SetEnabled(enableTrio);
 		self.QueueContainer.Duo:SetEnabled(enableDuo);
 		self.QueueContainer.Solo:SetEnabled(enableSolo);
 	else
+		self.QueueContainer.Training:Hide();
 		self.QueueContainer.Duo:Hide();
 		self.QueueContainer.Solo:Hide();
 		self.QueueContainer.Trio:Hide();
 	end
 
-	self:UpdateGameModeSelection();
+	self:UpdateQueueTypeSelection();
 
-	local gameModeSelection = C_WoWLabsMatchmaking.GetPartyPlaylistEntry();
-	self.QueueContainer.Trio:SetSelected(gameModeSelection == Enum.PartyPlaylistEntry.TrioGameMode);
-	self.QueueContainer.Duo:SetSelected(gameModeSelection == Enum.PartyPlaylistEntry.DuoGameMode);
-	self.QueueContainer.Solo:SetSelected(gameModeSelection == Enum.PartyPlaylistEntry.SoloGameMode);
+	local queueTypeSelection = self.TEMPuseLocalPlayIndex and self.TEMPlocalPlayIndex or C_WoWLabsMatchmaking.GetPartyPlaylistEntry();
+	self.QueueContainer.Trio:SetSelected(queueTypeSelection == Enum.PartyPlaylistEntry.TrioGameMode);
+	self.QueueContainer.Duo:SetSelected(queueTypeSelection == Enum.PartyPlaylistEntry.DuoGameMode);
+	self.QueueContainer.Solo:SetSelected(queueTypeSelection == Enum.PartyPlaylistEntry.SoloGameMode);
+	self.QueueContainer.Training:SetSelected(queueTypeSelection == Enum.PartyPlaylistEntry.TrainingGameMode);
 	self.QueueContainer:Layout();
 
-	self.GameReadyButton:Update();
+	if self.GameReadyButton then
+		self.GameReadyButton:Update();
+	end
 end
 
-function GameModeSettingsFrameMixin:IsSelectionActive()
+function QueueTypeSettingsFrameMixin:IsSelectionActive()
 	local currentEventRealmQueues = C_GameEnvironmentManager.GetCurrentEventRealmQueues();
-	if self.QueueContainer.Solo:IsSelected() then
+
+	if self.QueueContainer.Training:IsSelected() then
+		return bit.band(currentEventRealmQueues, Enum.EventRealmQueues.PlunderstormTraining) == Enum.EventRealmQueues.PlunderstormTraining;
+	elseif self.QueueContainer.Solo:IsSelected() then
 		return bit.band(currentEventRealmQueues, Enum.EventRealmQueues.PlunderstormSolo) == Enum.EventRealmQueues.PlunderstormSolo;
 	elseif self.QueueContainer.Duo:IsSelected() then
 		return bit.band(currentEventRealmQueues, Enum.EventRealmQueues.PlunderstormDuo) == Enum.EventRealmQueues.PlunderstormDuo;
@@ -131,20 +154,25 @@ function GameModeSettingsFrameMixin:IsSelectionActive()
 	return false;
 end
 
-function GameModeSettingsFrameMixin:UpdateGameModeSelection()
+function QueueTypeSettingsFrameMixin:UpdateQueueTypeSelection()
 	local needsUpdate = false;
-	local gameModeSelection = C_WoWLabsMatchmaking.GetPartyPlaylistEntry();
-	if (gameModeSelection == Enum.PartyPlaylistEntry.TrioGameMode) and not self.QueueContainer.Trio:IsEnabled() then
+	local queueTypeSelection = self.TEMPuseLocalPlayIndex and self.TEMPlocalPlayIndex or C_WoWLabsMatchmaking.GetPartyPlaylistEntry();
+
+	if (queueTypeSelection == Enum.PartyPlaylistEntry.TrainingGameMode) and not self.QueueContainer.Training:IsEnabled() then
 		needsUpdate = true;
-	elseif (gameModeSelection == Enum.PartyPlaylistEntry.DuoGameMode) and not self.QueueContainer.Duo:IsEnabled() then
+	elseif (queueTypeSelection == Enum.PartyPlaylistEntry.TrioGameMode) and not self.QueueContainer.Trio:IsEnabled() then
 		needsUpdate = true;
-	elseif (gameModeSelection == Enum.PartyPlaylistEntry.SoloGameMode) and not self.QueueContainer.Solo:IsEnabled() then
+	elseif (queueTypeSelection == Enum.PartyPlaylistEntry.DuoGameMode) and not self.QueueContainer.Duo:IsEnabled() then
+		needsUpdate = true;
+	elseif (queueTypeSelection == Enum.PartyPlaylistEntry.SoloGameMode) and not self.QueueContainer.Solo:IsEnabled() then
 		needsUpdate = true;
 	end
 
 	if needsUpdate then
 		local updated = false;
-		if self.QueueContainer.Solo:IsEnabled() then
+		if self.QueueContainer.Training:IsEnabled() then
+			updated = C_WoWLabsMatchmaking.SetPartyPlaylistEntry(3);
+		elseif self.QueueContainer.Solo:IsEnabled() then
 			updated = C_WoWLabsMatchmaking.SetPartyPlaylistEntry(0);
 		elseif self.QueueContainer.Duo:IsEnabled() then
 			updated = C_WoWLabsMatchmaking.SetPartyPlaylistEntry(1);
@@ -153,40 +181,59 @@ function GameModeSettingsFrameMixin:UpdateGameModeSelection()
 		end
 
 		if updated then
-			EventRegistry:TriggerEvent("GameMode.PlayerUpdatedPartyList");
+			EventRegistry:TriggerEvent("MatchmakingQueueType.PlayerUpdatedPartyList");
 		end
 	end
 end
 
-function GameModeSettingsFrameMixin:SetPlayerReady(isReady)
+function QueueTypeSettingsFrameMixin:SetPlayerReady(isReady)
 	PlaySound(SOUNDKIT.GS_CHARACTER_SELECTION_ENTER_WORLD);
 	C_WoWLabsMatchmaking.SetPlayerReady(isReady);
 	self:GetParent():Update();
 end
 
 
-PlunderstormReadyButtonMixin = { };
-local PlunderstormReadyButtonEvents =
+QueueReadyButtonMixin = { };
+local QueueReadyButtonEvents =
 {
+	"GLUES_RESUMED",
 	"LOBBY_MATCHMAKER_PARTY_UPDATE",
 };
 
-function PlunderstormReadyButtonMixin:OnShow()
-	FrameUtil.RegisterFrameForEvents(self,PlunderstormReadyButtonEvents);
+function QueueReadyButtonMixin:OnShow()
+	FrameUtil.RegisterFrameForEvents(self,QueueReadyButtonEvents);
 	self:Update();
 end
 
-function PlunderstormReadyButtonMixin:OnHide()
-	FrameUtil.UnregisterFrameForEvents(self,PlunderstormReadyButtonEvents);
+function QueueReadyButtonMixin:OnHide()
+	FrameUtil.UnregisterFrameForEvents(self,QueueReadyButtonEvents);
 end
 
-function PlunderstormReadyButtonMixin:OnEvent(event)
-	if event == "LOBBY_MATCHMAKER_PARTY_UPDATE" then
+function QueueReadyButtonMixin:OnEvent(event)
+	if event == "GLUES_RESUMED" then
+		local autoQueue, queueType = C_WoWLabsMatchmaking.GetAutoQueueOnLogout();
+		if autoQueue then
+			C_WoWLabsMatchmaking.SetAutoQueueOnLogout(false);
+
+			local queueContainer = self:GetParent().QueueContainer;
+			local queueTypeButton = queueContainer.Training;
+			if queueType == Enum.PartyPlaylistEntry.SoloGameMode then
+				queueTypeButton = queueContainer.Solo;
+			elseif queueType == Enum.PartyPlaylistEntry.DuoGameMode then
+				queueTypeButton = queueContainer.Duo;
+			elseif queueType == Enum.PartyPlaylistEntry.TrioGameMode then
+				queueTypeButton = queueContainer.Trio;
+			end
+			
+			queueTypeButton:OnClick();
+			self:OnClick();
+		end
+	elseif event == "LOBBY_MATCHMAKER_PARTY_UPDATE" then
 		self:Update();
 	end
 end
 
-function PlunderstormReadyButtonMixin:OnClick()
+function QueueReadyButtonMixin:OnClick()
 	self:GetParent():SetPlayerReady(not C_WoWLabsMatchmaking.IsPlayerReady());
 end
 
@@ -199,7 +246,7 @@ local function ShowReadyGlow(target, enabled)
 	end
 end
 
-function PlunderstormReadyButtonMixin:HasValidQueue()
+function QueueReadyButtonMixin:HasValidQueue()
 	if not C_WoWLabsMatchmaking.IsPartyLeader() then
 		return true;
 	end
@@ -221,7 +268,7 @@ function PlunderstormReadyButtonMixin:HasValidQueue()
 	return trioReady or duoReady;
 end
 
-function PlunderstormReadyButtonMixin:Update()
+function QueueReadyButtonMixin:Update()
 	self:SetEnabled(C_WoWLabsMatchmaking.CanEnterMatchmaking() and self:HasValidQueue());
 	
 	if C_WoWLabsMatchmaking.IsPlayerReady() then
@@ -253,7 +300,7 @@ end
 
 function MatchmakingQueueFrameMixin:ResetTimer()
 	self.currentTimeInQueue = 0;
-	self.glueStartTime = GetTime();
+	self.clientStartTime = GetTime();
 	self:UpdateTimerText();
 	self.timer:Cancel();
 	self:StartTimer();
@@ -264,14 +311,14 @@ function MatchmakingQueueFrameMixin:OnTick()
 		local deltaTime = 0;
 		local matchmakingStartTime = C_WoWLabsMatchmaking.GetInQueueTimeStart();
 		
-		if self.glueStartTime == nil then
-			self.glueStartTime = GetTime();
+		if self.clientStartTime == nil then
+			self.clientStartTime = GetTime();
 		end
 
 		if matchmakingStartTime > 0 then
 			deltaTime = GetTime() - (matchmakingStartTime / 1000);
 		else
-			deltaTime = GetTime() - (self.glueStartTime); -- in case we dont get the start time from C_WoWLabsMatchmaking, we fake the timer on the frontend
+			deltaTime = GetTime() - (self.clientStartTime); -- in case we dont get the start time from C_WoWLabsMatchmaking, we fake the timer
 		end
 
 		self.currentTimeInQueue = math.floor(deltaTime);
@@ -295,13 +342,13 @@ function MatchmakingQueueFrameMixin:SetWaiting(waiting)
 end
 
 function MatchmakingQueueFrameMixin:SetSquadSize(squadSize)
-	if squadSize == Enum.PartyPlaylistEntry.Solo then
+	if squadSize == Enum.PartyPlaylistEntry.SoloGameMode then
 		self.QueueSquadSize:SetText(WOWLABS_FIND_GAME_SOLO);
 		self.QueueTimerSpinner.QueueSizeIcon:SetAtlas("plunderstorm-glues-queue-pending-spinner-front-solo");
-	elseif squadSize == Enum.PartyPlaylistEntry.Duo then
+	elseif squadSize == Enum.PartyPlaylistEntry.DuoGameMode then
 		self.QueueSquadSize:SetText(WOWLABS_FIND_GAME_DUO);
 		self.QueueTimerSpinner.QueueSizeIcon:SetAtlas("plunderstorm-glues-queue-pending-spinner-front-duo");
-	elseif squadSize == Enum.PartyPlaylistEntry.Trio then
+	elseif squadSize == Enum.PartyPlaylistEntry.TrioGameMode then
 		self.QueueSquadSize:SetText(WOWLABS_FIND_GAME_TRIO);
 		self.QueueTimerSpinner.QueueSizeIcon:SetAtlas("plunderstorm-glues-queue-pending-spinner-front-trio");
 	else -- fallback case	
@@ -312,6 +359,5 @@ end
 
 LeaveQueueButtonMixin = {};
 function LeaveQueueButtonMixin:OnClick()
-	self:GetParent():GetParent():SetPlayerReady(false);
-	self:GetParent():GetParent().GameModeSettingsFrame.GameReadyButton:Update();
+	EventRegistry:TriggerEvent("MatchmakingQueue.LeaveQueue");
 end

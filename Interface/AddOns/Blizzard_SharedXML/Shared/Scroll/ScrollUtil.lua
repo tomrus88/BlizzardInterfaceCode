@@ -1577,8 +1577,9 @@ end
 
 ScrollBoxFactoryInitializerMixin = {};
 
-function ScrollBoxFactoryInitializerMixin:Init(frameTemplate)
+function ScrollBoxFactoryInitializerMixin:Init(frameTemplate, data)
 	self.frameTemplate = frameTemplate;
+	self.data = data or {};
 end
 
 function ScrollBoxFactoryInitializerMixin:GetTemplate()

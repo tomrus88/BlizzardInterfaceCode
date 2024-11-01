@@ -100,9 +100,6 @@ function WorldQuestDataProviderMixin:OnAdded(mapCanvas)
 	self.suppressedQuests = {};
 	MapCanvasDataProviderMixin.OnAdded(self, mapCanvas);
 
-	self:GetMap():SetPinTemplateType(self:GetPinTemplate(), "Button");
-	self:GetMap():SetPinTemplateType("WorldQuestSpellEffectPinTemplate", "CinematicModel");
-
 	self:RegisterEvent("SUPER_TRACKING_CHANGED");
 
 	self:GetMap():RegisterCallback("SetFocusedQuestID", self.OnSetFocusedQuestID, self);
@@ -205,11 +202,15 @@ function WorldQuestDataProviderMixin:DoesWorldQuestInfoPassFilters(info)
 	return WorldMap_DoesWorldQuestInfoPassFilters(info, ignoreTypeRequirements);
 end
 
-function WorldQuestDataProviderMixin:ShouldOverrideShowQuest(mapID, questID)
+function WorldQuestDataProviderMixin:ShouldMapShowQuest(mapID, questInfo)
+	-- the check for valid position happens in QuestPOIBlobWrapper::UpdateMapPositionFromBlob
 	local mapInfo = C_Map.GetMapInfo(mapID);
-	if questID == C_SuperTrack.GetSuperTrackedQuestID() and mapInfo.mapType == Enum.UIMapType.Continent then
+	if questInfo.childDepth and mapInfo.mapType == Enum.UIMapType.Zone then -- only show poi on other maps if they are child maps
+		return true;
+	elseif questInfo.questID == C_SuperTrack.GetSuperTrackedQuestID() and mapInfo.mapType == Enum.UIMapType.Continent then
 		return true;
 	end
+
 	return false;
 end
 
@@ -230,7 +231,7 @@ function WorldQuestDataProviderMixin:RefreshAllData(fromOnShow)
 
 	if taskInfo and GetCVarBool("questPOIWQ") then
 		for i, info in ipairs(taskInfo) do
-			if self:ShouldOverrideShowQuest(mapID, info.questID) or self:ShouldShowQuest(info) and HaveQuestData(info.questID) then
+			if self:ShouldMapShowQuest(mapID, info) or self:ShouldShowQuest(info) and HaveQuestData(info.questID) then
 				if QuestUtils_IsQuestWorldQuest(info.questID) or info.isMapIndicatorQuest then
 					if self:DoesWorldQuestInfoPassFilters(info) then
 						pinsToRemove[info.questID] = nil;

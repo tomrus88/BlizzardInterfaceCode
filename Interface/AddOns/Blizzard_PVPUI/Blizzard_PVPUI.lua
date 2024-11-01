@@ -700,8 +700,7 @@ function HonorFrame_UpdateQueueButtons()
 			elseif(isInCrossFactionGroup) then
 				if isBrawl or isSpecialBrawl then 
 					local brawlInfo = isSpecialBrawl and C_PvP.GetSpecialEventBrawlInfo() or C_PvP.GetAvailableBrawlInfo();
-					local allowCrossFactionGroups = brawlInfo and brawlInfo.brawlType == Enum.BrawlType.SoloRbg;
-					if (not allowCrossFactionGroups) then
+					if (brawlInfo and not brawlInfo.crossFactionAllowed) then
 						HonorFrame.QueueButton:Disable();
 						disabledReason = CROSS_FACTION_PVP_ERROR;
 					end

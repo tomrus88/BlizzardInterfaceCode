@@ -382,6 +382,7 @@ function MajorFactionButtonUnlockedStateMixin:ShowRenownRewardsTooltip()
 	end
 
 	GameTooltip_AddColoredLine(GameTooltip, MAJOR_FACTION_BUTTON_TOOLTIP_VIEW_RENOWN, GREEN_FONT_COLOR);
+	EventRegistry:TriggerEvent("MajorFactionRenown.Header.OnEnter", self, GameTooltip, factionID);
 	GameTooltip:Show();
 end
 

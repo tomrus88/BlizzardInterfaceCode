@@ -421,7 +421,7 @@ function ReputationEntryMixin:ShowMajorFactionRenownTooltip()
 
 	GameTooltip_AddBlankLineToTooltip(GameTooltip);
 	GameTooltip_AddInstructionLine(GameTooltip, REPUTATION_BUTTON_TOOLTIP_CLICK_INSTRUCTION);
-
+	EventRegistry:TriggerEvent("ShowMajorFactionRenown.Tooltip.OnEnter", self, GameTooltip, factionID);
 	GameTooltip:Show();
 end
 

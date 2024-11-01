@@ -1843,10 +1843,18 @@ if not C_Glue.IsOnGlueScreen() then
 		return cleanString;
 	end
 	local pingNameToTypeTable = {
-		[CleanupPingTypeString(PING_TYPE_ASSIST)] = Enum.PingSubjectType.Assist,
+		["1"] = Enum.PingSubjectType.Attack,
 		[CleanupPingTypeString(PING_TYPE_ATTACK)] = Enum.PingSubjectType.Attack,
-		[CleanupPingTypeString(PING_TYPE_ON_MY_WAY)] = Enum.PingSubjectType.OnMyWay,
+		["2"] = Enum.PingSubjectType.Warning,
 		[CleanupPingTypeString(PING_TYPE_WARNING)] = Enum.PingSubjectType.Warning,
+		["3"] = Enum.PingSubjectType.OnMyWay,
+		[CleanupPingTypeString(PING_TYPE_ON_MY_WAY)] = Enum.PingSubjectType.OnMyWay,
+		["4"] = Enum.PingSubjectType.Assist,
+		[CleanupPingTypeString(PING_TYPE_ASSIST)] = Enum.PingSubjectType.Assist,
+		["5"] = Enum.PingSubjectType.AlertNotThreat,
+		[CleanupPingTypeString(PING_TYPE_NOT_THREAT)] = Enum.PingSubjectType.AlertNotThreat,
+		["6"] = Enum.PingSubjectType.AlertThreat,
+		[CleanupPingTypeString(PING_TYPE_THREAT)] = Enum.PingSubjectType.AlertThreat,
 	};
 	SecureCmdList["PING"] = function(msg)
 		local action, target = SecureCmdOptionParse(msg);

@@ -17,9 +17,6 @@ end
 function BonusObjectiveDataProviderMixin:OnAdded(mapCanvas)
 	MapCanvasDataProviderMixin.OnAdded(self, mapCanvas);
 
-	mapCanvas:SetPinTemplateType("BonusObjectivePinTemplate", "Button");
-	mapCanvas:SetPinTemplateType("ThreatObjectivePinTemplate", "Button");
-
 	self:RegisterEvent("QUEST_LOG_UPDATE");
 
 	self:GetMap():RegisterCallback("SetFocusedQuestID", self.OnSetFocusedQuestID, self);

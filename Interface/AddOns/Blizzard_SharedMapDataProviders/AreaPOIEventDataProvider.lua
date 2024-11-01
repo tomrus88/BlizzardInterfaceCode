@@ -4,11 +4,6 @@ function AreaPOIEventDataProviderMixin:GetPinTemplate()
 	return "AreaPOIEventPinTemplate";
 end
 
-function AreaPOIEventDataProviderMixin:OnAdded(mapCanvas)
-	MapCanvasDataProviderMixin.OnAdded(self, mapCanvas);
-	mapCanvas:SetPinTemplateType(self:GetPinTemplate(), "Button");
-end
-
 function AreaPOIEventDataProviderMixin:OnShow()
 	self:RegisterEvent("AREA_POIS_UPDATED");
 end

@@ -87,12 +87,7 @@ WORLD_QUEST_QUALITY_COLORS = {
 	[Enum.WorldQuestQuality.Epic] = ITEM_QUALITY_COLORS[Enum.ItemQuality.Epic];
 };
 
--- Protecting from addons since we use this in GetScaledCursorDelta which is used in secure code.
-local _UIParentGetEffectiveScale;
-local _UIParentRef;
 function UIParent_OnLoad(self)
-	_UIParentGetEffectiveScale = self.GetEffectiveScale;
-	_UIParentRef = self;
 	self:RegisterEvent("PLAYER_LOGIN");
 	self:RegisterEvent("PLAYER_DEAD");
 	self:RegisterEvent("SELF_RES_SPELL_CHANGED");
@@ -395,6 +390,12 @@ function UIParent_OnShow(self)
 	end
 	if ( UIParentRightManagedFrameContainer ) then
 		UIParentRightManagedFrameContainer:UpdateManagedFrames();
+	end
+
+	-- Temporary hook to load the Plunderstore.
+	if C_GameModeManager.GetCurrentGameMode() == Enum.GameMode.Plunderstorm then
+		C_AddOns.LoadAddOn("Blizzard_AccountStore");
+		AccountStoreFrame:SetStoreFrontID(Constants.AccountStoreConsts.PlunderstormStoreFrontID);
 	end
 end
 
@@ -2744,7 +2745,7 @@ function GetScaledCursorPosition()
 end
 
 function GetScaledCursorDelta()
-	local uiScale = _UIParentGetEffectiveScale(_UIParentRef);
+	local uiScale = GetAppropriateTopLevelParent():GetEffectiveScale();
 	local x, y = GetCursorDelta();
 	return x / uiScale, y / uiScale;
 end
@@ -3549,7 +3550,7 @@ end
 
 
 function ConsolePrint(...)
-	ConsoleAddMessage(strjoin(" ", tostringall(...)));
+	ConsoleAddMessage(string.join(" ", tostringall(...)));
 end
 
 function LFD_IsEmpowered()

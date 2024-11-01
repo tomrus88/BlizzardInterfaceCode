@@ -7,8 +7,6 @@ end
 function QuestDataProviderMixin:OnAdded(mapCanvas)
 	MapCanvasDataProviderMixin.OnAdded(self, mapCanvas);
 
-	mapCanvas:SetPinTemplateType(self:GetPinTemplate(), "BUTTON");
-
 	if not self.poiQuantizer then
 		self.poiQuantizer = CreateFromMixins(WorldMapPOIQuantizerMixin);
 		self.poiQuantizer.size = 75;
@@ -231,7 +229,6 @@ function QuestDataProviderMixin:AddQuest(questID, x, y, frameLevelOffset, isWayp
 	pin.dataProvider = self;
 
 	local isSuperTracked = questID == C_SuperTrack.GetSuperTrackedQuestID();
-	local isComplete = QuestCache:Get(questID):IsComplete();
 
 	pin.isSuperTracked = isSuperTracked;
 

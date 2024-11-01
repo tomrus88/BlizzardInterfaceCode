@@ -75,7 +75,7 @@ function CharacterSelectFrameMixin:OnLoad()
 
 	self:AddDynamicEventMethod(EventRegistry, "GameEnvironment.Selected", self.OnGameEnvironmentSelected);
 	self:AddDynamicEventMethod(EventRegistry, "RealmList.Cancel", self.OnRealmListCancel);	
-	CharacterSelectUI_ResetEnvironmentButton();
+	CharacterSelectUI_InitGameEnvironmentButtons();
 
 	CharacterSelectCharacterFrame:Init();
 
@@ -94,12 +94,12 @@ end
 function CharacterSelectFrameMixin:OnGameEnvironmentSelected(requestedEnvironment)
 	assert(requestedEnvironment);
 	if C_GameEnvironmentManager.GetCurrentGameEnvironment() ~= requestedEnvironment then
-		self.CharacterSelectUI.VisibilityFramesContainer.GameEnvironmentToggleFrame:ChangeGameEnvironment(requestedEnvironment);
+		self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameEnvironmentButton.SelectionDrawer:ChangeGameEnvironment(requestedEnvironment);
 	end
 end
 
 function CharacterSelectFrameMixin:OnRealmListCancel()
-	self.CharacterSelectUI.VisibilityFramesContainer.GameEnvironmentToggleFrame:SelectRadioButtonForEnvironment(Enum.GameEnvironment.WoW);
+	self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameEnvironmentButton.SelectionDrawer:SelectRadioButtonForEnvironment(Enum.GameEnvironment.WoW);
 end
 
 function CharacterSelectFrameMixin:OnShow()
@@ -231,7 +231,7 @@ function CharacterSelectFrameMixin:OnShow()
 		C_SocialContractGlue.GetShouldShowSocialContract();
 	end
 
-	self.CharacterSelectUI.VisibilityFramesContainer.GameEnvironmentToggleFrame:SelectRadioButtonForEnvironment(Enum.GameEnvironment.WoW);
+	self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameEnvironmentButton.SelectionDrawer:SelectRadioButtonForEnvironment(Enum.GameEnvironment.WoW);
 
 	self.CharacterSelectUI.VisibilityFramesContainer.ToolTray:SetExpanded(not g_characterSelectToolTrayCollapsed);
 	GeneralDockManager:Hide();
@@ -972,11 +972,23 @@ function CharacterSelect_AllowedToEnterWorld()
     return true;
 end
 
-function CharacterSelectUI_ResetEnvironmentButton()
+function CharacterSelectUI_InitGameEnvironmentButtons()
 	-- because of the CharacterSelect animations, we need to set the initial alpha of the WoW Toggle to 1
-	local gameEnvironmentToggleFrame = CharacterSelect.CharacterSelectUI.VisibilityFramesContainer.GameEnvironmentToggleFrame;
+	local gameEnvironmentToggleFrame = CharacterSelect.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameEnvironmentButton.SelectionDrawer;
 	gameEnvironmentToggleFrame.SelectWoWToggle:SetAlpha(1);
 	gameEnvironmentToggleFrame.SelectWoWLabsToggle:SetAlpha(0.5);
+
+	local eventLabel = gameEnvironmentToggleFrame.SelectWoWLabsToggle.LimitedTimeEventText;
+	local eventLabelWidth = 160;
+	eventLabel:SetWidth(eventLabelWidth);
+
+	eventLabel.BGLabel:SetWidth(eventLabelWidth);
+	eventLabel.Label:SetWidth(eventLabelWidth);
+	
+	eventLabel.BGLabel:SetMaxLines(2);
+	eventLabel.Label:SetMaxLines(2);
+
+	eventLabel:Show();
 end
 
 function CharacterSelectRotateRight_OnUpdate(self)
@@ -1164,18 +1176,8 @@ function AccountUpgradePanel_GetBannerInfo()
 end
 
 function CharacterSelect_UpdateLogo()
-	-- For now, Timerunning overrides the event realms (plunderstorm) if both are active at once. Revisit if we have Plunderstorm and Timerunning at the same time.
-	local showEnvironmentToggle = CharacterSelectUI:GetVisibilityState() and C_GameEnvironmentManager.GetCurrentEventRealmQueues() ~= Enum.EventRealmQueues.None and GetActiveTimerunningSeasonID() == nil;
-	CharacterSelectLogo:SetShown(not showEnvironmentToggle);
-	local visibilityFramesContainer = CharacterSelect.CharacterSelectUI.VisibilityFramesContainer;
-	visibilityFramesContainer.GameEnvironmentToggleFrame:SetShown(showEnvironmentToggle);
-	visibilityFramesContainer.LimitedTimeEventFrame:SetShown(showEnvironmentToggle);
 	local currentExpansionLevel = AccountUpgradePanel_GetBannerInfo();
-	if ( showEnvironmentToggle ) then
-		SetExpansionLogo(visibilityFramesContainer.GameEnvironmentToggleFrame.SelectWoWToggle.NormalTexture, currentExpansionLevel);
-	else
-		SetExpansionLogo(CharacterSelectLogo, currentExpansionLevel);
-	end
+	SetExpansionLogo(CharacterSelectLogo, currentExpansionLevel);
 end
 
 local UpgradePanelServerAlertSpacing = 35;
@@ -1213,9 +1215,7 @@ function AccountUpgradePanel_Update(isExpanded, isUserInput)
     if ( shouldShowBanner ) then
 		CharSelectAccountUpgradeButton:SetText(upgradeButtonText);
 
-		local gameEnvironmentToggleShown = CharacterSelect.CharacterSelectUI.VisibilityFramesContainer.GameEnvironmentToggleFrame:IsShown();
-		local showChains = not gameEnvironmentToggleShown and (not currentExpansionLevel or currentExpansionLevel < LE_EXPANSION_WAR_WITHIN);
-
+		local showChains = CharacterSelectLogo:IsShown() and (not currentExpansionLevel or currentExpansionLevel < LE_EXPANSION_WAR_WITHIN);
 		CharSelectAccountUpgradeButton.TopChain1:SetShown(showChains);
 		CharSelectAccountUpgradeButton.TopChain2:SetShown(showChains);
 
@@ -1484,6 +1484,7 @@ function CharacterSelect_UpdateButtonState()
 	ActivateFactionChange:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress and not isAccountLocked);
 	ActivateFactionChange.texture:SetDesaturated(not (servicesEnabled and not undeleting and not redemptionInProgress and not isAccountLocked));
 	CharacterTemplatesFrame.CreateTemplateButton:SetEnabled(servicesEnabled and not undeleting and not redemptionInProgress and not isAccountLocked);
+	CharacterSelectUI:SetGameEnvironmentEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
 	CharacterSelectUI:SetStoreEnabled(servicesEnabled and not undeleting and not redemptionInProgress and not isAccountLocked);
 	CharacterSelectUI:SetMenuEnabled(servicesEnabled and not redemptionInProgress);
 	CharacterSelectUI:SetChangeRealmEnabled(servicesEnabled and not undeleting and not redemptionInProgress);
@@ -2899,11 +2900,4 @@ end
 
 function FlowErrorContainerMixin:OnLeave()
 	GetAppropriateTooltip():Hide();
-end
-
-LimitedTimeEventFrameMixin = {};
-
-function LimitedTimeEventFrameMixin:OnLoad()
-	self.Text.BGLabel:SetMaxLines(3);
-	self.Text.Label:SetMaxLines(3);
 end

@@ -1,6 +1,5 @@
 local DUNGEON_SCORE_LINK_INDEX_START = 11; 
 local DUNGEON_SCORE_LINK_ITERATE = 3; 
-local PVP_LINK_ITERATE = 3; 
 local PVP_LINK_ITERATE_BRACKET = 4; 
 local PVP_LINK_INDEX_START = 7;
 
@@ -633,7 +632,7 @@ end
 
 function AddPvpRatingsToTable()
 	local pvpLinkInfoTable = { };
-	for i = 1, PVP_LINK_ITERATE do 
+	for i = 1, #CONQUEST_BRACKET_INDEXES do 
 		local bracketIndex = CONQUEST_BRACKET_INDEXES[i];
 		local rating, seasonBest, weeklyBest, seasonPlayed, seasonWon, weeklyPlayed, weeklyWon, lastWeeksBest, hasWon, pvpTier, ranking, roundsSeasonPlayed, roundsSeasonWon, roundsWeeklyPlayed, roundsWeeklyWon = GetPersonalRatedInfo(bracketIndex);
 		local tierInfo = C_PvP.GetPvpTierInfo(pvpTier);

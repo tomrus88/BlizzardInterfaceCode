@@ -3028,8 +3028,8 @@ function WardrobeSetsTransmogModelMixin:OnMouseUp(button)
 
 						for index, variantSet in ipairs(C_TransmogSets.GetVariantSets(baseSetID)) do
 							C_TransmogSets.SetIsFavorite(variantSet.setID, false);
-	end
-end
+						end
+					end
 
 					C_TransmogSets.SetIsFavorite(self.setID, true);
 				end);
@@ -3720,7 +3720,9 @@ function WardrobeSetsCollectionMixin:OnShow()
 					colorCode = GRAY_FONT_COLOR_CODE;
 				end
 
-				local text = format(ITEM_SET_NAME, (variantSet.description)..colorCode, numSourcesCollected, numSourcesTotal);
+				assertsafe(variantSet.description ~= nil, "TransmogSet %s (%d) missing description / difficulty variant", variantSet.name, variantSet.setID);
+
+				local text = format(ITEM_SET_NAME, (variantSet.description or variantSet.name)..colorCode, numSourcesCollected, numSourcesTotal);
 				rootDescription:CreateRadio(text, IsSelected, SetSelected, variantSet);
 			end
 		end

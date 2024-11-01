@@ -428,3 +428,29 @@ function DelvesDashboardButtonPanelFrameMixin:OnLeave()
 		GameTooltip:Hide();
 	end
 end
+
+DelvesThresholdBarMixin = {};
+
+function DelvesThresholdBarMixin:OnEnter()
+	local renownInfo = self:GetParent().renownInfo;
+
+	if renownInfo then
+		local earnedLevels = math.floor(GetCVarNumberOrDefault(DELVES_SEASON_RENOWN_CVAR));
+		local cumulativeRepEarned = FormatLargeNumber((earnedLevels * renownInfo.renownLevelThreshold) + renownInfo.renownReputationEarned);
+		local maxRepForTrack = FormatLargeNumber(renownInfo.renownLevelThreshold * MAX_NUM_REWARDS);
+		local repToNextReward = FormatLargeNumber(renownInfo.renownLevelThreshold - renownInfo.renownReputationEarned);
+
+		GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT");
+		GameTooltip:SetMinimumWidth(235);
+		GameTooltip_AddHighlightLine(GameTooltip, DELVES_SEASON_PROGRESS:format(cumulativeRepEarned, maxRepForTrack));
+		GameTooltip_AddHighlightLine(GameTooltip, DELVES_SEASON_REWARD_PROGRESS:format(repToNextReward));
+		GameTooltip:Show();
+	end
+end
+
+function DelvesThresholdBarMixin:OnLeave()
+	if GameTooltip:GetOwner() == self then
+		GameTooltip:SetMinimumWidth(0, false);
+		GameTooltip:Hide();
+	end
+end

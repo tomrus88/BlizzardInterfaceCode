@@ -76,13 +76,20 @@ function QuestOfferDataProviderMixin:IsQuestOfferAccountIgnored(questOffer)
 	return true;
 end
 
-function QuestOfferDataProviderMixin:ShouldAddQuestOffer(questOffer)
+function QuestOfferDataProviderMixin:ShouldAddQuestOffer(questOffer, mapID)
 	if not questOffer then
 		return false;
 	end
 
 	if questOffer.inProgress then
 		return false;
+	end
+
+	-- offers from tasks won't have startMapID but will already be filtered out
+	if questOffer.startMapID then
+		if questOffer.startMapID ~= mapID and not MapUtil.IsChildMapCached(questOffer.startMapID, mapID) then
+			return false;
+		end
 	end
 
 	if questOffer.isHidden and not C_Minimap.IsTrackingHiddenQuests() then
@@ -100,8 +107,8 @@ function QuestOfferDataProviderMixin:ShouldAddQuestOffer(questOffer)
 	return true;
 end
 
-function QuestOfferDataProviderMixin:CheckAddQuestOffer(questOffer)
-	if self:ShouldAddQuestOffer(questOffer) then
+function QuestOfferDataProviderMixin:CheckAddQuestOffer(questOffer, mapID)
+	if self:ShouldAddQuestOffer(questOffer, mapID) then
 		questOffer.dataProvider = self;
 		self:GetQuestOffers()[questOffer.questID] = questOffer;
 	end
@@ -198,7 +205,7 @@ end
 
 function QuestOfferDataProviderMixin:AddAllRelevantQuestOffers(mapID)
 	for questID, questOffer in pairs(self:GetAllQuestOffersForMap(mapID)) do
-		self:CheckAddQuestOffer(questOffer);
+		self:CheckAddQuestOffer(questOffer, mapID);
 	end
 end
 
@@ -218,6 +225,7 @@ function QuestOfferDataProviderMixin:GetPinSuppressor()
 end
 
 function QuestOfferDataProviderMixin:IsCityMap(mapID)
+	mapID = mapID or self:GetMap():GetMapID();
 	local cityMaps = GetOrCreateTableEntry(self, "cityMaps");
 	local isCityMap = cityMaps[mapID];
 	if isCityMap ~= nil then
@@ -229,29 +237,34 @@ function QuestOfferDataProviderMixin:IsCityMap(mapID)
 	return isCityMap;
 end
 
+function QuestOfferDataProviderMixin:IsQuestHubForCityMap(questHubPin)
+	local hubMapID = questHubPin:GetLinkedUIMapID();
+	return hubMapID and self:IsCityMap(hubMapID);
+end
+
 function QuestOfferDataProviderMixin:IsSuppressionDisabled(mapID, questHubPin)
 	if self:IsCityMap(mapID) then
 		return true;
 	end
 
+	local isAtMaxZoom = self:IsAtMaxZoom();
+
 	-- Optional
-	if questHubPin and self:IsAtMaxZoom() then
-		local hubMapID = questHubPin:GetLinkedUIMapID();
-		if not hubMapID or not self:IsCityMap(hubMapID) then
-			return true;
+	if questHubPin then
+		if isAtMaxZoom then
+			if not self:IsQuestHubForCityMap(questHubPin) then
+				return true;
+			end
 		end
-	end
 
-	return false;
-end
-
-function QuestOfferDataProviderMixin:IsQuestOfferSuppressed(mapID, questOffer)
-	local hubPinThatSuppressedOffer = self:GetPinSuppressor()[questOffer.questID];
-	if self:IsSuppressionDisabled(mapID, hubPinThatSuppressedOffer) then
 		return false;
 	end
 
-	return hubPinThatSuppressedOffer ~= nil;
+	return isAtMaxZoom;
+end
+
+function QuestOfferDataProviderMixin:GetLinkedQuestHub(questOffer)
+	return self:GetPinSuppressor()[questOffer.questID];
 end
 
 function QuestOfferDataProviderMixin:CheckQuestIsRelatedToHub(questID, questHubPin)
@@ -285,9 +298,7 @@ end
 
 function QuestOfferDataProviderMixin:CheckAddQuestOfferPins(mapID)
 	for questID, questOffer in pairs(self:GetQuestOffers()) do
-		if not self:IsQuestOfferSuppressed(mapID, questOffer) then
-			local pin = self:GetMap():AcquirePin("QuestOfferPinTemplate", questOffer);
-		end
+		self:GetMap():AcquirePin("QuestOfferPinTemplate", questOffer);
 	end
 end
 
@@ -332,8 +343,18 @@ function QuestOfferDataProviderMixin:OnHide()
 end
 
 function QuestOfferDataProviderMixin:OnMapChanged()
-	self:RequestQuestLinesForMap()
-	MapCanvasDataProviderMixin.OnMapChanged(self)
+	self:RequestQuestLinesForMap();
+
+	-- Catch-22, to refresh data we need anim values, and they will update later
+	-- but to get those anim values we need to refresh data.
+	-- Use defaults until then.
+	self:SetTargetAnimValue(0);
+	self:SetCurrentAnimProgress(0);
+
+	MapCanvasDataProviderMixin.OnMapChanged(self);
+	self:SetTargetAnimValue(self:CalculateTargetAnimValue());
+	self:SetCurrentAnimProgress(self:GetTargetAnimValue());
+	self:RunPinOnUpdate();
 end
 
 function QuestOfferDataProviderMixin:OnEvent(event, ...)
@@ -361,7 +382,8 @@ end
 
 function QuestOfferDataProviderMixin:OnCanvasScaleChanged()
 	if self:CheckUpdateMaxZoom() then
-		self:RefreshAllData();
+		self:SetTargetAnimValue(self:CalculateTargetAnimValue());
+		self:GetMap():RegisterDataProviderOnUpdate(self);
 	end
 end
 
@@ -380,17 +402,56 @@ function QuestOfferDataProviderMixin:IsAtMaxZoom()
 	return self.isMaxZoom;
 end
 
--- TODO: Hoping to find a better way to get this implemented, but copy paste is the way for now.
+function QuestOfferDataProviderMixin:GetCurrentAnimProgress()
+	return self.animProgress;
+end
+
+function QuestOfferDataProviderMixin:SetCurrentAnimProgress(progress)
+	self.animProgress = progress;
+end
+
+function QuestOfferDataProviderMixin:GetTargetAnimValue()
+	return self.targetAnimValue;
+end
+
+function QuestOfferDataProviderMixin:SetTargetAnimValue(targetValue)
+	self.targetAnimValue = targetValue;
+end
+
+function QuestOfferDataProviderMixin:CalculateTargetAnimValue()
+	return self:IsSuppressionDisabled(self:GetMap():GetMapID()) and 1 or 0;
+end
+
 function QuestOfferDataProviderMixin:OnAdded(mapCanvas)
 	MapCanvasDataProviderMixin.OnAdded(self, mapCanvas);
-
 	self:GetMap():RegisterCallback("SetBounty", self.SetBounty, self);
 end
 
 function QuestOfferDataProviderMixin:OnRemoved(mapCanvas)
 	self:GetMap():UnregisterCallback("SetBounty", self);
-
 	MapCanvasDataProviderMixin.OnRemoved(self, mapCanvas);
+end
+
+function QuestOfferDataProviderMixin:OnUpdate()
+	local targetValue = self:GetTargetAnimValue();
+	local currentProgress = FrameDeltaLerp(self:GetCurrentAnimProgress(), targetValue, 0.05);
+	if ApproximatelyEqual(currentProgress, targetValue, 0.01) then
+		currentProgress = targetValue;
+		self:GetMap():UnregisterDataProviderOnUpdate(self);
+	end
+
+	self:SetCurrentAnimProgress(currentProgress);
+	self:RunPinOnUpdate();
+end
+
+function QuestOfferDataProviderMixin:RunPinOnUpdate()
+	for pin in self:GetMap():EnumeratePinsByTemplate("QuestOfferPinTemplate") do
+		pin:ApplyAnimation();
+	end
+
+	for pin in self:GetMap():EnumeratePinsByTemplate("QuestHubPinTemplate") do
+		pin:ApplyAnimation();
+	end
 end
 
 function QuestOfferDataProviderMixin:SetBounty(bountyQuestID, bountyFactionID, bountyFrameType)
@@ -437,6 +498,9 @@ function QuestOfferPinMixin:OnAcquired(questOffer)
 	self.mapID = self:GetMap():GetMapID();
 	Mixin(self, questOffer);
 
+	self:SetLinkedHub(self.dataProvider:GetLinkedQuestHub(self));
+	self:CheckCreateAnimationData();
+
 	self:UseFrameLevelType("PIN_FRAME_LEVEL_QUEST_OFFER", self.pinLevel);
 	self:SetHeightIndicator(self.floorLocation);
 	self:SetPosition(self.x, self.y);
@@ -444,7 +508,62 @@ function QuestOfferPinMixin:OnAcquired(questOffer)
 	self.Texture:SetAtlas(self.questIcon);
 	self.Texture:SetAlpha(self.pinAlpha);
 
-	self:Show();
+	self:ApplyAnimation();
+end
+
+function QuestOfferPinMixin:SetLinkedHub(linkedHub)
+	self.linkedHub = linkedHub;
+end
+
+function QuestOfferPinMixin:GetLinkedHub()
+	return self.linkedHub;
+end
+
+function QuestOfferPinMixin:CheckCreateAnimationData()
+	local linkedHub = self:GetLinkedHub();
+	if linkedHub then
+		local startX, startY = linkedHub:GetPosition();
+		self.linkedHubPos = CreateVector2D(startX, startY);
+
+		local endX, endY = self.x, self.y;
+		self.positionAnimVec = CreateVector2D(endX, endY):Subtract(self.linkedHubPos);
+	else
+		self.linkedHubPos = nil;
+		self.positionAnimVec = nil;
+	end
+end
+
+function QuestOfferPinMixin:GetAnimatedPosition(progress)
+	if self.positionAnimVec then
+		local x, y = Vector2D_ScaleBy(progress, self.positionAnimVec:GetXY());
+		return Vector2D_Add(x, y, self.linkedHubPos:GetXY());
+	else
+		return self.x, self.y;
+	end
+end
+
+function QuestOfferPinMixin:GetAnimationProgress()
+	local dataProvider = self.dataProvider;
+	local linkedHub = self:GetLinkedHub();
+
+	-- There are two cases for not having a linked hub: looking at a city map, quest is not actually linked to a hub.
+	if not linkedHub then
+		return 1;
+	elseif not dataProvider:IsCityMap() and dataProvider:IsQuestHubForCityMap(linkedHub) then
+		return 0;
+	end
+
+	return EasingUtil.InOutCubic(dataProvider:GetCurrentAnimProgress());
+end
+
+function QuestOfferPinMixin:ApplyAnimation()
+	self:CheckCreateAnimationData()
+	local progress = self:GetAnimationProgress();
+	self:SetAlpha(progress);
+	self:SetShown(progress > 0.02);
+
+	local x, y = self:GetAnimatedPosition(progress);
+	self:SetPosition(x, y);
 end
 
 function QuestOfferPinMixin:OnMouseEnter()
@@ -471,6 +590,29 @@ function QuestHubPinMixin:OnAcquired(poiInfo)
 	AreaPOIPinMixin.OnAcquired(self, poiInfo);
 	self:ConsolidateRelatedQuests();
 	self:UpdatePriorityQuestDisplay();
+
+	self:SetIsQuestHubForCityMap(self.dataProvider:IsQuestHubForCityMap(self));
+	self:ApplyAnimation();
+end
+
+function QuestHubPinMixin:GetAnimationProgress()
+	if self:IsQuestHubForCityMap() then
+		return 1;
+	end
+
+	return EasingUtil.InOutQuadratic(1 - self.dataProvider:GetCurrentAnimProgress());
+end
+
+function QuestHubPinMixin:ApplyAnimation()
+	self.PriorityQuest:SetAlpha(self:GetAnimationProgress());
+end
+
+function QuestHubPinMixin:SetIsQuestHubForCityMap(isForCity)
+	self.isForCity = isForCity;
+end
+
+function QuestHubPinMixin:IsQuestHubForCityMap()
+	return self.isForCity;
 end
 
 local function SortConsolidatedQuestsComparator(questOffer1, questOffer2)
@@ -586,28 +728,26 @@ function QuestHubPinGlowMixin:OnReleased()
 end
 
 function QuestHubPinGlowMixin:GetHighlightType() -- override
-	local highlightType = MapPinHighlightType.None;
-	local relatedQuests = self:GetRelatedQuests();
-	for _, quest in ipairs(relatedQuests) do
-		local shouldTryGlowQuest = GLOW_HUB_QUESTS[quest.questID];
-		if (shouldTryGlowQuest) then
+	for _, quest in ipairs(self:GetRelatedQuests()) do
+		if GLOW_HUB_QUESTS[quest.questID] then
 			local lastResetStartTimeAcknowledgement = GLOW_HUB_QUESTS_ACKNOWLEDGED[quest.questID];
 			local questAcknowledgedThisWeek = lastResetStartTimeAcknowledgement and lastResetStartTimeAcknowledgement == C_DateAndTime.GetWeeklyResetStartTime();
 			if (not questAcknowledgedThisWeek) then
-				highlightType = MapPinHighlightType.ImportantHubQuestHighlight;
+				return MapPinHighlightType.ImportantHubQuestHighlight;
 			end
 		end
 	end
 
-	if (highlightType == MapPinHighlightType.None) then
-		highlightType = AreaPOIPinMixin.GetHighlightType(self);
-	end
-
-	return highlightType;
+	return AreaPOIPinMixin.GetHighlightType(self);
 end
 
 function QuestHubPinGlowMixin:GetHighlightAnimType() -- override
-	return MapPinHighlightAnimType.BackgroundPulse;
+	local highlightType = self:GetHighlightType();
+	if highlightType == MapPinHighlightType.ImportantHubQuestHighlight then
+		return MapPinHighlightAnimType.BackgroundPulse;
+	end
+
+	return MapPinHighlightAnimType.ExpandAndFade;
 end
 
 function QuestHubPinGlowMixin:AcknowledgeGlow()
