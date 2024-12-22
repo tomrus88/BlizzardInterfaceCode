@@ -358,22 +358,6 @@ function PVPQueueFrame_OnLoad(self)
 		self.CategoryButton3.tooltip = failureReason;
 	end
 
-	canUse = not (IsTrialAccount() or IsVeteranTrialAccount());
-	failureReason = WOWLABS_SUB_REQUIRED;
-	if not canUse then
-		-- disabledButtons doesn't do anything for us in this case so no need to set it to true
-		PVPQueueFrame_SetCategoryButtonState(self.CategoryButton4, false);
-		self.CategoryButton4.tooltip = failureReason;
-	end
-
-	canUse = not C_PlayerInfo.IsPlayerNPERestricted();
-	failureReason = FEATURE_NOT_YET_AVAILABLE;
-	if not canUse then
-		-- disabledButtons doesn't do anything for us in this case so no need to set it to true
-		PVPQueueFrame_SetCategoryButtonState(self.CategoryButton4, false);
-		self.CategoryButton4.tooltip = failureReason;
-	end
-
 	if disabledButtons then
 		PVPQueueFrame:SetScript("OnEvent", PVPQueueFrame_OnEvent);
 		PVPQueueFrame:RegisterEvent("PLAYER_LEVEL_CHANGED");
@@ -458,6 +442,27 @@ function PVPQueueFrame_OnShow(self)
 	PVPQueueFrame_UpdateTitle();
 
 	PVEFrame.TopTileStreaks:Show()
+
+	local canUsePlunderButton = not (IsTrialAccount() or IsVeteranTrialAccount());
+	local failureReason = WOWLABS_SUB_REQUIRED;
+	if not canUsePlunderButton then
+		PVPQueueFrame_SetCategoryButtonState(self.CategoryButton4, false);
+		self.CategoryButton4.tooltip = failureReason;
+
+		return;
+	end
+
+	canUsePlunderButton = not C_PlayerInfo.IsPlayerNPERestricted();
+	failureReason = FEATURE_NOT_YET_AVAILABLE;
+	if not canUsePlunderButton then
+		PVPQueueFrame_SetCategoryButtonState(self.CategoryButton4, false);
+		self.CategoryButton4.tooltip = failureReason;
+
+		return;
+	end
+
+	self.CategoryButton4.tooltip = nil;
+	PVPQueueFrame_SetCategoryButtonState(self.CategoryButton4, true);
 end
 
 function PVPQueueFrame_UpdateTitle()
@@ -2268,12 +2273,31 @@ end
 
 PlunderstormQueueFrameMixin = {};
 
+PlunderstormQueueFrameEvents = {
+	"PARTY_LEADER_CHANGED",
+	"GROUP_ROSTER_UPDATE",
+	"GROUP_FORMED",
+}
+
 function PlunderstormQueueFrameMixin:OnLoad()
 	self.QueueSelect.useLocalPlayIndex = true;
 end
 
 function PlunderstormQueueFrameMixin:OnShow()
 	EventRegistry:TriggerEvent("PlunderstormQueueTutorial.Update");
+	FrameUtil.RegisterFrameForEvents(self, PlunderstormQueueFrameEvents);
+end
+
+function PlunderstormQueueFrameMixin:OnHide()
+	FrameUtil.UnregisterFrameForEvents(self, PlunderstormQueueFrameEvents);
+end
+
+function PlunderstormQueueFrameMixin:OnEvent(event, ...)
+	if event == "PARTY_LEADER_CHANGED" or
+	   event == "GROUP_ROSTER_UPDATE" or
+	   event == "GROUP_FORMED" then
+		self.QueueSelect:UpdateButtons();
+	end
 end
 
 StartPlunderstormQueueButtonMixin = {};
@@ -2281,6 +2305,7 @@ StartPlunderstormQueueButtonMixin = {};
 local PlunderstormQueueButtonEvents = {
 	"LOBBY_MATCHMAKER_QUEUE_STATUS_UPDATE",
 	"LOBBY_MATCHMAKER_QUEUE_ABANDONED",
+	"PARTY_LEADER_CHANGED",
 }
 
 function StartPlunderstormQueueButtonMixin:OnShow()
@@ -2322,7 +2347,8 @@ end
 
 function StartPlunderstormQueueButtonMixin:OnEvent(event, ...)
 	if ( event == "LOBBY_MATCHMAKER_QUEUE_STATUS_UPDATE" or
-		 event == "LOBBY_MATCHMAKER_QUEUE_ABANDONED") then
+		 event == "LOBBY_MATCHMAKER_QUEUE_ABANDONED" or
+		 event == "PARTY_LEADER_CHANGED" ) then
 		self:UpdateState();
 	end
 end
@@ -2333,6 +2359,11 @@ function StartPlunderstormQueueButtonMixin:UpdateState()
 	if ( not QueueStatusFrame:HasNonPlunderstormQueue() ) then
 		enabled = false;
 		tooltip = PLUNDERSTORM_QUEUE_TOOLTIP_ERROR;
+	end
+
+	if ( UnitInParty("player") and not UnitIsGroupLeader("player") ) then
+		enabled = false;
+		tooltip = ERR_NOT_LEADER;
 	end
 
 	self:SetEnabled(enabled);
@@ -2351,6 +2382,16 @@ function PlunderstormPanelMixin:OnLoad()
 	self.PlunderstoreButton:SetScript("OnClick", function()
 		AccountStoreUtil.ToggleAccountStore();
 	end);
+
+	self.PlunderDesc:SetScript("OnEnter", function(onEnterSelf)
+		if (onEnterSelf:IsTruncated()) then
+			GameTooltip:SetOwner(onEnterSelf, "ANCHOR_RIGHT");
+			GameTooltip:AddLine(onEnterSelf:GetText());
+			GameTooltip:Show();
+		end
+	end);
+
+	self.PlunderDesc:SetScript("OnLeave", function() GameTooltip_Hide(); end);
 
 	self.PlunderDisplay:SetScript("OnEnter", function(onEnterSelf)
 		GameTooltip:SetOwner(onEnterSelf, "ANCHOR_RIGHT");
@@ -2395,7 +2436,7 @@ function PlunderstormPanelMixin:UpdatePlunder()
 		self.PlunderDisplay:SetText("-");
 	end
 
-	self.PlunderDisplay:SetText(AccountStoreUtil.FormatCurrencyTotalDisplay(accountStoreCurrencyID));
+	self.PlunderDisplay:SetText(AccountStoreUtil.FormatCurrencyDisplayWithWarning(accountStoreCurrencyID));
 end
 
 PVPQuestRewardMixin = { };

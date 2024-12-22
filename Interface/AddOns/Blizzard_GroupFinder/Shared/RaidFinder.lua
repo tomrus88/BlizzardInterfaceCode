@@ -232,7 +232,7 @@ function RaidFinderQueueFrame_OnShow(self)
 		local function GetInstanceData(mapID)
 			local icon;
 			local modifiedInstanceTooltipText = "";
-			if mapID then 
+			if C_ModifiedInstance and mapID then 
 				local modifiedInstanceInfo = C_ModifiedInstance.GetModifiedInstanceInfoFromMapID(mapID)
 				if (modifiedInstanceInfo) then 
 					icon = GetFinalNameFromTextureKit("%s-small", modifiedInstanceInfo.uiTextureKit);
@@ -381,7 +381,7 @@ function RaidFinderQueueFrameRewards_UpdateFrame()
 end
 
 function RaidFinderFrameFindRaidButton_Update()
-	if C_LobbyMatchmakerInfo.IsInQueue() then
+	if C_LobbyMatchmakerInfo and C_LobbyMatchmakerInfo.IsInQueue() then
 		RaidFinderFrameFindRaidButton:Disable();
 		RaidFinderFrameFindRaidButton.disabledTooltip = WOW_LABS_CANNOT_ENTER_NON_PLUNDER_QUEUE;
 		return;

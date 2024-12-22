@@ -3883,6 +3883,7 @@ local Unit =
 				{ Name = "flashAtMinPower", Type = "bool", Nilable = false },
 				{ Name = "fractionalCounter", Type = "bool", Nilable = false },
 				{ Name = "animateNumbers", Type = "bool", Nilable = false },
+				{ Name = "attachTooltipToBar", Type = "bool", Nilable = false },
 			},
 		},
 	},

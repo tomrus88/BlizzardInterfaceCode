@@ -148,7 +148,6 @@ function TransmogFrameMixin:MarkDirty()
 end
 
 function TransmogFrameMixin:OnUpdate()
-	
 	if self.dirty then
 		self:Update();
 	end
@@ -1213,23 +1212,20 @@ end
 
 function WardrobeCollectionFrameMixin:OnKeyDown(key)
 	if self.tooltipCycle and key == WARDROBE_CYCLE_KEY then
-		self:SetPropagateKeyboardInput(false);
 		if IsShiftKeyDown() then
 			self.tooltipSourceIndex = self.tooltipSourceIndex - 1;
 		else
 			self.tooltipSourceIndex = self.tooltipSourceIndex + 1;
 		end
 		self.tooltipContentFrame:RefreshAppearanceTooltip();
+		return false;
 	elseif key == WARDROBE_PREV_VISUAL_KEY or key == WARDROBE_NEXT_VISUAL_KEY or key == WARDROBE_UP_VISUAL_KEY or key == WARDROBE_DOWN_VISUAL_KEY then
 		if self.activeFrame:CanHandleKey(key) then
-			self:SetPropagateKeyboardInput(false);
 			self.activeFrame:HandleKey(key);
-		else
-			self:SetPropagateKeyboardInput(true);
+			return false;
 		end
-	else
-		self:SetPropagateKeyboardInput(true);
 	end
+	return true;
 end
 
 function WardrobeCollectionFrameMixin:OpenTransmogLink(link)
@@ -2244,7 +2240,7 @@ function WardrobeItemsCollectionMixin:RefreshAppearanceTooltip()
 	end
 	local sources = CollectionWardrobeUtil.GetSortedAppearanceSources(self.tooltipVisualID, self.activeCategory, self.transmogLocation);
 	local chosenSourceID = self:GetChosenVisualSource(self.tooltipVisualID);	
-	local warningString = CollectionWardrobeUtil.GetBestVisibilityWarning(self.tooltipModel, self.transmogLocation, self.tooltipVisualID);		
+	local warningString = CollectionWardrobeUtil.GetBestVisibilityWarning(self.tooltipModel, self.transmogLocation, sources);		
 	self:GetParent():SetAppearanceTooltip(self, sources, chosenSourceID, warningString);
 end
 

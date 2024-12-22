@@ -3,7 +3,7 @@
 ## DefaultState: enabled
 ## AllowLoad: Both
 ## AllowLoadGameType: mainline
-## Dependencies: Blizzard_PrintHandler, Blizzard_Menu
+## Dependencies: Blizzard_SharedXMLBase, Blizzard_PrintHandler, Blizzard_Menu
 ## OptionalDep: Blizzard_FontStyles_Glue, Blizzard_FontStyles_Frame
 Shared\LocalizationMachinery.lua
 EnvironmentUtil.lua
@@ -170,6 +170,9 @@ Spinner.xml
 Mainline\SharedUIPanelTemplates.lua
 PortraitFrame.lua
 Mainline\SharedUIPanelTemplates.xml
+Mainline\SharedCollectionUtil.lua
+Mainline\SharedCollectionTemplates.lua
+Mainline\SharedCollectionTemplates.xml
 CustomBindingButtonMixin.lua
 CustomBindingButtonTemplate.xml
 Shared\Tabs\MinimalTab.lua
@@ -181,6 +184,8 @@ Mainline\UIDropDownMenuTemplates.lua
 Mainline\UIDropDownMenuTemplates.xml
 Mainline\UIDropDownMenu.xml
 DialogUtil.lua
+
+Mainline\Sound.lua
 
 Mainline\ModelFrames.lua
 Mainline\ModelFrameMixin.lua
