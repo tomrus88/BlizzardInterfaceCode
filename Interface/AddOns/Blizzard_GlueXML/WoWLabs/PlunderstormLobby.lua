@@ -9,10 +9,14 @@ local PlunderstormLobbyEvents =
 	"NEW_MATCHMAKING_PARTY_INVITE",
 };
 
-local function ExitPluderstormLobby()
+local function ExitPlunderstormLobby()
+	PlunderstormLobbyFrame.PlunderstormLobbyFriendsButton:DisableUntilNextUpdate();
+
     PlaySound(SOUNDKIT.GS_CHARACTER_SELECTION_EXIT);
     C_Login.DisconnectFromServer();
 end
+
+g_newGameModeAvailableAcknowledged = g_newGameModeAvailableAcknowledged or nil;
 
 PlunderstormLobbyMixin = { };
 function PlunderstormLobbyMixin:OnLoad()
@@ -90,6 +94,9 @@ function PlunderstormLobbyMixin:OnShow()
 	local isFrontEndChatEnabled = C_GameRules.IsGameRuleActive(Enum.GameRule.FrontEndChat);
 	GeneralDockManager:SetShown(isFrontEndChatEnabled);
 	ChatFrame1:SetShown(isFrontEndChatEnabled);
+
+	-- Plunderstorm has been seen as a mode
+	g_newGameModeAvailableAcknowledged = 1;
 end
 
 function PlunderstormLobbyMixin:OnRealmListCancel()
@@ -108,7 +115,8 @@ function PlunderstormLobbyMixin:OnHide()
 	CallbackRegistrantMixin.OnHide(self);
 	FrameUtil.UnregisterFrameForEvents (self,PlunderstormLobbyEvents);
 	CharacterSelect.connectingToPlunderstorm = false;
-	self.PlunderstormLobbyFriendsButton:DisableUntilNextUpdate();
+
+	FriendsFrame:Hide();
 
 	if AccountStoreFrame and AccountStoreFrame:IsShown() then
 		AccountStoreUtil.SetAccountStoreShown(false);
@@ -209,7 +217,7 @@ function PlunderstormLobbyMixin:OnKeyDown(key)
 end
 
 function PlunderstormLobbyMixin:OnExit()
-	ExitPluderstormLobby();
+	ExitPlunderstormLobby();
 end
 
 PlunderstormBackgroundMixin = { };
@@ -234,7 +242,7 @@ end
 
 PlunderstormLobbyBackButtonButtonMixin = { };
 function PlunderstormLobbyBackButtonButtonMixin:OnClick()
-	ExitPluderstormLobby();
+	ExitPlunderstormLobby();
 end
 
 

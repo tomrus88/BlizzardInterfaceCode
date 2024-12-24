@@ -264,6 +264,9 @@ function TrainingLobbyQueueMixin:OnShow()
 	QueueTypeSettingsFrameMixin.OnShow(self);
 
 	EventRegistry:TriggerEvent("TrainingLobbyQueue.ShownState", true);
+
+	local padding = 50;
+	self:SetWidth(self.QueueContainer:GetWidth() + padding);
 end
 
 function TrainingLobbyQueueMixin:OnHide()
@@ -273,6 +276,10 @@ function TrainingLobbyQueueMixin:OnHide()
 end
 
 StartQueueButtonMixin = {};
+
+function StartQueueButtonMixin:OnShow()
+	self:SetText(not C_WoWLabsMatchmaking.IsPartyLeader() and WOWLABS_READY_GAME or WOW_LABS_START_QUEUE);
+end
 
 function StartQueueButtonMixin:OnClick()
 	local parent = self:GetParent();
