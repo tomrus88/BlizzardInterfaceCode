@@ -32,6 +32,20 @@ function Sound_ToggleSound()
 	end
 end
 
+function Sound_ToggleAmbience()
+	if ( GetCVar("Sound_EnableAllSound") == "0" ) then
+		ActionStatus:DisplayMessage(SOUND_DISABLED);
+	else
+		if ( GetCVar("Sound_EnableAmbience") == "0" ) then
+			SetCVar("Sound_EnableAmbience", 1);
+			ActionStatus:DisplayMessage(SOUND_EFFECTS_ENABLED);
+		else
+			SetCVar("Sound_EnableAmbience", 0);
+			ActionStatus:DisplayMessage(SOUND_EFFECTS_DISABLED);
+		end
+	end
+end
+
 local function AdjustMasterVolume(amount)
 	local volume = tonumber(GetCVar("Sound_MasterVolume"));
 	if ( volume ) then

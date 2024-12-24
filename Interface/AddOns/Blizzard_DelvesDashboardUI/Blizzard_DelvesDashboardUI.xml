@@ -40,7 +40,7 @@
                 <FontString parentKey="PanelDescription" inherits="GameFontNormalMed2" wordwrap="true" justifyV="TOP">
                     <Size x="160" y="55"/>
                     <Anchors>
-                        <Anchor point="TOP" relativeKey="$parent.PanelTitle" relativePoint="BOTTOM" y="6"/>
+                        <Anchor point="TOP" relativeKey="$parent.PanelTitle" relativePoint="BOTTOM" y="3"/>
                     </Anchors>
                 </FontString>
             </Layer>

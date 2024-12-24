@@ -1,11 +1,6 @@
 MapLegendMixin = { };
 
 function MapLegendMixin:OnLoad()
-	self.BackButton:SetScript("OnClick", function()
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-		self:OnBackClicked();
-	  end);
-
 	self:SetupCategories();
 	self.ScrollFrame.ScrollChild:Layout();
 
@@ -88,10 +83,6 @@ function MapLegendMixin:SetupCategories()
 
 		category:Layout();
 	end
-end
-
-function MapLegendMixin:OnBackClicked()
-	EventRegistry:TriggerEvent("HideMapLegend");
 end
 
 MapLegendButtonMixin = { };

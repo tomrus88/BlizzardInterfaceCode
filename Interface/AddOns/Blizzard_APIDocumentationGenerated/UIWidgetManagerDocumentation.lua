@@ -1984,6 +1984,7 @@ local UIWidgetManager =
 				{ Name = "hAlignType", Type = "WidgetTextHorizontalAlignmentType", Nilable = false },
 				{ Name = "tint", Type = "SpellDisplayTint", Nilable = false },
 				{ Name = "showGlowState", Type = "WidgetShowGlowState", Nilable = false },
+				{ Name = "showAsEarned", Type = "bool", Nilable = false },
 			},
 		},
 		{

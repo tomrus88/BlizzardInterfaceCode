@@ -184,6 +184,25 @@ local AccountConstants =
 				{ Name = "ItemsCollections", Type = "DisableAccountProfilesFlags", EnumValue = 16 },
 			},
 		},
+		{
+			Name = "ItemCollectionType",
+			Type = "Enumeration",
+			NumValues = 9,
+			MinValue = 0,
+			MaxValue = 7,
+			Fields =
+			{
+				{ Name = "ItemCollectionNone", Type = "ItemCollectionType", EnumValue = 0 },
+				{ Name = "ItemCollectionToy", Type = "ItemCollectionType", EnumValue = 1 },
+				{ Name = "ItemCollectionHeirloom", Type = "ItemCollectionType", EnumValue = 2 },
+				{ Name = "ItemCollectionTransmog", Type = "ItemCollectionType", EnumValue = 3 },
+				{ Name = "ItemCollectionTransmogSetFavorite", Type = "ItemCollectionType", EnumValue = 4 },
+				{ Name = "ItemCollectionRuneforgeLegendaryAbility", Type = "ItemCollectionType", EnumValue = 5 },
+				{ Name = "ItemCollectionTransmogIllusion", Type = "ItemCollectionType", EnumValue = 6 },
+				{ Name = "ItemCollectionWarbandScene", Type = "ItemCollectionType", EnumValue = 7 },
+				{ Name = "NumItemCollectionTypes", Type = "ItemCollectionType", EnumValue = 7 },
+			},
+		},
 	},
 };
 

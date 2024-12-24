@@ -1439,6 +1439,7 @@ local QuestLog =
 				{ Name = "finished", Type = "bool", Nilable = false },
 				{ Name = "numFulfilled", Type = "number", Nilable = false },
 				{ Name = "numRequired", Type = "number", Nilable = false },
+				{ Name = "objectiveType", Type = "QuestObjectiveType", Nilable = true },
 			},
 		},
 		{

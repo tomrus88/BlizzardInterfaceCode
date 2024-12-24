@@ -959,7 +959,7 @@ function ExpansionLandingPageMinimapButtonMixin:SetTooltip()
 	GameTooltip:SetOwner(self, "ANCHOR_LEFT");
 
 	if self:IsInMajorFactionRenownMode() then
-		RenownRewardUtil.AddMajorFactionToTooltip(GameTooltip, self.majorFactionID, GenerateClosure(self.SetTooltip, self));
+		RenownRewardUtil.AddMajorFactionLandingPageSummaryToTooltip(GameTooltip, self.majorFactionID, GenerateClosure(self.SetTooltip, self));
 	else
 		GameTooltip:SetText(self.title, 1, 1, 1);
 		GameTooltip:AddLine(self.description, nil, nil, nil, true);
