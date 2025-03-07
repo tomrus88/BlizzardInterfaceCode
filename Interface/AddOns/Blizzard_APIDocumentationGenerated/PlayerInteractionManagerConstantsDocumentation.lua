@@ -86,7 +86,7 @@ local PlayerInteractionManagerConstants =
 				{ Name = "PlaceholderType74", Type = "PlayerInteractionType", EnumValue = 73 },
 				{ Name = "PlaceholderType75", Type = "PlayerInteractionType", EnumValue = 74 },
 				{ Name = "PlaceholderType76", Type = "PlayerInteractionType", EnumValue = 75 },
-				{ Name = "PlaceholderType77", Type = "PlayerInteractionType", EnumValue = 76 },
+				{ Name = "GuildRename", Type = "PlayerInteractionType", EnumValue = 76 },
 			},
 		},
 	},

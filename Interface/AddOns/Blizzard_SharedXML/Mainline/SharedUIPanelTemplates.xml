@@ -2396,9 +2396,9 @@
 		 frame to be parented to the appropriate top level parent. -->
 	<Frame name="TopLevelParentScaleFrameTemplate" mixin="TopLevelParentScaleFrameMixin" virtual="true">
 		<Scripts>
-			<OnLoad method="OnScaleFrameLoad" inherit="prepend"/>
-			<OnEvent method="OnScaleFrameEvent" inherit="prepend"/>
-			<OnShow method="OnScaleFrameShow" inherit="prepend"/>
+			<OnLoad method="OnScaleFrameLoad" inherit="prepend" />
+			<OnEvent method="OnScaleFrameEvent" inherit="prepend" />
+			<OnShow method="OnScaleFrameShow" inherit="prepend" />
 		</Scripts>
 	</Frame>
 

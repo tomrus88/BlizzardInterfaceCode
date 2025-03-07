@@ -12,7 +12,7 @@ LFGEnabledList = nil;
 --DEBUG FIXME:
 function LFGDebug(text, ...)
 	if ( GetCVarBool("lfgDebug") ) then
-		ConsolePrint("LFGLua: "..format(text, ...));
+		C_Log.LogMessage("LFGLua: "..format(text, ...));
 	end
 end
 

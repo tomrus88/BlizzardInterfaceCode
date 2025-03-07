@@ -5,7 +5,8 @@
 ## SavedVariables: g_auctionHouseSortsBySearchContext
 ## SavedVariablesPerCharacter: g_activeBidAuctionIDs
 ## AllowLoad: game
-## AllowLoadGameType: tbc, wrath, cata
+## AllowLoadGameType: tbc, wrath, cata, mists
+## Dependencies: Blizzard_Colors
 Shared\Blizzard_AuctionHouseUtil.lua
 Classic\Blizzard_AuctionHouseUtil.lua
 Shared\Blizzard_AuctionData.lua

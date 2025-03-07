@@ -475,8 +475,8 @@ function CharacterSelectUIMixin:IsCollectionsActive()
 	return self.CollectionsFrame:IsShown();
 end
 
-function CharacterSelectUIMixin:SetGameEnvironmentEnabled(enabled)
-	self.VisibilityFramesContainer.NavBar:SetGameEnvironmentButtonEnabled(enabled);
+function CharacterSelectUIMixin:SetGameModeSelectionEnabled(enabled)
+	self.VisibilityFramesContainer.NavBar:SetGameModeButtonEnabled(enabled);
 end
 
 function CharacterSelectUIMixin:SetMenuEnabled(enabled)
@@ -702,6 +702,7 @@ function CharacterDeletionDialogMixin:DeleteCharacter()
 	DeleteCharacter(self.characterGuid);
 	self:Hide();
 	PlaySound(SOUNDKIT.GS_TITLE_OPTION_OK);
+	CharacterSelectCharacterFrame:ClearSearch();
 	GlueDialog_Show("CHAR_DELETE_IN_PROGRESS");
 end
 

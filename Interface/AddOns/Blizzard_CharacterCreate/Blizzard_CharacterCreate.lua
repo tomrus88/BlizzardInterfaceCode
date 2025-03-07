@@ -522,7 +522,7 @@ function CharacterCreateMixin:SetMode(mode, instantRotate)
 
 		self:SetCameraZoomLevel(0);
 		self:SetModelDressState(true);
-		C_CharacterCreation.SetSelectedPreviewGearType(Enum.PreviewGearType.Awesome);
+		C_CharacterCreation.SetSelectedPreviewGearType(Enum.NewCharGear.Preview);
 
 		if self:IsMode(CHAR_CREATE_MODE_CUSTOMIZE) then
 			self.BottomBackgroundOverlay.FadeIn:Play();
@@ -533,7 +533,7 @@ function CharacterCreateMixin:SetMode(mode, instantRotate)
 			RaceAndClassFrame:PlayCustomizationAnimation();
 
 			C_CharacterCreation.SetBlurEnabled(true);
-			C_CharacterCreation.SetSelectedPreviewGearType(Enum.PreviewGearType.Starting);
+			C_CharacterCreation.SetSelectedPreviewGearType(Enum.NewCharGear.Start);
 
 			self.BottomBackgroundOverlay.FadeOut:Play();
 
@@ -2027,17 +2027,11 @@ function CharacterCreateEditBoxMixin:OnEvent(event, ...)
 	end
 end
 
-CharacterCreateNameAvailabilityStateMixin = {};
+CharacterCreateNameAvailabilityStateMixin = CreateFromMixins(TimedCallbackMixin);
 
 function CharacterCreateNameAvailabilityStateMixin:OnLoad()
+	self:SetCheckDelaySeconds(1);
 	self:RegisterEvent("CHECK_CHARACTER_NAME_AVAILABILITY_RESULT");
-end
-
-function CharacterCreateNameAvailabilityStateMixin:ClearTimer()
-	if self.Timer then
-		self.Timer:Cancel();
-		self.Timer = nil;
-	end
 end
 
 function CharacterCreateNameAvailabilityStateMixin:SetupAnchors(tooltip)
@@ -2055,29 +2049,25 @@ function CharacterCreateNameAvailabilityStateMixin:OnEvent(event, ...)
 	end
 end
 
-local CHECK_NAME_WAIT_TIME_SECONDS = 1;
-
 function CharacterCreateNameAvailabilityStateMixin:CheckName(nameToCheck)
 	self:Hide();
 
 	self:UpdateNavBlocker(nil);
-	self:ClearTimer();
-
-	local function checkName()
-		local valid, reason = C_CharacterCreation.IsCharacterNameValid(nameToCheck);
-		if not valid then
-			self:UpdateState(false, _G[reason]);
-			return;
-		end
-
-		-- The name is valid, so next request the availability be checked
-		C_CharacterCreation.RequestCheckNameAvailability(nameToCheck);
-	end
+	self:Cancel();
 
 	if nameToCheck == self.lastRandomName or nameToCheck == CharacterCreateFrame.currentPaidServiceName then
 		self:UpdateState(true);
 	else
-		self.Timer = C_Timer.NewTimer(CHECK_NAME_WAIT_TIME_SECONDS, checkName);
+		self:RunCallbackAsync(function()
+			local valid, reason = C_CharacterCreation.IsCharacterNameValid(nameToCheck);
+			if not valid then
+				self:UpdateState(false, _G[reason]);
+				return;
+			end
+	
+			-- The name is valid, so next request the availability be checked
+			C_CharacterCreation.RequestCheckNameAvailability(nameToCheck);
+		end);
 	end
 end
 

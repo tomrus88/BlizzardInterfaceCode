@@ -41,16 +41,6 @@ CharacterSelectNavBarMixin = {
 	NavBarButtonWidthBuffer = 70,
 };
 
-local function ToggleGameEnvironmentDrawer(navBar)
-	local selectionDrawer = navBar.GameEnvironmentButton.SelectionDrawer;
-	selectionDrawer:SetShown(not selectionDrawer:IsShown());
-
-	local enabled = true;
-	local highlight = selectionDrawer:IsShown();
-	navBar.GameEnvironmentButton:formatButtonTextCallback(enabled, highlight);
-	navBar.GameEnvironmentButton:SetLockHighlight(highlight);
-end
-
 local function ToggleAccountStoreUI()
 	-- Redirect is necessary to avoid load order issues.
 	AccountStoreUtil.ToggleAccountStore();
@@ -113,9 +103,9 @@ function CharacterSelectNavBarMixin:OnLoad()
 	local realmsCallback = GenerateFlatClosure(CharacterSelectUtil.ChangeRealm);
 
 	local passNavBarToCallback = true;
-	self.GameEnvironmentButton = self.ButtonTray:AddControl(nil, ToggleGameEnvironmentDrawer, passNavBarToCallback);
-	self.GameEnvironmentButton.SelectionDrawer = CreateFrame("FRAME", nil, self.GameEnvironmentButton, "GameEnvironmentFrameTemplate");
-	self.GameEnvironmentButton.SelectionDrawer:SetPoint("TOP", self.GameEnvironmentButton, "BOTTOM", 0, -20);
+	self.GameModeButton = self.ButtonTray:AddControl(nil, self.ToggleGameModeDrawer, passNavBarToCallback);
+	self.GameModeButton.SelectionDrawer = CreateFrame("FRAME", nil, self.GameModeButton, "GameModeFrameTemplate");
+	self.GameModeButton.SelectionDrawer:SetPoint("TOP", self.GameModeButton, "BOTTOM", 0, -20);
 
 	if self:GetParent() == PlunderstormLobbyFrame then
 		self:RegisterEvent("STORE_FRONT_STATE_UPDATED");
@@ -144,8 +134,8 @@ function CharacterSelectNavBarMixin:OnLoad()
 	self.RealmsButton = self.ButtonTray:AddControl(CHARACTER_SELECT_NAV_BAR_REALMS, realmsCallback);
 	self.CampsButton = self.ButtonTray:AddControl(CHARACTER_SELECT_NAV_BAR_CAMPS, ToggleCollections);
 
-	EventRegistry:RegisterCallback("GameEnvironmentFrame.Hide", ToggleGameEnvironmentDrawer, self);
-	EventRegistry:RegisterCallback("GameEnvironment.UpdateNavBar", self.UpdateSelectedGameMode, self);
+	EventRegistry:RegisterCallback("GameModeFrame.Hide", self.OnGameModeFrameHide, self);
+	EventRegistry:RegisterCallback("GameMode.UpdateNavBar", self.OnGameModeUpdateNavBar, self);
 
 	local function OnCollectionsHide()
 		UpdateButtonStatesForCollections(false);
@@ -155,23 +145,23 @@ function CharacterSelectNavBarMixin:OnLoad()
 	-- Any specific button setups.
 	self:SetButtonVisuals();
 
-	self.GameEnvironmentButton.TutorialBadge:ClearAllPoints();
-	self.GameEnvironmentButton.TutorialBadge:SetPoint("CENTER", self.GameEnvironmentButton:GetFontString(), "LEFT", -10, 0);
+	self.GameModeButton.TutorialBadge:ClearAllPoints();
+	self.GameModeButton.TutorialBadge:SetPoint("CENTER", self.GameModeButton:GetFontString(), "LEFT", -10, 0);
 end
 
 function CharacterSelectNavBarMixin:OnShow()
 	CallbackRegistrantMixin.OnShow(self);
 
-	self.GameEnvironmentButton.TutorialBadge:Hide();
-	self.tryForceShowModes = not g_newGameModeAvailableAcknowledged and C_GameEnvironmentManager.GetCurrentEventRealmQueues() ~= Enum.EventRealmQueues.None;
+	self.GameModeButton.TutorialBadge:Hide();
+	self.tryForceShowModes = not g_newGameModeAvailableAcknowledged and C_GameRules.GetCurrentEventRealmQueues() ~= Enum.EventRealmQueues.None;
 end
 
 function CharacterSelectNavBarMixin:OnEvent(event, ...)
 	if event == "GLOBAL_MOUSE_DOWN" then
-		if self.GameEnvironmentButton.SelectionDrawer:IsShown() and 
-			not self.GameEnvironmentButton:IsMouseOver() and
-			not self.GameEnvironmentButton.SelectionDrawer:IsMouseOver() then
-			ToggleGameEnvironmentDrawer(self);
+		if self.GameModeButton.SelectionDrawer:IsShown() and 
+			not self.GameModeButton:IsMouseOver() and
+			not self.GameModeButton.SelectionDrawer:IsMouseOver() then
+			self:ToggleGameModeDrawer();
 		end
 	elseif event == "ACCOUNT_CVARS_LOADED" then
 		self:EvaluateHelptips();
@@ -181,15 +171,34 @@ function CharacterSelectNavBarMixin:OnEvent(event, ...)
 		end
 	elseif event == "EVENT_REALM_QUEUES_UPDATED" then
 		local eventRealmQueues = ...;
-		self.GameEnvironmentButton.TutorialBadge:Hide();
+		self.GameModeButton.TutorialBadge:Hide();
 		self.tryForceShowModes = not g_newGameModeAvailableAcknowledged and eventRealmQueues ~= Enum.EventRealmQueues.None;
 
-		self:UpdateGameEnvironmentTutorial();
+		self:UpdateGameModeSelectionTutorial();
 	end
 end
 
+function CharacterSelectNavBarMixin:OnGameModeFrameHide()
+	self:ToggleGameModeDrawer();
+end
+
+function CharacterSelectNavBarMixin:OnGameModeUpdateNavBar()
+	self:UpdateSelectedGameMode();
+end
+
+function CharacterSelectNavBarMixin:ToggleGameModeDrawer()
+	local selectionDrawer = self.GameModeButton.SelectionDrawer;
+	selectionDrawer:SetShown(not selectionDrawer:IsShown());
+
+	local enabled = true;
+	local highlight = selectionDrawer:IsShown();
+	self.GameModeButton:formatButtonTextCallback(enabled, highlight);
+	self.GameModeButton:SetLockHighlight(highlight);
+
+end
+
 function CharacterSelectNavBarMixin:SetButtonVisuals()
-	local leftmostButton = self.GameEnvironmentButton;
+	local leftmostButton = self.GameModeButton;
 	local rightmostButton = self.CampsButton;
 
 	-- The leftmost and rightmost buttons in the nav bar have different textures than the default.
@@ -234,7 +243,7 @@ function CharacterSelectNavBarMixin:SetButtonVisuals()
 		self.StoreButton:SetWidth(self.StoreButton:GetTextWidth() + CharacterSelectNavBarMixin.NavBarButtonWidthBuffer);
 	end
 
-	local function FormatGameEnvironmentButtonText(self, enabled, highlight)
+	local function FormatGameModeButtonText(gameModeButtonSelf, enabled, highlight)
 		local selectionDownArrow = "glues-characterSelect-icon-arrowDown";
 		if not enabled then
 			selectionDownArrow = "glues-characterSelect-icon-arrowDown-disabled";
@@ -242,21 +251,18 @@ function CharacterSelectNavBarMixin:SetButtonVisuals()
 			selectionDownArrow = "glues-characterSelect-icon-arrowDown-hover";
 		end
 
-		self:SetText(WOWLABS_MODE_NAV_BUTTON .. (not self.SelectionDrawer:IsShown() and CreateAtlasMarkup(selectionDownArrow, 28, 28, 0, 1) or ""));
+		gameModeButtonSelf:SetText(WOWLABS_MODE_NAV_BUTTON .. (not gameModeButtonSelf.SelectionDrawer:IsShown() and CreateAtlasMarkup(selectionDownArrow, 28, 28, 0, 1) or ""));
 	end
-	self.GameEnvironmentButton.formatButtonTextCallback = FormatGameEnvironmentButtonText;
+	self.GameModeButton.formatButtonTextCallback = FormatGameModeButtonText;
 
 	self:UpdateSelectedGameMode();
 end
 
 function CharacterSelectNavBarMixin:UpdateSelectedGameMode()
-	-- Texture on the Modes button is dependent on the selected game mode
-	local selectedEnvironment = self.GameEnvironmentButton.SelectionDrawer:GetSelectedGameEnvironment();
-	
 	local enabled = true;
 	local highlight = false;
-	self.GameEnvironmentButton:formatButtonTextCallback(enabled, highlight);
-	self.GameEnvironmentButton:SetWidth(self.GameEnvironmentButton:GetTextWidth() + CharacterSelectNavBarMixin.NavBarButtonWidthBuffer);
+	self.GameModeButton:formatButtonTextCallback(enabled, highlight);
+	self.GameModeButton:SetWidth(self.GameModeButton:GetTextWidth() + CharacterSelectNavBarMixin.NavBarButtonWidthBuffer);
 
 	self.ButtonTray:Layout();
 end
@@ -280,27 +286,27 @@ function CharacterSelectNavBarMixin:UpdateButtonDividerState(button)
 	button.Bar:SetAtlas(isDividerBarEnabled and "glues-characterselect-tophud-bg-divider" or "glues-characterselect-tophud-bg-divider-dis", TextureKitConstants.UseAtlasSize);
 end
 
-function CharacterSelectNavBarMixin:UpdateGameEnvironmentTutorial()
+function CharacterSelectNavBarMixin:UpdateGameModeSelectionTutorial()
 	-- When a new mode is available we want to make sure the player knows
-	if self.GameEnvironmentButton:IsEnabled() and self.tryForceShowModes then
-		if not self.GameEnvironmentButton.SelectionDrawer:IsShown() then
-			ToggleGameEnvironmentDrawer(self);
+	if self.GameModeButton:IsEnabled() and self.tryForceShowModes then
+		if not self.GameModeButton.SelectionDrawer:IsShown() then
+			self:ToggleGameModeDrawer();
 		end
 
 		self.tryForceShowModes = false;
-		self.GameEnvironmentButton.TutorialBadge:Show();
+		self.GameModeButton.TutorialBadge:Show();
 	end
 end
 
-function CharacterSelectNavBarMixin:SetGameEnvironmentButtonEnabled(enabled)
-	self.GameEnvironmentButton:SetEnabled(enabled);
+function CharacterSelectNavBarMixin:SetGameModeButtonEnabled(enabled)
+	self.GameModeButton:SetEnabled(enabled);
 
 	local highlight = false;
-	self.GameEnvironmentButton:formatButtonTextCallback(enabled, highlight);
+	self.GameModeButton:formatButtonTextCallback(enabled, highlight);
 
 	self:UpdateButtonDividerState(self.StoreButton or self.PlunderstoreButton);
 
-	self:UpdateGameEnvironmentTutorial();
+	self:UpdateGameModeSelectionTutorial();
 end
 
 function CharacterSelectNavBarMixin:SetStoreButtonEnabled(enabled)
@@ -313,7 +319,7 @@ function CharacterSelectNavBarMixin:SetStoreButtonEnabled(enabled)
 	local highlight = false;
 	self.StoreButton:formatButtonTextCallback(enabled, highlight);
 
-	self:UpdateButtonDividerState(self.GameEnvironmentButton);
+	self:UpdateButtonDividerState(self.GameModeButton);
 	self:UpdateButtonDividerState(self.StoreButton);
 end
 

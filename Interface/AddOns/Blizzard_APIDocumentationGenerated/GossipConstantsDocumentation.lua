@@ -72,7 +72,7 @@ local GossipConstants =
 				{ Name = "Placeholder_1", Type = "GossipNpcOption", EnumValue = 59 },
 				{ Name = "Placeholder_2", Type = "GossipNpcOption", EnumValue = 60 },
 				{ Name = "Placeholder_3", Type = "GossipNpcOption", EnumValue = 61 },
-				{ Name = "Placeholder_4", Type = "GossipNpcOption", EnumValue = 62 },
+				{ Name = "GuildRename", Type = "GossipNpcOption", EnumValue = 62 },
 			},
 		},
 		{

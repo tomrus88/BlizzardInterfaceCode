@@ -220,24 +220,11 @@ function SetItemButtonBorder(button, asset, isAtlas)
 	end
 end
 
-local qualityToIconBorderAtlas =
-{
-	[Enum.ItemQuality.Poor] = "auctionhouse-itemicon-border-gray",
-	[Enum.ItemQuality.Common] = "auctionhouse-itemicon-border-white",
-	[Enum.ItemQuality.Uncommon] = "auctionhouse-itemicon-border-green",
-	[Enum.ItemQuality.Rare] = "auctionhouse-itemicon-border-blue",
-	[Enum.ItemQuality.Epic] = "auctionhouse-itemicon-border-purple",
-	[Enum.ItemQuality.Legendary] = "auctionhouse-itemicon-border-orange",
-	[Enum.ItemQuality.Artifact] = "auctionhouse-itemicon-border-artifact",
-	[Enum.ItemQuality.Heirloom] = "auctionhouse-itemicon-border-account",
-	[Enum.ItemQuality.WoWToken] = "auctionhouse-itemicon-border-account",
-};
-
 local function SetItemButtonQuality_Base(button, quality, itemIDOrLink, suppressOverlays, isBound)
 	ClearItemButtonOverlay(button);
 
-	local hasQuality = quality and BAG_ITEM_QUALITY_COLORS[quality];
-	if hasQuality then
+	local color = ColorManager.GetColorDataForBagItemQuality(quality);
+	if color then
 		if itemIDOrLink then
 			if IsArtifactRelicItem(itemIDOrLink) then
 				SetItemButtonBorder(button, [[Interface\Artifacts\RelicIconFrame]]);
@@ -252,7 +239,6 @@ local function SetItemButtonQuality_Base(button, quality, itemIDOrLink, suppress
 			SetItemButtonBorder(button, [[Interface\Common\WhiteIconFrame]]);
 		end
 
-		local color = BAG_ITEM_QUALITY_COLORS[quality];
 		SetItemButtonBorderVertexColor(button, color.r, color.g, color.b);
 	else
 		SetItemButtonBorder(button);
@@ -270,10 +256,11 @@ function SetItemButtonQuality(button, quality, itemIDOrLink, suppressOverlays, i
 end
 
 local function GetButtonOverlayQualityColor(quality)
-	if not quality or not BAG_ITEM_QUALITY_COLORS[quality] then
+	local color = ColorManager.GetColorDataForBagItemQuality(quality);
+	if not color then
 		quality = Enum.ItemQuality.Common;
 	end
-	return BAG_ITEM_QUALITY_COLORS[quality];
+	return ColorManager.GetColorDataForBagItemQuality(quality);
 end
 
 -- Remember to update the OverlayKeys table if adding an overlay texture here.
@@ -441,7 +428,14 @@ function CircularGiantItemButtonMixin:SetItemButtonQuality(quality, itemIDOrLink
 
 	if quality then
 		local isAtlas = true;
-		SetItemButtonBorder(self, qualityToIconBorderAtlas[quality], isAtlas);
+		local atlasData = ColorManager.GetAtlasDataForAuctionHouseItemQuality(quality);
+		SetItemButtonBorder(self, atlasData.atlas, isAtlas);
+
+		if atlasData.overrideColor then
+			SetItemButtonBorderVertexColor(self, atlasData.overrideColor.r, atlasData.overrideColor.g, atlasData.overrideColor.b);
+		else
+			SetItemButtonBorderVertexColor(self, 1, 1, 1);
+		end
 	else
 		SetItemButtonBorder(self);
 	end

@@ -2,7 +2,7 @@
 ## Author: Blizzard Entertainment
 ## DefaultState: enabled
 ## Dependencies: Blizzard_QuickKeybind, Blizzard_UIParent, Blizzard_EditMode, Blizzard_UIPanels_Game, Blizzard_TextStatusBar, Blizzard_Flyout
-## AllowLoadGameType: wowlabs
+## AllowLoadGameType: plunderstorm
 ## AllowLoad: Game
 ActionButtonUtil.lua
 WoWLabs\ActionBarConstants.lua

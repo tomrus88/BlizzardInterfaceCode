@@ -717,3 +717,43 @@ end
 function StaticGridLayoutFrameMixin:IgnoreLayoutIndex()
 	return true;
 end
+
+-- Note: we're still discussing options to handle the script override problems with
+-- Layout frames so use this only when necesssary for now since it may be replaced.
+OverrideLayoutFrameOnUpdateMixin = {};
+
+-- Override in your derived mixin.
+function OverrideLayoutFrameOnUpdateMixin:NeedsOnUpdate()
+	return false;
+end
+
+-- Override in your derived mixin.
+function OverrideLayoutFrameOnUpdateMixin:OverrideOnUpdate(_elapsed)
+end
+
+-- Use this to register/unregisterd OnUpdate.
+function OverrideLayoutFrameOnUpdateMixin:UpdateOnUpdateRegistration()
+	if self:ShouldRegisterOnUpdate() then
+		if not self:GetScript("OnUpdate") then
+			self:SetScript("OnUpdate", self.OnUpdate);
+		end
+	elseif self:GetScript("OnUpdate") then
+		self:SetScript("OnUpdate", nil);
+	end
+end
+
+-- Internal function, don't override. Override NeedsOnUpdate instead.
+function OverrideLayoutFrameOnUpdateMixin:ShouldRegisterOnUpdate()
+	return self.dirty or self:NeedsOnUpdate();
+end
+
+-- Internal function, don't override. Override OverrideOnUpdate instead.
+function OverrideLayoutFrameOnUpdateMixin:OnUpdate(elapsed)
+	BaseLayoutMixin.OnUpdate(self, elapsed);
+
+	if self:NeedsOnUpdate() then
+		self:OverrideOnUpdate(elapsed);
+	end
+
+	self:UpdateOnUpdateRegistration();
+end

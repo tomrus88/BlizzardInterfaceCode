@@ -75,10 +75,11 @@ function CharacterSelectFrameMixin:OnLoad()
 	self:RegisterEvent("ALL_WARBAND_GROUP_SCENES_UPDATED");
 	self:RegisterEvent("WARBAND_GROUP_SCENE_UPDATED");
 	self:RegisterEvent("ACTIVE_MAP_SCENE_TRANSITIONED");
+	self:RegisterEvent("ACCOUNT_DATA_RESTORING");
 
-	self:AddDynamicEventMethod(EventRegistry, "GameEnvironment.Selected", self.OnGameEnvironmentSelected);
+	self:AddDynamicEventMethod(EventRegistry, "GameMode.Selected", self.OnGameModeSelected);
 	self:AddDynamicEventMethod(EventRegistry, "RealmList.Cancel", self.OnRealmListCancel);	
-	CharacterSelectUI_InitGameEnvironmentButtons();
+	CharacterSelectUI_InitGameModeButtons();
 
 	CharacterSelectCharacterFrame:Init();
 
@@ -94,15 +95,15 @@ function CharacterSelectFrameMixin:OnLoad()
 	CharacterSelect_UpdateTimerunning();
 end
 
-function CharacterSelectFrameMixin:OnGameEnvironmentSelected(requestedEnvironment)
-	assert(requestedEnvironment);
-	if C_GameEnvironmentManager.GetCurrentGameEnvironment() ~= requestedEnvironment then
-		self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameEnvironmentButton.SelectionDrawer:ChangeGameEnvironment(requestedEnvironment);
+function CharacterSelectFrameMixin:OnGameModeSelected(requestedGameMode)
+	assert(requestedGameMode);
+	if C_GameRules.GetActiveGameMode() ~= requestedGameMode then
+		self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameModeButton.SelectionDrawer:ChangeGameMode(requestedGameMode);
 	end
 end
 
 function CharacterSelectFrameMixin:OnRealmListCancel()
-	self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameEnvironmentButton.SelectionDrawer:SelectRadioButtonForEnvironment(Enum.GameEnvironment.WoW);
+	self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameModeButton.SelectionDrawer:SelectRadioButtonForGameMode(Enum.GameMode.Standard);
 end
 
 function CharacterSelectFrameMixin:OnShow()
@@ -193,9 +194,6 @@ function CharacterSelectFrameMixin:OnShow()
         end
     end
 
-    -- fadein the character select ui
-    CharacterSelectUI.FadeIn:Play();
-
     --Clear out the addons selected item
 	AddonList_ClearCharacterDropdown();
 
@@ -234,7 +232,7 @@ function CharacterSelectFrameMixin:OnShow()
 		C_SocialContractGlue.GetShouldShowSocialContract();
 	end
 
-	self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameEnvironmentButton.SelectionDrawer:SelectRadioButtonForEnvironment(Enum.GameEnvironment.WoW);
+	self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameModeButton.SelectionDrawer:SelectRadioButtonForGameMode(Enum.GameMode.Standard);
 
 	self.CharacterSelectUI.VisibilityFramesContainer.ToolTray:SetExpanded(not g_characterSelectToolTrayCollapsed);
 	GeneralDockManager:Hide();
@@ -418,7 +416,7 @@ end
 
 function CharacterSelectFrameMixin:OnEvent(event, ...)
     if ( event == "CHARACTER_LIST_UPDATE" ) then
-		if C_GameEnvironmentManager.GetCurrentGameEnvironment() == Enum.GameEnvironment.WoWLabs then
+		if C_GameRules.GetActiveGameMode() == Enum.GameMode.Plunderstorm then
 			self.waitingforCharacterList = false;
 			return;
 		end
@@ -612,7 +610,7 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
         local guid, minutes = ...;
 		CharacterSelect_OnVASCharacterQueueStatusUpdate(guid, minutes);
     elseif ( event == "LOGIN_STATE_CHANGED" ) then
-		if C_GameEnvironmentManager.GetCurrentGameEnvironment() == Enum.GameEnvironment.WoWLabs then
+		if C_GameRules.GetActiveGameMode() == Enum.GameMode.Plunderstorm then
 			return;
 		end
         local FROM_LOGIN_STATE_CHANGE = true;
@@ -660,6 +658,8 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
 		CharacterSelectCharacterFrame:UpdateCharacterSelection();
 		local charID = CharacterSelectListUtil.GetCharIDFromIndex(self.selectedIndex);
 		CharacterSelectUI:SetCharacterDisplay(charID);
+	elseif (event == "ACCOUNT_DATA_RESTORING") then
+	    GlueDialog_Show("COPY_IN_PROGRESS");
 	end
 end
 
@@ -846,13 +846,14 @@ function CharacterSelect_ShowTimerunningChoiceWhenActive()
 end
 
 function CharacterSelect_SelectCharacter(index, noCreate)
-    if ( index == CharacterSelect.createIndex ) then
-        if ( not noCreate and not CharacterSelectUtil.IsAccountLocked()) then
-            PlaySound(SOUNDKIT.GS_CHARACTER_SELECTION_CREATE_NEW);
-            C_CharacterCreation.ClearCharacterTemplate();
-            GlueParent_SetScreen("charcreate");
-        end
-    else
+ 	if ( index == CharacterSelect.createIndex ) then
+		if ( not noCreate and not CharacterSelectUtil.IsAccountLocked()) then
+			PlaySound(SOUNDKIT.GS_CHARACTER_SELECTION_CREATE_NEW);
+			CharacterSelectCharacterFrame:ClearSearch();
+			C_CharacterCreation.ClearCharacterTemplate();
+			GlueParent_SetScreen("charcreate");
+		end
+	else
 		if (not C_WowTokenPublic.GetCurrentMarketPrice() or
 			not CAN_BUY_RESULT_FOUND or (CAN_BUY_RESULT_FOUND ~= LE_TOKEN_RESULT_ERROR_SUCCESS and CAN_BUY_RESULT_FOUND ~= LE_TOKEN_RESULT_ERROR_SUCCESS_NO) ) then
 			AccountReactivate_RecheckEligibility();
@@ -945,6 +946,7 @@ function CharacterSelect_Exit()
 
 	CharacterSelectListUtil.SaveCharacterOrder();
 
+	CharacterSelectCharacterFrame:ClearSearch();
 	CharacterSelectCharacterFrame:ClearCharacterSelection();
 	CharacterSelectUI:ReleaseCharacterOverlayFrames();
 	C_Login.DisconnectFromServer();
@@ -1010,11 +1012,11 @@ function CharacterSelect_AllowedToEnterWorld()
     return true;
 end
 
-function CharacterSelectUI_InitGameEnvironmentButtons()
+function CharacterSelectUI_InitGameModeButtons()
 	-- because of the CharacterSelect animations, we need to set the initial alpha of the WoW Toggle to 1
-	local gameEnvironmentToggleFrame = CharacterSelectUI.VisibilityFramesContainer.NavBar.GameEnvironmentButton.SelectionDrawer;
-	gameEnvironmentToggleFrame.SelectWoWToggle:SetAlpha(1);
-	gameEnvironmentToggleFrame.SelectWoWLabsToggle:SetAlpha(0.5);
+	local gameModeToggleFrame = CharacterSelectUI.VisibilityFramesContainer.NavBar.GameModeButton.SelectionDrawer;
+	gameModeToggleFrame.SelectWoWToggle:SetAlpha(1);
+	gameModeToggleFrame.SelectWoWLabsToggle:SetAlpha(0.5);
 end
 
 function CharacterSelectRotateRight_OnUpdate(self)
@@ -1355,6 +1357,7 @@ function CharacterTemplatesFrame_OnLoad(self)
 	self.CreateTemplateButton:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.GS_CHARACTER_SELECTION_CREATE_NEW);
 		CharacterSelectListUtil.SaveCharacterOrder();
+		CharacterSelectCharacterFrame:ClearSearch();
 		C_CharacterCreation.SetCharacterTemplate(self.characterIndex);
 		GlueParent_SetScreen("charcreate");
 	end);
@@ -1516,7 +1519,7 @@ function CharacterSelect_UpdateButtonState()
 	CharSelectUndeleteCharacterButton:SetEnabled(servicesEnabled and not redemptionInProgress and not isAccountLocked and undeleteEnabled and not undeleteOnCooldown);
 
 	-- Nav bar buttons.
-	CharacterSelectUI:SetGameEnvironmentEnabled(servicesEnabled and not undeleting and not redemptionInProgress and not isCollectionsActive);
+	CharacterSelectUI:SetGameModeSelectionEnabled(servicesEnabled and not undeleting and not redemptionInProgress and not isCollectionsActive);
 	CharacterSelectUI:SetStoreEnabled(servicesEnabled and not undeleting and not redemptionInProgress and not isAccountLocked and not isCollectionsActive);
 	CharacterSelectUI:SetMenuEnabled(servicesEnabled and not redemptionInProgress and not isCollectionsActive);
 	CharacterSelectUI:SetChangeRealmEnabled(servicesEnabled and not undeleting and not redemptionInProgress and not isCollectionsActive);

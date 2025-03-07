@@ -2323,6 +2323,11 @@ local ChatInfo =
 			LiteralName = "CHAT_SERVER_RECONNECTED",
 		},
 		{
+			Name = "ChatToxicity",
+			Type = "Event",
+			LiteralName = "CHAT_TOXICITY",
+		},
+		{
 			Name = "ClearBossEmotes",
 			Type = "Event",
 			LiteralName = "CLEAR_BOSS_EMOTES",

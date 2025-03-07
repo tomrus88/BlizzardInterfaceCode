@@ -56,7 +56,6 @@ local barColorFromTintValue = {
 	[Enum.StatusBarColorTintValue.Blue] = RARE_BLUE_COLOR,
 }
 
-local fillTextureKitFormatString = "%s-fill-%s";
 local DEFAULT_BAR_WIDTH = 215;
 
 local textureKitOptions =
@@ -78,15 +77,6 @@ function UIWidgetTemplateStatusBarMixin:Setup(widgetInfo, widgetContainer)
 	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo, widgetContainer);
 
 	self:SanitizeTextureKits(widgetInfo);
-
-	local fillAtlas = fillTextureKitFormatString:format(self.frameTextureKit, self.textureKit);
-	local fillAtlasInfo = C_Texture.GetAtlasInfo(fillAtlas);
-	if fillAtlasInfo and fillAtlas ~= self.lastFillAtlas then
-		self.Bar:SetStatusBarTexture(fillAtlas);
-		self.Bar:SetHeight(fillAtlasInfo.height);
-		self.Bar:GetStatusBarTexture():SetHorizTile(fillAtlasInfo.tilesHorizontally);
-		self.lastFillAtlas = fillAtlas;
-	end
 
 	local barColor = barColorFromTintValue[widgetInfo.colorTint];
 	if barColor then 
