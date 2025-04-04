@@ -7,10 +7,6 @@ ItemButtonConstants =
 	},
 };
 
-local function GetItemButtonIconTexture(button)
-	return button.Icon or button.icon or _G[button:GetName().."IconTexture"];
-end
-
 function GetFormattedItemQuantity(quantity, maxQuantity)
 	if quantity > (maxQuantity or 9999) then
 		return "*";
@@ -220,10 +216,16 @@ function SetItemButtonBorder(button, asset, isAtlas)
 	end
 end
 
-local function SetItemButtonQuality_Base(button, quality, itemIDOrLink, suppressOverlays, isBound)
+local function SetItemButtonQuality_Base(button, quality, itemIDOrLink, suppressOverlays, isBound, ignoreColorOverrides)
 	ClearItemButtonOverlay(button);
 
-	local color = ColorManager.GetColorDataForBagItemQuality(quality);
+	local color = nil;
+	if ignoreColorOverrides then
+		color = ColorManager.GetDefaultColorDataForBagItemQuality(quality);
+	else
+		color = ColorManager.GetColorDataForBagItemQuality(quality);
+	end
+
 	if color then
 		if itemIDOrLink then
 			if IsArtifactRelicItem(itemIDOrLink) then
@@ -245,12 +247,12 @@ local function SetItemButtonQuality_Base(button, quality, itemIDOrLink, suppress
 	end
 end
 
-function SetItemButtonQuality(button, quality, itemIDOrLink, suppressOverlays, isBound)
+function SetItemButtonQuality(button, quality, itemIDOrLink, suppressOverlays, isBound, ignoreColorOverrides)
 	if button then
 		if button.SetItemButtonQuality then
-			button:SetItemButtonQuality(quality, itemIDOrLink, suppressOverlays, isBound);
+			button:SetItemButtonQuality(quality, itemIDOrLink, suppressOverlays, isBound, ignoreColorOverrides);
 		else
-			SetItemButtonQuality_Base(button, quality, itemIDOrLink, suppressOverlays, isBound);
+			SetItemButtonQuality_Base(button, quality, itemIDOrLink, suppressOverlays, isBound, ignoreColorOverrides);
 		end
 	end
 end
@@ -409,8 +411,8 @@ function ItemButtonMixin:SetItemButtonTextureVertexColor(r, g, b)
 	SetItemButtonTextureVertexColor_Base(self, r, g, b);
 end
 
-function ItemButtonMixin:SetItemButtonQuality(quality, itemIDOrLink, suppressOverlays, isBound)
-	SetItemButtonQuality_Base(self, quality, itemIDOrLink, suppressOverlays, isBound);
+function ItemButtonMixin:SetItemButtonQuality(quality, itemIDOrLink, suppressOverlays, isBound, ignoreColorOverrides)
+	SetItemButtonQuality_Base(self, quality, itemIDOrLink, suppressOverlays, isBound, ignoreColorOverrides);
 end
 
 function ItemButtonMixin:SetItemButtonBorderVertexColor(r, g, b)
@@ -423,7 +425,7 @@ end
 
 CircularGiantItemButtonMixin = {}
 
-function CircularGiantItemButtonMixin:SetItemButtonQuality(quality, itemIDOrLink, suppressOverlays, isBound)
+function CircularGiantItemButtonMixin:SetItemButtonQuality(quality, itemIDOrLink, suppressOverlays, isBound, ignoreColorOverrides)
 	ClearItemButtonOverlay(self);
 
 	if quality then

@@ -12,6 +12,12 @@ ITEM_QUALITY_OVERRIDES = {
 	[Enum.ItemQuality.Heirloom] = Enum.ColorOverride.ItemQualityAccount
 };
 
+ITEM_QUALITY_COLORS = { };
+
+WORLD_QUEST_QUALITY_COLORS = { };
+
+FOLLOWER_QUALITY_COLORS = { };
+
 BAG_ITEM_QUALITY_COLORS = {
 	[Enum.ItemQuality.Common] = COMMON_GRAY_COLOR,
 	[Enum.ItemQuality.Uncommon] = UNCOMMON_GREEN_COLOR,
@@ -22,12 +28,6 @@ BAG_ITEM_QUALITY_COLORS = {
 	[Enum.ItemQuality.Heirloom] = HEIRLOOM_BLUE_COLOR,
 	[Enum.ItemQuality.WoWToken] = HEIRLOOM_BLUE_COLOR
 };
-
-ITEM_QUALITY_COLORS = { };
-
-WORLD_QUEST_QUALITY_COLORS = { };
-
-FOLLOWER_QUALITY_COLORS = { };
 
 AUCTION_HOUSE_ITEM_QUALITY_ICON_BORDER_ATLASES = {
 	[Enum.ItemQuality.Poor] = "auctionhouse-itemicon-border-gray",
@@ -71,10 +71,22 @@ LOOT_BORDER_BY_QUALITY = {
 };
 
 LOOTUPGRADEFRAME_QUALITY_TEXTURES = {
-	[Enum.ItemQuality.Uncommon]	= {border = "loottoast-itemborder-green", arrow = "loottoast-arrow-green"},
-	[Enum.ItemQuality.Rare]	= {border = "loottoast-itemborder-blue", arrow = "loottoast-arrow-blue"},
-	[Enum.ItemQuality.Epic]	= {border = "loottoast-itemborder-purple", arrow = "loottoast-arrow-purple"},
-	[Enum.ItemQuality.Legendary] = {border = "loottoast-itemborder-orange",	arrow = "loottoast-arrow-orange"}
+	[Enum.ItemQuality.Uncommon]	= {
+		border = "loottoast-itemborder-green",
+		arrow = "loottoast-arrow-green"
+	},
+	[Enum.ItemQuality.Rare]	= {
+		border = "loottoast-itemborder-blue",
+		arrow = "loottoast-arrow-blue"
+	},
+	[Enum.ItemQuality.Epic]	= {
+		border = "loottoast-itemborder-purple",
+		arrow = "loottoast-arrow-purple"
+	},
+	[Enum.ItemQuality.Legendary] = {
+		border = "loottoast-itemborder-orange",
+		arrow = "loottoast-arrow-orange"
+	}
 };
 
 GARRISON_FOLLOWER_QUALITY_TEXTURE_SUFFIXES = {
@@ -112,18 +124,41 @@ GARRISON_SHIPYARD_FOLLOWER_QUALITY_ATLASES = {
 	[Enum.ItemQuality.Epic] = "ShipMission_BoatRarity-Epic"
 };
 
-SPELL_DISPLAY_ITEM_QUALITIES = {
-	[Enum.SpellDisplayBorderColor.White] = Enum.ItemQuality.Common,
-	[Enum.SpellDisplayBorderColor.Green] = Enum.ItemQuality.Uncommon,
-	[Enum.SpellDisplayBorderColor.Blue] = Enum.ItemQuality.Rare,
-	[Enum.SpellDisplayBorderColor.Purple] = Enum.ItemQuality.Epic,
-	[Enum.SpellDisplayBorderColor.Orange] = Enum.ItemQuality.Legendary
+SPELL_DISPLAY_BORDER_COLOR_ATLASES = {
+	[Enum.ItemQuality.Common] = "wowlabs-in-world-item-common",
+	[Enum.ItemQuality.Uncommon] = "wowlabs-in-world-item-uncommon",
+	[Enum.ItemQuality.Rare] = "wowlabs-in-world-item-rare",
+	[Enum.ItemQuality.Epic] = "wowlabs-in-world-item-epic",
+	[Enum.ItemQuality.Legendary] = "wowlabs-in-world-item-legendary"
 };
 
-SPELL_DISPLAY_BORDER_COLOR_ATLASES = {
-	[Enum.SpellDisplayBorderColor.White] = "wowlabs-in-world-item-common",
-	[Enum.SpellDisplayBorderColor.Green] = "wowlabs-in-world-item-uncommon",
-	[Enum.SpellDisplayBorderColor.Blue] = "wowlabs-in-world-item-rare",
-	[Enum.SpellDisplayBorderColor.Purple] = "wowlabs-in-world-item-epic",
-	[Enum.SpellDisplayBorderColor.Orange] = "wowlabs-in-world-item-legendary"
+PLAYER_CHOICE_ATLAS_POSTFIXES = {
+	[Enum.ItemQuality.Common] = {
+		circleBorder = "-border",
+		portraitBackgroundGlow1 = "-portrait-qualitygeneric-01",
+		portraitBackgroundGlow2 = "-portrait-qualitygeneric-02",
+		portraitBackgroundTorghast = "",
+		portraitBackgroundCypher = "-Common"
+	},
+	[Enum.ItemQuality.Uncommon] = {
+		circleBorder = "-QualityUncommon-border",
+		portraitBackgroundGlow1 = "-portrait-qualityuncommon-01",
+		portraitBackgroundGlow2 = "-portrait-qualityuncommon-02",
+		portraitBackgroundTorghast = "-QualityUncommon",
+		portraitBackgroundCypher = "-Uncommon"
+	},
+	[Enum.ItemQuality.Rare] = {
+		circleBorder = "-QualityRare-border",
+		portraitBackgroundGlow1 = "-portrait-qualityrare-01",
+		portraitBackgroundGlow2 = "-portrait-qualityrare-02",
+		portraitBackgroundTorghast = "-QualityRare",
+		portraitBackgroundCypher = "-Rare"
+	},
+	[Enum.ItemQuality.Epic] = {
+		circleBorder = "-QualityEpic-border",
+		portraitBackgroundGlow1 = "-portrait-qualityepic-01",
+		portraitBackgroundGlow2 = "-portrait-qualityepic-02",
+		portraitBackgroundTorghast = "-QualityEpic",
+		portraitBackgroundCypher = "-Epic"
+	}
 };

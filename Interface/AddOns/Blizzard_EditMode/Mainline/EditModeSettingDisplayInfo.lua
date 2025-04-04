@@ -763,9 +763,9 @@ EditModeSettingDisplayInfoManager.systemSettingDisplayInfo = {
 			type = Enum.EditModeSettingDisplayType.Dropdown,
 			options = 
 			{
-				{value = Enum.CooldownViewerVisibleSetting.Always, text = HUD_EDIT_MODE_SETTING_ACTION_BAR_VISIBLE_SETTING_ALWAYS},
-				{value = Enum.CooldownViewerVisibleSetting.InCombat, text = HUD_EDIT_MODE_SETTING_ACTION_BAR_VISIBLE_SETTING_IN_COMBAT},
-				{value = Enum.CooldownViewerVisibleSetting.Hidden, text = HUD_EDIT_MODE_SETTING_ACTION_BAR_VISIBLE_SETTING_HIDDEN},
+				{value = Enum.CooldownViewerVisibleSetting.Always, text = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_VISIBLE_SETTING_ALWAYS},
+				{value = Enum.CooldownViewerVisibleSetting.InCombat, text = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_VISIBLE_SETTING_IN_COMBAT},
+				{value = Enum.CooldownViewerVisibleSetting.Hidden, text = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_VISIBLE_SETTING_HIDDEN},
 			},
 		},
 
@@ -793,6 +793,13 @@ EditModeSettingDisplayInfoManager.systemSettingDisplayInfo = {
 		{
 			setting = Enum.EditModeCooldownViewerSetting.ShowTimer,
 			name = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_SHOW_TIMER,
+			type = Enum.EditModeSettingDisplayType.Checkbox,
+		},
+
+		-- Show Tooltips
+		{
+			setting = Enum.EditModeCooldownViewerSetting.ShowTooltips,
+			name = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_SHOW_TOOLTIPS,
 			type = Enum.EditModeSettingDisplayType.Checkbox,
 		},
 	},

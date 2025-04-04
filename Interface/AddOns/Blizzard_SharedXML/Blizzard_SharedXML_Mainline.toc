@@ -3,7 +3,7 @@
 ## DefaultState: enabled
 ## AllowLoad: Both
 ## AllowLoadGameType: mainline
-## Dependencies: Blizzard_Fonts_Shared, Blizzard_SharedXMLBase, Blizzard_PrintHandler, Blizzard_Menu, Blizzard_Colors
+## Dependencies: Blizzard_Fonts_Shared, Blizzard_SharedXMLBase, Blizzard_PrintHandler, Blizzard_Menu, Blizzard_Colors, Blizzard_HelpPlate
 Shared\LocalizationMachinery.lua
 ProjectConstants.lua
 WoWLabs\ProjectConstants.lua
@@ -197,6 +197,8 @@ AlertFrameIntrinsic.lua
 AlertFrameIntrinsic.xml
 Mainline\MajorFactionRenownSharedTemplates.lua
 Mainline\MajorFactionRenownSharedTemplates.xml
+
+CommonUIPanelTemplates.xml
 
 ## Deprecated. Retained only for addons
 HybridScrollFrame.lua

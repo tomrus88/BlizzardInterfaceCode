@@ -11,7 +11,8 @@ Wrath\SparkleFrame.xml
 CustomBindingManager.lua
 CustomBindingHandler.lua
 Classic\SecureTemplatesBase.xml
-Classic\SecureTemplates.lua
+Mists\SecureTemplates.lua
+Classic\SecureTemplates_Shared.lua
 SecureStateDriver.lua
 SecureHoverDriver.lua
 Classic\SecureTemplates.xml
@@ -49,10 +50,10 @@ Classic\ColorPickerFrame.xml
 TBC\WorldStateFrame.lua
 Mists\WorldStateFrame.xml
 Classic\TalentFrameBase_Shared.lua
-Cata\TalentFrameBase.lua
+Mists\TalentFrameBase.lua
 Cata\Blizzard_TalentUITemplates.xml
-Classic\MovieFrame.lua
-Classic\MovieFrame.xml
+MovieFrame.lua
+MovieFrame.xml
 Classic\RolePoll.xml
 Classic\StreamingFrame.lua
 Classic\StreamingFrame.xml
@@ -69,3 +70,7 @@ Classic\ClassTrainerFrameTemplates.xml
 Wrath\EquipmentManager.lua
 EquipmentFlyout.xml
 GhostFrame.xml
+FloatingPetBattleTooltip.lua
+FloatingPetBattleTooltip.xml
+BattlePetTooltip.lua
+BattlePetTooltip.xml

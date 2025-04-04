@@ -34,7 +34,6 @@ function CharacterSelectFrameMixin:OnLoad()
     self.selectedIndex = 0;
 	self.selectLast = false;
 	self.backFromCharCreate = false;
-	self.connectingToPlunderstorm = false;
 	self.waitingforCharacterList = true;
 	self.showSocialContract = false;
 	self.autoRealmSwap = false;
@@ -77,10 +76,6 @@ function CharacterSelectFrameMixin:OnLoad()
 	self:RegisterEvent("ACTIVE_MAP_SCENE_TRANSITIONED");
 	self:RegisterEvent("ACCOUNT_DATA_RESTORING");
 
-	self:AddDynamicEventMethod(EventRegistry, "GameMode.Selected", self.OnGameModeSelected);
-	self:AddDynamicEventMethod(EventRegistry, "RealmList.Cancel", self.OnRealmListCancel);	
-	CharacterSelectUI_InitGameModeButtons();
-
 	CharacterSelectCharacterFrame:Init();
 
 	local shouldHideGM = IsGMClient() and HideGMOnly();
@@ -95,20 +90,7 @@ function CharacterSelectFrameMixin:OnLoad()
 	CharacterSelect_UpdateTimerunning();
 end
 
-function CharacterSelectFrameMixin:OnGameModeSelected(requestedGameMode)
-	assert(requestedGameMode);
-	if C_GameRules.GetActiveGameMode() ~= requestedGameMode then
-		self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameModeButton.SelectionDrawer:ChangeGameMode(requestedGameMode);
-	end
-end
-
-function CharacterSelectFrameMixin:OnRealmListCancel()
-	self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameModeButton.SelectionDrawer:SelectRadioButtonForGameMode(Enum.GameMode.Standard);
-end
-
 function CharacterSelectFrameMixin:OnShow()
-	CallbackRegistrantMixin.OnShow(self);
-
     InitializeCharacterScreenData();
     SetInCharacterSelect(true);
     CharacterSelect_ResetVeteranStatus();
@@ -232,8 +214,6 @@ function CharacterSelectFrameMixin:OnShow()
 		C_SocialContractGlue.GetShouldShowSocialContract();
 	end
 
-	self.CharacterSelectUI.VisibilityFramesContainer.NavBar.GameModeButton.SelectionDrawer:SelectRadioButtonForGameMode(Enum.GameMode.Standard);
-
 	self.CharacterSelectUI.VisibilityFramesContainer.ToolTray:SetExpanded(not g_characterSelectToolTrayCollapsed);
 	GeneralDockManager:Hide();
 	ChatFrame1:Hide();
@@ -243,8 +223,6 @@ function CharacterSelectFrameMixin:OnShow()
 end
 
 function CharacterSelectFrameMixin:OnHide()
-	CallbackRegistrantMixin.OnHide(self);
-
     CharacterDeleteDialog:Hide();
     CharacterRenameDialog:Hide();
     AccountReactivate_CloseDialogs();
@@ -429,11 +407,12 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
         end
 
         if GetNumCharacters() == 0 then
+			local screenName = C_GameRules.GetGameModeGlueScreenName();
 			if self.undeleting then
 				CharacterSelect_EndCharacterUndelete();
 				self.undeleteNoCharacters = true;
 				return;
-			elseif (not self.connectingToPlunderstorm and not self.backFromCharCreate and not self.autoRealmSwap) then
+			elseif (not screenName and not self.backFromCharCreate and not self.autoRealmSwap) then
 				if (IsKioskGlueEnabled()) then
 					GlueParent_SetScreen("kioskmodesplash");
 				else
@@ -643,12 +622,18 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
 		local swapping = ...;
 		self.autoRealmSwap = swapping;
 	elseif (event == "ALL_WARBAND_GROUP_SCENES_UPDATED") then
+		-- Clear search to correct visual issues with the camp/map scene when we refresh things.
+		CharacterSelectCharacterFrame:ClearSearch();
+
 		CharacterSelectCharacterFrame:UpdateCharacterSelection();
 		local charID = CharacterSelectListUtil.GetCharIDFromIndex(self.selectedIndex);
 		CharacterSelectUI:SetCharacterDisplay(charID);
 		CharacterSelectListUtil:SaveCharacterOrder();
 	elseif (event == "WARBAND_GROUP_SCENE_UPDATED") then
 		local groupID = ...;
+
+		-- Clear search to correct visual issues with the camp/map scene when we refresh things.
+		CharacterSelectCharacterFrame:ClearSearch();
 
 		CharacterSelectCharacterFrame:UpdateCharacterSelection();
 		local charID = CharacterSelectListUtil.GetCharIDFromIndex(self.selectedIndex);
@@ -1010,13 +995,6 @@ function CharacterSelect_AllowedToEnterWorld()
     end
 
     return true;
-end
-
-function CharacterSelectUI_InitGameModeButtons()
-	-- because of the CharacterSelect animations, we need to set the initial alpha of the WoW Toggle to 1
-	local gameModeToggleFrame = CharacterSelectUI.VisibilityFramesContainer.NavBar.GameModeButton.SelectionDrawer;
-	gameModeToggleFrame.SelectWoWToggle:SetAlpha(1);
-	gameModeToggleFrame.SelectWoWLabsToggle:SetAlpha(0.5);
 end
 
 function CharacterSelectRotateRight_OnUpdate(self)

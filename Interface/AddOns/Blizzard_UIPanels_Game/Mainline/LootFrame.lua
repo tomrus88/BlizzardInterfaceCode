@@ -256,7 +256,13 @@ function LootFrameElementMixin:Init()
 	self.Text:SetText(item);
 
 	local quality = itemQuality or Enum.ItemQuality.Common;
-	local colorData = ColorManager.GetColorDataForItemQuality(quality);
+	local colorData = nil;
+	if self.ignoreColorOverrides then
+		colorData = ColorManager.GetDefaultColorDataForItemQuality(quality);
+	else
+		colorData = ColorManager.GetColorDataForItemQuality(quality);
+	end
+
 	if colorData then
 		self.Text:SetVertexColor(colorData.color:GetRGB());
 		self.NameFrame:SetVertexColor(colorData.color:GetRGB());
@@ -281,7 +287,9 @@ function LootFrameElementMixin:Init()
 	end
 
 	local link = GetLootSlotLink(slotIndex);
-	SetItemButtonQuality(self.Item, quality, link);
+	local suppressOverlays = false;
+	local isBound = false;
+	SetItemButtonQuality(self.Item, quality, link, suppressOverlays, isBound, self.ignoreColorOverrides);
 	self.Item.icon:SetTexture(texture);
 
 	if quantity > 1 then
