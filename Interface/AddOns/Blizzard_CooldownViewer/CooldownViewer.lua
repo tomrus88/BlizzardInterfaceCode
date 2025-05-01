@@ -1,7 +1,12 @@
-COOLDOWN_VIEWER_ITEM_USABLE_COLOR = CreateColor(1.0, 1.0, 1.0, 1.0);
-COOLDOWN_VIEWER_ITEM_NOT_ENOUGH_MANA_COLOR = CreateColor(0.5, 0.5, 1.0, 1.0);
-COOLDOWN_VIEWER_ITEM_NOT_USABLE_COLOR = CreateColor(0.4, 0.4, 0.4, 1.0);
-COOLDOWN_VIEWER_ITEM_NOT_IN_RANGE_COLOR = CreateColor(0.64, 0.15, 0.15, 1.0);
+CooldownViewerConstants = {
+	ITEM_USABLE_COLOR = CreateColor(1.0, 1.0, 1.0, 1.0);
+	ITEM_NOT_ENOUGH_MANA_COLOR = CreateColor(0.5, 0.5, 1.0, 1.0);
+	ITEM_NOT_USABLE_COLOR = CreateColor(0.4, 0.4, 0.4, 1.0);
+	ITEM_NOT_IN_RANGE_COLOR = CreateColor(0.64, 0.15, 0.15, 1.0);
+
+	ITEM_AURA_COLOR = CreateColor(1, 0.95, 0.57, 0.7);
+	ITEM_COOLDOWN_COLOR = CreateColor(0, 0, 0, 0.7);
+};
 
 ---------------------------------------------------------------------------------------------------
 -- Some ways to generate fake data for edit mode if the character doesn't have enough spells to populate it.
@@ -51,9 +56,11 @@ function CooldownViewerItemMixin:OnLoad()
 end
 
 function CooldownViewerItemMixin:OnEnter()
-	GameTooltip_SetDefaultAnchor(GameTooltip, self);
-	self:RefreshTooltip();
-	GameTooltip:Show();
+	if self:IsDisplayed() then
+		GameTooltip_SetDefaultAnchor(GameTooltip, self);
+		self:RefreshTooltip();
+		GameTooltip:Show();
+	end
 end
 
 function CooldownViewerItemMixin:OnLeave()
@@ -62,6 +69,10 @@ end
 
 function CooldownViewerItemMixin:SetViewerFrame(viewerFrame)
 	self.viewerFrame = viewerFrame;
+end
+
+function CooldownViewerItemMixin:IsDisplayed()
+	return self:GetAlpha() > 0;
 end
 
 function CooldownViewerItemMixin:SetCooldownID(cooldownID)
@@ -107,6 +118,7 @@ end
 function CooldownViewerItemMixin:OnCooldownIDCleared()
 	self.cooldownInfo = nil;
 	self:ClearAuraInfo();
+	self:ClearTotemData();
 
 	self:RefreshData();
 end
@@ -118,6 +130,10 @@ function CooldownViewerItemMixin:ClearAuraInfo()
 
 	self.auraInstanceID = nil;
 	self.auraSpellID = nil;
+end
+
+function CooldownViewerItemMixin:ClearTotemData()
+	self.totemData = nil;
 end
 
 function CooldownViewerItemMixin:SetEditModeData(index)
@@ -249,6 +265,26 @@ function CooldownViewerItemMixin:OnUnitAuraAddedEvent(unitAuraUpdateInfo)
 	end
 end
 
+function CooldownViewerItemMixin:OnPlayerTotemUpdateEvent(slot, name, startTime, duration, modRate, spellID)
+	if not self:NeedsTotemUpdate(slot, spellID) then
+		return;
+	end
+
+	if duration == 0 then
+		self:ClearTotemData();
+	else
+		self.totemData = {
+			slot = slot,
+			expirationTime = startTime + duration,
+			duration = duration,
+			name = name,
+			modRate = modRate;
+		};
+	end
+
+	self:RefreshData();
+end
+
 function CooldownViewerItemMixin:GetCooldownID()
 	return self.cooldownID;
 end
@@ -342,6 +378,10 @@ function CooldownViewerItemMixin:UseAuraForCooldown()
 	return FlagsUtil.IsSet(cooldownInfo.flags, Enum.CooldownSetSpellFlags.HideAura) == false;
 end
 
+function CooldownViewerItemMixin:GetTotemData()
+	return self.totemData;
+end
+
 function CooldownViewerItemMixin:RefreshData()
 	assertsafe(false, "RefreshData must be overridden by a derived mixin.");
 end
@@ -431,10 +471,6 @@ function CooldownViewerItemMixin:IsActive()
 	return self.isActive;
 end
 
-function CooldownViewerItemMixin:IsActivationOverlayActive()
-	return self.SpellActivationAlert and self.SpellActivationAlert:IsShown();
-end
-
 function CooldownViewerItemMixin:NeedsCooldownUpdate(spellID, baseSpellID, startRecoveryCategory)
 	-- A nill spellID indicates all cooldowns should be updated.
 	if spellID == nil then
@@ -469,7 +505,8 @@ function CooldownViewerItemMixin:NeedsCooldownUpdate(spellID, baseSpellID, start
 	-- In rare cases, some spells remove their override before the Update Cooldown Event is sent. 
 	-- When this happens the event doesn't correctly reference the base spell, so this logic
 	-- compensates for that to ensure the event causes a refresh.
-	if spellID == self.cooldownInfo.previousOverrideSpellID then
+	local cooldownInfo = self:GetCooldownInfo();
+	if cooldownInfo and spellID == cooldownInfo.previousOverrideSpellID then
 		return true;
 	end
 
@@ -482,6 +519,24 @@ function CooldownViewerItemMixin:NeedsAddedAuraUpdate(spellID)
 	end
 
 	if spellID == self:GetSpellID() then
+		return true;
+	end
+
+	return false;
+end
+
+function CooldownViewerItemMixin:NeedsTotemUpdate(slot, spellID)
+	if self:UpdateLinkedSpell(spellID) then
+		return true;
+	end
+
+	if spellID == self:GetSpellID() then
+		return true;
+	end
+
+	-- If a totem is destroyed the totem's spellID may already be set to 0, in which case
+	-- it's necessary to use the slot to determine if the update is needed.
+	if spellID == 0 and self.totemData and self.totemData.slot == slot then
 		return true;
 	end
 
@@ -529,7 +584,7 @@ end
 function CooldownViewerCooldownItemMixin:OnCooldownIDCleared()
 	CooldownViewerItemMixin.OnCooldownIDCleared(self);
 
-	ActionButton_HideOverlayGlow(self);
+	ActionButtonSpellAlertManager:HideAlert(self);
 
 	if self.needsRangeCheck == true then
 		C_Spell.EnableSpellRangeCheck(self.rangeCheckSpellID, false);
@@ -540,7 +595,15 @@ function CooldownViewerCooldownItemMixin:OnCooldownIDCleared()
 end
 
 function CooldownViewerCooldownItemMixin:OnCooldownDone()
-	self:RefreshIconDesaturation();
+	-- No external event is dispatched when a totem finishes, but if the totem duration was shorter
+	-- than the spell's cooldown, the item should immediately start displaying the cooldown.
+	local totemData = self:GetTotemData();
+	if totemData and totemData.expirationTime < GetTime() then
+		self:ClearTotemData();
+		self:RefreshData();
+	else
+		self:RefreshIconDesaturation();
+	end
 end
 
 function CooldownViewerCooldownItemMixin:OnSpellActivationOverlayGlowShowEvent(spellID)
@@ -548,7 +611,7 @@ function CooldownViewerCooldownItemMixin:OnSpellActivationOverlayGlowShowEvent(s
 		return;
 	end
 
-	ActionButton_ShowOverlayGlow(self);
+	ActionButtonSpellAlertManager:ShowAlert(self);
 end
 
 function CooldownViewerCooldownItemMixin:OnSpellActivationOverlayGlowHideEvent(spellID)
@@ -556,7 +619,7 @@ function CooldownViewerCooldownItemMixin:OnSpellActivationOverlayGlowHideEvent(s
 		return;
 	end
 
-	ActionButton_HideOverlayGlow(self);
+	ActionButtonSpellAlertManager:HideAlert(self);
 end
 
 function CooldownViewerCooldownItemMixin:OnSpellUpdateUsesEvent(spellID, baseSpellID)
@@ -611,13 +674,29 @@ end
 function CooldownViewerCooldownItemMixin:CacheCooldownValues()
 	-- If the spell results in a self buff, give those values precedence over the spell's cooldown until the buff is gone.
 	if self:UseAuraForCooldown() == true then
+		local totemData = self:GetTotemData();
+		if totemData then
+			self.cooldownEnabled = 1;
+			self.cooldownStartTime = totemData.expirationTime - totemData.duration;
+			self.cooldownDuration = totemData.duration;
+			self.cooldownModRate = totemData.modRate;
+			self.cooldownSwipeColor = CooldownViewerConstants.ITEM_AURA_COLOR;
+			self.cooldownDesaturated = false;
+			self.cooldownShowDrawEdge = false;
+			self.cooldownShowSwipe = true;
+			self.cooldownUseAuraDisplayTime = true;
+			self.cooldownPlayFlash = false;
+			self.cooldownPaused = false;
+			return;
+		end
+
 		local auraData = self:GetAuraData();
 		if auraData then
 			self.cooldownEnabled = 1;
 			self.cooldownStartTime = auraData.expirationTime - auraData.duration;
 			self.cooldownDuration = auraData.duration;
 			self.cooldownModRate = auraData.timeMod;
-			self.cooldownSwipeColor = CreateColor(1, 0.95, 0.57, 0.7);
+			self.cooldownSwipeColor = CooldownViewerConstants.ITEM_AURA_COLOR;
 			self.cooldownDesaturated = false;
 			self.cooldownShowDrawEdge = false;
 			self.cooldownShowSwipe = true;
@@ -641,7 +720,7 @@ function CooldownViewerCooldownItemMixin:CacheCooldownValues()
 		self.cooldownStartTime = spellChargeInfo.cooldownStartTime;
 		self.cooldownDuration = spellChargeInfo.cooldownDuration;
 		self.cooldownModRate = spellChargeInfo.chargeModRate;
-		self.cooldownSwipeColor = CreateColor(0, 0, 0, 0.7);
+		self.cooldownSwipeColor = CooldownViewerConstants.ITEM_COOLDOWN_COLOR;
 		self.cooldownDesaturated = false;
 		self.cooldownShowDrawEdge = true;
 		self.cooldownShowSwipe = false;
@@ -657,7 +736,7 @@ function CooldownViewerCooldownItemMixin:CacheCooldownValues()
 		self.cooldownStartTime = spellCooldownInfo.startTime;
 		self.cooldownDuration = spellCooldownInfo.duration;
 		self.cooldownModRate = spellCooldownInfo.modRate;
-		self.cooldownSwipeColor = CreateColor(0, 0, 0, 0.7);
+		self.cooldownSwipeColor = CooldownViewerConstants.ITEM_COOLDOWN_COLOR;
 		self.cooldownShowDrawEdge = false;
 		self.cooldownShowSwipe = true;
 		self.cooldownUseAuraDisplayTime = false;
@@ -679,7 +758,7 @@ function CooldownViewerCooldownItemMixin:CacheCooldownValues()
 		self.cooldownStartTime = GetTime() - GetEditModeElapsedTime(self.editModeIndex);
 		self.cooldownDuration = GetEditModeDuration(self.editModeIndex);
 		self.cooldownModRate = 1;
-		self.cooldownSwipeColor = CreateColor(0, 0, 0, 0.7);
+		self.cooldownSwipeColor = CooldownViewerConstants.ITEM_COOLDOWN_COLOR;
 		self.cooldownDesaturated = false;
 		self.cooldownShowDrawEdge = false;
 		self.cooldownShowSwipe = true;
@@ -693,7 +772,7 @@ function CooldownViewerCooldownItemMixin:CacheCooldownValues()
 	self.cooldownStartTime = 0;
 	self.cooldownDuration = 0;
 	self.cooldownModRate = 1;
-	self.cooldownSwipeColor = CreateColor(0, 0, 0, 0);
+	self.cooldownSwipeColor = CooldownViewerConstants.ITEM_COOLDOWN_COLOR;
 	self.cooldownDesaturated = false;
 	self.cooldownShowDrawEdge = false;
 	self.cooldownShowSwipe = false;
@@ -800,13 +879,13 @@ function CooldownViewerCooldownItemMixin:RefreshIconColor()
 	local isUsable, notEnoughMana = C_Spell.IsSpellUsable(spellID);
 
 	if self.spellOutOfRange == true then
-		iconTexture:SetVertexColor(COOLDOWN_VIEWER_ITEM_NOT_IN_RANGE_COLOR:GetRGBA());
+		iconTexture:SetVertexColor(CooldownViewerConstants.ITEM_NOT_IN_RANGE_COLOR:GetRGBA());
 	elseif isUsable then
-		iconTexture:SetVertexColor(COOLDOWN_VIEWER_ITEM_USABLE_COLOR:GetRGBA());
+		iconTexture:SetVertexColor(CooldownViewerConstants.ITEM_USABLE_COLOR:GetRGBA());
 	elseif notEnoughMana then
-		iconTexture:SetVertexColor(COOLDOWN_VIEWER_ITEM_NOT_ENOUGH_MANA_COLOR:GetRGBA());
+		iconTexture:SetVertexColor(CooldownViewerConstants.ITEM_NOT_ENOUGH_MANA_COLOR:GetRGBA());
 	else
-		iconTexture:SetVertexColor(COOLDOWN_VIEWER_ITEM_NOT_USABLE_COLOR:GetRGBA());
+		iconTexture:SetVertexColor(CooldownViewerConstants.ITEM_NOT_USABLE_COLOR:GetRGBA());
 	end
 
 	outOfRangeTexture:SetShown(self.spellOutOfRange == true);
@@ -816,9 +895,9 @@ function CooldownViewerCooldownItemMixin:RefreshOverlayGlow()
 	local spellID = self:GetSpellID();
 	local isSpellOverlayed = spellID and IsSpellOverlayed(spellID) or false;
 	if isSpellOverlayed then
-		ActionButton_ShowOverlayGlow(self);
+		ActionButtonSpellAlertManager:ShowAlert(self);
 	else
-		ActionButton_HideOverlayGlow(self);
+		ActionButtonSpellAlertManager:HideAlert(self);
 	end
 end
 
@@ -848,52 +927,7 @@ function CooldownViewerBuffItemMixin:OnCooldownIDSet()
 end
 
 function CooldownViewerBuffItemMixin:OnCooldownIDCleared()
-	-- Totem data is intentionally cleared before calling the base function so the call to RefreshData operates correctly.
-	self:ClearTotemData();
-
 	CooldownViewerItemMixin.OnCooldownIDCleared(self);
-end
-
-function CooldownViewerBuffItemMixin:OnPlayerTotemUpdateEvent(slot, name, startTime, duration, modRate, spellID)
-	if not self:NeedsTotemUpdate(slot, spellID) then
-		return;
-	end
-
-	self.totemData = {
-		slot = slot,
-		expirationTime = startTime + duration,
-		duration = duration,
-		name = name,
-		modRate = modRate;
-	};
-
-	self:RefreshData();
-end
-
-function CooldownViewerBuffItemMixin:NeedsTotemUpdate(slot, spellID)
-	if self:UpdateLinkedSpell(spellID) then
-		return true;
-	end
-
-	if spellID == self:GetSpellID() then
-		return true;
-	end
-
-	-- If a totem is destroyed the totem's spellID may already be set to 0, in which case
-	-- it's necessary to use the slot to determine if the update is needed.
-	if spellID == 0 and self.totemData and self.totemData.slot == slot then
-		return true;
-	end
-
-	return false;
-end
-
-function CooldownViewerBuffItemMixin:GetTotemData()
-	return self.totemData;
-end
-
-function CooldownViewerBuffItemMixin:ClearTotemData()
-	self.totemData = nil;
 end
 
 function CooldownViewerBuffItemMixin:ShouldBeActive()
@@ -1276,6 +1310,7 @@ function CooldownViewerMixin:OnShow()
 	self:RegisterEvent("COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED");
 	self:RegisterEvent("SPELL_UPDATE_COOLDOWN");
 	self:RegisterEvent("UNIT_AURA");
+	self:RegisterEvent("PLAYER_TOTEM_UPDATE");
 end
 
 function CooldownViewerMixin:OnHide()
@@ -1283,6 +1318,7 @@ function CooldownViewerMixin:OnHide()
 	self:UnregisterEvent("COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED");
 	self:UnregisterEvent("SPELL_UPDATE_COOLDOWN");
 	self:UnregisterEvent("UNIT_AURA");
+	self:UnregisterEvent("PLAYER_TOTEM_UPDATE");
 end
 
 function CooldownViewerMixin:OnVariablesLoaded()
@@ -1350,6 +1386,12 @@ function CooldownViewerMixin:OnEvent(event, ...)
 				end
 			end
 		end
+	elseif event == "PLAYER_TOTEM_UPDATE" then
+		local slot = ...;
+		local _haveTotem, name, startTime, duration, _icon, modRate, spellID = GetTotemInfo(slot);
+		for itemFrame in self.itemFramePool:EnumerateActive() do
+			itemFrame:OnPlayerTotemUpdateEvent(slot, name, startTime, duration, modRate, spellID);
+		end
 	end
 end
 
@@ -1362,7 +1404,8 @@ function CooldownViewerMixin:ShouldBeShown()
 		return false;
 	end
 
-	if not C_CooldownViewer.IsCooldownViewerAvailable() then
+	local isAvailable, _failureReason = C_CooldownViewer.IsCooldownViewerAvailable();
+	if not isAvailable then
 		return false;
 	end
 
@@ -1386,6 +1429,7 @@ end
 function CooldownViewerMixin:OnIsEditingChanged()
 	self:UpdateShownState();
 	self:RefreshLayout();
+	self:GetItemContainerFrame():Layout();
 end
 
 function CooldownViewerMixin:SetIsEditing(isEditing)
@@ -1402,7 +1446,7 @@ function CooldownViewerMixin:IsEditing()
 	return self.isEditing;
 end
 
-function CooldownViewerMixin:OnHideWhenInactiveChanged()
+function CooldownViewerMixin:OnHideWhenInactiveChanged(entireSystemUpdate)
 	if self.itemActiveStateChangedEvent then
 		-- Only need to listen for the event if it will result in a layout change.
 		if self.hideWhenInactive then
@@ -1412,18 +1456,20 @@ function CooldownViewerMixin:OnHideWhenInactiveChanged()
 		end
 
 		-- Changes to the setting may result in items being shown or hidden.
-		self:RefreshItemsShown();
+		if not entireSystemUpdate then
+			self:RefreshItemsShown();
+		end
 	end
 end
 
-function CooldownViewerMixin:SetHideWhenInactive(hideWhenInactive)
+function CooldownViewerMixin:SetHideWhenInactive(hideWhenInactive, entireSystemUpdate)
 	if self.hideWhenInactive == hideWhenInactive then
 		return;
 	end
 
 	self.hideWhenInactive = hideWhenInactive;
 
-	self:OnHideWhenInactiveChanged();
+	self:OnHideWhenInactiveChanged(entireSystemUpdate);
 end
 
 function CooldownViewerMixin:GetHideWhenInactive()
@@ -1453,10 +1499,8 @@ function CooldownViewerMixin:GetItemCount()
 	local cooldownIDs = self:GetCooldownIDs();
 	local itemCount = cooldownIDs and #cooldownIDs or 0;
 
-	if self:IsEditing() then
-		local editModeMinimumItemCount = 2;
-		itemCount = math.max(itemCount, editModeMinimumItemCount);
-	end
+	local minimumItemCount = 2;
+	itemCount = math.max(itemCount, minimumItemCount);
 
 	return itemCount;
 end
@@ -1489,6 +1533,7 @@ function CooldownViewerMixin:OnAcquireItemFrame(itemFrame)
 	itemFrame:SetScale(self.iconScale);
 	itemFrame:SetTimerShown(self.timerShown);
 	itemFrame:SetTooltipsShown(self.tooltipsShown);
+	itemFrame:SetAlpha(0);
 end
 
 function CooldownViewerMixin:RefreshLayout()
@@ -1582,6 +1627,10 @@ function CooldownViewerMixin:ShouldItemBeShown(itemFrame)
 		return true;
 	end
 
+	if not itemFrame:GetCooldownID() then
+		return false;
+	end
+
 	if self:GetHideWhenInactive() then
 		return itemFrame:IsActive();
 	end
@@ -1591,9 +1640,11 @@ end
 
 function CooldownViewerMixin:RefreshItemShown(itemFrame)
 	local shouldItemBeShown = self:ShouldItemBeShown(itemFrame);
-	local isItemShown = itemFrame:IsShown();
+	local isItemShown = itemFrame:IsDisplayed();
 
-	itemFrame:SetShown(shouldItemBeShown);
+	-- Always show all items to preserve layout and use alpha to 'hide' inactive items when appropriate.
+	itemFrame:SetShown(true);
+	itemFrame:SetAlpha(shouldItemBeShown and 1.0 or 0.0);
 
 	-- Return true if the shown state changed to indicate to the caller that a layout is needed.
 	return shouldItemBeShown ~= isItemShown;
@@ -1605,7 +1656,7 @@ function CooldownViewerMixin:RefreshItemsShown()
 
 	for itemFrame in self.itemFramePool:EnumerateActive() do
 		needsLayout = self:RefreshItemShown(itemFrame) or needsLayout;
-		anyItemsShown = anyItemsShown or itemFrame:IsShown();
+		anyItemsShown = anyItemsShown or itemFrame:IsDisplayed();
 	end
 
 	if anyItemsShown ~= self.anyItemsShown then
@@ -1743,28 +1794,14 @@ CooldownViewerBuffMixin = CreateFromMixins(CooldownViewerMixin);
 
 function CooldownViewerBuffMixin:OnShow()
 	CooldownViewerMixin.OnShow(self);
-
-	-- Events passed directly to the items.
-	self:RegisterEvent("PLAYER_TOTEM_UPDATE");
 end
 
 function CooldownViewerBuffMixin:OnHide()
 	CooldownViewerMixin.OnHide(self);
-
-	-- Events passed directly to the items.
-	self:UnregisterEvent("PLAYER_TOTEM_UPDATE");
 end
 
 function CooldownViewerBuffMixin:OnEvent(event, ...)
 	CooldownViewerMixin.OnEvent(self, event, ...);
-
-	if event == "PLAYER_TOTEM_UPDATE" then
-		local slot = ...;
-		local _haveTotem, name, startTime, duration, _icon, modRate, spellID = GetTotemInfo(slot);
-		for itemFrame in self.itemFramePool:EnumerateActive() do
-			itemFrame:OnPlayerTotemUpdateEvent(slot, name, startTime, duration, modRate, spellID);
-		end
-	end
 end
 
 ---------------------------------------------------------------------------------------------------

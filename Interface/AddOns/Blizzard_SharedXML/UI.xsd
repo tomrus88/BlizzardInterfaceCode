@@ -467,6 +467,7 @@
 		<xs:attribute name="secureReferenceKey" type="xs:string"/>
     <xs:attribute name="retainClickThroughOverride" type="xs:boolean" default="false"/>
     <xs:attribute name="propagateMouseInput" type="PROPAGATE_MOUSE"/>
+    <xs:attribute name="propagateMouseInputMask" type="PROPAGATE_MOUSE"/>
 	</xs:attributeGroup>
 
 	<xs:complexType name="LayoutFrameType">
