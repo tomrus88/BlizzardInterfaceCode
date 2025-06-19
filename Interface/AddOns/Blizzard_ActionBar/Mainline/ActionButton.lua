@@ -157,8 +157,9 @@ function ActionButtonUp(id)
 	if button then
 		if ( button:GetButtonState() == "PUSHED" ) then
 			button:SetButtonState("NORMAL");
-			TryUseActionButton(button, false);
 		end
+
+		TryUseActionButton(button, false);
 	end
 end
 
@@ -1729,11 +1730,9 @@ function ActionBarButtonAssistedCombatRotationFrameMixin:OnLoad()
 		self:SetFrameLevel(MainMenuBar:GetEndCapsFrameLevel() + 1);
 	end
 
-	self:ProcessCVars();
+	self.updateTimeLeft = 0;
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
-	self:RegisterEvent("VARIABLES_LOADED");
-	CVarCallbackRegistry:RegisterCallback("assistedCombatIconUpdateRate", self.ProcessCVars, self);
 end
 
 function ActionBarButtonAssistedCombatRotationFrameMixin:OnShow()
@@ -1763,9 +1762,6 @@ function ActionBarButtonAssistedCombatRotationFrameMixin:OnEvent(event)
 	elseif event == "ASSISTED_COMBAT_ACTION_SPELL_CAST" then
 		HelpTip:Acknowledge(UIParent, ASSISTED_COMBAT_ROTATION_ACTION_BUTTON_HELPTIP);
 		self:UnregisterEvent("ASSISTED_COMBAT_ACTION_SPELL_CAST");
-
-	elseif event == "VARIABLES_LOADED" then
-		self:ProcessCVars();
 	else
 		self:UpdateGlow();
 	end
@@ -1776,14 +1772,8 @@ function ActionBarButtonAssistedCombatRotationFrameMixin:OnUpdate(elapsed)
 	if self.updateTimeLeft <= 0 then
 		local actionButton = self:GetParent();
 		C_ActionBar.ForceUpdateAction(actionButton.action);
-		self.updateTimeLeft = self.updateRate;
+		self.updateTimeLeft = AssistedCombatManager:GetUpdateRate();
 	end
-end
-
-function ActionBarButtonAssistedCombatRotationFrameMixin:ProcessCVars()
-	local updateRate = tonumber(GetCVar("assistedCombatIconUpdateRate"));
-	self.updateRate = Clamp(updateRate, 0, 1);
-	self.updateTimeLeft = 0;
 end
 
 function ActionBarButtonAssistedCombatRotationFrameMixin:UpdateState()
