@@ -20,12 +20,13 @@ function EditModeSystemMixin:OnSystemLoad()
 
 	EditModeManagerFrame:RegisterSystemFrame(self);
 
-	self.Selection:SetGetLabelTextFunction(function() return self:GetSystemName(); end);
 	self:SetupSettingsDialogAnchor();
 	self.snappedFrames = {};
 	self.downKeys = {};
 
 	self.settingDisplayInfoMap = EditModeSettingDisplayInfoManager:GetSystemSettingDisplayInfoMap(self.system);
+
+	self.Selection:SetSystem(self);
 end
 
 function EditModeSystemMixin:SetupVisibilityFunctionOverrides()
@@ -165,7 +166,7 @@ end
 function EditModeSystemMixin:SetShownOverride(shown)
 	if shown then
 		return self:Show();
-	else 
+	else
 		return self:Hide();
 	end
 end
@@ -822,6 +823,10 @@ function EditModeSystemMixin:SetSelectionShown(shown)
 	self.Selection:SetShown(shown);
 end
 
+function EditModeSystemMixin:ShowEditInstructions(shown)
+	self.Selection:ShowEditInstructions(shown);
+end
+
 function EditModeSystemMixin:OnEditModeEnter()
 	if not self.defaultHideSelection then
 		self:HighlightSystem();
@@ -1021,7 +1026,7 @@ function EditModeActionBarSystemMixin:UpdateSystemSettingHideBarArt()
 end
 
 function EditModeActionBarSystemMixin:UpdateSystemSettingHideBarScrolling()
-	if(self.ActionBarPageNumber) then 
+	if(self.ActionBarPageNumber) then
 	self.ActionBarPageNumber:SetShown(not self:GetSettingValueBool(Enum.EditModeActionBarSetting.HideBarScrolling));
 	end
 end
@@ -1419,7 +1424,7 @@ function EditModeUnitFrameSystemMixin:UpdateSystemSetting(setting, entireSystemU
 	end
 
 	if setting == Enum.EditModeUnitFrameSetting.CastBarUnderneath and self:HasSetting(Enum.EditModeUnitFrameSetting.CastBarUnderneath) then
-		-- Nothing to do, this setting is mirrored by Enum.EditModeCastBarSetting.LockToPlayerFrame 
+		-- Nothing to do, this setting is mirrored by Enum.EditModeCastBarSetting.LockToPlayerFrame
 	elseif setting == Enum.EditModeUnitFrameSetting.BuffsOnTop and self:HasSetting(Enum.EditModeUnitFrameSetting.BuffsOnTop) then
 		self:UpdateSystemSettingBuffsOnTop();
 	elseif setting == Enum.EditModeUnitFrameSetting.UseLargerFrame and self:HasSetting(Enum.EditModeUnitFrameSetting.UseLargerFrame) then
@@ -1649,7 +1654,7 @@ function EditModeCastBarSystemMixin:UpdateSystemSettingLockToPlayerFrame()
 	elseif not self:IsInDefaultPosition() and self.attachedToPlayerFrame then
 		-- If we aren't locked to the player frame and we aren't in our default position then
 		-- try to detach from the player frame and break any connections.
-		-- Only do this when not in our default position since our default position is in the UIParent bottom layout frame 
+		-- Only do this when not in our default position since our default position is in the UIParent bottom layout frame
 		-- which we would not want to unparent from
 		self:SetParent(UIParent);
 		self:UpdateSystemSettingBarSize();
@@ -2669,6 +2674,13 @@ function EditModeSystemSelectionBaseMixin:OnLoad()
 	if self.HorizontalLabel then
 		self.HorizontalLabel:SetFontObjectsToTry("GameFontHighlightLarge", "GameFontHighlightMedium", "GameFontHighlightSmall");
 	end
+
+	NineSliceUtil.ApplyLayout(self.MouseOverHighlight, EditModeSystemSelectionLayout, self.highlightTextureKit);
+	self.MouseOverHighlight:SetBlendMode("ADD");
+end
+
+function EditModeSystemSelectionBaseMixin:SetSystem(system)
+	self.system = system;
 end
 
 function EditModeSystemSelectionBaseMixin:ShowHighlighted()
@@ -2682,7 +2694,16 @@ function EditModeSystemSelectionBaseMixin:ShowSelected()
 	NineSliceUtil.ApplyLayout(self, EditModeSystemSelectionLayout, self.selectedTextureKit);
 	self.isSelected = true;
 	self:UpdateLabelVisibility();
+	self:CheckShowInstructionalTooltip();
 	self:Show();
+end
+
+function EditModeSystemSelectionBaseMixin:IsSelected()
+	return self.isSelected;
+end
+
+function EditModeSystemSelectionBaseMixin:ShouldShowLabelText()
+	return self:IsSelected() or self:IsShowingEditInstructions();
 end
 
 function EditModeSystemSelectionBaseMixin:OnDragStart()
@@ -2697,25 +2718,59 @@ function EditModeSystemSelectionBaseMixin:OnMouseDown()
 	EditModeManagerFrame:SelectSystem(self.parent);
 end
 
-EditModeSystemSelectionMixin = {};
-
-function EditModeSystemSelectionMixin:SetGetLabelTextFunction(getLabelText)
-	self.getLabelText = getLabelText;
+function EditModeSystemSelectionBaseMixin:OnEnter()
+	self:ShowEditInstructions(true);
+	self:CheckShowInstructionalTooltip();
 end
 
-function EditModeSystemSelectionMixin:UpdateLabelVisibility()
-	if self.getLabelText then
-		self.Label:SetText(self.getLabelText());
+function EditModeSystemSelectionBaseMixin:OnLeave()
+	self:ShowEditInstructions(false);
+	self:HideInstructionalTooltip();
+end
+
+function EditModeSystemSelectionBaseMixin:ShowEditInstructions(shown)
+	self.instructionsShown = shown;
+
+	self.MouseOverHighlight:SetShown(shown);
+	self:UpdateLabelVisibility();
+end
+
+function EditModeSystemSelectionBaseMixin:IsShowingEditInstructions()
+	return self.instructionsShown;
+end
+
+function EditModeSystemSelectionBaseMixin:CheckShowInstructionalTooltip()
+	if not self:IsSelected() then
+		local tooltip = GetAppropriateTooltip();
+		tooltip:SetOwner(self, "ANCHOR_CURSOR");
+		tooltip:SetText(self.system:GetSystemName());
+		tooltip:Show();
+	else
+		self:HideInstructionalTooltip();
+	end
+end
+
+function EditModeSystemSelectionBaseMixin:HideInstructionalTooltip()
+	local tooltip = GetAppropriateTooltip();
+	tooltip:Hide();
+end
+
+function EditModeSystemSelectionBaseMixin:GetLabelText()
+	if self:IsSelected() then
+		return self.system:GetSystemName();
 	end
 
-	self.Label:SetShown(self.isSelected);
+	return HUD_EDIT_MODE_INSTRUCTIONS_CLICK_TO_EDIT;
 end
 
-EditModeSystemSelectionDoubleLabelMixin = {};
+EditModeSystemSelectionMixin = CreateFromMixins(EditModeSystemSelectionBaseMixin);
 
-function EditModeSystemSelectionDoubleLabelMixin:SetGetLabelTextFunction(getLabelText)
-	self.getLabelText = getLabelText;
+function EditModeSystemSelectionMixin:UpdateLabelVisibility()
+	self.Label:SetText(self:GetLabelText());
+	self.Label:SetShown(self:ShouldShowLabelText());
 end
+
+EditModeSystemSelectionDoubleLabelMixin = CreateFromMixins(EditModeSystemSelectionBaseMixin);
 
 function EditModeSystemSelectionDoubleLabelMixin:SetVerticalState(vertical)
 	self.isVertical = vertical;
@@ -2723,12 +2778,11 @@ function EditModeSystemSelectionDoubleLabelMixin:SetVerticalState(vertical)
 end
 
 function EditModeSystemSelectionDoubleLabelMixin:UpdateLabelVisibility()
-	if self.getLabelText then
-		local labelText = self.getLabelText();
-		self.HorizontalLabel:SetText(labelText);
-		self.VerticalLabel:SetText(labelText);
-	end
+	local labelText = self:GetLabelText();
+	self.HorizontalLabel:SetText(labelText);
+	self.VerticalLabel:SetText(labelText);
 
-	self.HorizontalLabel:SetShown(self.isSelected and not self.isVertical);
-	self.VerticalLabel:SetShown(self.isSelected and self.isVertical);
+	local showLabel = self:ShouldShowLabelText();
+	self.HorizontalLabel:SetShown(showLabel and not self.isVertical);
+	self.VerticalLabel:SetShown(showLabel and self.isVertical);
 end

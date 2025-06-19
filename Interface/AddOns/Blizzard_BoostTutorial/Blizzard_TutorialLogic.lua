@@ -1983,7 +1983,9 @@ function Class_TurnInQuestWatcher:QUEST_COMPLETE()
 
 	if (GetNumQuestChoices() > 1) then
 		-- Wait one frame to make sure the reward buttons have been positioned
-		C_Timer.After(0.01, function() Tutorials.QuestRewardChoice:Begin(areAllItemsUsable); end);
+		RunNextFrame(function()
+			Tutorials.QuestRewardChoice:Begin(areAllItemsUsable);
+		end);
 	end
 end
 

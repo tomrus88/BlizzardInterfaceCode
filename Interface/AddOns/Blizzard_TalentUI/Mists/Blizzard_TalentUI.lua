@@ -4,7 +4,7 @@ StaticPopupDialogs["CONFIRM_REMOVE_TALENT"] = {
 	button2 = NO,
 	OnAccept = function (self)
 		local talentGroup = PlayerTalentFrame and PlayerTalentFrame.talentGroup or 1;
-		if ( talentGroup == GetActiveSpecGroup() ) then
+		if ( talentGroup == C_SpecializationInfo.GetActiveSpecGroup() ) then
 			RemoveTalent(self.data.id);
 		end
 	end,
@@ -34,7 +34,7 @@ StaticPopupDialogs["CONFIRM_UNLEARN_AND_SWITCH_TALENT"] = {
 	button2 = NO,
 	OnAccept = function (self)
 		local talentGroup = PlayerTalentFrame and PlayerTalentFrame.talentGroup or 1;
-		if ( talentGroup == GetActiveSpecGroup() ) then
+		if ( talentGroup == C_SpecializationInfo.GetActiveSpecGroup() ) then
 			RemoveTalent(self.data.oldID);
 			PlayerTalentFrame_SelectTalent(self.data.tier, self.data.id);
 		end
@@ -201,7 +201,7 @@ function PlayerTalentFrame_Toggle(suggestedTalentGroup)
 	local selectedTab = PanelTemplates_GetSelectedTab(PlayerTalentFrame);
 	if ( not PlayerTalentFrame:IsShown() ) then
 		ShowUIPanel(PlayerTalentFrame);
-		if ( not GetSpecialization() ) then
+		if ( not C_SpecializationInfo.GetSpecialization() ) then
 			PlayerTalentTab_OnClick(_G["PlayerTalentFrameTab"..SPECIALIZATION_TAB]);
 		elseif ( GetNumUnspentTalents() > 0 ) then
 			PlayerTalentTab_OnClick(_G["PlayerTalentFrameTab"..TALENTS_TAB]);
@@ -275,7 +275,7 @@ function PlayerTalentFrame_OnLoad(self)
 	PlayerTalentFramePortrait:SetTexCoord(unpack(CLASS_ICON_TCOORDS[strupper(class)]));
 	
 	-- initialize active spec
-	PlayerTalentFrame_UpdateActiveSpec(GetActiveSpecGroup(false));
+	PlayerTalentFrame_UpdateActiveSpec(C_SpecializationInfo.GetActiveSpecGroup(false));
 	TalentUIUtil.SelectActiveSpec();
 end
 
@@ -301,7 +301,7 @@ function PlayerTalentFrameSpec_OnLoad(self)
 	
 	for i = 1, numSpecs do
 		local button = self["specButton"..i];
-		local _, name, description, icon = GetSpecializationInfo(i, false, self.isPet);
+		local _, name, description, icon = C_SpecializationInfo.GetSpecializationInfo(i, false, self.isPet);
 		SetPortraitToTexture(button.specIcon, icon);
 		button.specName:SetText(name);
 		button.tooltip = description;
@@ -356,7 +356,7 @@ function PlayerTalentFrame_OnHide()
 	TalentUIUtil.WipeTalentTabWidthCache()
 	
 	local selection = PlayerTalentFrame_GetTalentSelections();
-	if ( not GetSpecialization() ) then
+	if ( not C_SpecializationInfo.GetSpecialization() ) then
 		TalentMicroButtonAlert.Text:SetText(TALENT_MICRO_BUTTON_NO_SPEC);
 		TalentMicroButtonAlert:SetHeight(TalentMicroButtonAlert.Text:GetHeight()+42);
 		TalentMicroButtonAlert:Show();
@@ -526,8 +526,8 @@ function PlayerTalentFrame_RefreshClearInfo()
 end
 
 function PlayerTalentFrame_Update(playerLevel)
-	local activeTalentGroup, numTalentGroups = GetActiveSpecGroup(false), GetNumSpecGroups(false);
-	PlayerTalentFrame.primaryTree = GetSpecialization(PlayerTalentFrame.inspect, false, PlayerTalentFrame.talentGroup);
+	local activeTalentGroup, numTalentGroups = C_SpecializationInfo.GetActiveSpecGroup(false), GetNumSpecGroups(false);
+	PlayerTalentFrame.primaryTree = C_SpecializationInfo.GetSpecialization(PlayerTalentFrame.inspect, false, PlayerTalentFrame.talentGroup);
 			
 	-- update specs
 	if ( not PlayerTalentFrame_UpdateSpecs(activeTalentGroup, numTalentGroups) ) then
@@ -698,9 +698,17 @@ function PlayerTalentFrameTalent_OnClick(self, button)
 			-- if there is something else already learned for this tier, display a dialog about unlearning that one.
 			if ( button == "LeftButton" and not selected ) then
 				local tierAvailable, selectedTalentColumn, tierUnlockLevel = GetTalentTierInfo(self.tier, PlayerTalentFrame.talentGroup, PlayerTalentFrame.inspect, "player");
-				local selectedTalentID = GetTalentInfo(tier, selectedTalentColumn, PlayerTalentFrame.talentGroup, PlayerTalentFrame.inspect, "player");
 				if (selectedTalentColumn ~= 0) then
-					StaticPopup_Show("CONFIRM_UNLEARN_AND_SWITCH_TALENT", nil, nil, {tier = self.tier, oldID = selectedTalentID, id = self:GetID()});
+					local talentInfoQuery = {};
+					talentInfoQuery.tier = tier;
+					talentInfoQuery.column = selectedTalentColumn;
+					talentInfoQuery.groupIndex = PlayerTalentFrame.talentGroup;
+					talentInfoQuery.isInspect = PlayerTalentFrame.inspect;
+					talentInfoQuery.target = "player";
+					local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery);
+					if talentInfo then
+						StaticPopup_Show("CONFIRM_UNLEARN_AND_SWITCH_TALENT", nil, nil, {tier = self.tier, oldID = talentInfo.talentID, id = self:GetID()});
+					end
 				end
 			end
 		end
@@ -713,8 +721,7 @@ end
 
 function PlayerTalentFrameTalent_OnEvent(self, event, ...)
 	if ( GameTooltip:IsOwned(self) ) then
-		GameTooltip:SetTalent(self:GetID(),
-			PlayerTalentFrame.inspect, PlayerTalentFrame.talentGroup);
+		GameTooltip:SetTalent(self:GetID(), PlayerTalentFrame.inspect, PlayerTalentFrame.talentGroup);
 	end
 end
 
@@ -732,9 +739,8 @@ function PlayerTalentFrameTalent_OnEnter(self)
 	lastTopLineHighlight = self:GetParent().TopLine;
 	lastBottomLineHighlight = self:GetParent().BottomLine;
 
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");	
-	GameTooltip:SetTalent(self:GetID(),
-		PlayerTalentFrame.inspect, PlayerTalentFrame.talentGroup);
+	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+	GameTooltip:SetTalent(self:GetID(), PlayerTalentFrame.inspect, PlayerTalentFrame.talentGroup);
 end
 
 ------------------------------------
@@ -744,7 +750,7 @@ function PlayerTalentFrame_UpdateControls(activeTalentGroup, numTalentGroups)
 	local isActiveSpec = TalentUIUtil.IsActiveSpecSelected();
 	local selectedTab = PanelTemplates_GetSelectedTab(PlayerTalentFrame);
 	if (not activeTalentGroup or not numTalentGroups) then
-		activeTalentGroup, numTalentGroups = GetActiveSpecGroup(false), GetNumSpecGroups(false);
+		activeTalentGroup, numTalentGroups = C_SpecializationInfo.GetActiveSpecGroup(false), GetNumSpecGroups(false);
 	end
 	
 	-- show the activate button if this is not the active spec
@@ -1029,10 +1035,10 @@ function PlayerSpecTab_Update(self, activeTalentGroup, numTalentGroups)
 	-- update spec tab icon
 	local hasMultipleTalentGroups = numTalentGroups > 1;
 	if ( hasMultipleTalentGroups ) then
-		local primaryTree = GetSpecialization(false, false, spec.talentGroup);
+		local primaryTree = C_SpecializationInfo.GetSpecialization(false, false, spec.talentGroup);
 		
 		local specInfoCache = talentSpecInfoCache[specIndex];
-		if ( primaryTree and primaryTree > 0 and specInfoCache) then
+		if ( primaryTree and primaryTree > 0 and (not IsInitialSpec(primaryTree)) and specInfoCache) then
 			-- the spec had a primary tab, set the icon to that tab's icon
 			normalTexture:SetTexture(specInfoCache[primaryTree].icon);
 		else
@@ -1055,7 +1061,7 @@ function PlayerSpecTab_Load(self, specIndex)
 	local checkedTexture = self:GetCheckedTexture();
 	checkedTexture:SetTexture("Interface\\Buttons\\CheckButtonHilight");
 
-	local activeTalentGroup, numTalentGroups = GetActiveSpecGroup(false), GetNumSpecGroups(false);
+	local activeTalentGroup, numTalentGroups = C_SpecializationInfo.GetActiveSpecGroup(false), GetNumSpecGroups(false);
 	PlayerSpecTab_Update(self, activeTalentGroup, numTalentGroups);
 end
 
@@ -1137,7 +1143,7 @@ function PlayerTalentFrame_UpdateSpecFrame(self, spec)
 	local playerTalentSpec = nil;
 	local selectedSpec = TalentUIUtil.GetSelectedSpec();
 	if not IsPlayerInitialSpec() then
-		playerTalentSpec = GetSpecialization(nil, self.isPet, selectedSpec.talentGroup);
+		playerTalentSpec = C_SpecializationInfo.GetSpecialization(nil, self.isPet, selectedSpec.talentGroup);
 	end
 	local shownSpec = spec or playerTalentSpec or 1;
 	local numSpecs = GetNumSpecializations(nil, self.isPet);
@@ -1200,7 +1206,12 @@ function PlayerTalentFrame_UpdateSpecFrame(self, spec)
 
 	-- display spec info in the scrollframe
 	local scrollChild = self.spellsScroll.child;
-	local id, name, description, icon, background = GetSpecializationInfo(shownSpec, nil, self.isPet);
+	local id, name, description, icon = C_SpecializationInfo.GetSpecializationInfo(shownSpec, false, self.isPet);
+	if (id == 0) then
+		-- We can't get information about specializations before entering the world. In
+		-- that case, just return, and we'll update things later.
+		return;
+	end
 	SetPortraitToTexture(scrollChild.specIcon, icon);
 	scrollChild.specName:SetText(name);
 	scrollChild.description:SetText(description);

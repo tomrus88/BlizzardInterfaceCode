@@ -285,7 +285,7 @@ local ItemConstants =
 				{ Name = "SingingThunder", Type = "ItemGemColor", EnumValue = 134217728 },
 				{ Name = "SingingSea", Type = "ItemGemColor", EnumValue = 268435456 },
 				{ Name = "SingingWind", Type = "ItemGemColor", EnumValue = 536870912 },
-				{ Name = "FutureUse", Type = "ItemGemColor", EnumValue = 1073741824 },
+				{ Name = "Fiber", Type = "ItemGemColor", EnumValue = 1073741824 },
 			},
 		},
 		{
@@ -402,7 +402,7 @@ local ItemConstants =
 				{ Name = "SingingThunder", Type = "ItemSocketType", EnumValue = 27 },
 				{ Name = "SingingSea", Type = "ItemSocketType", EnumValue = 28 },
 				{ Name = "SingingWind", Type = "ItemSocketType", EnumValue = 29 },
-				{ Name = "FutureUse", Type = "ItemSocketType", EnumValue = 30 },
+				{ Name = "Fiber", Type = "ItemSocketType", EnumValue = 30 },
 			},
 		},
 		{

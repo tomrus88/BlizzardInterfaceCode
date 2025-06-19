@@ -118,7 +118,7 @@ function TargetFrameMixin:OnLoad(unit, menuFunc)
 end
 
 local function ShouldShowTargetFrame(targetFrame)
-	return UnitExists(targetFrame.unit) or ShowBossFrameWhenUninteractable(targetFrame.unit);
+	return UnitIsVisible(targetFrame.unit);
 end
 
 function TargetFrameMixin:Update()

@@ -48,6 +48,8 @@ Mainline\RoleSelectionTemplate.lua
 Mainline\RoleSelectionTemplate.xml
 Mainline\ItemRef.lua
 Mainline\ItemRef.xml
+Mainline\ItemRefHandlers.lua
+Shared\ItemRefHandlersShared.lua
 Shared\SocialQueue.lua
 Mainline\UnitPositionFrameTemplates.lua
 Mainline\UnitPositionFrameTemplates.xml

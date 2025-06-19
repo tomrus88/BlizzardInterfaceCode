@@ -16,6 +16,7 @@ AdventureJournalDocumentation.lua
 AdventureMapDocumentation.lua
 AreaPoiInfoDocumentation.lua
 ArenaTeamDocumentation.lua
+AssistedCombatDocumentation.lua
 AuctionHouseDocumentation.lua
 AzeriteEmpoweredItemDocumentation.lua
 AzeriteEssenceDocumentation.lua
@@ -32,6 +33,7 @@ BrowserDocumentation.lua
 BuildDocumentation.lua
 CalendarDocumentation.lua
 CameraDocumentation.lua
+ChallengeModeInfoDocumentation.lua
 ChatBubblesDocumentation.lua
 ChatInfoDocumentation.lua
 CinematicDocumentation.lua
@@ -123,6 +125,7 @@ MinimapFrameAPIDocumentation.lua
 MirrorTimerDocumentation.lua
 MountJournalDocumentation.lua
 MovieDocumentation.lua
+MythicPlusInfoDocumentation.lua
 NamePlateManagerDocumentation.lua
 NewItemsDocumentation.lua
 OsDocumentation.lua
@@ -266,9 +269,7 @@ AlliedRacesFrameDocumentation.lua
 AnimaDiversionUIDocumentation.lua
 ArdenwealdGardeningDocumentation.lua
 ArtifactUIDocumentation.lua
-AssistedCombatDocumentation.lua
 CVarDocumentation.lua
-ChallengeModeInfoDocumentation.lua
 ChromieTimeUIDocumentation.lua
 CinematicListDocumentation.lua
 ClassColorDocumentation.lua
@@ -307,7 +308,6 @@ LoreTextDocumentation.lua
 MailInfoDocumentation.lua
 MajorFactionsDocumentation.lua
 MapDocumentation.lua
-MythicPlusInfoDocumentation.lua
 PerksActivitiesDocumentation.lua
 PlayerChoiceDocumentation.lua
 PlayerMentorshipDocumentation.lua
@@ -339,6 +339,7 @@ ActionDocumentation.lua
 AddOnProfilerConstantsDocumentation.lua
 AppearanceSourceDocumentation.lua
 ArrowCalloutConstantsDocumentation.lua
+AsyncAssistActionsConstantsDocumentation.lua
 AuctionHouseConstantsDocumentation.lua
 AuctionHouseEnumsDocumentation.lua
 AzeriteConstantsDocumentation.lua
@@ -375,6 +376,7 @@ GARRISON_TYPEConstantsDocumentation.lua
 GamePadConstDocumentation.lua
 GameRulesConstantsDocumentation.lua
 GarrisonConstantsDocumentation.lua
+GlyphConstantsDocumentation.lua
 GossipConstantsDocumentation.lua
 GroupFinderConstantsDocumentation.lua
 GuildConstantsDocumentation.lua
@@ -386,6 +388,7 @@ ItemSharedDocumentation.lua
 LFGConstantsDocumentation.lua
 LevelConstantsDocumentation.lua
 LogConstantsDocumentation.lua
+LogicConstantsDocumentation.lua
 LootConstantsDocumentation.lua
 MapConstantsDocumentation.lua
 MatrixSharedDocumentation.lua
@@ -393,6 +396,7 @@ MinimapConstantsDocumentation.lua
 ModelAnimationSharedDocumentation.lua
 MoneyConstantsDocumentation.lua
 MountConstantsDocumentation.lua
+MythicPlusInfoSharedDocumentation.lua
 NamePlateDocumentation.lua
 PVPMgrConstantsDocumentation.lua
 PartyConstantsDocumentation.lua
@@ -469,7 +473,6 @@ GarrisonSharedDocumentation.lua
 ItemConstants_MainlineDocumentation.lua
 LegendaryCraftingTypesDocumentation.lua
 MajorFactionsConstantsDocumentation.lua
-MythicPlusInfoSharedDocumentation.lua
 ProfessionSpecConstantsDocumentation.lua
 QuestConstants_MainlineDocumentation.lua
 SoulbindsConstantsDocumentation.lua

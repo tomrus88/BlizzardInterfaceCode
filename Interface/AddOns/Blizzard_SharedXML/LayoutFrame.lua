@@ -153,6 +153,10 @@ function BaseLayoutMixin:SetHeightPadding(padding)
 	self.heightPadding = padding;
 end
 
+function BaseLayoutMixin:SetWidthPadding(padding)
+	self.widthPadding = padding;
+end
+
 function BaseLayoutMixin:GetHeightPadding()
 	return self.heightPadding or 0;
 end
@@ -458,20 +462,20 @@ function ResizeLayoutMixin:IgnoreLayoutIndex()
 	return true;
 end
 
-function ResizeLayoutMixin:SetWidthPadding(widthPadding)
-	self.widthPadding = widthPadding;
-end
-
-function ResizeLayoutMixin:SetHeightPadding(heightPadding)
-	self.heightPadding = heightPadding;
-end
-
 function ResizeLayoutMixin:SetMinimumWidth(minimumWidth)
 	self.minimumWidth = minimumWidth;
 end
 
+function ResizeLayoutMixin:GetMinimumWidth()
+	return self.minimumWidth;
+end
+
 function ResizeLayoutMixin:SetMaximumWidth(maximumWidth)
 	self.maximumWidth = maximumWidth;
+end
+
+function ResizeLayoutMixin:GetMaximumWidth()
+	return self.maximumWidth;
 end
 
 function ResizeLayoutMixin:Layout()

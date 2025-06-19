@@ -34,15 +34,10 @@ WORLD_QUEST_QUALITY_COLORS = {
 	[LE_WORLD_QUEST_QUALITY_EPIC] = ITEM_QUALITY_COLORS[LE_ITEM_QUALITY_EPIC];
 };
 
--- Protecting from addons since we use this in GetScaledCursorDelta which is used in secure code.
-local _UIParentGetEffectiveScale;
-local _UIParentRef;
 function UIParent_OnLoad(self)
 	-- First register for any shared events
 	UIParent_Shared_OnLoad(self);
 
-	_UIParentGetEffectiveScale = self.GetEffectiveScale;
-	_UIParentRef = self;
 	self:RegisterEvent("PLAYER_LOGIN");
 	self:RegisterEvent("PLAYER_DEAD");
 	self:RegisterEvent("SELF_RES_SPELL_CHANGED");
@@ -55,7 +50,6 @@ function UIParent_OnLoad(self)
 	self:RegisterEvent("CHANNEL_PASSWORD_REQUEST");
 	self:RegisterEvent("PARTY_INVITE_REQUEST");
 	self:RegisterEvent("PARTY_INVITE_CANCEL");
-	self:RegisterEvent("GUILD_INVITE_REQUEST");
 	self:RegisterEvent("ARENA_TEAM_INVITE_REQUEST");
 	self:RegisterEvent("GUILD_INVITE_CANCEL");
 	self:RegisterEvent("PLAYER_CAMPING");
@@ -134,6 +128,7 @@ function UIParent_OnLoad(self)
 	self:RegisterEvent("BARBER_SHOP_CLOSE");
 	self:RegisterEvent("RAISED_AS_GHOUL");
 	self:RegisterEvent("LFG_ENABLED_STATE_CHANGED");
+	self:RegisterEvent("QUEST_CHOICE_UPDATE");
 
 	-- Events for auction UI handling
 	self:RegisterEvent("AUCTION_HOUSE_SHOW");
@@ -238,7 +233,7 @@ function UIParentLoadAddOn(name)
 	local loaded, reason = C_AddOns.LoadAddOn(name);
 	if ( not loaded ) then
 		if ( not FailedAddOnLoad[name] ) then
-			message(format(ADDON_LOAD_FAILED, name, _G["ADDON_"..reason]));
+			SetBasicMessageDialogText(format(ADDON_LOAD_FAILED, name, _G["ADDON_"..reason]));
 			FailedAddOnLoad[name] = true;
 		end
 	end
@@ -246,7 +241,15 @@ function UIParentLoadAddOn(name)
 end
 
 function AuctionFrame_LoadUI()
-	UIParentLoadAddOn("Blizzard_AuctionUI");
+	if( IsUsingLegacyAuctionClient() ) then
+		UIParentLoadAddOn("Blizzard_AuctionUI");
+	else
+		UIParentLoadAddOn("Blizzard_AuctionHouseUI");
+	end
+end
+
+function QuestChoice_LoadUI()
+	UIParentLoadAddOn("Blizzard_QuestChoice");
 end
 
 function BattlefieldMap_LoadUI()
@@ -298,11 +301,6 @@ end
 
 function RaidFrame_LoadUI()
 	UIParentLoadAddOn("Blizzard_RaidUI");
-end
-
-function SocialFrame_LoadUI()
-	AchievementFrame_LoadUI();
-	UIParentLoadAddOn("Blizzard_SocialUI");
 end
 
 function TalentFrame_LoadUI()
@@ -380,6 +378,10 @@ end
 
 function BlackMarket_LoadUI()
 	UIParentLoadAddOn("Blizzard_BlackMarketUI");
+end
+
+function ItemUpgrade_LoadUI()
+	UIParentLoadAddOn("Blizzard_ItemUpgradeUI");
 end
 
 local playerEnteredWorld = false;
@@ -655,7 +657,7 @@ function UIParent_OnEvent(self, event, ...)
 
 	local arg1, arg2, arg3, arg4, arg5, arg6 = ...;
 	if ( event == "CURRENT_SPELL_CAST_CHANGED" ) then
-		if ( StaticPopup_HasDisplayedFrames() ) then
+		if ( StaticPopup_IsAnyDialogShown() ) then
 			if ( arg1 ) then
 				StaticPopup_Hide("BIND_ENCHANT");
 				StaticPopup_Hide("REPLACE_ENCHANT");
@@ -734,16 +736,10 @@ function UIParent_OnEvent(self, event, ...)
 		if ( GetCVarBool("blockChannelInvites") ) then
 			DeclineChannelInvite(arg1);
 		else
-			local dialog = StaticPopup_Show("CHAT_CHANNEL_INVITE", arg1, arg2);
-			if ( dialog ) then
-				dialog.data = arg1;
-			end
+			StaticPopup_Show("CHAT_CHANNEL_INVITE", arg1, arg2, arg1);
 		end
 	elseif ( event == "CHANNEL_PASSWORD_REQUEST" ) then
-		local dialog = StaticPopup_Show("CHAT_CHANNEL_PASSWORD", arg1);
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("CHAT_CHANNEL_PASSWORD", arg1, nil, arg1);
 	elseif ( event == "PARTY_INVITE_REQUEST" ) then
 		FlashClientIcon();
 		
@@ -758,8 +754,6 @@ function UIParent_OnEvent(self, event, ...)
 	elseif ( event == "PARTY_INVITE_CANCEL" ) then
 		StaticPopup_Hide("PARTY_INVITE");
 		StaticPopupSpecial_Hide(LFGInvitePopup);
-	elseif ( event == "GUILD_INVITE_REQUEST" ) then
-		StaticPopup_Show("GUILD_INVITE", arg1, arg2);
 	elseif ( event == "GUILD_INVITE_CANCEL" ) then
 		StaticPopup_Hide("GUILD_INVITE");
 	elseif ( event == "ARENA_TEAM_INVITE_REQUEST" ) then
@@ -775,31 +769,19 @@ function UIParent_OnEvent(self, event, ...)
 		StaticPopup_Hide("QUIT");
 	elseif ( event == "LOOT_BIND_CONFIRM" ) then
 		local texture, item, quantity, itemID, quality, locked = GetLootSlotInfo(arg1);
-		local dialog = StaticPopup_Show("LOOT_BIND", ITEM_QUALITY_COLORS[quality].hex..item.."|r");
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("LOOT_BIND", ITEM_QUALITY_COLORS[quality].hex..item.."|r", nil, arg1);
 	elseif ( event == "EQUIP_BIND_CONFIRM" ) then
 		StaticPopup_Hide("EQUIP_BIND_REFUNDABLE");
 		StaticPopup_Hide("EQUIP_BIND_TRADEABLE");
-		local dialog = StaticPopup_Show("EQUIP_BIND");
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("EQUIP_BIND", nil, nil, arg1);
 	elseif ( event == "EQUIP_BIND_REFUNDABLE_CONFIRM" ) then
 		StaticPopup_Hide("EQUIP_BIND");
 		StaticPopup_Hide("EQUIP_BIND_TRADEABLE");
-		local dialog = StaticPopup_Show("EQUIP_BIND_REFUNDABLE");
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("EQUIP_BIND_REFUNDABLE", nil, nil, arg1);
 	elseif ( event == "EQUIP_BIND_TRADEABLE_CONFIRM" ) then
 		StaticPopup_Hide("EQUIP_BIND");
 		StaticPopup_Hide("EQUIP_BIND_REFUNDABLE");
-		local dialog = StaticPopup_Show("EQUIP_BIND_TRADEABLE");
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("EQUIP_BIND_TRADEABLE", nil, nil, arg1);
 	elseif ( event == "USE_BIND_CONFIRM" ) then
 		StaticPopup_Show("USE_BIND");
 	elseif( event == "USE_NO_REFUND_CONFIRM" )then
@@ -953,24 +935,16 @@ function UIParent_OnEvent(self, event, ...)
 	elseif ( event == "CONFIRM_XP_LOSS" ) then
 		local resSicknessTime = GetResSicknessDuration();
 		if ( resSicknessTime ) then
-			local dialog = nil;
 			if (UnitLevel("player") < Constants.LevelConstsExposed.MIN_RES_SICKNESS_LEVEL) then
-				dialog = StaticPopup_Show("XP_LOSS_NO_SICKNESS_NO_DURABILITY", resSicknessTime);
+				StaticPopup_Show("XP_LOSS_NO_SICKNESS_NO_DURABILITY", resSicknessTime, nil, resSicknessTime);
 			else
-				dialog = StaticPopup_Show("XP_LOSS", resSicknessTime);
-			end
-			if ( dialog ) then
-				dialog.data = resSicknessTime;
+				StaticPopup_Show("XP_LOSS", resSicknessTime, nil, resSicknessTime);
 			end
 		else
-			local dialog = nil;
 			if (UnitLevel("player") <= Constants.LevelConstsExposed.MIN_RES_SICKNESS_LEVEL) then
-				dialog = StaticPopup_Show("XP_LOSS_NO_SICKNESS_NO_DURABILITY");
+				StaticPopup_Show("XP_LOSS_NO_SICKNESS_NO_DURABILITY", nil, nil, 1);
 			else
-				dialog = StaticPopup_Show("XP_LOSS_NO_SICKNESS");
-			end
-			if ( dialog ) then
-				dialog.data = 1;
+				StaticPopup_Show("XP_LOSS_NO_SICKNESS", nil, nil, 1);
 			end
 		end
 		HideUIPanel(GossipFrame);
@@ -1002,10 +976,7 @@ function UIParent_OnEvent(self, event, ...)
 	elseif ( event == "MACRO_ACTION_FORBIDDEN" ) then
 		StaticPopup_Show("MACRO_ACTION_FORBIDDEN");
 	elseif ( event == "ADDON_ACTION_FORBIDDEN" ) then
-		local dialog = StaticPopup_Show("ADDON_ACTION_FORBIDDEN", arg1);
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("ADDON_ACTION_FORBIDDEN", arg1, nil, arg1);
 	elseif ( event == "PLAYER_CONTROL_LOST" ) then
 		if ( UnitOnTaxi("player") ) then
 			return;
@@ -1021,8 +992,8 @@ function UIParent_OnEvent(self, event, ...)
 		local texture, name, count, quality, bindOnPickUp = GetLootRollItemInfo(arg1);
 		local dialog = StaticPopup_Show("CONFIRM_LOOT_ROLL", ITEM_QUALITY_COLORS[quality].hex..name.."|r");
 		if ( dialog ) then
-			dialog.text:SetFormattedText(arg3, ITEM_QUALITY_COLORS[quality].hex..name.."|r");
-			StaticPopup_Resize(dialog, "CONFIRM_LOOT_ROLL");
+			dialog:SetFormattedText(arg3, ITEM_QUALITY_COLORS[quality].hex..name.."|r");
+			dialog:Resize("CONFIRM_LOOT_ROLL");
 			dialog.data = arg1;
 			dialog.data2 = arg2;
 		end
@@ -1051,8 +1022,8 @@ function UIParent_OnEvent(self, event, ...)
 		local texture, name, count, quality, bindOnPickUp = GetLootRollItemInfo(arg1);
 		local dialog = StaticPopup_Show("CONFIRM_LOOT_ROLL", ITEM_QUALITY_COLORS[quality].hex..name.."|r");
 		if ( dialog ) then
-			dialog.text:SetFormattedText(LOOT_NO_DROP_DISENCHANT, ITEM_QUALITY_COLORS[quality].hex..name.."|r");
-			StaticPopup_Resize(dialog, "CONFIRM_LOOT_ROLL");
+			dialog:SetFormattedText(LOOT_NO_DROP_DISENCHANT, ITEM_QUALITY_COLORS[quality].hex..name.."|r");
+			dialog:Resize("CONFIRM_LOOT_ROLL");
 			dialog.data = arg1;
 			dialog.data2 = arg2;
 		end
@@ -1071,7 +1042,7 @@ function UIParent_OnEvent(self, event, ...)
 		StaticPopupDialogs["CONFIRM_TALENT_WIPE"].text = _G["CONFIRM_TALENT_WIPE_"..arg2];
 		local dialog = StaticPopup_Show("CONFIRM_TALENT_WIPE");
 		if ( dialog ) then
-			MoneyFrame_Update(dialog:GetName().."MoneyFrame", arg1);
+			MoneyFrame_Update(dialog.MoneyFrame, arg1);
 			-- open the talent UI to the player's active talent group...just so the player knows
 			-- exactly which talent spec he is wiping
 		end
@@ -1080,13 +1051,13 @@ function UIParent_OnEvent(self, event, ...)
 		StaticPopupDialogs["CONFIRM_BARBERS_CHOICE"].text = _G["BARBERS_CHOICE_CONFIRM"];
 		local dialog = StaticPopup_Show("CONFIRM_BARBERS_CHOICE");
 		if ( dialog ) then
-			MoneyFrame_Update(dialog:GetName().."MoneyFrame", arg1);
+			MoneyFrame_Update(dialog.MoneyFrame, arg1);
 		end
 	elseif ( event == "CONFIRM_PET_UNLEARN" ) then
 		HideUIPanel(GossipFrame);
 		local dialog = StaticPopup_Show("CONFIRM_PET_UNLEARN");
 		if ( dialog ) then
-			MoneyFrame_Update(dialog:GetName().."MoneyFrame", arg1);
+			MoneyFrame_Update(dialog.MoneyFrame, arg1);
 		end
 	elseif ( event == "CONFIRM_BINDER" ) then
 		StaticPopup_Show("CONFIRM_BINDER", arg1);
@@ -1113,18 +1084,12 @@ function UIParent_OnEvent(self, event, ...)
 		else
 			StaticPopupDialogs["GOSSIP_CONFIRM"].hasMoneyFrame = nil;
 		end
-		local dialog = StaticPopup_Show("GOSSIP_CONFIRM", arg2);
-		if ( dialog ) then
-			dialog.data = arg1;
-			if ( arg3 > 0 ) then
-				MoneyFrame_Update(dialog:GetName().."MoneyFrame", arg3);
-			end
+		local dialog = StaticPopup_Show("GOSSIP_CONFIRM", arg2, nil, arg1);
+		if ( dialog and arg3 > 0 ) then
+			MoneyFrame_Update(dialog.MoneyFrame, arg3);
 		end
 	elseif ( event == "GOSSIP_ENTER_CODE" ) then
-		local dialog = StaticPopup_Show("GOSSIP_ENTER_CODE");
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("GOSSIP_ENTER_CODE", nil, nil, arg1);
 	elseif ( event == "GOSSIP_CONFIRM_CANCEL" or event == "GOSSIP_CLOSED" ) then
 		StaticPopup_Hide("GOSSIP_CONFIRM");
 		StaticPopup_Hide("GOSSIP_ENTER_CODE");
@@ -1429,13 +1394,9 @@ function UIParent_OnEvent(self, event, ...)
 	-- Quest Choice trigger event
 
 	elseif ( event == "QUEST_CHOICE_UPDATE" ) then
-		local uiTextureKitID = select(4, GetQuestChoiceInfo());
-		if (uiTextureKitID and uiTextureKitID ~= 0) then
-			WarboardQuestChoice_LoadUI();
-			WarboardQuestChoiceFrame:TryShow();
-		else
-			QuestChoice_LoadUI();
-			QuestChoiceFrame:TryShow();
+		QuestChoice_LoadUI();
+		if QuestChoiceFrame then
+			QuestChoiceFrame:Show();
 		end
 	elseif ( event == "GARRISON_ARCHITECT_OPENED") then
 		if (not GarrisonBuildingFrame) then
@@ -1755,7 +1716,7 @@ function GetScaledCursorPosition()
 end
 
 function GetScaledCursorDelta()
-	local uiScale = _UIParentGetEffectiveScale(_UIParentRef);
+	local uiScale = GetAppropriateTopLevelParent():GetEffectiveScale();
 	local x, y = GetCursorDelta();
 	return x / uiScale, y / uiScale;
 end
@@ -1778,16 +1739,6 @@ end
 -- Wrapper for the desaturation function
 function SetDesaturation(texture, desaturation)
 	texture:SetDesaturated(desaturation);
-end
-
-function GetMaterialTextColors(material)
-	local textColor = MATERIAL_TEXT_COLOR_TABLE[material];
-	local titleColor = MATERIAL_TITLETEXT_COLOR_TABLE[material];
-	if ( not(textColor and titleColor) ) then
-		textColor = MATERIAL_TEXT_COLOR_TABLE["Default"];
-		titleColor = MATERIAL_TITLETEXT_COLOR_TABLE["Default"];
-	end
-	return textColor, titleColor;
 end
 
 function OrderHallMissionFrame_EscapePressed()
@@ -2047,10 +1998,7 @@ end
 
 function InviteToGroup(name)
 	if ( not IsInRaid() and GetNumGroupMembers() > MAX_PARTY_MEMBERS and CanGroupInvite() ) then
-		local dialog = StaticPopup_Show("CONVERT_TO_RAID");
-		if ( dialog ) then
-			dialog.data = name;
-		end
+		StaticPopup_Show("CONVERT_TO_RAID", nil, nil, name);
 	else
 		C_PartyInfo.InviteUnit(name);
 	end
@@ -2895,4 +2843,27 @@ end
 function UpdateUIParentPosition()
 	local topOffset = GetUIParentOffset();
 	UIParent:SetPoint("TOPLEFT", 0, -topOffset);
+end
+
+function GetTimeStringFromSeconds(timeAmount, hasMS, dropZeroHours)
+	local seconds, ms;
+	-- milliseconds
+	if ( hasMS ) then
+		seconds = floor(timeAmount / 1000);
+		ms = timeAmount - seconds * 1000;
+	else
+		seconds = timeAmount;
+	end
+
+	local hours = floor(seconds / 3600);
+	local minutes = floor((seconds / 60) - (hours * 60));
+	seconds = seconds - hours * 3600 - minutes * 60;
+	if ( hasMS ) then
+		return format(HOURS_MINUTES_SECONDS_MILLISECONDS, hours, minutes, seconds, ms);
+	elseif ( dropZeroHours and hours == 0 ) then
+		return format(MINUTES_SECONDS, minutes, seconds);
+	else
+		return format(HOURS_MINUTES_SECONDS, hours, minutes, seconds);
+	end
+--	end
 end

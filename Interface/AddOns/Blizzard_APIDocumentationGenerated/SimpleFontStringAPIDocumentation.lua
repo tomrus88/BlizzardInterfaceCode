@@ -390,6 +390,15 @@ local SimpleFontStringAPI =
 			},
 		},
 		{
+			Name = "SetFontHeight",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "height", Type = "uiUnit", Nilable = false },
+			},
+		},
+		{
 			Name = "SetFontObject",
 			Type = "Function",
 

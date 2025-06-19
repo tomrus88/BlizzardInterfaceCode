@@ -786,13 +786,4 @@ RELIC_TALENT_LINK_STYLE_ACTIVE = 3;
 RELIC_TALENT_LINK_STYLE_UPCOMING = 4;
 RELIC_TALENT_LINK_STYLE_AVAILABLE = 5;
 
--- TODO: Need to be able to expose this from client...
-Enum.ChatChannelType = {
-	None = 0,
-	Custom = 1,
-	Private_Party = 2,
-	Public_Party = 3,
-	Communities = 4,
-};
-
 TOOLTIP_INDENT_OFFSET = 10;

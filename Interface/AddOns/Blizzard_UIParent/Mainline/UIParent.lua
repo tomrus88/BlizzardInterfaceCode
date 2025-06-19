@@ -90,8 +90,6 @@ function UIParent_OnLoad(self)
 	self:RegisterEvent("CHANNEL_PASSWORD_REQUEST");
 	self:RegisterEvent("PARTY_INVITE_REQUEST");
 	self:RegisterEvent("PARTY_INVITE_CANCEL");
-	self:RegisterEvent("GUILD_INVITE_REQUEST");
-	self:RegisterEvent("GUILD_INVITE_CANCEL");
 	self:RegisterEvent("PLAYER_CAMPING");
 	self:RegisterEvent("PLAYER_QUITING");
 	self:RegisterEvent("LOGOUT_CANCEL");
@@ -406,7 +404,7 @@ function UIParentLoadAddOn(name)
 	local loaded, reason = C_AddOns.LoadAddOn(name);
 	if ( not loaded ) then
 		if ( not FailedAddOnLoad[name] ) then
-			message(format(ADDON_LOAD_FAILED, name, _G["ADDON_"..reason]));
+			SetBasicMessageDialogText(format(ADDON_LOAD_FAILED, name, _G["ADDON_"..reason]));
 			FailedAddOnLoad[name] = true;
 		end
 	end
@@ -490,11 +488,6 @@ end
 
 function RaidFrame_LoadUI()
 	UIParentLoadAddOn("Blizzard_RaidUI");
-end
-
-function SocialFrame_LoadUI()
-	AchievementFrame_LoadUI();
-	UIParentLoadAddOn("Blizzard_SocialUI");
 end
 
 function TalentFrame_LoadUI()
@@ -1261,8 +1254,14 @@ local function PlayBattlefieldBanner(self)
 	end
 end
 
-local function HandlesGlobalMouseEvent(focus, buttonName, event)
-	return focus and focus.HandlesGlobalMouseEvent and focus:HandlesGlobalMouseEvent(buttonName, event);
+local function IsGlobalMouseEventHandled(buttonName, event)
+	local regions = GetMouseFoci();
+	for _, region in ipairs(regions) do
+		if region and region.HandlesGlobalMouseEvent and region:HandlesGlobalMouseEvent(buttonName, event) then
+			return true;
+		end
+	end
+	return false;
 end
 
 local function HasVisibleAutoCompleteBox(autoCompleteBoxList, mouseFocus)
@@ -1272,6 +1271,30 @@ local function HasVisibleAutoCompleteBox(autoCompleteBoxList, mouseFocus)
 		end
 	end
 	return false;
+end
+
+local function ClearCurrentKeyboardFocus(event, buttonName)
+	if event == "GLOBAL_MOUSE_DOWN" and buttonName == "LeftButton" and not IsModifierKeyDown() then
+		local keyBoardFocus = GetCurrentKeyBoardFocus();
+		if keyBoardFocus and keyBoardFocus.ClearFocus then
+			if keyBoardFocus.HasStickyFocus and keyBoardFocus:HasStickyFocus() then
+				return;
+			end
+
+			local autoCompleteBoxList = { AutoCompleteBox }
+			if LFGListFrame and LFGListFrame.SearchPanel and LFGListFrame.SearchPanel.AutoCompleteFrame then
+				tinsert(autoCompleteBoxList, LFGListFrame.SearchPanel.AutoCompleteFrame);
+			end
+
+			for _, mouseFocus in ipairs(GetMouseFoci()) do
+				if mouseFocus == keyBoardFocus or HasVisibleAutoCompleteBox(autoCompleteBoxList, mouseFocus) then
+					return;
+				end
+			end
+
+			keyBoardFocus:ClearFocus();
+		end
+	end
 end
 
 -- UIParent_OnEvent --
@@ -1338,7 +1361,7 @@ function UIParent_OnEvent(self, event, ...)
 				end
 			end
 		end
-		if ( StaticPopup_HasDisplayedFrames() ) then
+		if ( StaticPopup_IsAnyDialogShown() ) then
 			if ( arg1 ) then
 				StaticPopup_Hide("BIND_ENCHANT");
 				StaticPopup_Hide("REPLACE_ENCHANT");
@@ -1456,16 +1479,10 @@ function UIParent_OnEvent(self, event, ...)
 		if ( GetCVarBool("blockChannelInvites") ) then
 			DeclineChannelInvite(arg1);
 		else
-			local dialog = StaticPopup_Show("CHAT_CHANNEL_INVITE", arg1, arg2);
-			if ( dialog ) then
-				dialog.data = arg1;
-			end
+			StaticPopup_Show("CHAT_CHANNEL_INVITE", arg1, arg2, arg1);
 		end
 	elseif ( event == "CHANNEL_PASSWORD_REQUEST" ) then
-		local dialog = StaticPopup_Show("CHAT_CHANNEL_PASSWORD", arg1);
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("CHAT_CHANNEL_PASSWORD", arg1, nil, arg1);
 	elseif event == "LEAVING_TUTORIAL_AREA" then
 		StaticPopup_Show("LEAVING_TUTORIAL_AREA");
 	elseif event == "UI_ERROR_POPUP" then
@@ -1508,10 +1525,6 @@ function UIParent_OnEvent(self, event, ...)
 	elseif ( event == "PARTY_INVITE_CANCEL" ) then
 		StaticPopup_Hide("PARTY_INVITE");
 		StaticPopupSpecial_Hide(LFGInvitePopup);
-	elseif ( event == "GUILD_INVITE_REQUEST" ) then
-		StaticPopup_Show("GUILD_INVITE", arg1, arg2);
-	elseif ( event == "GUILD_INVITE_CANCEL" ) then
-		StaticPopup_Hide("GUILD_INVITE");
 	elseif ( event == "PLAYER_CAMPING" ) then
 		StaticPopup_Show("CAMP");
 	elseif ( event == "PLAYER_PLUNDERSTORM_TRANSFERING" ) then
@@ -1531,10 +1544,7 @@ function UIParent_OnEvent(self, event, ...)
 			textArg1 = colorData.hex..item.."|r";
 		end
 
-		local dialog = StaticPopup_Show("LOOT_BIND", textArg1);
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("LOOT_BIND", textArg1, nil, arg1);
 	elseif ( event == "EQUIP_BIND_CONFIRM" ) then
 		StaticPopup_Hide("EQUIP_BIND_REFUNDABLE");
 		StaticPopup_Hide("EQUIP_BIND_TRADEABLE");
@@ -1736,14 +1746,10 @@ function UIParent_OnEvent(self, event, ...)
 	elseif ( event == "CONFIRM_XP_LOSS" ) then
 		local resSicknessTime = GetResSicknessDuration();
 		if ( resSicknessTime ) then
-			local dialog = nil;
 			if (UnitLevel("player") < Constants.LevelConstsExposed.MIN_RES_SICKNESS_LEVEL) then
-				dialog = StaticPopup_Show("XP_LOSS_NO_SICKNESS_NO_DURABILITY", resSicknessTime);
+				StaticPopup_Show("XP_LOSS_NO_SICKNESS_NO_DURABILITY", resSicknessTime, nil, resSicknessTime);
 			else
-				dialog = StaticPopup_Show("XP_LOSS", resSicknessTime);
-			end
-			if ( dialog ) then
-				dialog.data = resSicknessTime;
+				StaticPopup_Show("XP_LOSS", resSicknessTime, nil, resSicknessTime);
 			end
 		end
 	elseif ( event == "CORPSE_IN_RANGE" ) then
@@ -1778,10 +1784,7 @@ function UIParent_OnEvent(self, event, ...)
 		AddonTooltip_ActionBlocked(arg1);
 		StaticPopup_Show("MACRO_ACTION_FORBIDDEN");
 	elseif ( event == "ADDON_ACTION_FORBIDDEN" ) then
-		local dialog = StaticPopup_Show("ADDON_ACTION_FORBIDDEN", arg1);
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("ADDON_ACTION_FORBIDDEN", arg1, nil, arg1);
 	elseif ( event == "PLAYER_CONTROL_LOST" ) then
 		if ( UnitOnTaxi("player") ) then
 			return;
@@ -1828,8 +1831,8 @@ function UIParent_OnEvent(self, event, ...)
 
 		local dialog = StaticPopup_Show("CONFIRM_LOOT_ROLL", textArg1);
 		if dialog then
-			dialog.text:SetFormattedText(arg3, textArg1);
-			StaticPopup_Resize(dialog, "CONFIRM_LOOT_ROLL");
+			dialog:SetFormattedText(arg3, textArg1);
+			dialog:Resize("CONFIRM_LOOT_ROLL");
 			dialog.data = arg1;
 			dialog.data2 = arg2;
 		end
@@ -1868,8 +1871,8 @@ function UIParent_OnEvent(self, event, ...)
 
 		local dialog = StaticPopup_Show("CONFIRM_LOOT_ROLL", textArg1);
 		if dialog then
-			dialog.text:SetFormattedText(LOOT_NO_DROP_DISENCHANT, textArg1);
-			StaticPopup_Resize(dialog, "CONFIRM_LOOT_ROLL");
+			dialog:SetFormattedText(LOOT_NO_DROP_DISENCHANT, textArg1);
+			dialog:Resize("CONFIRM_LOOT_ROLL");
 			dialog.data = arg1;
 			dialog.data2 = arg2;
 		end
@@ -1893,13 +1896,7 @@ function UIParent_OnEvent(self, event, ...)
 		StaticPopupDialogs["CONFIRM_TALENT_WIPE"].text = _G["CONFIRM_TALENT_WIPE_"..arg2];
 		local dialog = StaticPopup_Show("CONFIRM_TALENT_WIPE");
 		if ( dialog ) then
-			MoneyFrame_Update(dialog:GetName().."MoneyFrame", arg1);
-			-- open the talent UI to the player's active talent group...just so the player knows
-			-- exactly which talent spec he is wiping
---			TalentFrame_LoadUI();
---			if ( PlayerTalentFrame_Open ) then
---				PlayerTalentFrame_Open(GetActiveSpecGroup());
---			end
+			MoneyFrame_Update(dialog.MoneyFrame, arg1);
 		end
 	elseif ( event == "CONFIRM_BINDER" ) then
 		StaticPopup_Show("CONFIRM_BINDER", arg1);
@@ -1926,18 +1923,12 @@ function UIParent_OnEvent(self, event, ...)
 		else
 			StaticPopupDialogs["GOSSIP_CONFIRM"].hasMoneyFrame = nil;
 		end
-		local dialog = StaticPopup_Show("GOSSIP_CONFIRM", arg2);
-		if ( dialog ) then
-			dialog.data = arg1;
-			if ( arg3 > 0 ) then
-				MoneyFrame_Update(dialog:GetName().."MoneyFrame", arg3);
-			end
+		StaticPopup_Show("GOSSIP_CONFIRM", arg2, nil, arg1);
+		if ( dialog and arg3 > 0 ) then
+			MoneyFrame_Update(dialog.MoneyFrame, arg3);
 		end
 	elseif ( event == "GOSSIP_ENTER_CODE" ) then
-		local dialog = StaticPopup_Show("GOSSIP_ENTER_CODE");
-		if ( dialog ) then
-			dialog.data = arg1;
-		end
+		StaticPopup_Show("GOSSIP_ENTER_CODE", nil, nil, arg1);
 	elseif ( event == "GOSSIP_CONFIRM_CANCEL" or event == "GOSSIP_CLOSED" ) then
 		StaticPopup_Hide("GOSSIP_CONFIRM");
 		StaticPopup_Hide("GOSSIP_ENTER_CODE");
@@ -2349,33 +2340,11 @@ function UIParent_OnEvent(self, event, ...)
 		end
 
 		-- Close dropdown(s).
-		local mouseFoci = GetMouseFoci();
-		for _, mouseFocus in ipairs(mouseFoci) do
-			if not HandlesGlobalMouseEvent(mouseFocus, buttonID, event) then
-				UIDropDownMenu_HandleGlobalMouseEvent(buttonID, event);
-			end
+		if not IsGlobalMouseEventHandled(buttonID, event) then
+			UIDropDownMenu_HandleGlobalMouseEvent(buttonID, event);
 		end
 
-		-- Clear keyboard focus.
-		local autoCompleteBoxList = { AutoCompleteBox }
-		if LFGListFrame and LFGListFrame.SearchPanel and LFGListFrame.SearchPanel.AutoCompleteFrame then
-			tinsert(autoCompleteBoxList, LFGListFrame.SearchPanel.AutoCompleteFrame);
-		end
-
-
-		for _, mouseFocus in ipairs(mouseFoci) do
-			if not HasVisibleAutoCompleteBox(autoCompleteBoxList, mouseFocus) then
-				if event == "GLOBAL_MOUSE_DOWN" and buttonID == "LeftButton" and not IsModifierKeyDown() then
-					local keyBoardFocus = GetCurrentKeyBoardFocus();
-					if keyBoardFocus then
-						local hasStickyFocus = keyBoardFocus.HasStickyFocus and keyBoardFocus:HasStickyFocus();
-						if keyBoardFocus.ClearFocus and not hasStickyFocus and keyBoardFocus ~= mouseFocus then
-							keyBoardFocus:ClearFocus();
-						end
- 					end
-				end
-			end
-		end
+		ClearCurrentKeyboardFocus(event, buttonID);
 	elseif (event == "SCRIPTED_ANIMATIONS_UPDATE") then
 		ScriptedAnimationEffectsUtil.ReloadDB();
 	elseif event == "SHOW_HYPERLINK_TOOLTIP" then
@@ -2384,6 +2353,8 @@ function UIParent_OnEvent(self, event, ...)
 	elseif event == "HIDE_HYPERLINK_TOOLTIP" then
 		GameTooltip_HideEventHyperlink();
 	elseif (event == "RETURNING_PLAYER_PROMPT") then
+		StaticPopup_Show("RETURNING_PLAYER_PROMPT");
+	elseif (event == "LEAVER_PENALTY_WARNING_PROMPT") then
 		StaticPopup_Show("RETURNING_PLAYER_PROMPT");
 	elseif(event == "PLAYER_SOFT_INTERACT_CHANGED") then
 		if(GetCVarBool("softTargettingInteractKeySound")) then
@@ -2667,16 +2638,6 @@ function SetDesaturation(texture, desaturation)
 	texture:SetDesaturated(desaturation);
 end
 
-function GetMaterialTextColors(material)
-	local textColor = MATERIAL_TEXT_COLOR_TABLE[material];
-	local titleColor = MATERIAL_TITLETEXT_COLOR_TABLE[material];
-	if ( not(textColor and titleColor) ) then
-		textColor = MATERIAL_TEXT_COLOR_TABLE["Default"];
-		titleColor = MATERIAL_TITLETEXT_COLOR_TABLE["Default"];
-	end
-	return {textColor:GetRGB()}, {titleColor:GetRGB()};
-end
-
 function OrderHallMissionFrame_EscapePressed()
 	return OrderHallMissionFrame and OrderHallMissionFrame.EscapePressed and OrderHallMissionFrame:EscapePressed();
 end
@@ -2842,10 +2803,7 @@ function OnInviteToPartyConfirmation(name, willConvertToRaid, questSessionActive
 	if questSessionActive then
 		QuestSessionManager:OnInviteToPartyConfirmation(name, willConvertToRaid);
 	elseif willConvertToRaid then
-		local dialog = StaticPopup_Show("CONVERT_TO_RAID");
-		if ( dialog ) then
-			dialog.data = name;
-		end
+		StaticPopup_Show("CONVERT_TO_RAID", nil, nil, name);
 	else
 		C_PartyInfo.ConfirmInviteUnit(name);
 	end
@@ -3597,14 +3555,6 @@ function PrintLootSpecialization()
 	if ( specID and specID > 0 ) then
 		local id, name = GetSpecializationInfoByID(specID, sex);
 		lootSpecChoice = format(ERR_LOOT_SPEC_CHANGED_S, name);
---[[	else
-		local specIndex = GetSpecialization();
-		if ( specIndex) then
-			local specID, specName = GetSpecializationInfo(specIndex, nil, nil, nil, sex);
-			if ( specName ) then
-				lootSpecChoice = format(ERR_LOOT_SPEC_CHANGED_S, format(LOOT_SPECIALIZATION_DEFAULT, specName));
-			end
-		end]]
 	end
 	if ( lootSpecChoice ) then
 		local info = ChatTypeInfo["SYSTEM"];

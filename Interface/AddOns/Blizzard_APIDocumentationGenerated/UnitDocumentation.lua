@@ -531,20 +531,6 @@ local Unit =
 			},
 		},
 		{
-			Name = "ShowBossFrameWhenUninteractable",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "result", Type = "bool", Nilable = false },
-			},
-		},
-		{
 			Name = "UnitAffectingCombat",
 			Type = "Function",
 

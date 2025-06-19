@@ -570,6 +570,11 @@ local CurrencyInfo =
 			LiteralName = "CURRENCY_TRANSFER_LOG_UPDATE",
 		},
 		{
+			Name = "CurrencyTransferSuccess",
+			Type = "Event",
+			LiteralName = "CURRENCY_TRANSFER_SUCCESS",
+		},
+		{
 			Name = "PlayerMoney",
 			Type = "Event",
 			LiteralName = "PLAYER_MONEY",

@@ -1208,7 +1208,7 @@ function RestoreCharacterServiceButtonMixin:OnClick()
 	local guid = GetCharacterGUID(characterID);
 	CharacterSelect.pendingUndeleteGuid = guid;
 	local timeStr = SecondsToTime(CHARACTER_UNDELETE_COOLDOWN, false, true, 1, false);
-	GlueDialog_Show("UNDELETE_CONFIRM", UNDELETE_CONFIRMATION:format(timeStr));
+	StaticPopup_Show("UNDELETE_CONFIRM", UNDELETE_CONFIRMATION:format(timeStr));
 end
 
 function RestoreCharacterServiceButtonMixin:OnEnter()

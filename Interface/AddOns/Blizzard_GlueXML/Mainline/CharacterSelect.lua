@@ -206,7 +206,7 @@ function CharacterSelectFrameMixin:OnShow()
 
     if (C_StoreGlue.GetDisconnectOnLogout()) then
         C_StoreSecure.SetDisconnectOnLogout(false);
-        GlueDialog_Hide();
+        StaticPopup_Hide();
         C_Login.DisconnectFromServer();
     end
 
@@ -286,15 +286,14 @@ function CharacterSelect_SetRetrievingCharacters(retrieving, success)
 
         if ( retrieving ) then
 			-- Do not stop showing the login queue dialog if currently showing.
-			local visibleGlueDialog = GlueDialog_GetVisible();
-			if ( visibleGlueDialog ~= "QUEUED_WITH_FCM" and visibleGlueDialog ~= "QUEUED_NORMAL" ) then
-				GlueDialog_Show("RETRIEVING_CHARACTER_LIST");
+			if ( not StaticPopup_FindVisible("QUEUED_WITH_FCM") and not StaticPopup_FindVisible("QUEUED_NORMAL") ) then
+				StaticPopup_Show("RETRIEVING_CHARACTER_LIST");
 			end
         else
             if ( success ) then
-                GlueDialog_Hide("RETRIEVING_CHARACTER_LIST");
+                StaticPopup_Hide("RETRIEVING_CHARACTER_LIST");
             else
-                GlueDialog_Show("OKAY", CHAR_LIST_FAILED);
+                StaticPopup_Show("OKAY", CHAR_LIST_FAILED);
             end
         end
 
@@ -316,21 +315,21 @@ end
 
 function CharacterSelectFrameMixin:OnUpdate(elapsed)
     if ( self.undeleteFailed ) then
-        if (not GlueDialog:IsShown()) then
+        if (not StaticPopup_IsAnyDialogShown()) then
 			if (self.undeleteFailed == "name") then
-				GlueDialog_Show("UNDELETE_NAME_TAKEN");
+				StaticPopup_Show("UNDELETE_NAME_TAKEN");
 			elseif (self.undeleteFailed == "dracthyr") then
-				GlueDialog_Show("UNDELETE_DRACTHYR_LEVEL_REQUIREMENT");
+				StaticPopup_Show("UNDELETE_DRACTHYR_LEVEL_REQUIREMENT");
 			else
-				GlueDialog_Show("UNDELETE_FAILED");
+				StaticPopup_Show("UNDELETE_FAILED");
 			end
             self.undeleteFailed = false;
         end
     end
 
     if ( self.undeleteSucceeded ) then
-        if (not GlueDialog:IsShown()) then
-            GlueDialog_Show(self.undeletePendingRename and "UNDELETE_SUCCEEDED_NAME_TAKEN" or "UNDELETE_SUCCEEDED");
+        if (not StaticPopup_IsAnyDialogShown()) then
+            StaticPopup_Show(self.undeletePendingRename and "UNDELETE_SUCCEEDED_NAME_TAKEN" or "UNDELETE_SUCCEEDED");
             self.undeleteSucceeded = false;
             self.undeletePendingRename = false;
         end
@@ -344,7 +343,7 @@ function CharacterSelectFrameMixin:OnUpdate(elapsed)
         StoreFrame_OnCharacterListUpdate();
     end
 
-	GlueDialog_CheckQueuedDialogs();
+	StaticPopup_CheckQueuedDialogs();
 end
 
 function CharacterSelectFrameMixin:OnKeyDown(key)
@@ -436,13 +435,13 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
         end
 
         if (self.undeleteNoCharacters) then
-            GlueDialog_Show("UNDELETE_NO_CHARACTERS");
+            StaticPopup_Show("UNDELETE_NO_CHARACTERS");
             self.undeleteNoCharacters = false;
         end
 
 		-- If we get here then any account conversion should have completed.
 		-- Clear the dialog if showing as a fallback in case the usual close message gets lost to prevent confusion.
-		GlueDialog_Hide("ACCOUNT_CONVERSION_DISPLAY");
+		StaticPopup_Hide("ACCOUNT_CONVERSION_DISPLAY");
 
 		self.waitingforCharacterList = false;
         UpdateCharacterList();
@@ -497,16 +496,14 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
 			CharacterSelectListUtil.ScrollToElement(elementData, ScrollBoxConstants.AlignNearest);
 		end
     elseif ( event == "FORCE_RENAME_CHARACTER" ) then
-        GlueDialog_Hide();
+        StaticPopup_Hide();
         local message = ...;
         CharacterRenameDialog:Show();
         CharacterRenameText1:SetText(_G[message]);
     elseif ( event == "CHAR_RENAME_IN_PROGRESS" ) then
-        GlueDialog_Show("OKAY", CHAR_RENAME_IN_PROGRESS);
+        StaticPopup_Show("OKAY", CHAR_RENAME_IN_PROGRESS);
     elseif ( event == "STORE_STATUS_CHANGED" ) then
-        if (ADDON_LIST_RECEIVED) then
-			CharacterSelectUI:UpdateStoreEnabled();
-        end
+		CharacterSelectUI:UpdateStoreEnabled();
     elseif ( event == "CHARACTER_UNDELETE_STATUS_CHANGED") then
         local enabled, onCooldown, cooldown, remaining = GetCharacterUndeleteStatus();
 
@@ -527,7 +524,7 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
 	elseif ( event == "CHARACTER_COPY_STATUS_CHANGED" ) then
 		CopyCharacterButton:UpdateButtonState();
     elseif ( event == "CHARACTER_UNDELETE_FINISHED" ) then
-        GlueDialog_Hide("UNDELETING_CHARACTER");
+        StaticPopup_Hide("UNDELETING_CHARACTER");
         CharacterSelect_EndCharacterUndelete();
         local result, guid = ...;
 
@@ -565,13 +562,13 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
     elseif event == "CHARACTER_DELETION_RESULT" then
         local success, errorToken = ...;
         if success then
-            GlueDialog_Hide();
+            StaticPopup_Hide();
         else
-            GlueDialog_Show("OKAY", _G[errorToken]);
+            StaticPopup_Show("OKAY", _G[errorToken]);
         end
     elseif ( event == "CHARACTER_DUPLICATE_LOGON" ) then
         local errorCode = ...;
-        GlueDialog_Show("OKAY", _G[errorCode]);
+        StaticPopup_Show("OKAY", _G[errorCode]);
     elseif ( event == "CHARACTER_LIST_RETRIEVING" ) then
         CharacterSelect_SetRetrievingCharacters(true);
     elseif ( event == "CHARACTER_LIST_RETRIEVAL_RESULT" ) then
@@ -587,7 +584,8 @@ function CharacterSelectFrameMixin:OnEvent(event, ...)
         local errorCode = ...
         if errorCode ~= 0 then
             local urlIndex = GetCurrentRegionName() == "CN" and 36 or 35;
-            GlueDialog_Show("OKAY_WITH_URL_INDEX", ERROR_MANUAL_UNREVOKE_FAILURE, urlIndex);
+			local text2 = nil;
+            StaticPopup_Show("OKAY_WITH_URL_INDEX", ERROR_MANUAL_UNREVOKE_FAILURE, text2, urlIndex);
         end
     elseif ( event == "VAS_CHARACTER_QUEUE_STATUS_UPDATE" ) then
         local guid, minutes = ...;
@@ -888,27 +886,34 @@ function CharacterSelect_SelectCharacter(index, noCreate)
 				frame:SetSelectedState(frame:GetCharacterIndex() == index);
 			end);
 		end
-    end
+	end
 end
 
-local function EnterWorldHelper()
+function DoEnterWorld()
 	PlaySound(SOUNDKIT.GS_CHARACTER_SELECTION_ENTER_WORLD);
 	StopGlueAmbience();
 	EnterWorld();
 end
 
 StaticPopupDialogs["RPE_SKIP_UPGRADE_CONFIRM"] = {
-    text = RPE_SKIP_UPGRADE_CONFIRMATION,
-    button1 = CONTINUE,
-    button2 = CANCEL,
-    OnAccept = EnterWorldHelper,
-    OnCancel = function () end,
-}
+	text = RPE_SKIP_UPGRADE_CONFIRMATION,
+	button1 = CONTINUE,
+	button2 = CANCEL,
+	OnAccept = function(dialog, data) DoEnterWorld() end,
+	OnCancel = function(dialog, data) end,
+};
+
+function CheckDisplayEnterWorldConfirmationDialog(_characterGuid)
+	if IsRPEBoostEligible(GetCharacterSelection()) then
+		StaticPopup_Show("RPE_SKIP_UPGRADE_CONFIRM");
+		return true;
+	end
+end
 
 function CharacterSelect_EnterWorld()
 	if (CharacterSelectUtil.IsAccountLocked()) then
-        return;
-    end
+		return;
+	end
 
 	CharacterSelectListUtil.SaveCharacterOrder();
 	local characterGuid = GetCharacterGUID(GetCharacterSelection());
@@ -918,15 +923,13 @@ function CharacterSelect_EnterWorld()
 
 	local serviceInfo = GetServiceCharacterInfo(characterGuid);
 
-    if ( serviceInfo.isLocked ) then
-        SubscriptionRequestDialog_Open();
-        return;
-    end
+	if ( serviceInfo.isLocked ) then
+		SubscriptionRequestDialog_Open();
+		return;
+	end
 
-	if IsRPEBoostEligible(GetCharacterSelection()) then
-		GlueDialog_Show("RPE_SKIP_UPGRADE_CONFIRM");
-	else
-		EnterWorldHelper();
+	if not CheckDisplayEnterWorldConfirmationDialog(characterGuid) then
+		DoEnterWorld();
 	end
 end
 
@@ -2091,13 +2094,14 @@ function CharacterBoostMixin:OnClick()
 			DisplayBattlepayTokenFreeFrame(self);
 		end
     elseif IsVeteranTrialAccount() then
-        GlueDialog_Show("CHARACTER_BOOST_FEATURE_RESTRICTED", CHARACTER_BOOST_YOU_MUST_REACTIVATE);
+        StaticPopup_Show("CHARACTER_BOOST_FEATURE_RESTRICTED", CHARACTER_BOOST_YOU_MUST_REACTIVATE);
     elseif IsTrialAccount() then
-        GlueDialog_Show("CHARACTER_BOOST_FEATURE_RESTRICTED", CHARACTER_BOOST_YOU_MUST_UPGRADE);
+        StaticPopup_Show("CHARACTER_BOOST_FEATURE_RESTRICTED", CHARACTER_BOOST_YOU_MUST_UPGRADE);
     elseif not C_CharacterCreation.IsNewPlayerRestricted() then
         CharacterUpgradePopup_BeginCharacterUpgradeFlow(self.data);
     else
-        GlueDialog_Show("CHARACTER_BOOST_NO_CHARACTERS_WARNING", nil, self.data);
+        local text1, text2 = nil, nil;
+        StaticPopup_Show("CHARACTER_BOOST_NO_CHARACTERS_WARNING", text1, text2, self.data);
     end
 end
 
@@ -2115,10 +2119,10 @@ function CharacterServicesMaster_OnEvent(self, event, ...)
     elseif (event == "PRODUCT_ASSIGN_TO_TARGET_FAILED") then
         if (CharacterServicesMaster.pendingGuid and C_CharacterServices.DoesGUIDHavePendingFactionChange(CharacterServicesMaster.pendingGuid)) then
             CharacterServicesMaster.pendingGuid = nil;
-            GlueDialog_Show("BOOST_FACTION_CHANGE_IN_PROGRESS");
+            StaticPopup_Show("BOOST_FACTION_CHANGE_IN_PROGRESS");
             return;
         end
-        GlueDialog_Show("PRODUCT_ASSIGN_TO_TARGET_FAILED");
+        StaticPopup_Show("PRODUCT_ASSIGN_TO_TARGET_FAILED");
     end
 end
 
@@ -2274,7 +2278,7 @@ function CharacterServicesMaster_Update()
 				if ( block.GetPopupText ) then
 					text = block:GetPopupText();
 				end
-				GlueDialog_Show(block.Popup, text);
+				StaticPopup_Show(block.Popup, text);
 				return;
 			end
             self.flow:Advance(self);
@@ -2378,7 +2382,7 @@ function CharacterServicesMasterNextButton_OnClick()
         if ( master.currentBlock.GetPopupText ) then
             text = master.currentBlock:GetPopupText();
         end
-        GlueDialog_Show(master.currentBlock.Popup, text);
+        StaticPopup_Show(master.currentBlock.Popup, text);
         return;
     end
 
@@ -2475,11 +2479,11 @@ StaticPopupDialogs["UNDELETE_CONFIRM"] = {
     text = UNDELETE_CONFIRMATION,
     button1 = OKAY,
     button2 = CANCEL,
-    OnAccept = function ()
+    OnAccept = function(dialog, data)
         CharacterSelect_FinishUndelete(CharacterSelect.pendingUndeleteGuid);
         CharacterSelect.pendingUndeleteGuid = nil;
     end,
-    OnCancel = function ()
+    OnCancel = function(dialog, data)
         CharacterSelect.pendingUndeleteGuid = nil;
     end,
 }
@@ -2511,7 +2515,7 @@ function CharacterSelect_EndCharacterUndelete()
 end
 
 function CharacterSelect_FinishUndelete(guid)
-    GlueDialog_Show("UNDELETING_CHARACTER");
+    StaticPopup_Show("UNDELETING_CHARACTER");
 
     UndeleteCharacter(guid);
     CharacterSelect.createIndex = 0;
@@ -2523,7 +2527,7 @@ StaticPopupDialogs["COPY_CHARACTER"] = {
     button1 = OKAY,
     button2 = CANCEL,
     escapeHides = true,
-    OnAccept = function ()
+    OnAccept = function(dialog, data)
         CopyCharacterFromLive();
     end,
 }
@@ -2533,7 +2537,7 @@ StaticPopupDialogs["COPY_ACCOUNT_DATA"] = {
     button1 = OKAY,
     button2 = CANCEL,
     escapeHides = true,
-    OnAccept = function ()
+    OnAccept = function(dialog, data)
         CopyCharacter_AccountDataFromLive();
     end,
 }
@@ -2543,7 +2547,7 @@ StaticPopupDialogs["COPY_KEY_BINDINGS"] = {
     button1 = OKAY,
     button2 = CANCEL,
     escapeHides = true,
-    OnAccept = function ()
+    OnAccept = function(dialog, data)
         CopyCharacter_KeyBindingsFromLive();
     end,
 }
@@ -2568,7 +2572,7 @@ function CopyCharacterFromLive()
 	else
 		CopyAccountCharacterFromLive(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
 	end
-    GlueDialog_Show("COPY_IN_PROGRESS");
+    StaticPopup_Show("COPY_IN_PROGRESS");
 end
 
 function CopyCharacter_AccountDataFromLive()
@@ -2577,7 +2581,7 @@ function CopyCharacter_AccountDataFromLive()
     else
         CopyAccountDataFromLive(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
     end
-    GlueDialog_Show("COPY_IN_PROGRESS");
+    StaticPopup_Show("COPY_IN_PROGRESS");
 end
 
 function CopyCharacter_KeyBindingsFromLive()
@@ -2586,7 +2590,7 @@ function CopyCharacter_KeyBindingsFromLive()
     else
         CopyKeyBindingsFromLive(CopyCharacterFrame_GetSelectedRegionID(), CopyCharacterFrame.SelectedIndex, CopyCharacterFrame.RealmName:GetText(), CopyCharacterFrame.CharacterName:GetText());
     end
-    GlueDialog_Show("COPY_IN_PROGRESS");
+    StaticPopup_Show("COPY_IN_PROGRESS");
 end
 
 CopyCharacterButtonMixin = {};
@@ -2608,26 +2612,26 @@ function CopyCharacterSearch_OnClick(self)
 end
 
 function CopyCharacterCopy_OnClick(self)
-    if ( not GlueDialog:IsShown() ) then
+    if ( not StaticPopup_IsAnyDialogShown() ) then
 		local selectedIndex = CopyCharacterFrame.SelectedIndex;
 		if ( selectedIndex and (selectedIndex <= GetNumAccountCharacters()) ) then
 			local name, realm = GetAccountCharacterInfo(selectedIndex);
-			GlueDialog_Show("COPY_CHARACTER", format(COPY_CHARACTER_CONFIRM, name, realm));
+			StaticPopup_Show("COPY_CHARACTER", format(COPY_CHARACTER_CONFIRM, name, realm));
 		elseif ( IsGMClient() ) then
-			GlueDialog_Show("COPY_CHARACTER", format(COPY_CHARACTER_CONFIRM, CopyCharacterFrame.CharacterName:GetText(), CopyCharacterFrame.RealmName:GetText()));
+			StaticPopup_Show("COPY_CHARACTER", format(COPY_CHARACTER_CONFIRM, CopyCharacterFrame.CharacterName:GetText(), CopyCharacterFrame.RealmName:GetText()));
 		end
     end
 end
 
 function CopyAccountData_OnClick(self)
-    if ( not GlueDialog:IsShown() ) then
-        GlueDialog_Show("COPY_ACCOUNT_DATA");
+    if ( not StaticPopup_IsAnyDialogShown() ) then
+        StaticPopup_Show("COPY_ACCOUNT_DATA");
     end
 end
 
 function CopyKeyBindings_OnClick(self)
-    if ( not GlueDialog:IsShown() ) then
-        GlueDialog_Show("COPY_KEY_BINDINGS");
+    if ( not StaticPopup_IsAnyDialogShown() ) then
+        StaticPopup_Show("COPY_KEY_BINDINGS");
     end
 end
 
@@ -2760,10 +2764,10 @@ function CopyCharacterFrame_OnEvent(self, event, ...)
         self.SearchButton:Enable();
     elseif ( event == "CHAR_RESTORE_COMPLETE" or event == "ACCOUNT_DATA_RESTORED" or event == "KEY_BINDINGS_COPY_COMPLETE") then
         local success, token = ...;
-        GlueDialog_Hide();
+        StaticPopup_Hide();
         self:Hide();
         if (not success) then
-            GlueDialog_Show("OKAY", COPY_FAILED);
+            StaticPopup_Show("OKAY", COPY_FAILED);
         end
     end
 end
