@@ -171,6 +171,18 @@ local AccountConstants =
 			},
 		},
 		{
+			Name = "ChallengeModeHistoryFlags",
+			Type = "Enumeration",
+			NumValues = 2,
+			MinValue = 0,
+			MaxValue = 1,
+			Fields =
+			{
+				{ Name = "None", Type = "ChallengeModeHistoryFlags", EnumValue = 0 },
+				{ Name = "ConfirmedLeaver", Type = "ChallengeModeHistoryFlags", EnumValue = 1 },
+			},
+		},
+		{
 			Name = "ChallengeModeHistoryResult",
 			Type = "Enumeration",
 			NumValues = 2,
@@ -180,6 +192,18 @@ local AccountConstants =
 			{
 				{ Name = "Successful", Type = "ChallengeModeHistoryResult", EnumValue = 0 },
 				{ Name = "Leaver", Type = "ChallengeModeHistoryResult", EnumValue = 1 },
+			},
+		},
+		{
+			Name = "ChallengeModeHistoryStatus",
+			Type = "Enumeration",
+			NumValues = 2,
+			MinValue = 0,
+			MaxValue = 1,
+			Fields =
+			{
+				{ Name = "Normal", Type = "ChallengeModeHistoryStatus", EnumValue = 0 },
+				{ Name = "Leaver", Type = "ChallengeModeHistoryStatus", EnumValue = 1 },
 			},
 		},
 		{

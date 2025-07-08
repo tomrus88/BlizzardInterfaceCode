@@ -2094,13 +2094,12 @@ StaticPopupDialogs["INSTANCE_LOCK"] = {
 	-- code which we don't want for this dialog
 	text = INSTANCE_LOCK_TIMER,
 	textOnEnterScript = InstanceLock_OnEnter,
-	textOnLeaveScript = GameTooltip_Hide,
+	textOnLeaveScript = function() GameTooltip:Hide() end,
 	button1 = ACCEPT,
 	button2 = INSTANCE_LEAVE,
 	OnShow = function(dialog, data)
-		local enforceTime = data;
 		local lockTimeleft, isPreviousInstance = GetInstanceLockTimeRemaining();
-		if ( enforceTime and lockTimeleft <= 0 ) then
+		if ( data.enforceTime and lockTimeleft <= 0 ) then
 			dialog:Hide();
 			return;
 		end
@@ -2110,7 +2109,7 @@ StaticPopupDialogs["INSTANCE_LOCK"] = {
 		local type, difficulty;
 		dialog.name, type, difficulty, dialog.difficultyName = GetInstanceInfo();
 
-		if ( not enforceTime ) then
+		if ( not data.enforceTime ) then
 			local name = GetDungeonNameWithDifficulty(dialog.name, dialog.difficultyName);
 			local lockstring = string.format((dialog.isPreviousInstance and INSTANCE_LOCK_WARNING_PREVIOUSLY_SAVED or INSTANCE_LOCK_WARNING), name, SecondsToTime(ceil(lockTimeleft), nil, 1));
 			local time, extending;
@@ -2122,7 +2121,7 @@ StaticPopupDialogs["INSTANCE_LOCK"] = {
 
 	end,
 	OnUpdate = function(dialog, elapsed)
-		local enforceTime = data;
+		local enforceTime = dialog.data.enforceTime;
 		if ( enforceTime ) then
 			local lockTimeleft = dialog.lockTimeleft - elapsed;
 			if ( lockTimeleft <= 0 ) then
@@ -2163,7 +2162,7 @@ StaticPopupDialogs["INSTANCE_LOCK"] = {
 		dialog.lockTimeleft = nil;
 	end,
 	DisplayButton2 = function(dialog, data)
-		local enforceTime = data;
+		local enforceTime = data.enforceTime;
 		return enforceTime ~= nil;
 	end,
 	timeout = 0,
