@@ -1462,6 +1462,9 @@ function PaperDollFrame_OnShow(self)
 
 	PaperDollFrame_SetPlayer();
 	self:RegisterEvent("UNIT_MODEL_CHANGED");
+
+	local shown = true;
+	EventRegistry:TriggerEvent("PaperDollFrame.VisibilityUpdated", shown);
 end
 
 function PaperDollFrame_OnHide(self)
@@ -1470,6 +1473,9 @@ function PaperDollFrame_OnHide(self)
 	PaperDollSidebarTabs:Hide();
 	PaperDollFrame_HideInventoryFixupComplete(self);
 	self:UnregisterEvent("UNIT_MODEL_CHANGED");
+
+	local shown = false;
+	EventRegistry:TriggerEvent("PaperDollFrame.VisibilityUpdated", shown);
 end
 
 function PaperDollFrame_ClearIgnoredSlots()
@@ -2785,7 +2791,7 @@ PaperDollItemSocketDisplayMixin = {};
 
 function PaperDollItemSocketDisplayMixin:SetItem(item)
 	-- Currently only showing socket display for timerunning characters
-	local showSocketDisplay = item ~= nil and PlayerGetTimerunningSeasonID() ~= nil;
+	local showSocketDisplay = item ~= nil and PlayerIsTimerunning();
 	self:SetShown(showSocketDisplay);
 
 	if not showSocketDisplay then

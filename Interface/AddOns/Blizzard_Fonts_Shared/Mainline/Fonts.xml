@@ -1067,25 +1067,6 @@
 		</Member>
 	</FontFamily>
 
-
-	<FontFamily name="Game60Font" virtual="true">
-		<Member alphabet="roman">
-			<Font font="Fonts\FRIZQT__.ttf" height="60"/>
-		</Member>
-		<Member alphabet="korean">
-			<Font font="Fonts\K_Pagetext.ttf" height="60"/>
-		</Member>
-		<Member alphabet="simplifiedchinese">
-			<Font font="Fonts\ARKai_T.ttf" height="60"/>
-		</Member>
-		<Member alphabet="traditionalchinese">
-			<Font font="Fonts\blei00d.ttf" height="60"/>
-		</Member>
-		<Member alphabet="russian">
-			<Font font="Fonts\MORPHEUS_CYR.ttf" height="60"/>
-		</Member>
-	</FontFamily>
-
 	<FontFamily name="Game120Font" virtual="true">
 		<Member alphabet="roman">
 			<Font font="Fonts\FRIZQT__.ttf" height="120"/>
@@ -2177,59 +2158,6 @@
 		</Member>
 		<Member alphabet="russian">
 			<Font font="Fonts\FRIZQT___CYR.TTF" height="21">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="1" y="-1"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>
-			</Font>
-		</Member>
-	</FontFamily>
-
-	<FontFamily name="Game22Font" virtual="true">
-		<Member alphabet="roman">
-			<Font font="Fonts\FRIZQT__.TTF" height="22">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="1" y="-1"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>
-			</Font>
-		</Member>
-		<Member alphabet="korean">
-			<Font font="Fonts\2002.TTF" height="22">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="1" y="-1"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>
-			</Font>
-		</Member>
-		<Member alphabet="simplifiedchinese">
-			<Font font="Fonts\ARKai_T.ttf" height="22">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="1" y="-1"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>
-			</Font>
-		</Member>
-		<Member alphabet="traditionalchinese">
-			<Font font="Fonts\bKAI00M.TTF" height="22">
-				<Shadow>
-					<Offset>
-						<AbsDimension x="1" y="-1"/>
-					</Offset>
-					<Color r="0" g="0" b="0"/>
-				</Shadow>
-			</Font>
-		</Member>
-		<Member alphabet="russian">
-			<Font font="Fonts\FRIZQT___CYR.TTF" height="22">
 				<Shadow>
 					<Offset>
 						<AbsDimension x="1" y="-1"/>

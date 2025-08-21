@@ -154,7 +154,9 @@ QuestOfferDocumentation.lua
 QuestSessionDocumentation.lua
 QuestTaskInfoDocumentation.lua
 RaidLocksDocumentation.lua
+RecentAlliesDocumentation.lua
 RecruitAFriendDocumentation.lua
+RemixArtifactUIDocumentation.lua
 ReportSystemDocumentation.lua
 ReputationInfoDocumentation.lua
 ResearchInfoDocumentation.lua
@@ -259,9 +261,11 @@ VoiceChatDocumentation.lua
 WorldLootObjectDocumentation.lua
 WorldStateInfoDocumentation.lua
 WowEntitlementInfoDocumentation.lua
+WowSurveyDocumentation.lua
 WowTokenUIDocumentation.lua
 XMLUtilDocumentation.lua
 ZoneScriptDocumentation.lua
+CatalogShopDocumentation.lua
 AccessibilityOptionsDocumentation.lua
 AlliedRacesFrameDocumentation.lua
 AnimaDiversionUIDocumentation.lua
@@ -346,10 +350,12 @@ AzeriteConstantsDocumentation.lua
 BagConstantsDocumentation.lua
 BaseDocumentation.lua
 BattlePetConstantsDocumentation.lua
+BattlepayConstantsDocumentation.lua
 BountySharedDocumentation.lua
 ButtonConstantsDocumentation.lua
 CalendarConstantsDocumentation.lua
 CameraConstantsDocumentation.lua
+CatalogShopConstantsDocumentation.lua
 CharacterCustomizationSharedDocumentation.lua
 CharacterSelectionConstantsDocumentation.lua
 ChatConstantsDocumentation.lua
@@ -421,6 +427,7 @@ QuestSessionConstantsDocumentation.lua
 QueueSpecificDocumentation.lua
 RecruitAFriendSharedDocumentation.lua
 ReportSystemConstantsDocumentation.lua
+RolodexConstantsDocumentation.lua
 ScreenLocationConstantsDocumentation.lua
 ScriptRegionSharedDocumentation.lua
 SeasonsConstantsDocumentation.lua
@@ -434,6 +441,7 @@ SpellBookConstantsDocumentation.lua
 SpellConstantsDocumentation.lua
 SpellIDDocumentation.lua
 SpellSharedDocumentation.lua
+SummonConstantsDocumentation.lua
 TalentAndGlyphConstantsDocumentation.lua
 TextureSharedDocumentation.lua
 TimeDocumentation.lua
@@ -464,6 +472,8 @@ VectorSharedDocumentation.lua
 VignetteConstantsDocumentation.lua
 WarbandSceneInfoConstantsDocumentation.lua
 WeeklyRewardsSharedDocumentation.lua
+WorldElapsedTimerConstantsDocumentation.lua
+WowSurveyConstantsDocumentation.lua
 ClickBindingsConstantsDocumentation.lua
 CovenantCallingsConstantsDocumentation.lua
 CovenantSanctumConstantsDocumentation.lua

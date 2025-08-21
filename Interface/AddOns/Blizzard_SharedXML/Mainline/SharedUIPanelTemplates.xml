@@ -1240,7 +1240,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="$parentClearButton" parentKey="clearButton" hidden="true">
+			<Button name="$parentClearButton" parentKey="clearButton" mixin="ClearButtonMixin" hidden="true">
 				<Size x="17" y="17"/>
 				<Anchors>
 					<Anchor point="RIGHT" x="-3" y="0"/>
@@ -1256,21 +1256,11 @@
 					</Layer>
 				</Layers>
 				<Scripts>
-					<OnEnter>
-						self.texture:SetAlpha(1.0);
-					</OnEnter>
-					<OnLeave>
-						self.texture:SetAlpha(0.5);
-					</OnLeave>
-					<OnMouseDown>
-						if self:IsEnabled() then
-							self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 4, -4);
-						end
-					</OnMouseDown>
-					<OnMouseUp>
-						self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 3, -3);
-					</OnMouseUp>
-					<OnClick function="SearchBoxTemplateClearButton_OnClick"/>
+					<OnEnter method="OnEnter" />
+					<OnLeave method="OnLeave" />
+					<OnMouseDown method="OnMouseDown" />
+					<OnMouseUp method="OnMouseUp" />
+					<OnClick method="OnClick"/>
 				</Scripts>
 			</Button>
 		</Frames>
@@ -1359,6 +1349,46 @@
 	</Button>
 
 	<Button name="PanelTopTabButtonTemplate" inherits="PanelTabButtonTemplate" mixin="PanelTopTabButtonMixin" virtual="true"/>
+
+	<Frame name="LargeSideTabButtonTemplate" mixin="SidePanelTabButtonMixin" virtual="true">
+		<Size x="43" y="55"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Background" atlas="questlog-tab-side" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Icon">
+					<Anchors>
+						<Anchor point="CENTER" x="-2"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture parentKey="SelectedTexture" atlas="QuestLog-Tab-side-Glow-select" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="HIGHLIGHT">
+				<Texture atlas="QuestLog-Tab-side-Glow-hover" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnMouseDown method="OnMouseDown"/>
+			<OnMouseUp method="OnMouseUp"/>
+			<OnEnter method="OnEnter"/>
+			<OnLeave method="OnLeave"/>
+		</Scripts>
+	</Frame>
 
 	<Frame name="MaximizeMinimizeButtonFrameTemplate" parentKey="MaxMinButtonFrame" mixin="MaximizeMinimizeButtonFrameMixin" frameLevel="510" virtual="true">
 		<Size x="24" y="24"/>

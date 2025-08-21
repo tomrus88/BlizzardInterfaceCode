@@ -1291,6 +1291,15 @@ local PlayerScript =
 			},
 		},
 		{
+			Name = "PlayerIsTimerunning",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "playerIsTimerunning", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "PortGraveyard",
 			Type = "Function",
 		},

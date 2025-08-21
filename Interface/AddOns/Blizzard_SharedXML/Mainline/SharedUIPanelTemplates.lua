@@ -308,20 +308,18 @@ function PanelTabButtonMixin:OnShow()
 end
 
 function PanelTabButtonMixin:OnEnter()
-	if not C_Glue.IsOnGlueScreen() then
-		GameTooltip_Hide();
-	end
+	local tooltip = GetAppropriateTooltip();
+	tooltip:Hide();
 
 	if self.Text:IsTruncated() then
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-		GameTooltip:SetText(self.Text:GetText());
+		tooltip:SetOwner(self, "ANCHOR_RIGHT");
+		tooltip:SetText(self.Text:GetText());
+		tooltip:Show();
 	end
 end
 
 function PanelTabButtonMixin:OnLeave()
-	if not C_Glue.IsOnGlueScreen() then
-		GameTooltip_Hide();
-	end
+	GetAppropriateTooltip():Hide();
 end
 
 PanelTopTabButtonMixin = {};
@@ -349,6 +347,50 @@ function PanelTopTabButtonMixin:OnLoad()
 
 	self.isTopTab = true;
 end
+
+SidePanelTabButtonMixin = { };
+
+function SidePanelTabButtonMixin:OnMouseDown(button)
+	if button == "LeftButton" then
+		self.Icon:SetPoint("CENTER", -1, -1);
+	end
+end
+
+function SidePanelTabButtonMixin:OnMouseUp(button, upInside)
+	if button == "LeftButton" then
+		self.Icon:SetPoint("CENTER", -2, 0);
+		PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB);
+	end
+
+	if self.customMouseUpHandler then
+		self.customMouseUpHandler(self, button, upInside);
+	end
+end
+
+function SidePanelTabButtonMixin:SetCustomOnMouseUpHandler(handler)
+	self.customMouseUpHandler = handler;
+end
+
+function SidePanelTabButtonMixin:SetChecked(checked)
+	if checked then
+		self.Icon:SetAtlas(self.activeAtlas, TextureKitConstants.UseAtlasSize);
+	else
+		self.Icon:SetAtlas(self.inactiveAtlas, TextureKitConstants.UseAtlasSize);
+	end
+	self.SelectedTexture:SetShown(checked);
+end
+
+function SidePanelTabButtonMixin:OnEnter()
+	local tooltip = GetAppropriateTooltip();
+	tooltip:SetOwner(self, "ANCHOR_RIGHT", -4, -4);
+	tooltip:SetText(self.tooltipText);
+	tooltip:Show();
+end
+
+function SidePanelTabButtonMixin:OnLeave()
+	GetAppropriateTooltip():Hide();
+end
+
 
 -- functions to manage tab interfaces where only one tab of a group may be selected
 function PanelTemplates_Tab_OnClick(self, frame)
@@ -1541,7 +1583,7 @@ function ResizeCheckButtonMixin:SetControlEnabled(enabled)
 	if self.Button == nil then
 		return;
 	end
-	
+
 	self.Button:SetEnabled(enabled);
 
 	self:UpdateLabelFont();
@@ -3045,4 +3087,27 @@ end
 
 function UIPanelIconDropdownButtonMixin:OnMouseUp(button, upInside)
 	self.Icon:AdjustPointsOffset(-1, 1);
+end
+
+ClearButtonMixin = {};
+function ClearButtonMixin:OnEnter()
+	self.texture:SetAlpha(1.0);
+end
+
+function ClearButtonMixin:OnLeave()
+	self.texture:SetAlpha(0.5);
+end
+
+function ClearButtonMixin:OnMouseDown()
+	if self:IsEnabled() then
+		self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 4, -4);
+	end
+end
+
+function ClearButtonMixin:OnMouseUp()
+	self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 3, -3);
+end
+
+function ClearButtonMixin:OnClick()
+	SearchBoxTemplateClearButton_OnClick(self);
 end

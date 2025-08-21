@@ -46,6 +46,10 @@ NewSettings["11.2.0"] = {
 	"GameplaySoundEffects",
 };
 
+NewSettings["11.2.5"] = {
+	"cooldownViewerEnabled",
+};
+
 NewSettingsPredicates["ASSISTED_COMBAT_ROTATION"] = function()
 	return C_AssistedCombat.IsAvailable();
 end;

@@ -3836,8 +3836,8 @@ end
 
 -- TODO: Fix for Level Squish
 function LFGListUtil_GetCurrentExpansion()
-	if PVEFrame:TimerunningEnabled() then
-		return LE_EXPANSION_MISTS_OF_PANDARIA;
+	if TimerunningUtil.TimerunningEnabledForPlayer() then
+		return TimerunningUtil.GetTimerunningExpansion();
 	else
 		return GetExpansionForLevel(UnitLevel("player")) or LE_EXPANSION_LEVEL_CURRENT;
 	end

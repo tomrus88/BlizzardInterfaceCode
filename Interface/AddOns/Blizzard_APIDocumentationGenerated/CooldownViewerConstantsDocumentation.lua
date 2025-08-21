@@ -11,7 +11,7 @@ local CooldownViewerConstants =
 			Fields =
 			{
 				{ Name = "HideAura", Type = "CooldownSetSpellFlags", EnumValue = 1 },
-				{ Name = "PlaceHolder1", Type = "CooldownSetSpellFlags", EnumValue = 2 },
+				{ Name = "HideByDefault", Type = "CooldownSetSpellFlags", EnumValue = 2 },
 			},
 		},
 		{

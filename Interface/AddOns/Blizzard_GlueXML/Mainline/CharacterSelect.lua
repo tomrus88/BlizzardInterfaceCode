@@ -874,7 +874,7 @@ function CharacterSelect_SelectCharacter(index, noCreate)
         CharSelectEnterWorldButton:SetText(text);
 
 		if characterInfo.boostInProgress == false and (not CharacterServicesFlow_IsShowing() or not CharacterServicesMaster.flow:UsesSelector()) then
-			if IsRPEBoostEligible(selectedCharacterID) and CharacterSelectUtil.IsSameRealmAsCurrent(characterInfo.realmAddress) and not CharacterSelectUI:IsCollectionsActive() then
+			if IsRPEBoostEligible(selectedCharacterID) and not CharacterSelectUI:IsCollectionsActive() then
 				BeginCharacterServicesFlow(RPEUpgradeFlow, {});
 				if CharSelectServicesFlowFrame:IsShown() and CharacterServicesMaster.flow == RPEUpgradeFlow and IsVeteranTrialAccount() then
 					CharSelectServicesFlow_Minimize(); --if they need to resubscribe, get the RPE flow out of the way.
@@ -997,8 +997,7 @@ function CharacterSelect_AllowedToEnterWorld()
         return false;
     end
 
-    local timerunningSeasonID = GetCharacterTimerunningSeasonID(guid);
-    if (timerunningSeasonID and not IsTimerunningEnabled()) then
+    if (IsCharacterTimerunning(guid) and not IsTimerunningEnabled()) then
         return false, TIMERUNNING_DISABLED_TOOLTIP;
     end
 
@@ -1219,12 +1218,23 @@ function CharacterTemplatesFrame_OnShow(self)
 end
 
 function ToggleStoreUI(contextKey)
-	local wasShown = StoreFrame_IsShown();
-    if ( not wasShown ) then
-        --We weren't showing, now we are. We should hide all other panels.
-        -- not sure if anything is needed here at the gluescreen
-    end
-    StoreFrame_SetShown(not wasShown, contextKey);
+	-- TODO: Replace with MirrorVar
+	local useNewCashShop = GetCVarBool("useNewCashShop");
+	if useNewCashShop then
+		local wasShown = CatalogShopInboundInterface.IsShown();
+		if ( not wasShown ) then
+			--We weren't showing, now we are. We should hide all other panels.
+			-- not sure if anything is needed here at the gluescreen
+		end
+		CatalogShopInboundInterface.SetShown(not wasShown, contextKey);
+	else
+		local wasShown = StoreFrame_IsShown();
+		if ( not wasShown ) then
+			--We weren't showing, now we are. We should hide all other panels.
+			-- not sure if anything is needed here at the gluescreen
+		end
+		StoreFrame_SetShown(not wasShown, contextKey);
+	end
 end
 
 function SetStoreUIShown(shown)
