@@ -5,12 +5,12 @@ StaticPopupDialogs["VOTE_ABANDON_INSTANCE_VOTE"] = {
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(dialog, data)
-		C_PartyInfo.SetInstanceAbandonVoteResponse(true);
+		InstanceAbandonFrame:SetResponse(true);
 	end,
 	OnCancel = function(dialog, data, reason)
 		-- prevents reentry from OnAccept processing
 		if reason == "clicked" then
-			C_PartyInfo.SetInstanceAbandonVoteResponse(false);
+			InstanceAbandonFrame:SetResponse(false);
 		end
 	end,
 	whileDead = 1,
@@ -72,34 +72,6 @@ function InstanceAbandonMixin:OnLoad()
 end
 
 function InstanceAbandonMixin:OnShow()
-	if not self.textures then
-		-- init
-		local numIcons = 5;
-		local iconSize = 48;
-		local iconSpacing = 6;
-		local sidePadding = 60;
-		local topPadding = 10;
-
-		self.StatusFrame.textures = { };
-		local lastTexture;
-		for i = 1, numIcons do
-			local texture = self.StatusFrame:CreateTexture(nil, "ARTWORK");
-			texture:SetSize(iconSize, iconSize);
-			if lastTexture then
-				texture:SetPoint("LEFT", lastTexture, "RIGHT", iconSpacing, 0);
-			else
-				texture:SetPoint("TOPLEFT", sidePadding, -topPadding);
-			end
-			tinsert(self.StatusFrame.textures, texture);
-			lastTexture = texture;
-		end
-		local width = sidePadding * 2 + numIcons * iconSize + (numIcons - 1) * iconSpacing;
-		local height = topPadding + iconSize;
-		self.StatusFrame:SetSize(width, height);
-
-		self.VoteText:SetFontObject("UserScaledFontGameNormal");
-	end
-
 	local votesRequired, keystoneOwnerVoteWeight = C_PartyInfo.GetInstanceAbandonVoteRequirements();
 
 	if C_PartyInfo.IsChallengeModeKeystoneOwner() then
@@ -111,15 +83,47 @@ function InstanceAbandonMixin:OnShow()
 	self:Refresh();
 end
 
+function InstanceAbandonMixin:Init()
+	local numIcons = 5;
+	local iconSize = 48;
+	local iconSpacing = 6;
+	local sidePadding = 60;
+	local topPadding = 10;
+
+	self.StatusFrame.textures = { };
+	local lastTexture;
+	for i = 1, numIcons do
+		local texture = self.StatusFrame:CreateTexture(nil, "ARTWORK");
+		texture:SetSize(iconSize, iconSize);
+		if lastTexture then
+			texture:SetPoint("LEFT", lastTexture, "RIGHT", iconSpacing, 0);
+		else
+			texture:SetPoint("TOPLEFT", sidePadding, -topPadding);
+		end
+		tinsert(self.StatusFrame.textures, texture);
+		lastTexture = texture;
+	end
+	local width = sidePadding * 2 + numIcons * iconSize + (numIcons - 1) * iconSpacing;
+	local height = topPadding + iconSize;
+	self.StatusFrame:SetSize(width, height);
+
+	self.VoteText:SetFontObject("UserScaledFontGameNormal");
+end
+
 function InstanceAbandonMixin:OnEvent(event, ...)
 	if event == "INSTANCE_ABANDON_VOTE_STARTED" then
 		local playSound = true;
 		self:CheckShowVoteDialog(playSound);
 	elseif event == "INSTANCE_ABANDON_VOTE_UPDATED" then
+		if not InstanceAbandonFrame:IsShown() then
+			local playSound = false;
+			self:CheckShowVoteDialog(playSound);
+		end
 		self:Refresh();
 	elseif event == "INSTANCE_ABANDON_VOTE_FINISHED" then
 		StaticPopup_Hide("VOTE_ABANDON_INSTANCE_VOTE");
 		StaticPopup_Hide("VOTE_ABANDON_INSTANCE_WAIT");
+		self:SetResponse(nil);
 		local votePassed = ...;
 		if votePassed then
 			self:CheckShowShutdownDialog();
@@ -146,6 +150,11 @@ function InstanceAbandonMixin:OnEvent(event, ...)
 end
 
 function InstanceAbandonMixin:Refresh()
+	-- this addon is always loaded, don't set up textures until needed
+	if not self.textures then
+		self:Init();
+	end
+
 	local numVoted = C_PartyInfo.GetNumInstanceAbandonGroupVoteResponses();
 	for i, texture in ipairs(self.StatusFrame.textures) do
 		if i <= numVoted then
@@ -155,7 +164,7 @@ function InstanceAbandonMixin:Refresh()
 		end
 	end
 
-	local response = C_PartyInfo.GetInstanceAbandonVoteResponse();
+	local response = self:GetResponse();
 	if response == nil then
 		self.ResponseText:Hide();
 	else
@@ -167,12 +176,32 @@ function InstanceAbandonMixin:Refresh()
 	self:Layout();
 end
 
+function InstanceAbandonMixin:SetResponse(response)
+	local dialog = StaticPopup_FindVisible("VOTE_ABANDON_INSTANCE_VOTE");
+	if not dialog or response == nil then
+		self.response = nil;
+	else
+		-- store the response so we can immediately reflect the state without waiting on server
+		self.response = response;
+		C_PartyInfo.SetInstanceAbandonVoteResponse(response);
+		StaticPopup_ReleaseInsertedFrame(dialog);
+		self:CheckShowVoteDialog();
+	end
+end
+
+function InstanceAbandonMixin:GetResponse()
+	if self.response == nil then
+		return C_PartyInfo.GetInstanceAbandonVoteResponse();
+	end
+	return self.response;
+end
+
 function InstanceAbandonMixin:CheckShowVoteDialog(playSound)
 	local duration, timeLeft = C_PartyInfo.GetInstanceAbandonVoteTime();
 	if timeLeft > 0 then
 		InstanceAbandonFrame:Show();
 		local dialog;
-		local response = C_PartyInfo.GetInstanceAbandonVoteResponse();
+		local response = self:GetResponse();
 		if response == nil then
 			dialog = StaticPopup_Show("VOTE_ABANDON_INSTANCE_VOTE", nil, nil, nil, InstanceAbandonFrame);
 		else

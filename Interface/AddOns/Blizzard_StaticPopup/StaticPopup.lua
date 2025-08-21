@@ -1,8 +1,22 @@
+local securecallfunction = securecallfunction;
+
 local atGlues = C_Glue.IsOnGlueScreen();
 local dialogFrames = {};
 local shownDialogFrames = {};
 local queuedDialogInfo = {};
 local showConditions = {};
+
+local StaticPopupAttributes = {
+	ReallocateShownDialogs = "reallocate-shown-dialogs",
+};
+
+local StaticPopupAttributeDelegate = CreateFrame("Frame");
+StaticPopupAttributeDelegate:SetForbidden();
+StaticPopupAttributeDelegate:SetScript("OnAttributeChanged", function(_self, attr, _value)
+	if attr == StaticPopupAttributes.ReallocateShownDialogs then
+		shownDialogFrames = {};
+	end
+end);
 
 StaticPopupDialogs = {}; -- Definitions
 StaticPopupTimeoutSec = 60;
@@ -55,6 +69,15 @@ local function StaticPopup_CollapseTable()
 		if not dialog:IsShown() then
 			table.remove(shownDialogFrames, index);
 		end
+	end
+
+	-- If this was the last dialog then reallocate the table. This is to resolve
+	-- situations where ipairs/ipairs_reverse iterations over this table can
+	-- taint in cases where an addon-initiated dialog was just removed and
+	-- a tainted nil value has been left behind in the table in its place.
+
+	if #shownDialogFrames == 0 then
+		StaticPopupAttributeDelegate:SetAttribute(StaticPopupAttributes.ReallocateShownDialogs, true);
 	end
 end
 
@@ -113,13 +136,21 @@ function StaticPopup_FindVisible(which, data)
 	return nil;
 end
 
-function StaticPopup_Visible(which)
+local function SecureStaticPopup_Visible(which)
 	for _, dialog in ipairs(shownDialogFrames) do
 		if dialog.which == which then
 			return dialog:GetName(), dialog;
 		end
 	end
 	return nil;
+end
+
+function StaticPopup_Visible(which)
+	return securecallfunction(SecureStaticPopup_Visible, which);
+end
+
+function StaticPopup_IsSpecial(dialog)
+	return dialog.special;
 end
 
 function StaticPopup_ForEachShownDialog(func)
@@ -386,7 +417,13 @@ end
 function StaticPopup_Hide(which, data)
 	for _, dialog in ipairs_reverse(shownDialogFrames) do
 		if (dialog.which == which) and (not data or (data == dialog.data)) then
+			local needsOnHideCall = dialog:IsShown() and not dialog:IsVisible();
+
 			dialog:Hide();
+
+			if needsOnHideCall then
+				StaticPopup_OnHide(dialog);
+			end
 		end
 	end
 end
@@ -409,7 +446,6 @@ function StaticPopup_HideAll()
 end
 
 function StaticPopup_OnUpdate(dialog, elapsed)
-	local which = dialog.which;
 	local dialogInfo = dialog.dialogInfo;
 
 	if dialog.timeleft > 0 then
@@ -498,11 +534,20 @@ function StaticPopup_UpdateProgressBar(dialog, percent)
 end
 
 -- This is intended to be used to continue ticking dialogs while the entire UI is hidden
+-- Do not allow special dialogs to run StaticPopup_OnUpdate.
 function StaticPopup_UpdateAll(elapsed)
 	for _, dialog in ipairs(shownDialogFrames) do
-		if not dialog:IsVisible() then
+		if not dialog:IsVisible() and not StaticPopup_IsSpecial(dialog) then
 			StaticPopup_OnUpdate(dialog, elapsed);
 		end
+	end
+end
+
+function StaticPopup_ReleaseInsertedFrame(dialog)
+	if dialog.insertedFrame then
+		dialog.insertedFrame:Hide();
+		dialog.insertedFrame:SetParent(nil);
+		dialog.insertedFrame = nil;
 	end
 end
 
@@ -553,10 +598,7 @@ function StaticPopup_OnHide(dialog)
 		dialog:SetScript("OnKeyDown", nil);
 	end
 
-	if dialog.insertedFrame then
-		dialog.insertedFrame:Hide();
-		dialog.insertedFrame:SetParent(nil);
-	end
+	StaticPopup_ReleaseInsertedFrame(dialog);
 
 	StaticPopup_CollapseTable();
 end
@@ -858,7 +900,7 @@ function StaticPopupSpecial_Toggle(dialog)
 end
 
 function StaticPopup_ReparentDialogs()
-	for dialog in ipairs(shownDialogFrames) do
+	for _, dialog in ipairs(shownDialogFrames) do
 		dialog:SetParent(GetFullScreenFrame());
 		dialog:SetFrameStrata("DIALOG");
 	end
