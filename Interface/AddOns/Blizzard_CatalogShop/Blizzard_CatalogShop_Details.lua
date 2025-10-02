@@ -17,6 +17,9 @@ function CatalogShopProductDetailsContainerFrameMixin:OnShow()
 end
 
 function CatalogShopProductDetailsContainerFrameMixin:OnHide()
+	-- when we hide the Details Frame, we need to clear that ScrollBox
+	local dataProvider = CreateDataProvider();
+	self.DetailsProductContainerFrame.ProductsScrollBoxContainer.ScrollBox:SetDataProvider(dataProvider);
 end
 
 function CatalogShopProductDetailsContainerFrameMixin:OnEvent(event, ...)
@@ -60,7 +63,7 @@ function DetailsProductContainerFrameMixin:InitProductContainer()
 		local dataProvider = CreateDataProvider();
 		for _, childInfo in ipairs(self.bundleChildInfo) do
 			local productInfo = CatalogShopFrame:GetProductInfo(childInfo.childProductID);
-			if productInfo then
+			if productInfo and (not productInfo.isHidden) then
 				productInfo.elementType = CatalogShopConstants.ScrollViewElementType.Product;
 				productInfo.isBundleChild = true;
 				productInfo.displayOrder = childInfo.displayOrder;
@@ -81,14 +84,31 @@ function DetailsProductContainerFrameMixin:InitProductContainer()
 		frame:SetSelected(isSelected);
 		frame:SetScript("OnClick", function(button, buttonName)
 			scrollContainer.selectionBehavior:ToggleSelect(button);
+			EventRegistry:TriggerEvent("CatalogShop.OnBundleChildSelected", productInfo);
 		end);
 	end
 
-	local function GetDetailContainerElementFactory(factory, elementData)
-		if elementData.cardDisplayData.productCardType == CatalogShopConstants.ProductCardType.Subscription then
-			factory(CatalogShopConstants.CardTemplate.DetailsSubscriptionSmall, InitializeButton);
+	local function GetDetailContainerElementFactory(factory, elementData)		
+		if elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Subscription then
+			-- Subscription
+			factory(CatalogShopConstants.CardTemplate.DetailsSubscription, InitializeButton);
+		elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.GameTime then
+			-- Game Time
+			factory(CatalogShopConstants.CardTemplate.DetailsGameTime, InitializeButton);
+		elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Toy then
+			-- Toy
+			factory(CatalogShopConstants.CardTemplate.DetailsToys, InitializeButton);
+		elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.TradersTenders then
+			-- Trader's Tender
+			factory(CatalogShopConstants.CardTemplate.DetailsTender, InitializeButton);
+		elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Services then
+			-- Services
+			factory(CatalogShopConstants.CardTemplate.DetailsServices, InitializeButton);
+		elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Access then
+			-- Access
+			factory(CatalogShopConstants.CardTemplate.DetailsAccess, InitializeButton);
 		else
-			factory(CatalogShopConstants.CardTemplate.DetailsSmall, InitializeButton);
+			factory(CatalogShopConstants.CardTemplate.Details, InitializeButton);
 		end
 	end
 	self:SetupScrollView(GetDetailContainerElementFactory);
@@ -99,29 +119,39 @@ function DetailsProductContainerFrameMixin:UpdateProductInfo(productInfo)
 	self.displayInfo = C_CatalogShop.GetCatalogShopProductDisplayInfo(self.productInfo.catalogShopProductID);
 
 	self.ProductsHeader:SetShown(true);
-	self.usesScrollBox = productInfo.isBundle or false;
-	-- Init ProductsScrollBoxContainer
-	self.ProductsScrollBoxContainer:SetShown(self.usesScrollBox);
-	self.ShadowLayer:SetShown(self.usesScrollBox);
 
-	local desc = CatalogShopUtil.GetDescriptionText(self.productInfo, self.displayInfo);
+	local desc = CatalogShopUtil.GetDescriptionText(self.productInfo);
 	if productInfo.isBundle then
 		self.sectionData = nil;
 		self.bundleChildInfo = C_CatalogShop.GetProductIDsForBundle(productInfo.catalogShopProductID);
 		local headerData = {
 			Name = self.productInfo.name,
 			Description = desc,
+			showLegal = true,
 		};
-		self:SetupProductHeaderFrame(headerData);
+		self.ProductsHeader:Init(headerData);
 	else
 		local headerData = {
 			Name = self.productInfo.name,
-			Type = self.displayInfo.productType,
+			Type = CatalogShopUtil.GetTypeText(productInfo),
 			Description = desc,
+			showLegal = true,
 		};
-		self:SetupProductHeaderFrame(headerData);
+		self.ProductsHeader:Init(headerData);
 		self.bundleChildInfo = nil;
 	end
-	-- Only show the bundle container if our product is a bundle.
+
+	local function onHyperlinkClicked(frame, link, text, button)
+		C_CatalogShop.OnLegalDisclaimerClicked(self.productInfo.catalogShopProductID);
+	end
+	self.ProductsHeader:SetScript("OnHyperlinkClick", onHyperlinkClicked);
+
+	-- Force the VerticalLayoutFrame to update the layout immediately. This allows the scrollbox to have accurate layout info from it's anchor.
+	self.ProductsHeader:Layout();
+
+	-- Init ProductsScrollBoxContainer AFTER the VerticalLayoutFrame has been built (via call to Layout)
+	self.usesScrollBox = productInfo.isBundle or false;
+	self.ProductsScrollBoxContainer:SetShown(self.usesScrollBox);
+	self.ShadowLayer:SetShown(self.usesScrollBox);
 	self:AllDataRefresh(true);
 end

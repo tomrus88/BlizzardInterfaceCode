@@ -72,6 +72,16 @@ local CatalogShop =
 			},
 		},
 		{
+			Name = "GetFailureInfo",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "errorResultEnum", Type = "StoreError", Nilable = true },
+				{ Name = "errorResultRaw", Type = "number", Nilable = true },
+			},
+		},
+		{
 			Name = "GetProductAvailabilityTimeRemainingSecs",
 			Type = "Function",
 
@@ -125,7 +135,7 @@ local CatalogShop =
 
 			Returns =
 			{
-				{ Name = "productInfo", Type = "CatalogShopProductInfo", Nilable = false },
+				{ Name = "productInfo", Type = "CatalogShopProductInfo", Nilable = true },
 			},
 		},
 		{
@@ -173,8 +183,37 @@ local CatalogShop =
 			},
 		},
 		{
+			Name = "IsShop2Enabled",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "value", Type = "bool", Nilable = true },
+			},
+		},
+		{
+			Name = "OnLegalDisclaimerClicked",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "catalogShopProductID", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "OpenCatalogShopInteraction",
 			Type = "Function",
+		},
+		{
+			Name = "ProductDisplayedTelemetry",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "categoryId", Type = "number", Nilable = false },
+				{ Name = "sectionId", Type = "number", Nilable = false },
+				{ Name = "catalogShopProductID", Type = "number", Nilable = false },
+			},
 		},
 		{
 			Name = "ProductSelectedTelemetry",
@@ -182,7 +221,10 @@ local CatalogShop =
 
 			Arguments =
 			{
+				{ Name = "categoryId", Type = "number", Nilable = false },
+				{ Name = "sectionId", Type = "number", Nilable = false },
 				{ Name = "catalogShopProductID", Type = "number", Nilable = false },
+				{ Name = "wasCodeSelection", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -260,6 +302,11 @@ local CatalogShop =
 			},
 		},
 		{
+			Name = "CatalogShopRebuildScrollBox",
+			Type = "Event",
+			LiteralName = "CATALOG_SHOP_REBUILD_SCROLL_BOX",
+		},
+		{
 			Name = "CatalogShopRemovePendingProduct",
 			Type = "Event",
 			LiteralName = "CATALOG_SHOP_REMOVE_PENDING_PRODUCT",
@@ -267,6 +314,11 @@ local CatalogShop =
 			{
 				{ Name = "productID", Type = "number", Nilable = false },
 			},
+		},
+		{
+			Name = "CatalogShopResultError",
+			Type = "Event",
+			LiteralName = "CATALOG_SHOP_RESULT_ERROR",
 		},
 		{
 			Name = "CatalogShopSpecificProductRefresh",
@@ -335,15 +387,19 @@ local CatalogShop =
 				{ Name = "hasUnknownLicense", Type = "bool", Nilable = false },
 				{ Name = "otherProductImageAtlasName", Type = "string", Nilable = true },
 				{ Name = "otherProductPMTURL", Type = "string", Nilable = true },
+				{ Name = "otherProductGameTitleBaseTag", Type = "string", Nilable = true },
+				{ Name = "otherProductGameType", Type = "string", Nilable = true },
 				{ Name = "customLoopingSoundStart", Type = "number", Nilable = true },
 				{ Name = "customLoopingSoundMiddle", Type = "number", Nilable = true },
 				{ Name = "customLoopingSoundEnd", Type = "number", Nilable = true },
-				{ Name = "specialActorID_1", Type = "number", Nilable = true },
-				{ Name = "specialActorID_2", Type = "number", Nilable = true },
-				{ Name = "specialActorID_3", Type = "number", Nilable = true },
-				{ Name = "specialActorID_4", Type = "number", Nilable = true },
-				{ Name = "specialActorID_5", Type = "number", Nilable = true },
-				{ Name = "subTitleID", Type = "number", Nilable = true },
+				{ Name = "specialActorID_1", Type = "string", Nilable = true },
+				{ Name = "specialActorID_2", Type = "string", Nilable = true },
+				{ Name = "specialActorID_3", Type = "string", Nilable = true },
+				{ Name = "specialActorID_4", Type = "string", Nilable = true },
+				{ Name = "specialActorID_5", Type = "string", Nilable = true },
+				{ Name = "gameFlavorID", Type = "number", Nilable = true },
+				{ Name = "decorFileDataID", Type = "number", Nilable = true },
+				{ Name = "quantity", Type = "number", Nilable = true },
 			},
 		},
 		{
@@ -353,13 +409,15 @@ local CatalogShop =
 			{
 				{ Name = "catalogShopProductID", Type = "number", Nilable = false },
 				{ Name = "name", Type = "string", Nilable = false },
+				{ Name = "type", Type = "string", Nilable = true },
 				{ Name = "description", Type = "string", Nilable = false },
 				{ Name = "iconTexture", Type = "string", Nilable = false },
-				{ Name = "productCardType", Type = "number", Nilable = false },
-				{ Name = "purchased", Type = "bool", Nilable = false },
+				{ Name = "isFullyOwned", Type = "bool", Nilable = false },
 				{ Name = "isPurchasePending", Type = "bool", Nilable = false },
 				{ Name = "refundable", Type = "bool", Nilable = false },
 				{ Name = "price", Type = "string", Nilable = false },
+				{ Name = "originalPrice", Type = "string", Nilable = false },
+				{ Name = "discountPercentage", Type = "number", Nilable = false },
 				{ Name = "itemID", Type = "number", Nilable = false },
 				{ Name = "mountID", Type = "number", Nilable = false },
 				{ Name = "mountTypeName", Type = "string", Nilable = false },
@@ -369,6 +427,12 @@ local CatalogShop =
 				{ Name = "subItems", Type = "table", InnerType = "CatalogShopSubItemInfo", Nilable = false },
 				{ Name = "subItemsLoaded", Type = "bool", Nilable = false },
 				{ Name = "backgroundTexture", Type = "string", Nilable = false },
+				{ Name = "foregroundTexture", Type = "string", Nilable = true },
+				{ Name = "smallCardBGTexture", Type = "string", Nilable = true },
+				{ Name = "smallCardFGTexture", Type = "string", Nilable = true },
+				{ Name = "wideCardBGTexture", Type = "string", Nilable = true },
+				{ Name = "wideCardFGTexture", Type = "string", Nilable = true },
+				{ Name = "previewIconTexture", Type = "string", Nilable = true },
 				{ Name = "hasTimeRemaining", Type = "bool", Nilable = false },
 				{ Name = "optionalWideCardBackgroundTexture", Type = "string", Nilable = true },
 				{ Name = "isBundle", Type = "bool", Nilable = false },
@@ -376,6 +440,8 @@ local CatalogShop =
 				{ Name = "licenseTermType", Type = "number", Nilable = false },
 				{ Name = "licenseTermDuration", Type = "number", Nilable = false },
 				{ Name = "virtualCurrencies", Type = "table", InnerType = "CatalogShopVirtualCurrency", Nilable = false },
+				{ Name = "isHidden", Type = "bool", Nilable = false },
+				{ Name = "hasPendingOrders", Type = "bool", Nilable = false },
 			},
 		},
 		{

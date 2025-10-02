@@ -5,9 +5,9 @@ local AccountConstants =
 		{
 			Name = "AccountData",
 			Type = "Enumeration",
-			NumValues = 17,
+			NumValues = 20,
 			MinValue = 0,
-			MaxValue = 16,
+			MaxValue = 19,
 			Fields =
 			{
 				{ Name = "Config", Type = "AccountData", EnumValue = 0 },
@@ -27,6 +27,9 @@ local AccountConstants =
 				{ Name = "UIEditModeChar", Type = "AccountData", EnumValue = 14 },
 				{ Name = "FrontendChatSettings", Type = "AccountData", EnumValue = 15 },
 				{ Name = "CharacterListOrder", Type = "AccountData", EnumValue = 16 },
+				{ Name = "CooldownManager", Type = "AccountData", EnumValue = 17 },
+				{ Name = "CooldownManager2", Type = "AccountData", EnumValue = 18 },
+				{ Name = "Shop2PendingOrders", Type = "AccountData", EnumValue = 19 },
 			},
 		},
 		{
@@ -227,9 +230,9 @@ local AccountConstants =
 		{
 			Name = "ItemCollectionType",
 			Type = "Enumeration",
-			NumValues = 10,
+			NumValues = 13,
 			MinValue = 0,
-			MaxValue = 8,
+			MaxValue = 11,
 			Fields =
 			{
 				{ Name = "ItemCollectionNone", Type = "ItemCollectionType", EnumValue = 0 },
@@ -241,7 +244,10 @@ local AccountConstants =
 				{ Name = "ItemCollectionTransmogIllusion", Type = "ItemCollectionType", EnumValue = 6 },
 				{ Name = "ItemCollectionWarbandScene", Type = "ItemCollectionType", EnumValue = 7 },
 				{ Name = "ItemCollectionRoom", Type = "ItemCollectionType", EnumValue = 8 },
-				{ Name = "NumItemCollectionTypes", Type = "ItemCollectionType", EnumValue = 8 },
+				{ Name = "ItemCollectionExteriorFixture", Type = "ItemCollectionType", EnumValue = 9 },
+				{ Name = "ItemCollectionRoomThemes", Type = "ItemCollectionType", EnumValue = 10 },
+				{ Name = "ItemCollectionRoomMaterials", Type = "ItemCollectionType", EnumValue = 11 },
+				{ Name = "NumItemCollectionTypes", Type = "ItemCollectionType", EnumValue = 11 },
 			},
 		},
 	},

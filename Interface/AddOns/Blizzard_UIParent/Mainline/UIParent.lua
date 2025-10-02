@@ -933,8 +933,7 @@ function ToggleStoreUI(contextKey)
 		return;
 	end
 
-	-- TODO: Replace with MirrorVar
-	local useNewCashShop = GetCVarBool("useNewCashShop");
+	local useNewCashShop = C_CatalogShop.IsShop2Enabled();
 	if useNewCashShop then
 		local wasShown = CatalogShopInboundInterface.IsShown();
 		if ( not wasShown ) then
@@ -1288,8 +1287,7 @@ function UIParent_OnEvent(self, event, ...)
 
 		NPETutorial_AttemptToBegin(event);
 
-		-- TODO: Replace with MirrorVar
-		local useNewCashShop = GetCVarBool("useNewCashShop");
+		local useNewCashShop = C_CatalogShop.IsShop2Enabled();
 		if useNewCashShop then
 			CatalogShopInboundInterface.CheckForFree(event);
 		else
@@ -1731,8 +1729,12 @@ function UIParent_OnEvent(self, event, ...)
 		local spellID, confirmType = ...;
 		if ( confirmType == Enum.ConfirmationPromptUIType.StaticText ) then
 			StaticPopup_Hide("SPELL_CONFIRMATION_PROMPT", spellID);
+		elseif ( confirmType == Enum.ConfirmationPromptUIType.StaticTextAlert ) then
+			StaticPopup_Hide("SPELL_CONFIRMATION_PROMPT_ALERT", spellID);
 		elseif ( confirmType == Enum.ConfirmationPromptUIType.SimpleWarning ) then
 			StaticPopup_Hide("SPELL_CONFIRMATION_WARNING", spellID);
+		elseif ( confirmType == Enum.ConfirmationPromptUIType.SimpleWarningAlert ) then
+			StaticPopup_Hide("SPELL_CONFIRMATION_WARNING_ALERT", spellID);
 		elseif ( confirmType == Enum.ConfirmationPromptUIType.BonusRoll ) then
 			BonusRollFrame_CloseBonusRoll();
 		end
@@ -2114,8 +2116,7 @@ function UIParent_OnEvent(self, event, ...)
 		C_AddOns.LoadAddOn("Blizzard_BehavioralMessaging");
 		BehavioralMessagingTray:OnEvent(event, ...);
 	elseif ( event == "PRODUCT_DISTRIBUTIONS_UPDATED" ) then
-		-- TODO: Replace with MirrorVar
-		local useNewCashShop = GetCVarBool("useNewCashShop");
+		local useNewCashShop = C_CatalogShop.IsShop2Enabled();
 		if useNewCashShop then
 			CatalogShopInboundInterface.CheckForFree(self, value);
 		else

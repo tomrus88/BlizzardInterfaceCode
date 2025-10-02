@@ -796,9 +796,7 @@ end
 function GetDisplayedExpansionLogo(expansionLevel)
 	local isTrial = expansionLevel == nil;
 
-	if isTrial then
-		return [[Interface\Glues\Common\Glues-WoW-FreeTrial]];
-	elseif expansionLevel <= GetMinimumExpansionLevel() then
+	if isTrial or expansionLevel <= GetMinimumExpansionLevel() then
 		local expansionInfo = GetExpansionDisplayInfo(LE_EXPANSION_CLASSIC);
 		if expansionInfo then
 			return expansionInfo.logo;
@@ -828,8 +826,7 @@ function UpgradeAccount()
 		StoreInterfaceUtil.OpenToSubscriptionProduct();
 	else
 		if C_StorePublic.DoesGroupHavePurchaseableProducts(WOW_GAMES_CATEGORY_ID) then
-			-- TODO: Replace with MirrorVar
-			local useNewCashShop = GetCVarBool("useNewCashShop");
+			local useNewCashShop = C_CatalogShop.IsShop2Enabled();
 			if useNewCashShop then
 				CatalogShopInboundInterface.SetGamesCategory();
 			else

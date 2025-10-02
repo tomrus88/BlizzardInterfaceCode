@@ -112,7 +112,7 @@ function NavigationBarMixin:SetupNavigationScrollView()
 		end);
 	end
 
-	local view = CreateScrollBoxListLinearView(DefaultPad, DefaultPad, DefaultPad, DefaultPad, DefaultSpacing);
+	local view = CreateScrollBoxListLinearView(DefaultPad, DefaultPad, DefaultPad, DefaultPad, -0.05);
 	view:SetVirtualized(false);
 	view:SetHorizontal(true);	
 	view:SetElementInitializer("NavigationBarButtonTemplate", InitializeButton);
@@ -320,7 +320,6 @@ CatalogShopErrorFrameMixin = {};
 function CatalogShopErrorFrameMixin:OnShow()
 	-- TODO update whatever states are required
 	self.ActiveURLIndex = nil;
-	self.ErrorNeedsAck = nil;
 end
 
 function CatalogShopErrorFrameMixin:OnHide()
@@ -334,6 +333,7 @@ end
 function CatalogShopErrorFrameMixin:ShowError(title, desc, urlIndex, needsAck)
 	local height = 180;
 	self.Title:SetText(title);
+	self.Title:Show();
 	self.Description:SetText(desc);
 	self.AcceptButton:SetText(OKAY);
 	height = height + self.Description:GetHeight() + self.Title:GetHeight();
@@ -418,6 +418,71 @@ end
 
 
 ----------------------------------------------------------------------------------
+-- CrossGameContainerFrameMixin
+----------------------------------------------------------------------------------
+CrossGameContainerFrameMixin = {};
+function CrossGameContainerFrameMixin:OnLoad()
+end
+
+function CrossGameContainerFrameMixin:OnShow()
+end
+
+function CrossGameContainerFrameMixin:OnHide()
+end
+
+local function SetAlternateProductURLImage(displayInfo)
+	local texture = CatalogShopFrame.CrossGameContainerFrame.PMTImageForNoModel;
+
+	if displayInfo and displayInfo.otherProductPMTURL then
+		C_Texture.SetURLTexture(texture, displayInfo.otherProductPMTURL);
+	end
+end
+
+-- TODO: Add support for correct localized flavor based on PMT attribute [WOW11-145789]
+local function SetMissingLicenseCaptionText(displayInfo)
+	local text = CatalogShopFrame.CrossGameContainerFrame.OtherProductWarningText;
+
+	if not displayInfo then
+		text:SetText("");
+		return;
+	end
+
+	local secureEnv = GetCurrentEnvironment();
+
+	if displayInfo.otherProductGameTitleBaseTag then
+		local gameNameStr = nil;
+		if displayInfo.otherProductGameType == CatalogShopConstants.GameTypes.Classic then
+			gameNameStr = CatalogShopConstants.GameTypeGlobalStringTag.Classic;
+		elseif displayInfo.otherProfuctGameType == CatalogShopConstants.GameTypes.Modern then
+			gameNameStr = CatalogShopConstants.GameTypeGlobalStringTag.Modern;
+		end
+		-- At this point gameNameStr should be nil (no special name format), "%s Classic", or "World of Warcraft: %s"
+
+		if gameNameStr then
+			local gameTitleStr = secureEnv[displayInfo.otherProductGameTitleBaseTag];
+			gameNameStr = gameNameStr:format(gameTitleStr);
+		else
+			gameNameStr = secureEnv[displayInfo.otherProductGameTitleBaseTag];
+		end
+		-- At this point gameNameStr is a fully described game title "Mists of Pandaria Classic" or "World of Warcraft: The War Within"
+
+		gameNameStr = CatalogShopConstants.ShopGlobalStringTag.MissingLicenseCaptionText:format(gameNameStr);
+		-- At this point the text is complete and holds something like "This product is available in Mists of Pandaria Classic"
+
+		text:SetText(gameNameStr);
+	else
+		text:SetText("");
+	end
+end
+
+function CrossGameContainerFrameMixin:SetDisplayInfo(displayInfo)
+	CatalogShopUtil.SetAlternateProductIcon(self.WatermarkLogoTexture, displayInfo);
+	SetAlternateProductURLImage(displayInfo);
+	SetMissingLicenseCaptionText(displayInfo);
+end
+
+
+----------------------------------------------------------------------------------
 -- CatalogShopDetailsRaceButtonMixin
 ----------------------------------------------------------------------------------
 CatalogShopDetailsRaceButtonMixin = {};
@@ -446,29 +511,35 @@ end
 GlowPulseAnimContainerMixin = {};
 function GlowPulseAnimContainerMixin:OnLoad()
 	if self.playLoopingSoundFX == true then
-		local startingSound = SOUNDKIT.CATALOG_SHOP_GOLD_SHIMMER_START;
-		local loopingSound = SOUNDKIT.CATALOG_SHOP_GOLD_SHIMMER_LOOP;
-		local endingSound = SOUNDKIT.CATALOG_SHOP_GOLD_SHIMMER_END;
-
-		local loopStartDelay = 0.3; -- Delay before the looping sound starts
-		local loopEndDelay = 0.3; -- Delay before the looping sound ends
-		local loopFadeTime = 0.3; -- Time to fade out the looping sound
-
-		self.loopingSoundEmitter = CreateLoopingSoundEffectEmitter(startingSound, loopingSound, endingSound, loopStartDelay, loopEndDelay, loopFadeTime);
+		self.loopingSoundEmitter = self:CreateLoopingSoundFX();
+	else
+		self.loopingSoundEmitter = nil;
 	end
+end
+
+function GlowPulseAnimContainerMixin:CreateLoopingSoundFX()
+	local startingSound = SOUNDKIT.CATALOG_SHOP_GOLD_SHIMMER_START;
+	local loopingSound = SOUNDKIT.CATALOG_SHOP_GOLD_SHIMMER_LOOP;
+	local endingSound = SOUNDKIT.CATALOG_SHOP_GOLD_SHIMMER_END;
+
+	local loopStartDelay = 0.3; -- Delay before the looping sound starts
+	local loopEndDelay = 0.3; -- Delay before the looping sound ends
+	local loopFadeTime = 0.3; -- Time to fade out the looping sound
+
+	return CreateLoopingSoundEffectEmitter(startingSound, loopingSound, endingSound, loopStartDelay, loopEndDelay, loopFadeTime);
 end
 
 function GlowPulseAnimContainerMixin:OnShow()
 	self.ShopRays.RayAnim:Play();
-	if self.playLoopingSoundFX == true then
+	if self.loopingSoundEmitter then
 		self.loopingSoundEmitter:StartLoopingSound();
 	end
 end
 
 function GlowPulseAnimContainerMixin:OnHide()
 	self.ShopRays.RayAnim:Stop();
-	if self.playLoopingSoundFX == true then
-		self.loopingSoundEmitter:FinishLoopingSound();
+	if self.loopingSoundEmitter then
+		self.loopingSoundEmitter:CancelLoopingSound();
 	end
 end
 
@@ -492,7 +563,139 @@ function CatalogShopLoadingScreenMixin:OnShow()
 	self.loopingSoundEmitter:StartLoopingSound();
 end
 
-function CatalogShopLoadingScreenMixin:OnHide()
-	self.loopingSoundEmitter:FinishLoopingSound();
+function CatalogShopLoadingScreenMixin:StopLoopingSound()
+	self.loopingSoundEmitter:CancelLoopingSound();
 end
 
+function CatalogShopLoadingScreenMixin:OnHide()
+	self:StopLoopingSound();
+end
+
+
+----------------------------------------------------------------------------------
+-- CatalogShopUnavailableScreenMixin
+----------------------------------------------------------------------------------
+CatalogShopUnavailableScreenMixin = {};
+function CatalogShopUnavailableScreenMixin:OnLoad()
+end
+
+function CatalogShopUnavailableScreenMixin:OnShow()
+end
+
+function CatalogShopUnavailableScreenMixin:OnHide()
+end
+
+
+----------------------------------------------------------------------------------
+-- CarouselControlMixin
+----------------------------------------------------------------------------------
+CarouselControlMixin = {};
+function CarouselControlMixin:OnLoad()
+	EventRegistry:RegisterCallback("CatalogShopModel.TransmogLoaded.CheckCarousel", self.CheckCarousel, self);
+	EventRegistry:RegisterCallback("CatalogShopModel.TransmogLoaded.HideCarousel", self.HideCarousel, self);
+
+	local function OnCarouselButtonClick(button, buttonName, down)
+		PlaySound(SOUNDKIT.CATALOG_SHOP_SELECT_GENERIC_UI_BUTTON);
+		self.carouselIndex = self.carouselIndex + button.incrementAmount;
+		self.carouselIndex = Clamp(self.carouselIndex, 1, #self.items);
+		self:UpdateCarousel();
+
+		self.currentItem = self.items[self.carouselIndex];
+
+		if self.actor then
+			CatalogShopUtil.CatalogShopTryOn(self.actor, self.currentItem);
+			-- TODO do we need to notify any other UI elements of what happened here
+			--EventRegistry:TriggerEvent("CatalogShop.Carousel.TransmogChanged", self.currentItem);
+		end
+	end
+
+	local leftButton = self.CarouselLeftButton;
+	leftButton.incrementAmount = -1;
+	leftButton:SetScript("OnClick", OnCarouselButtonClick );
+
+	local rightButton = self.CarouselRightButton;
+	rightButton.incrementAmount = 1;
+	rightButton:SetScript("OnClick", OnCarouselButtonClick );
+end
+
+function CarouselControlMixin:HideCarousel()
+	self:Hide();
+end
+
+function CarouselControlMixin:CheckCarousel(modelScene, actor, playerData)
+	if not playerData or C_Glue.IsOnGlueScreen() then
+		self:Hide();
+		return;
+	end
+	local itemModifiedAppearanceIDs = playerData.itemModifiedAppearanceIDs;
+	self:SetCarouselItems(modelScene, actor, itemModifiedAppearanceIDs);
+end
+
+function CarouselControlMixin:UpdateCarouselText()
+	local carouselText = format(CATALOG_SHOP_CAROUSEL_INDEX, self.carouselIndex, #self.items);
+	self.CarouselLabelContainer.Label:SetText(carouselText);
+end
+
+function CarouselControlMixin:UpdateCarouselButtons()
+	local count = #self.items;
+	local enablePreviousButton = self.carouselIndex > 1;
+	local enableNextButton = self.carouselIndex < count;
+	self.CarouselLeftButton:SetEnabled(enablePreviousButton);
+	self.CarouselRightButton:SetEnabled(enableNextButton);
+end
+
+function CarouselControlMixin:UpdateCarousel()
+	self:UpdateCarouselText();
+	self:UpdateCarouselButtons();
+end
+
+function CarouselControlMixin:SetCarouselItems(modelScene, actor, itemModifiedAppearanceIDs)
+	self.carouselIndex = 1;
+	self.actor = actor;
+	self.modelScene = modelScene;
+	self.items = itemModifiedAppearanceIDs;
+	local count = self.items and #self.items or 0;
+	local allSameType = CatalogShopUtil.ItemAppearancesHaveSameCategory(self.items);
+	local showCarousel = count > 1 and allSameType;
+	if showCarousel then
+		self:UpdateCarousel();
+	end
+	self:SetShown(showCarousel);	
+end
+
+ProductsHeaderMixin = {};
+function ProductsHeaderMixin:Init(headerData)
+	self.headerData = headerData;
+	-- Set up ProductsHeader
+	if headerData.Name then
+		self.ProductName:Show();
+		self.ProductName:SetText(headerData.Name);
+	else
+		self.ProductName:Hide();
+	end
+	if headerData.Type then
+		self.ProductType:Show();
+		self.ProductType:SetText(headerData.Type);
+	else
+		self.ProductType:Hide();
+	end
+	if headerData.Description and headerData.Description ~= "" then
+		self.ProductDescription:Show();
+		self.ProductDescription:SetText(headerData.Description);
+	else
+		self.ProductDescription:Hide();
+	end
+	self.LegalDisclaimerText:SetShown(headerData.showLegal or false);
+end
+
+ProductDescriptionMixin = {};
+function ProductDescriptionMixin:OnEnter()
+	local parent = self:GetParent();
+	if parent.headerData and self:IsShown() then
+		CatalogShopFrame:ShowTooltip(self, parent.headerData.Name, parent.headerData.Description);
+	end
+end
+
+function ProductDescriptionMixin:OnLeave()
+	CatalogShopFrame:HideTooltip();
+end

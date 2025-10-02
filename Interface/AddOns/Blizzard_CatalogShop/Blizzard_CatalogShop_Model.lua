@@ -61,8 +61,6 @@ function CatalogShopModelSceneContainerFrameMixin:OnShow()
 			self.formButtonsInitialized = true;
 		end
 	end
-	self:UpdateFormButtonVisibility();
-
 	local forceSceneChange = true;
 end
 
@@ -78,8 +76,8 @@ function CatalogShopModelSceneContainerFrameMixin:OnUpdate()
 	end
 end
 
-function CatalogShopModelSceneContainerFrameMixin:UpdateFormButtonVisibility(forceHideButtons)
-	if forceHideButtons then
+function CatalogShopModelSceneContainerFrameMixin:UpdateFormButtonVisibility(forceHideFormButtons)
+	if forceHideFormButtons then
 		self.NormalFormButton:Hide();
 		self.AlternateFormButton:Hide();
 		return;
@@ -101,6 +99,8 @@ function CatalogShopModelSceneContainerFrameMixin:Init()
 	EventRegistry:RegisterCallback("CatalogShop.OnProductSelected", self.OnProductSelected, self);
 	EventRegistry:RegisterCallback("CatalogShop.OnFormChanged", self.OnFormChanged, self);
 	EventRegistry:RegisterCallback("CatalogShop.CelebratePurchase", self.OnCelebratePurchase, self);
+	EventRegistry:RegisterCallback("CatalogShopModel.AfterTransmogActorLoadedCheckCarousel", self.AfterTransmogActorLoadedCheckCarousel, self);
+	EventRegistry:RegisterCallback("CatalogShopModel.AfterTransmogActorLoaded", self.AfterTransmogActorLoaded, self);
 end
 
 function CatalogShopModelSceneContainerFrameMixin:OnCelebratePurchase(catalogShopProductID)
@@ -137,12 +137,12 @@ function CatalogShopModelSceneContainerFrameMixin:UpdatePlayerModel(data)
 	self.currentData = data;
 	local displayInfo = C_CatalogShop.GetCatalogShopProductDisplayInfo(data.catalogShopProductID);
 	local displayData = self.currentData.sceneDisplayData;
-	local productCardType = displayInfo.productType;
-	if productCardType == CatalogShopConstants.ProductCardType.Bundle then
+	local productType = displayInfo.productType;
+	if productType == CatalogShopConstants.ProductType.Bundle then
 		local forceSceneChange = false;
 		local preserveCurrentView = true;
 		self:OnProductSelected(data, forceSceneChange, preserveCurrentView);
-	elseif productCardType == CatalogShopConstants.ProductCardType.Mount then
+	elseif productType == CatalogShopConstants.ProductType.Mount then
 		local modelScene = self.MainModelScene;
 		local playerActor = modelScene:GetPlayerActor("player-rider");
 		local mountActor = modelScene:GetActorByTag(CatalogShopConstants.DefaultActorTag.Mount);
@@ -157,7 +157,7 @@ function CatalogShopModelSceneContainerFrameMixin:UpdatePlayerModel(data)
 			local useNativeForm = CatalogShopFrame:GetUseNativeForm();
 			modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview, spellVisualKitID, useNativeForm);
 		end
-	elseif productCardType == CatalogShopConstants.ProductCardType.Transmog then
+	elseif productType == CatalogShopConstants.ProductType.Transmog then
 		local forceSceneChange = false;
 		local preserveCurrentView = true;
 		self:OnProductSelected(data, forceSceneChange, preserveCurrentView);
@@ -166,79 +166,79 @@ end
 
 local DefaultInsets = {left=80, right=0, top=0, bottom=0};
 function CatalogShopModelSceneContainerFrameMixin:OnProductSelected(data, forceSceneChange, preserveCurrentView)
+	if not self:IsShown() then
+		EventRegistry:TriggerEvent("CatalogShopModel.OnProductSelectEarlyOut", data);
+		return;
+	end
+
 	local oldData = self.currentData;
 	self.currentData = data;
 
 	local dataHasChanged = true;
 	local shouldSetupModelScene = forceSceneChange or dataHasChanged;
-	local forceHideButtons = false;
+	local forceHideFormButtons = false;
 	local currentActor;
 	local modelScene = self.MainModelScene;
 
 	modelScene:SetViewInsets(DefaultInsets.left, DefaultInsets.right, DefaultInsets.top, DefaultInsets.bottom);
 
 	if shouldSetupModelScene then
-		local modelLoadedCB = CatalogShopModelSceneContainerFrameMixin.UpdateActorVisuals;
+		local modelLoadedCB = CatalogShopModelSceneContainerFrameMixin.AfterTransmogActorLoaded;
 		local displayInfo = C_CatalogShop.GetCatalogShopProductDisplayInfo(data.catalogShopProductID);
 		local defaultModelSceneID = displayInfo.defaultPreviewModelSceneID;
 		local displayData = self.currentData.sceneDisplayData;
-		local productCardType = displayInfo.productType;
+		local productType = displayInfo.productType;
 
-		self.WatermarkLogoTexture:Hide();
-		self.PMTImageForNoModel:Hide();
-		self.PMTImageForNoModelMask:Hide();
-		self.PMTImageForNoModelBorder:Hide();
-		self.OtherProductWarningText:Hide();
+		CatalogShopUtil.ClearSpecialActors(modelScene)
 
-		if productCardType == CatalogShopConstants.ProductCardType.Bundle then
+		displayData.modelSceneContext = CatalogShopConstants.ModelSceneContext.PreviewScene;
+		if productType == CatalogShopConstants.ProductType.Bundle then
+			forceHideFormButtons = true;
 			local forceHidePlayer = false;
 			local bestActorTag = CatalogShopUtil.SetupModelSceneForBundle(modelScene, defaultModelSceneID, displayData, modelLoadedCB, forceHidePlayer);
 			modelScene:Show();
 			currentActor = modelScene:GetActorByTag(bestActorTag);
 		else
-			-- An Unknown License implies we have a product from Catalog that isn't known by our server (it was returned as a missing license)
-			-- So in this case we are currently assuming this means the product is for another game (which could be another flavor of WoW)
-			if displayInfo.hasUnknownLicense then
-				modelScene:Hide();
-				forceHideButtons = true;
-				self.WatermarkLogoTexture:Show();
-				CatalogShopUtil.SetAlternateProductIcon(self.WatermarkLogoTexture, displayInfo);
-				self.PMTImageForNoModel:Show();
-				self.PMTImageForNoModelMask:Show();
-				self.PMTImageForNoModelBorder:Show();
-				-- Add support for correct localized flavor based on PMT attribute [WOW11-145789]
-				self.OtherProductWarningText:SetText("This item is only available on [NYI].")
-				self.OtherProductWarningText:Show();
-				CatalogShopUtil.SetAlternateProductURLImage(self.PMTImageForNoModel, displayInfo);
-			elseif productCardType == CatalogShopConstants.ProductCardType.Mount then
+			if productType == CatalogShopConstants.ProductType.Mount then
 				forceSceneChange = true;--forceSceneChange or self.previousMainModelSceneID ~= defaultModelSceneID;
 				CatalogShopUtil.SetupModelSceneForMounts(modelScene, defaultModelSceneID, displayData, modelLoadedCB, forceSceneChange, forceHidePlayer);
 				modelScene:Show();
 				currentActor = modelScene:GetActorByTag(CatalogShopConstants.DefaultActorTag.Mount);
 				self.previousMainModelSceneID = defaultModelSceneID;
-			elseif productCardType == CatalogShopConstants.ProductCardType.Pet then
+			elseif productType == CatalogShopConstants.ProductType.Pet then
 				forceSceneChange = true;--forceSceneChange or self.previousMainModelSceneID ~= defaultModelSceneID;
 				CatalogShopUtil.SetupModelSceneForPets(modelScene, defaultModelSceneID, displayData, modelLoadedCB, forceSceneChange);
 				modelScene:Show();
 				self.previousMainModelSceneID = defaultModelSceneID;
-				forceHideButtons = true;
+				forceHideFormButtons = true;
 				currentActor = modelScene:GetActorByTag(CatalogShopConstants.DefaultActorTag.Pet);
-			elseif productCardType == CatalogShopConstants.ProductCardType.Transmog then --transmogs
+			elseif productType == CatalogShopConstants.ProductType.Transmog then --transmogs
 				if forceSceneChange == nil then
 					forceSceneChange = true;
 				end
+				modelLoadedCB = CatalogShopModelSceneContainerFrameMixin.AfterTransmogActorLoadedCheckCarousel;
 				CatalogShopUtil.SetupModelSceneForTransmogs(modelScene, defaultModelSceneID, displayData, modelLoadedCB, forceSceneChange, preserveCurrentView);
 				modelScene:Show();
 				currentActor = modelScene.CachedPlayerActor;
+			elseif productType == CatalogShopConstants.ProductType.Decor then
+				forceSceneChange = true;--forceSceneChange or self.previousMainModelSceneID ~= defaultModelSceneID;
+				CatalogShopUtil.SetupModelSceneForDecor(modelScene, defaultModelSceneID, displayData, modelLoadedCB, forceSceneChange);
+				modelScene:Show();
+				self.previousMainModelSceneID = defaultModelSceneID;
+				forceHideFormButtons = true;
+				currentActor = modelScene:GetActorByTag(CatalogShopConstants.DefaultActorTag.Decor);
 			else
 				modelScene:Hide();
-				forceHideButtons = true;
+				forceHideFormButtons = true;
 			end
 			CatalogShopFrame:SetCurrentActor(currentActor);
 		end
+		if CatalogShopUtil.HasSpecialActors(displayData) then
+			CatalogShopUtil.SetupSpecialActors(displayData, modelScene);
+		end
 		CatalogShopFrame:SetCurrentModelSceneData(modelScene, defaultModelSceneID, displayInfo.overridePreviewModelSceneID);
 	end
-	self:UpdateFormButtonVisibility(forceHideButtons);
+	self:UpdateFormButtonVisibility(forceHideFormButtons);
 	EventRegistry:TriggerEvent("CatalogShopModel.OnProductSelectedAfterModel", self.currentData);
 end
 
@@ -247,6 +247,16 @@ function CatalogShopModelSceneContainerFrameMixin:OnFormChanged(useNativeForm)
 	if self.currentData then
 		self:UpdatePlayerModel(self.currentData);
 	end
+end
+
+function CatalogShopModelSceneContainerFrameMixin.AfterTransmogActorLoadedCheckCarousel(modelScene, actor, data)
+	EventRegistry:TriggerEvent("CatalogShopModel.TransmogLoaded.CheckCarousel", modelScene, actor, data);
+	CatalogShopModelSceneContainerFrameMixin.UpdateDropShadowForSingleActor(modelScene, actor);
+end
+
+function CatalogShopModelSceneContainerFrameMixin.AfterTransmogActorLoaded(modelScene, actor, data)
+	EventRegistry:TriggerEvent("CatalogShopModel.TransmogLoaded.HideCarousel");
+	CatalogShopModelSceneContainerFrameMixin.UpdateActorVisuals(modelScene, actor);
 end
 
 function CatalogShopModelSceneContainerFrameMixin.UpdateActorVisuals(modelScene, actor)
@@ -391,6 +401,9 @@ function CatalogShopModelSceneContainerFrameMixin.UpdateDropShadowForBundle(mode
 		local avgZ = sumZ / #displayData.actorDisplayBucket;
 
 		local camera = modelScene:GetActiveCamera();
+		if not camera then
+			return;
+		end
 		local targetX, targetY, targetZ = camera:GetDerivedTarget();
 		local camZoomPct = camera:GetZoomPercent();
 

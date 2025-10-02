@@ -167,6 +167,11 @@ local RecentAllies =
 	Events =
 	{
 		{
+			Name = "LetRecentAlliesSeeLocationSettingUpdated",
+			Type = "Event",
+			LiteralName = "LET_RECENT_ALLIES_SEE_LOCATION_SETTING_UPDATED",
+		},
+		{
 			Name = "RecentAlliesCacheUpdate",
 			Type = "Event",
 			LiteralName = "RECENT_ALLIES_CACHE_UPDATE",
@@ -260,7 +265,7 @@ local RecentAllies =
 				{ Name = "isAFK", Type = "bool", Nilable = false },
 				{ Name = "pinExpirationDate", Type = "time_t", Nilable = true },
 				{ Name = "hasFriendRequestPending", Type = "bool", Nilable = false },
-				{ Name = "currentLocation", Type = "cstring", Nilable = false },
+				{ Name = "currentLocation", Type = "string", Nilable = true },
 			},
 		},
 	},

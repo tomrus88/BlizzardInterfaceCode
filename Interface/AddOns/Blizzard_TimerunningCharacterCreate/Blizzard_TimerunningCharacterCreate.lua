@@ -54,7 +54,7 @@ function TimerunningFirstTimeDialogMixin:OnLoad()
 
 		local createCharacterCallback = function()
 			-- Don't show the popup with the create character choice since the player just selected timerunner.
-			CharacterSelectUtil.CreateNewCharacter(Enum.CharacterCreateType.Normal, timerunningSeasonID);
+			StaticPopup_Show("TIMERUNNING_CHOICE_WARNING");
 		end;
 
 		if GetCVar("showCreateCharacterRealmConfirmDialog") == "1" then
@@ -124,8 +124,10 @@ local TIMERUNNING_LOCALE_SUFFIX_OVERRIDES = {
 
 function TimerunningFirstTimeDialogMixin:UpdateState()
 	local activeTimerunningSeasonID = GetActiveTimerunningSeasonID() or Constants.TimerunningConsts.TIMERUNNING_SEASON_NONE;
+	local seenTimerunningFirstLoginPopup = GetCVarNumberOrDefault("seenTimerunningFirstLoginPopup");
+	local neverShow = seenTimerunningFirstLoginPopup == -1;
 	-- There is no current legion dialog art, so the frame is being hidden until then
-	local shouldShow = activeTimerunningSeasonID ~= TIMERUNNING_SEASON_NONE and GetCVarNumberOrDefault("seenTimerunningFirstLoginPopup") ~= activeTimerunningSeasonID;
+	local shouldShow = not neverShow and activeTimerunningSeasonID ~= TIMERUNNING_SEASON_NONE and seenTimerunningFirstLoginPopup ~= activeTimerunningSeasonID;
 	local canShow = (IsConnectedToServer() and (CharacterSelect:IsShown()) or (CharacterCreateFrame:IsShown() and (not TimerunningChoicePopup or not TimerunningChoicePopup:IsShown())) and (not IsBetaBuild()));
 	self:SetShown(canShow and shouldShow);
 	self.InfoPanel.CreateButton:SetEnabled(IsTimerunningEnabled());
@@ -179,6 +181,12 @@ StaticPopupDialogs["TIMERUNNING_CHOICE_WARNING"] = {
 		TimerunningChoicePopup:Hide();
 		CharacterSelectUtil.CreateNewCharacter(Enum.CharacterCreateType.Normal, GetActiveTimerunningSeasonID());
 	end,
+	OnCancel = function(dialog, data)
+		if GlueParent_GetCurrentScreen() == "charcreate" then
+			CharacterSelectUtil.CreateNewCharacter(Enum.CharacterCreateType.Normal);
+		end
+	end,
+	cover = true,
 };
 
 TimerunningChoiceDialogMixin = {};
@@ -202,11 +210,11 @@ function TimerunningChoiceDialogMixin:OnLoad()
 			C_LiveEvent.OnLiveEventPopupClicked(GetActiveTimerunningSeasonID());
 		end
 
-		if self.isTimerunning and GlueParent_GetCurrentScreen() == "charcreate" then
+		TimerunningChoicePopup:Hide();
+		if self.isTimerunning then
 			StaticPopup_Show("TIMERUNNING_CHOICE_WARNING");
 		else
-			TimerunningChoicePopup:Hide();
-			CharacterSelectUtil.CreateNewCharacter(Enum.CharacterCreateType.Normal, self.isTimerunning and GetActiveTimerunningSeasonID() or nil);
+			CharacterSelectUtil.CreateNewCharacter(Enum.CharacterCreateType.Normal);
 		end
 	end);
 end
@@ -247,7 +255,15 @@ TimerunningEventBannerMixin = {};
 local TimerunningTimeRemainingFormatter = CreateFromMixins(SecondsFormatterMixin);
 TimerunningTimeRemainingFormatter:Init(0, SecondsFormatter.Abbreviation.None, false, false);
 function TimerunningTimeRemainingFormatter:GetMinInterval(seconds)
-	return SecondsFormatter.Interval.Days;
+	if not seconds then
+		return SecondsFormatter.Interval.Days;
+	elseif seconds > SECONDS_PER_DAY then
+		return SecondsFormatter.Interval.Days;
+	elseif seconds > SECONDS_PER_HOUR then
+		return SecondsFormatter.Interval.Hours;
+	end
+
+	return SecondsFormatter.Interval.Minutes;
 end
 
 function TimerunningEventBannerMixin:OnLoad()

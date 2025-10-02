@@ -3,6 +3,30 @@ local REORDER_MARKER_AFTER_TARGET = true;
 
 COOLDOWN_BAR_DEFAULT_COLOR = CreateColor(1, 0.5, 0.25);
 
+StaticPopupDialogs["REVERT_COOLDOWN_LAYOUT_CHANGES"] = {
+	text = COOLDOWN_VIEWER_SETTINGS_DIALOG_TEXT_REVERT_CHANGES,
+	button1 = YES,
+	button2 = NO,
+	OnAccept = function(dialog, data)
+		data:ResetToRestorePoint();
+	end,
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
+StaticPopupDialogs["RESET_COOLDOWN_LAYOUT_TO_DEFAULT"] = {
+	text = COOLDOWN_VIEWER_SETTINGS_DIALOG_TEXT_RESET_LAYOUT_TO_DEFAULT,
+	button1 = YES,
+	button2 = NO,
+	OnAccept = function(dialog, data)
+		data:ResetCurrentToDefaults();
+	end,
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1
+};
+
 CooldownViewerSettingsDraggedItemMixin = {};
 function CooldownViewerSettingsDraggedItemMixin:SetToCursor(cooldownItem)
 	self.Icon:SetTexture(cooldownItem:GetTextureFileID());
@@ -198,13 +222,13 @@ function CooldownViewerSettingsItemMixin:RefreshTooltip(...)
 		CooldownViewerItemDataMixin.RefreshTooltip(self, ...);
 	else
 		local tooltip = GetAppropriateTooltip();
-		GameTooltip_SetTitle(tooltip, "Empty Slot"); -- TODO: Not sure what's going to be displayed here yet.
+		GameTooltip_SetTitle(tooltip, COOLDOWN_VIEWER_SETTINGS_EMPTY_SLOT_TOOLTIP);
 	end
 end
 
 function CooldownViewerSettingsItemMixin:SetReorderLocked(locked)
 	self.reorderLocked = locked;
-	self:RefreshIconState();
+	self:RefreshData();
 end
 
 function CooldownViewerSettingsItemMixin:IsReorderLocked()
@@ -246,25 +270,34 @@ function CooldownViewerSettingsItemMixin:AssignToCategory(category)
 	CooldownViewerSettings:RefreshLayout();
 end
 
+function CooldownViewerSettingsItemMixin:CheckCreateFilterOverlay(filterOverlayKey, anchorToRegion)
+	local overlay = self[filterOverlayKey];
+	if not overlay then
+		overlay = self:CreateTexture(nil, "OVERLAY", nil, 7);
+		overlay:SetColorTexture(0, 0, 0, 0.8);
+		overlay:SetAllPoints(anchorToRegion);
+		self[filterOverlayKey] = overlay;
+	end
+
+	return overlay;
+end
+
 function CooldownViewerSettingsItemMixin:ApplyFilter(passesFilter)
 	if passesFilter or self:IsEmptyCategory() then
 		if self.FilterOverlay then
 			self.FilterOverlay:Hide();
 		end
 	else
-		if not self.FilterOverlay then
-			self.FilterOverlay = self:CreateTexture(nil, "OVERLAY", nil, 7);
-			self.FilterOverlay:SetColorTexture(0, 0, 0, 0.8);
-			self.FilterOverlay:SetAllPoints(self);
-		end
-
+		self:CheckCreateFilterOverlay("FilterOverlay", self.Icon);
 		self.FilterOverlay:Show();
 	end
 end
 
 function CooldownViewerSettingsItemMixin:SetAsCooldown(cooldownID, orderIndex)
 	self.emptyCategory = nil;
-	self:SetCooldownID(cooldownID);
+
+	local forceSet = true;
+	self:SetCooldownID(cooldownID, forceSet);
 	self:SetOrderIndex(orderIndex);
 end
 
@@ -308,6 +341,19 @@ function CooldownViewerSettingsBarItemMixin:RefreshIconState()
 	local info = self:GetCooldownInfo();
 	local isDisabled = not info.isKnown or self:IsReorderLocked();
 	self.Bar.FillTexture:SetVertexColor((isDisabled and DISABLED_FONT_COLOR or COOLDOWN_BAR_DEFAULT_COLOR):GetRGB());
+end
+
+function CooldownViewerSettingsBarItemMixin:ApplyFilter(passesFilter)
+	CooldownViewerSettingsItemMixin.ApplyFilter(self, passesFilter);
+
+	if passesFilter or self:IsEmptyCategory() then
+		if self.BarFilterOverlay then
+			self.BarFilterOverlay:Hide();
+		end
+	else
+		self:CheckCreateFilterOverlay("BarFilterOverlay", self.Bar);
+		self.BarFilterOverlay:Show();
+	end
 end
 
 function CooldownViewerSettingsBarItemMixin:UpdateReorderMarkerPosition(marker, _cursorX, cursorY)
@@ -485,30 +531,50 @@ function CooldownViewerSettingsMixin:OnLoad()
 	self:SetupTabs();
 	self:SetupEventHandlers();
 	self:SetupDropdownMenu();
-	self:SetupSaveButtons();
+	self:SetupPanelButtons();
 	self:SetupScrollFrame();
 
-	self.layoutManager = CreateFromMixins(CooldownViewerLayoutManagerMixin);
-	self.dataSerialization = CreateFromMixins(CooldownViewerDataStoreSerializationMixin);
-	self.dataProvider = CreateFromMixins(CooldownViewerSettingsDataProviderMixin);
+	self:SetLayoutManager(CreateFromMixins(CooldownViewerLayoutManagerMixin));
+	self:SetDataProvider(CreateFromMixins(CooldownViewerSettingsDataProviderMixin));
+	self:SetSerializer(CreateFromMixins(CooldownViewerDataStoreSerializationMixin));
 
 	local function LoadCooldownSettings()
-		self.layoutManager:Init(self.dataProvider, self.dataSerialization);
-		self.dataSerialization:Init(self.layoutManager);
-		self.dataProvider:Init(self.layoutManager);
+		local manager = self:GetLayoutManager();
+		local dataProvider = self:GetDataProvider();
+		local serializer = self:GetSerializer();
+
+		manager:Init(dataProvider, serializer);
+		serializer:Init(manager);
+		dataProvider:Init(manager);
 
 		EventRegistry:TriggerEvent("CooldownViewerSettings.OnSettingsLoaded", self);
 	end
 
-	EventUtil.ContinueAfterAllEvents(LoadCooldownSettings, "VARIABLES_LOADED", "PLAYER_ENTERING_WORLD");
+	EventUtil.ContinueAfterAllEvents(LoadCooldownSettings, "VARIABLES_LOADED", "PLAYER_ENTERING_WORLD", "COOLDOWN_VIEWER_DATA_LOADED");
 end
 
 function CooldownViewerSettingsMixin:GetDataProvider()
 	return self.dataProvider;
 end
 
+function CooldownViewerSettingsMixin:SetDataProvider(provider)
+	self.dataProvider = provider;
+end
+
 function CooldownViewerSettingsMixin:GetLayoutManager()
 	return self.layoutManager;
+end
+
+function CooldownViewerSettingsMixin:SetLayoutManager(manager)
+	self.layoutManager = manager;
+end
+
+function CooldownViewerSettingsMixin:GetSerializer()
+	return self.dataSerialization;
+end
+
+function CooldownViewerSettingsMixin:SetSerializer(serializer)
+	self.dataSerialization = serializer;
 end
 
 function CooldownViewerSettingsMixin:SetupTabs()
@@ -526,7 +592,7 @@ end
 function CooldownViewerSettingsMixin:SetupEventHandlers()
 	self:AddDynamicEventMethod(EventRegistry, "CooldownViewerSettings.BeginOrderChange", self.BeginOrderChange);
 	self:AddDynamicEventMethod(EventRegistry, "CooldownViewerSettings.OnEnterItem", self.OnEnterItem);
-	self:AddDynamicEventMethod(EventRegistry, "CooldownViewerSettings.OnSpecChanged", self.RefreshLayout);
+	self:AddDynamicEventMethod(EventRegistry, "CooldownViewerSettings.OnDataChanged", self.RefreshLayout);
 	self:AddDynamicEventMethod(EventRegistry, "CooldownViewerSettings.OnPendingChanges", self.UpdateSaveButtonStates);
 end
 
@@ -537,7 +603,7 @@ function CooldownViewerSettingsMixin:SetupDropdownMenu()
 		rootDescription:CreateCheckbox(COOLDOWN_VIEWER_SETTINGS_SHOW_UNLEARNED, IsShowingUnlearned, ToggleSetShowUnlearned);
 
 		rootDescription:CreateButton(COOLDOWN_VIEWER_SETTINGS_RESET_LAYOUT_TO_DEFAULT, function()
-			CooldownViewerSettings:ResetCurrentToDefaults();
+			StaticPopup_Show("RESET_COOLDOWN_LAYOUT_TO_DEFAULT", nil, nil, self);
 		end);
 
 		rootDescription:CreateButton(COOLDOWN_VIEWER_SETTINGS_SHOW_OPTIONS, function()
@@ -548,13 +614,13 @@ function CooldownViewerSettingsMixin:SetupDropdownMenu()
 	end);
 end
 
-function CooldownViewerSettingsMixin:SetupSaveButtons()
-	self.SaveLayoutButton:SetOnClickHandler(function(_layoutButton, _button, _isDown)
-		self:SaveCurrentLayout();
+function CooldownViewerSettingsMixin:SetupPanelButtons()
+	self.UndoButton:SetOnClickHandler(function(_layoutButton, _button, _isDown)
+		StaticPopup_Show("REVERT_COOLDOWN_LAYOUT_CHANGES", nil, nil, self);
 	end);
 
-	self.UndoButton:SetOnClickHandler(function(_layoutButton, _button, _isDown)
-		self:ResetToRestorePoint();
+	self.UndoButton:SetCustomTextFormatter(function(button, enabled, highlight)
+		return COOLDOWN_VIEWER_SETTINGS_BUTTON_REVERT_CHANGES .. " " .. CreateAtlasMarkup(enabled and "common-icon-undo" or "common-icon-undo-disable");
 	end);
 end
 
@@ -713,7 +779,6 @@ function CooldownViewerSettingsMixin:OnShow()
 	PlaySound(SOUNDKIT.UI_CLASS_TALENT_OPEN_WINDOW);
 
 	CallbackRegistrantMixin.OnShow(self);
-	self:GetDataProvider():IncrementShowCount();
 
 	if self.displayMode then
 		self:RefreshLayout();
@@ -731,10 +796,11 @@ function CooldownViewerSettingsMixin:OnShow()
 end
 
 function CooldownViewerSettingsMixin:OnHide()
+	self:SaveCurrentLayout();
+
 	PlaySound(SOUNDKIT.UI_CLASS_TALENT_CLOSE_WINDOW);
 
 	CallbackRegistrantMixin.OnHide(self);
-	self:GetDataProvider():DecrementShowCount();
 	EditModeManagerFrame:ShowIfActive();
 	EventRegistry:TriggerEvent("CooldownViewerSettings.OnHide", self);
 end
@@ -915,8 +981,11 @@ function CooldownViewerSettingsMixin:DoesCooldownMatchTextFilter(cooldownItem, t
 	return true;
 end
 
-function CooldownViewerSettingsMixin:ShowUIPanel()
-	EditModeManagerFrame:CheckHideAndLockEditMode();
+function CooldownViewerSettingsMixin:ShowUIPanel(fromEditMode)
+	if fromEditMode then
+		EditModeManagerFrame:CheckHideAndLockEditMode();
+	end
+
 	ShowUIPanel(self);
 end
 
@@ -955,16 +1024,17 @@ end
 
 function CooldownViewerSettingsMixin:SaveCurrentLayout()
 	local layoutManager = self:GetLayoutManager();
-	layoutManager:SaveLayouts();
+	local savedSomething = layoutManager:SaveLayouts();
 	layoutManager:CreateRestorePoint();
+
+	if savedSomething then
+		UIErrorsFrame:AddExternalWarningMessage(COOLDOWN_VIEWER_SETTINGS_LAYOUT_SAVED_MESSAGE);
+	end
 end
 
 function CooldownViewerSettingsMixin:UpdateSaveButtonStates()
 	local hasPendingChanges = self:GetLayoutManager():HasPendingChanges();
-	self.SaveLayoutButton:SetEnabled(hasPendingChanges);
-	GlowEmitterFactory:SetShown(hasPendingChanges, self.SaveLayoutButton, GlowEmitterMixin.Anims.NPE_RedButton_GreenGlow);
 	self.UndoButton:SetEnabled(hasPendingChanges);
-	self.UndoButton.Icon:SetDesaturated(not hasPendingChanges);
 end
 
 function CooldownViewerSettingsMixin:ShowOptionsPanel(fromEditMode)
