@@ -8,6 +8,7 @@ end
 
 function GameTutorials:OnTutorialsInit()
 	AddEvokerTutorials();
+	AddDragonridingRPETutorials();
 end
 
 function GameTutorials:OnTutorialsEnabled()

@@ -54,7 +54,7 @@ local function UpdateButtonStatesForCollections(enabledState)
 
 	if not enabledState then
 		-- Use saved state when going back, do not assume player wants list expanded.
-		local isExpanded = GetCVarBool("expandWarbandCharacterList");
+		local isExpanded = CharacterSelectUtil.ShouldExpandCharacterList();
 		CharacterSelectUI:ExpandCharacterList(isExpanded);
 	else
 		CharacterSelectUI:ExpandCharacterList(false);

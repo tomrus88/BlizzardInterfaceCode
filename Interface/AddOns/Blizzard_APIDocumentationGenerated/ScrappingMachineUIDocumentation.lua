@@ -13,6 +13,7 @@ local ScrappingMachineUI =
 		{
 			Name = "DropPendingScrapItemFromCursor",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -23,6 +24,7 @@ local ScrappingMachineUI =
 			Name = "GetCurrentPendingScrapItemLocationByIndex",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -73,6 +75,7 @@ local ScrappingMachineUI =
 		{
 			Name = "RemoveItemToScrap",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

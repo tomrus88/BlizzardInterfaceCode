@@ -47,6 +47,7 @@ function LayoutIndexComparator(left, right)
 		local rightName = (right.GetDebugName and right:GetDebugName()) or "unnamed";
 		GMError(("Duplicate layoutIndex found: %d for %s and %s"):format(left.layoutIndex, leftName, rightName));
 	end
+
 	return left.layoutIndex < right.layoutIndex;
 end
 
@@ -601,7 +602,7 @@ function GridLayoutFrameMixin:ShouldUpdateLayout(layoutChildren)
     end
 
     for index, child in ipairs(layoutChildren) do
-        if self.oldGridSettings.layoutChildren[index] ~= child then
+        if self.oldGridSettings.layoutChildren[index] ~= child or child:GetNumPoints() == 0 then
             return true;
         end
     end

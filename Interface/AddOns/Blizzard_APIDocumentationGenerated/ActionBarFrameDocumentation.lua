@@ -9,6 +9,7 @@ local ActionBarFrame =
 		{
 			Name = "EnableActionRangeCheck",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Used in conjunction with ActionRangeCheckUpdate to inform the UI when an action goes in or out of range with its current target." },
 
 			Arguments =
@@ -32,6 +33,7 @@ local ActionBarFrame =
 			Name = "FindFlyoutActionButtons",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -47,6 +49,7 @@ local ActionBarFrame =
 			Name = "FindPetActionButtons",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -62,6 +65,7 @@ local ActionBarFrame =
 			Name = "FindSpellActionButtons",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenTainted",
 			Documentation = { "Returns the list of action bar slots that contain a specified spell." },
 
 			Arguments =
@@ -77,6 +81,7 @@ local ActionBarFrame =
 		{
 			Name = "ForceUpdateAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Force updates some internals for an action button slot." },
 
 			Arguments =
@@ -87,6 +92,7 @@ local ActionBarFrame =
 		{
 			Name = "GetBonusBarIndexForSlot",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -101,6 +107,7 @@ local ActionBarFrame =
 		{
 			Name = "GetItemActionOnEquipSpellID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -116,6 +123,7 @@ local ActionBarFrame =
 			Name = "GetPetActionPetBarIndices",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -130,6 +138,7 @@ local ActionBarFrame =
 		{
 			Name = "GetProfessionQuality",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -142,8 +151,24 @@ local ActionBarFrame =
 			},
 		},
 		{
+			Name = "GetProfessionQualityInfo",
+			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "actionID", Type = "luaIndex", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "info", Type = "CraftingQualityInfo", Nilable = true },
+			},
+		},
+		{
 			Name = "GetSpell",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -167,6 +192,7 @@ local ActionBarFrame =
 		{
 			Name = "HasFlyoutActionButtons",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -181,6 +207,7 @@ local ActionBarFrame =
 		{
 			Name = "HasPetActionButtons",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -195,6 +222,7 @@ local ActionBarFrame =
 		{
 			Name = "HasPetActionPetBarIndices",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -209,6 +237,7 @@ local ActionBarFrame =
 		{
 			Name = "HasSpellActionButtons",
 			Type = "Function",
+			SecretArguments = "AllowedWhenTainted",
 
 			Arguments =
 			{
@@ -223,6 +252,7 @@ local ActionBarFrame =
 		{
 			Name = "IsAssistedCombatAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Returns whether the given action button contains the Assisted Combat action spell." },
 
 			Arguments =
@@ -238,6 +268,7 @@ local ActionBarFrame =
 		{
 			Name = "IsAutoCastPetAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -252,6 +283,7 @@ local ActionBarFrame =
 		{
 			Name = "IsEnabledAutoCastPetAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -266,6 +298,7 @@ local ActionBarFrame =
 		{
 			Name = "IsHarmfulAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -281,6 +314,7 @@ local ActionBarFrame =
 		{
 			Name = "IsHelpfulAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -296,6 +330,7 @@ local ActionBarFrame =
 		{
 			Name = "IsOnBarOrSpecialBar",
 			Type = "Function",
+			SecretArguments = "AllowedWhenTainted",
 
 			Arguments =
 			{
@@ -310,6 +345,7 @@ local ActionBarFrame =
 		{
 			Name = "PutActionInSlot",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -337,6 +373,7 @@ local ActionBarFrame =
 		{
 			Name = "ToggleAutoCastPetAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

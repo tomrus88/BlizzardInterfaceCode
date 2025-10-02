@@ -19,6 +19,7 @@ local WarbandSceneInfo =
 			Name = "GetWarbandSceneEntry",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -33,6 +34,7 @@ local WarbandSceneInfo =
 		{
 			Name = "HasWarbandScene",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -47,6 +49,7 @@ local WarbandSceneInfo =
 		{
 			Name = "IsFavorite",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -61,6 +64,7 @@ local WarbandSceneInfo =
 		{
 			Name = "SearchWarbandSceneEntries",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -75,6 +79,7 @@ local WarbandSceneInfo =
 		{
 			Name = "SetFavorite",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

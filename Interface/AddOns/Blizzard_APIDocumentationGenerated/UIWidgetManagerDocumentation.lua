@@ -9,6 +9,7 @@ local UIWidgetManager =
 		{
 			Name = "GetAllWidgetsBySetID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -32,6 +33,7 @@ local UIWidgetManager =
 		{
 			Name = "GetBulletTextListWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -46,6 +48,7 @@ local UIWidgetManager =
 		{
 			Name = "GetButtonHeaderWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -60,6 +63,7 @@ local UIWidgetManager =
 		{
 			Name = "GetCaptureBarWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -74,6 +78,7 @@ local UIWidgetManager =
 		{
 			Name = "GetCaptureZoneVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -88,6 +93,7 @@ local UIWidgetManager =
 		{
 			Name = "GetDiscreteProgressStepsVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -102,6 +108,7 @@ local UIWidgetManager =
 		{
 			Name = "GetDoubleIconAndTextWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -116,6 +123,7 @@ local UIWidgetManager =
 		{
 			Name = "GetDoubleStateIconRowVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -130,6 +138,7 @@ local UIWidgetManager =
 		{
 			Name = "GetDoubleStatusBarWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -144,6 +153,7 @@ local UIWidgetManager =
 		{
 			Name = "GetFillUpFramesWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -158,6 +168,7 @@ local UIWidgetManager =
 		{
 			Name = "GetHorizontalCurrenciesWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -172,6 +183,7 @@ local UIWidgetManager =
 		{
 			Name = "GetIconAndTextWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -186,6 +198,7 @@ local UIWidgetManager =
 		{
 			Name = "GetIconTextAndBackgroundWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -200,6 +213,7 @@ local UIWidgetManager =
 		{
 			Name = "GetIconTextAndCurrenciesWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -214,6 +228,7 @@ local UIWidgetManager =
 		{
 			Name = "GetItemDisplayVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -228,6 +243,7 @@ local UIWidgetManager =
 		{
 			Name = "GetMapPinAnimationWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -260,6 +276,7 @@ local UIWidgetManager =
 		{
 			Name = "GetScenarioHeaderCurrenciesAndBackgroundWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -274,6 +291,7 @@ local UIWidgetManager =
 		{
 			Name = "GetScenarioHeaderDelvesWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -288,6 +306,7 @@ local UIWidgetManager =
 		{
 			Name = "GetScenarioHeaderTimerWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -302,6 +321,7 @@ local UIWidgetManager =
 		{
 			Name = "GetSpacerVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -316,6 +336,7 @@ local UIWidgetManager =
 		{
 			Name = "GetSpellDisplayVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -330,6 +351,7 @@ local UIWidgetManager =
 		{
 			Name = "GetStackedResourceTrackerWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -344,6 +366,7 @@ local UIWidgetManager =
 		{
 			Name = "GetStatusBarWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -358,6 +381,7 @@ local UIWidgetManager =
 		{
 			Name = "GetTextColumnRowVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -372,6 +396,7 @@ local UIWidgetManager =
 		{
 			Name = "GetTextWithStateWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -386,6 +411,7 @@ local UIWidgetManager =
 		{
 			Name = "GetTextWithSubtextWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -400,6 +426,7 @@ local UIWidgetManager =
 		{
 			Name = "GetTextureAndTextRowVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -414,6 +441,7 @@ local UIWidgetManager =
 		{
 			Name = "GetTextureAndTextVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -428,6 +456,7 @@ local UIWidgetManager =
 		{
 			Name = "GetTextureWithAnimationVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -451,6 +480,7 @@ local UIWidgetManager =
 		{
 			Name = "GetTugOfWarWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -465,6 +495,7 @@ local UIWidgetManager =
 		{
 			Name = "GetUnitPowerBarWidgetVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -480,6 +511,7 @@ local UIWidgetManager =
 			Name = "GetWidgetSetInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -494,6 +526,7 @@ local UIWidgetManager =
 		{
 			Name = "GetZoneControlVisualizationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -508,6 +541,7 @@ local UIWidgetManager =
 		{
 			Name = "RegisterUnitForWidgetUpdates",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -518,6 +552,7 @@ local UIWidgetManager =
 		{
 			Name = "SetProcessingUnit",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -527,6 +562,7 @@ local UIWidgetManager =
 		{
 			Name = "SetProcessingUnitGuid",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -536,6 +572,7 @@ local UIWidgetManager =
 		{
 			Name = "UnregisterUnitForWidgetUpdates",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

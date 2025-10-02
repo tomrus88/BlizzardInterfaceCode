@@ -257,7 +257,8 @@ ProfessionsCrafterTableCellQualityMixin = CreateFromMixins(TableBuilderCellMixin
 function ProfessionsCrafterTableCellQualityMixin:Populate(rowData, dataIndex)
 	local order = rowData;
 	local atlasSize = 25;
-	local text = CreateAtlasMarkup(Professions.GetIconForQuality(order.quality), atlasSize, atlasSize);
+	local qualityInfo = C_TradeSkillUI.GetRecipeItemQualityInfo(order.spellID, order.quality);
+	local text = CreateAtlasMarkup(qualityInfo.icon, atlasSize, atlasSize);
 	ProfessionsTableCellTextMixin.SetText(self, text);
 end
 
@@ -412,8 +413,9 @@ function ProfessionsCrafterTableCellItemNameMixin:Populate(rowData, dataIndex)
 			itemName = PROFESSIONS_RECRAFT_ORDER_NAME_FMT:format(itemName);
 		end
 		if order.minQuality and order.minQuality > 1 then
+			local qualityInfo = C_TradeSkillUI.GetRecipeItemQualityInfo(order.spellID, order.minQuality);
 			local smallIcon = true;
-			local qualityAtlas = Professions.GetChatIconMarkupForQuality(order.minQuality, smallIcon);
+			local qualityAtlas = Professions.GetChatIconMarkupForQuality(qualityInfo, smallIcon);
 			itemName = itemName.." "..qualityAtlas;
 		end
 
@@ -483,8 +485,9 @@ function ProfessionsCustomerTableCellItemNameMixin:Populate(rowData, dataIndex)
 			itemName = PROFESSIONS_RECRAFT_ORDER_NAME_FMT:format(itemName);
 		end
 		if order.minQuality and order.minQuality > 1 then
+			local qualityInfo = C_TradeSkillUI.GetRecipeItemQualityInfo(order.spellID, order.minQuality);
 			local smallIcon = true;
-			local qualityAtlas = Professions.GetChatIconMarkupForQuality(order.minQuality, smallIcon);
+			local qualityAtlas = Professions.GetChatIconMarkupForQuality(qualityInfo, smallIcon);
 			itemName = itemName.." "..qualityAtlas;
 		end
 
@@ -517,7 +520,8 @@ function ProfessionsCustomerTableCellIlvlMixin:OnEnter()
 		local item = Item:CreateFromItemLink(outputItemInfo.hyperlink);
 		if item:IsItemDataCached() then
 			local atlasSize = 25;
-			local atlasMarkup = CreateAtlasMarkup(Professions.GetIconForQuality(index), atlasSize, atlasSize);
+			local qualityInfo = C_TradeSkillUI.GetRecipeItemQualityInfo(order.spellID, index);
+			local atlasMarkup = CreateAtlasMarkup(qualityInfo.icon, atlasSize, atlasSize);
 			GameTooltip_AddNormalLine(GameTooltip, PROFESSIONS_CRAFTING_QUALITY_BONUS_INCR:format(atlasMarkup, item:GetCurrentItemLevel(), ilvlBonus));
 		else
 			local continuableContainer = ContinuableContainer:Create();

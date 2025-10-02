@@ -4,6 +4,33 @@
 Enum.CooldownViewerCategory.HiddenSpell = -1;
 Enum.CooldownViewerCategory.HiddenAura = -2;
 
-function CooldownViewerUtil_IsDisabledCategory(category)
-	return category == Enum.CooldownViewerCategory.HiddenSpell or category == Enum.CooldownViewerCategory.HiddenAura;
-end
+Enum.CDMLayoutMode =
+{
+	AccessOnly = false,
+	AllowCreate = true,
+};
+
+-- TODO: Define in tag...or share with editmode?
+Enum.CooldownLayoutType =
+{
+	Character = 1,
+	Account = 2,
+};
+
+Enum.CooldownLayoutStatus =
+{
+	Success = 0,
+	InvalidLayoutName = 1,
+	TooManyLayouts = 2,
+	AttemptToModifyDefaultLayoutWouldCreateTooManyLayouts = 3,
+	TooManyAlerts = 4,
+	InvalidOrderChange = 5,
+};
+
+Enum.CooldownLayoutAction =
+{
+	ChangeOrder = 0,
+	ChangeCategory = 1,
+	AddLayout = 2,
+	AddAlert = 3,
+};

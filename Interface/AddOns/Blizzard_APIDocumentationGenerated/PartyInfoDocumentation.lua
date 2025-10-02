@@ -9,6 +9,7 @@ local PartyInfo =
 		{
 			Name = "AllowedToDoPartyConversion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -65,6 +66,7 @@ local PartyInfo =
 		{
 			Name = "ConfirmInviteTravelPass",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -76,6 +78,7 @@ local PartyInfo =
 			Name = "ConfirmInviteUnit",
 			Type = "Function",
 			RequiresValidInviteTarget = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Immediately invites the named unit to a party, with no regard for potentially destructive actions." },
 
 			Arguments =
@@ -86,6 +89,7 @@ local PartyInfo =
 		{
 			Name = "ConfirmLeaveParty",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Immediately leave the party with no regard for potentially destructive actions" },
 
 			Arguments =
@@ -97,6 +101,7 @@ local PartyInfo =
 			Name = "ConfirmRequestInviteFromUnit",
 			Type = "Function",
 			RequiresValidInviteTarget = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Immediately request an invite into the target party, this is the confirmation function to call after RequestInviteFromUnit, or if you would like to skip the confirmation process." },
 
 			Arguments =
@@ -123,6 +128,7 @@ local PartyInfo =
 		{
 			Name = "DoCountdown",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -212,6 +218,7 @@ local PartyInfo =
 			Name = "GetInviteConfirmationInvalidQueues",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -227,6 +234,7 @@ local PartyInfo =
 			Name = "GetInviteReferralInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -256,6 +264,7 @@ local PartyInfo =
 		{
 			Name = "GetMinItemLevel",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -271,6 +280,7 @@ local PartyInfo =
 		{
 			Name = "GetMinLevel",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -305,6 +315,7 @@ local PartyInfo =
 			Name = "InviteUnit",
 			Type = "Function",
 			RequiresValidInviteTarget = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Attempt to invite the named unit to a party, requires confirmation in some cases (e.g. the party will convert to a raid, or if there is a party sync in progress)." },
 
 			Arguments =
@@ -333,6 +344,7 @@ local PartyInfo =
 		{
 			Name = "IsCrossFactionParty",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -365,6 +377,7 @@ local PartyInfo =
 		{
 			Name = "IsPartyFull",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -397,6 +410,7 @@ local PartyInfo =
 		{
 			Name = "LeaveParty",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Usually this will leave the party immediately. In some cases (e.g. PartySync) the user will be prompted to confirm leaving the party, because it's potentially destructive" },
 
 			Arguments =
@@ -408,6 +422,7 @@ local PartyInfo =
 			Name = "RequestInviteFromUnit",
 			Type = "Function",
 			RequiresValidInviteTarget = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Attempt to request an invite into the target party, requires confirmation in some cases (e.g. there is a party sync in progress)." },
 
 			Arguments =
@@ -422,6 +437,7 @@ local PartyInfo =
 			Name = "SetInstanceAbandonVoteResponse",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Vote on whether to abandon instance, true for yes, false for no" },
 
 			Arguments =
@@ -432,6 +448,7 @@ local PartyInfo =
 		{
 			Name = "SetLootMethod",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -447,6 +464,7 @@ local PartyInfo =
 		{
 			Name = "SetRestrictPings",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -634,7 +652,7 @@ local PartyInfo =
 			LiteralName = "PARTY_MEMBER_DISABLE",
 			Payload =
 			{
-				{ Name = "unitTarget", Type = "UnitToken", Nilable = false },
+				{ Name = "unitTarget", Type = "UnitTokenVariant", Nilable = false },
 			},
 		},
 		{
@@ -643,7 +661,7 @@ local PartyInfo =
 			LiteralName = "PARTY_MEMBER_ENABLE",
 			Payload =
 			{
-				{ Name = "unitTarget", Type = "UnitToken", Nilable = false },
+				{ Name = "unitTarget", Type = "UnitTokenVariant", Nilable = false },
 			},
 		},
 		{
@@ -677,7 +695,7 @@ local PartyInfo =
 			LiteralName = "READY_CHECK_CONFIRM",
 			Payload =
 			{
-				{ Name = "unitTarget", Type = "UnitToken", Nilable = false },
+				{ Name = "unitTarget", Type = "UnitTokenVariant", Nilable = false },
 				{ Name = "isReady", Type = "bool", Nilable = false },
 			},
 		},

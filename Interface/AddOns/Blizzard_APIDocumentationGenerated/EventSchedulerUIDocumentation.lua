@@ -9,6 +9,7 @@ local EventSchedulerUI =
 		{
 			Name = "ClearReminder",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Clears reminder on a scheduled event. Must use endTime to identify which specific instance in the case of repeating ones." },
 
 			Arguments =
@@ -30,6 +31,7 @@ local EventSchedulerUI =
 		{
 			Name = "GetEventUiMapID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Will try to figure out a UiMap for an areaPOI." },
 
 			Arguments =
@@ -45,6 +47,7 @@ local EventSchedulerUI =
 		{
 			Name = "GetEventZoneName",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Will try to figure out a map zone name for an areaPOI" },
 
 			Arguments =
@@ -107,6 +110,7 @@ local EventSchedulerUI =
 		{
 			Name = "SetReminder",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Sets reminder on a scheduled event. Must use endTime to identify which specific instance in the case of repeating ones." },
 
 			Arguments =

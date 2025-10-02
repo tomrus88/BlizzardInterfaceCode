@@ -5,6 +5,7 @@
 ## LoadWith: Blizzard_UIParent
 ## AllowLoad: game
 ## AllowLoadGameType: mists
-Classic\UIParentPanelManager.lua
-Cata\UIParentPanelManager.lua
+Cata\UIPanelWindows.lua
+Shared\UIParentPanelManager.lua
+Classic\UIParentPanelManagerOverrides.lua
 Shared\UpdateUIPanelPositions.lua

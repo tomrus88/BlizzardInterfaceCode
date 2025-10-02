@@ -4,6 +4,7 @@
 ## AllowLoadGameType: standard
 StateMachineUtil.lua
 StateMachineTutorialUtil.lua
+BagTutorialUtil.lua
 Blizzard_Tutorials_Classes.lua
 Blizzard_Tutorials_Dracthyr.lua
 Blizzard_Tutorials_Dragonriding.lua

@@ -35,6 +35,7 @@ local PerksProgram =
 		{
 			Name = "GetCategoryInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -86,6 +87,7 @@ local PerksProgram =
 		{
 			Name = "GetPerksProgramItemDisplayInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -100,6 +102,7 @@ local PerksProgram =
 		{
 			Name = "GetTimeRemaining",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -114,6 +117,7 @@ local PerksProgram =
 		{
 			Name = "GetVendorItemInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -128,6 +132,7 @@ local PerksProgram =
 		{
 			Name = "GetVendorItemInfoRefundTimeLeft",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -151,6 +156,7 @@ local PerksProgram =
 		{
 			Name = "IsFrozenPerksVendorItem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -174,6 +180,7 @@ local PerksProgram =
 		{
 			Name = "ItemSelectedTelemetry",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -183,6 +190,7 @@ local PerksProgram =
 		{
 			Name = "PickupPerksVendorItem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -192,6 +200,7 @@ local PerksProgram =
 		{
 			Name = "RequestCartCheckout",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -205,6 +214,7 @@ local PerksProgram =
 		{
 			Name = "RequestPurchase",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -214,6 +224,7 @@ local PerksProgram =
 		{
 			Name = "RequestRefund",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

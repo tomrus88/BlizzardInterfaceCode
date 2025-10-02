@@ -63,6 +63,7 @@ HelpTip.ButtonStyle = {
 	Okay = 3,
 	GotIt = 4,
 	Next = 5,
+	Exit = 6,
 };
 
 HelpTip.HideReason = {
@@ -127,6 +128,7 @@ HelpTip.Buttons = {
 	[HelpTip.ButtonStyle.Okay]	= { textWidthAdj = 0,	heightAdj = 30,	parentKey = "OkayButton", text = OKAY },
 	[HelpTip.ButtonStyle.GotIt]	= { textWidthAdj = 0,	heightAdj = 30,	parentKey = "OkayButton", text = HELP_TIP_BUTTON_GOT_IT },
 	[HelpTip.ButtonStyle.Next]	= { textWidthAdj = 0,	heightAdj = 30,	parentKey = "OkayButton", text = NEXT },
+	[HelpTip.ButtonStyle.Exit]	= { textWidthAdj = 0,	heightAdj = 30,	parentKey = "OkayButton", text = HELP_TIP_EXIT },
 };
 
 HelpTip.verticalPadding	 = 31;

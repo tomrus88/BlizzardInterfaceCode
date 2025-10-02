@@ -43,6 +43,17 @@ function GetCVarNumberOrDefault(name)
 	return number or tonumber(GetCVarDefault(name));
 end
 
+-- Returns a lua table from serialized CVar string
+function GetCVarTable(name)
+	return C_EncodingUtil.DeserializeCBOR(C_EncodingUtil.DecodeBase64(GetCVar(name))) or {};
+end
+
+-- Given the CVar name and a lua table, serialize the table into a string and store in the CVar
+function SetCVarTable(name, tbl)
+	local encodedTbl = C_EncodingUtil.EncodeBase64(C_EncodingUtil.SerializeCBOR(tbl));
+	SetCVar(name, encodedTbl);
+end
+
 -- Assumes every value stored in the cvar is of the same type. The purpose
 -- of using this accessor is to add type strictness to avoid scenarios where
 -- nil is implicitly converted to "0" or false and to relieve the callsites of
@@ -66,7 +77,7 @@ function CVarAccessorMixin:Init(cvar, variableType)
 
 	self.GetValue = function(self)
 		local rawValue = GetCVar(cvar);
-		return self:ConvertValue(rawValue);	
+		return self:ConvertValue(rawValue);
 	end;
 
 	self.SetValue = function(self, value)
@@ -135,6 +146,38 @@ end
 function CVarCallbackRegistry:GetCVarValueBool(cvar)
 	local value = self:GetCVarValue(cvar);
 	return (value ~= nil) and value ~= "0";
+end
+
+function CVarCallbackRegistry:GetCVarBitfieldIndex(cvar, index)
+	local value = self:GetCVarValue(cvar);
+
+	-- Index is decremented going into C++.
+	index = index - 1;
+
+	-- Must match CVAR_ARRAY_BITS_STORED_PER_BYTE
+	local bitsPerByte = 6;
+
+	local totalBits = (#value - 1) * bitsPerByte;
+	if index >= totalBits then
+		return false;
+	end
+
+	-- byteIndex is offset by 1 in C++, and add another 1 to account for 1-based index in lua.
+	local byteIndex = 2 + math.floor(index / bitsPerByte);
+
+	local byte = string.byte(value, byteIndex);
+	if not byte then
+		return false
+	end
+
+	local bitIndex = index % bitsPerByte;
+	local shiftedBitIndex = bit.lshift(1, bitIndex);
+	return bit.band(byte, shiftedBitIndex) ~= 0;
+end
+
+function CVarCallbackRegistry:GetCVarNumberOrDefault(cvar)
+	local number = tonumber(self:GetCVarValue(cvar));
+	return number or tonumber(GetCVarDefault(cvar));
 end
 
 function CVarCallbackRegistry:SetCVarCachable(cvar)

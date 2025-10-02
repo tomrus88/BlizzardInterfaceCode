@@ -18,6 +18,7 @@ local LFGListInfo =
 		{
 			Name = "CanCreateQuestGroup",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -32,6 +33,7 @@ local LFGListInfo =
 		{
 			Name = "CanCreateScenarioGroup",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -63,6 +65,7 @@ local LFGListInfo =
 			Name = "CreateListing",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -77,6 +80,7 @@ local LFGListInfo =
 		{
 			Name = "CreateScenarioListing",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -95,6 +99,7 @@ local LFGListInfo =
 		{
 			Name = "DoesEntryTitleMatchPrebuiltTitle",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -121,6 +126,7 @@ local LFGListInfo =
 		{
 			Name = "GetActivityFullName",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -138,6 +144,7 @@ local LFGListInfo =
 			Name = "GetActivityGroupInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -154,6 +161,7 @@ local LFGListInfo =
 			Name = "GetActivityInfoTable",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -180,6 +188,7 @@ local LFGListInfo =
 			Name = "GetApplicantBestDungeonScore",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -196,6 +205,7 @@ local LFGListInfo =
 			Name = "GetApplicantDungeonScoreForListing",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -213,6 +223,7 @@ local LFGListInfo =
 			Name = "GetApplicantInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -228,6 +239,7 @@ local LFGListInfo =
 			Name = "GetApplicantPvpRatingInfoForListing",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -244,6 +256,7 @@ local LFGListInfo =
 		{
 			Name = "GetAvailableActivityGroups",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -281,6 +294,7 @@ local LFGListInfo =
 			Name = "GetKeystoneForActivity",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -296,6 +310,7 @@ local LFGListInfo =
 			Name = "GetLfgCategoryInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -311,6 +326,7 @@ local LFGListInfo =
 			Name = "GetOwnedKeystoneActivityAndGroupAndLevel",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -327,6 +343,7 @@ local LFGListInfo =
 		{
 			Name = "GetPlaystyleString",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -352,6 +369,7 @@ local LFGListInfo =
 			Name = "GetSearchResultInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -367,6 +385,7 @@ local LFGListInfo =
 			Name = "GetSearchResultLeaderInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -382,6 +401,7 @@ local LFGListInfo =
 			Name = "GetSearchResultPlayerInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -416,6 +436,7 @@ local LFGListInfo =
 		{
 			Name = "HasSearchResultInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -430,6 +451,7 @@ local LFGListInfo =
 		{
 			Name = "IsPlayerAuthenticatedForLFG",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -454,6 +476,7 @@ local LFGListInfo =
 			Name = "ReportGroupAsAdvertisement",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -463,6 +486,7 @@ local LFGListInfo =
 		{
 			Name = "SaveAdvancedFilter",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -473,6 +497,7 @@ local LFGListInfo =
 			Name = "Search",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -489,6 +514,7 @@ local LFGListInfo =
 			Name = "SetEntryTitle",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -500,6 +526,7 @@ local LFGListInfo =
 		{
 			Name = "SetSearchToActivity",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -509,6 +536,7 @@ local LFGListInfo =
 		{
 			Name = "SetSearchToQuestID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -518,6 +546,7 @@ local LFGListInfo =
 		{
 			Name = "SetSearchToScenarioID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -528,6 +557,7 @@ local LFGListInfo =
 			Name = "UpdateListing",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -542,6 +572,7 @@ local LFGListInfo =
 		{
 			Name = "ValidateRequiredDungeonScore",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -556,6 +587,7 @@ local LFGListInfo =
 		{
 			Name = "ValidateRequiredPvpRatingForActivity",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -684,22 +716,6 @@ local LFGListInfo =
 
 	Tables =
 	{
-		{
-			Name = "LFGListDisplayType",
-			Type = "Enumeration",
-			NumValues = 6,
-			MinValue = 0,
-			MaxValue = 5,
-			Fields =
-			{
-				{ Name = "RoleCount", Type = "LFGListDisplayType", EnumValue = 0 },
-				{ Name = "RoleEnumerate", Type = "LFGListDisplayType", EnumValue = 1 },
-				{ Name = "ClassEnumerate", Type = "LFGListDisplayType", EnumValue = 2 },
-				{ Name = "HideAll", Type = "LFGListDisplayType", EnumValue = 3 },
-				{ Name = "PlayerCount", Type = "LFGListDisplayType", EnumValue = 4 },
-				{ Name = "Comment", Type = "LFGListDisplayType", EnumValue = 5 },
-			},
-		},
 		{
 			Name = "AdvancedFilterOptions",
 			Type = "Structure",

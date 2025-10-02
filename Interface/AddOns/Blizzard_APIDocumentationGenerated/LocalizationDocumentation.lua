@@ -8,6 +8,7 @@ local Localization =
 		{
 			Name = "BreakUpLargeNumbers",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -23,6 +24,7 @@ local Localization =
 		{
 			Name = "CaseAccentInsensitiveParse",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -37,6 +39,7 @@ local Localization =
 		{
 			Name = "DeclineName",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -53,6 +56,7 @@ local Localization =
 		{
 			Name = "GetNumDeclensionSets",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -77,6 +81,7 @@ local Localization =
 		{
 			Name = "LocalizedClassList",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -91,6 +96,7 @@ local Localization =
 		{
 			Name = "SetEuropeanNumbers",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

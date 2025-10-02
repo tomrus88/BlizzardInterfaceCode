@@ -1,36 +1,7 @@
 InterfaceOverrides = {}
 
-function InterfaceOverrides.CreateLargerNameplateSetting(category)
-	local normalScale = 1.0;
-	local function GetValue()
-		local hScale = GetCVarNumberOrDefault("NamePlateHorizontalScale");
-		local vScale = GetCVarNumberOrDefault("NamePlateVerticalScale");
-		local cScale = GetCVarNumberOrDefault("NamePlateClassificationScale");
-		return not (ApproximatelyEqual(hScale, normalScale) and ApproximatelyEqual(vScale, normalScale) and ApproximatelyEqual(cScale, normalScale));
-	end
-		
-	local function SetValue(value)
-		if value then
-			SetCVar("NamePlateHorizontalScale", 1.4);
-			SetCVar("NamePlateVerticalScale", 2.7);
-			SetCVar("NamePlateClassificationScale", 1.25);
-		else
-			SetCVar("NamePlateHorizontalScale", normalScale);
-			SetCVar("NamePlateVerticalScale", normalScale);
-			SetCVar("NamePlateClassificationScale", normalScale);
-		end
-	end
-
-	local defaultValue = false;
-	local setting = Settings.RegisterProxySetting(category, "PROXY_LARGER_SETTINGS",
-		Settings.VarType.Boolean, UNIT_NAMEPLATES_MAKE_LARGER, defaultValue, GetValue, SetValue);
-	local initializer = Settings.CreateCheckbox(category, setting, OPTION_TOOLTIP_UNIT_NAMEPLATES_MAKE_LARGER);
-	initializer:AddModifyPredicate(function()
-		return not C_Commentator.IsSpectating();
-	end);
-end
-
-function InterfaceOverrides.AdjustNameplateSettings(category)
+function InterfaceOverrides.AdjustNameplateSettings(category, layout)
+	-- Unused in mainline.
 end
 
 function InterfaceOverrides.AdjustDisplaySettings(category)
@@ -151,7 +122,7 @@ function InterfaceOverrides.ShowTutorialsOnButtonClick()
 end
 
 function InterfaceOverrides.RunSettingsCallback(callback)
-	if not Settings.IsPlunderstorm() then
+	if not C_GameRules.IsPlunderstorm() then
 		callback();
 	end
 end

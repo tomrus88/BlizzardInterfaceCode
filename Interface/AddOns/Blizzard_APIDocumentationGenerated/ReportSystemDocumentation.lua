@@ -9,6 +9,7 @@ local ReportSystem =
 		{
 			Name = "CanReportPlayer",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -23,6 +24,7 @@ local ReportSystem =
 		{
 			Name = "CanReportPlayerForLanguage",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -37,6 +39,7 @@ local ReportSystem =
 		{
 			Name = "GetMajorCategoriesForReportType",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -51,6 +54,7 @@ local ReportSystem =
 		{
 			Name = "GetMajorCategoryString",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -65,6 +69,7 @@ local ReportSystem =
 		{
 			Name = "GetMinorCategoriesForReportTypeAndMajorCategory",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -80,6 +85,7 @@ local ReportSystem =
 		{
 			Name = "GetMinorCategoryString",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -100,9 +106,25 @@ local ReportSystem =
 			Type = "Function",
 		},
 		{
+			Name = "RequiresScreenshotForReportType",
+			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "reportType", Type = "ReportType", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "requiresScreenshot", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "SendReport",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Not allowed to be called by addons" },
 
 			Arguments =
@@ -110,6 +132,20 @@ local ReportSystem =
 				{ Name = "reportInfo", Type = "ReportInfo", Mixin = "ReportInfoMixin", Nilable = false },
 				{ Name = "playerLocation", Type = "PlayerLocation", Mixin = "PlayerLocationMixin", Nilable = true },
 			},
+		},
+		{
+			Name = "SetScreenshotPreviewTexture",
+			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "textureObject", Type = "SimpleTexture", Nilable = false },
+			},
+		},
+		{
+			Name = "TakeReportScreenshot",
+			Type = "Function",
 		},
 	},
 
@@ -124,6 +160,11 @@ local ReportSystem =
 				{ Name = "result", Type = "SendReportResult", Nilable = false },
 				{ Name = "reportType", Type = "ReportType", Nilable = false },
 			},
+		},
+		{
+			Name = "ReportScreenshotReady",
+			Type = "Event",
+			LiteralName = "REPORT_SCREENSHOT_READY",
 		},
 	},
 

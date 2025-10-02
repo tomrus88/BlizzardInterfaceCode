@@ -48,6 +48,25 @@ function FrameUtil.RegisterFrameForUnitEvents(frame, events, ...)
 	end
 end
 
+function FrameUtil.RegisterFrameForEventCallbacks(frame, events)
+	for event, callback in pairs(events) do
+		frame:RegisterEventCallback(event, callback);
+	end
+end
+
+function FrameUtil.UnregisterFrameForEventCallbacks(frame, events)
+	for event, _callback in pairs(events) do
+		frame:UnregisterEventCallback(event);
+	end
+end
+
+function FrameUtil.RegisterFrameForEventCallbackFields(frame, events)
+	for event, callbackName in pairs(events) do
+		local callback = frame[callbackName];
+		frame:RegisterEventCallback(event, callback);
+	end
+end
+
 function FrameUtil.DialogStyleGlobalMouseDown(frame, buttonName, ...)
 	local mouseFoci = GetMouseFoci();
 	if DoesAncestryIncludeAny(frame, mouseFoci) then

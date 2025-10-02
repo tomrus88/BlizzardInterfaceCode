@@ -10,6 +10,7 @@ local TooltipInfo =
 			Name = "GetAchievementByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -25,6 +26,7 @@ local TooltipInfo =
 			Name = "GetAction",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -50,6 +52,7 @@ local TooltipInfo =
 			Name = "GetArtifactPowerByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -65,6 +68,7 @@ local TooltipInfo =
 			Name = "GetAzeriteEssence",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -81,6 +85,7 @@ local TooltipInfo =
 			Name = "GetAzeriteEssenceSlot",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -96,6 +101,7 @@ local TooltipInfo =
 			Name = "GetAzeritePower",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -114,6 +120,7 @@ local TooltipInfo =
 			Name = "GetBackpackToken",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -129,6 +136,7 @@ local TooltipInfo =
 			Name = "GetBagItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -145,6 +153,7 @@ local TooltipInfo =
 			Name = "GetBagItemChild",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -162,6 +171,7 @@ local TooltipInfo =
 			Name = "GetBuybackItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -177,6 +187,7 @@ local TooltipInfo =
 			Name = "GetCompanionPet",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -192,6 +203,7 @@ local TooltipInfo =
 			Name = "GetConduit",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -208,6 +220,7 @@ local TooltipInfo =
 			Name = "GetCurrencyByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -224,6 +237,7 @@ local TooltipInfo =
 			Name = "GetCurrencyToken",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -239,6 +253,7 @@ local TooltipInfo =
 			Name = "GetEnhancedConduit",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -255,6 +270,7 @@ local TooltipInfo =
 			Name = "GetEquipmentSet",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -270,6 +286,7 @@ local TooltipInfo =
 			Name = "GetExistingSocketGem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -286,6 +303,7 @@ local TooltipInfo =
 			Name = "GetGuildBankItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -302,6 +320,7 @@ local TooltipInfo =
 			Name = "GetHeirloomByItemID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -317,6 +336,7 @@ local TooltipInfo =
 			Name = "GetHyperlink",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -335,6 +355,7 @@ local TooltipInfo =
 			Name = "GetInboxItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -351,6 +372,7 @@ local TooltipInfo =
 			Name = "GetInstanceLockEncountersComplete",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -366,6 +388,7 @@ local TooltipInfo =
 			Name = "GetInventoryItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -383,6 +406,7 @@ local TooltipInfo =
 			Name = "GetInventoryItemByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -398,6 +422,7 @@ local TooltipInfo =
 			Name = "GetItemByGUID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -413,6 +438,7 @@ local TooltipInfo =
 			Name = "GetItemByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -429,6 +455,7 @@ local TooltipInfo =
 			Name = "GetItemByItemModifiedAppearanceID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -454,6 +481,7 @@ local TooltipInfo =
 			Name = "GetItemKey",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -472,6 +500,7 @@ local TooltipInfo =
 			Name = "GetLFGDungeonReward",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -488,6 +517,7 @@ local TooltipInfo =
 			Name = "GetLFGDungeonShortageReward",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -505,6 +535,7 @@ local TooltipInfo =
 			Name = "GetLootCurrency",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -520,6 +551,7 @@ local TooltipInfo =
 			Name = "GetLootItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -535,6 +567,7 @@ local TooltipInfo =
 			Name = "GetLootRollItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -550,6 +583,7 @@ local TooltipInfo =
 			Name = "GetMerchantCostItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -566,6 +600,7 @@ local TooltipInfo =
 			Name = "GetMerchantItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -591,6 +626,7 @@ local TooltipInfo =
 			Name = "GetMountBySpellID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenTainted",
 
 			Arguments =
 			{
@@ -607,6 +643,7 @@ local TooltipInfo =
 			Name = "GetOwnedItemByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -622,6 +659,7 @@ local TooltipInfo =
 			Name = "GetPetAction",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -637,6 +675,7 @@ local TooltipInfo =
 			Name = "GetPossession",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -652,6 +691,7 @@ local TooltipInfo =
 			Name = "GetPvpBrawl",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -667,6 +707,7 @@ local TooltipInfo =
 			Name = "GetPvpTalent",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -685,6 +726,7 @@ local TooltipInfo =
 			Name = "GetQuestCurrency",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -701,6 +743,7 @@ local TooltipInfo =
 			Name = "GetQuestItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -718,6 +761,7 @@ local TooltipInfo =
 			Name = "GetQuestLogCurrency",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -735,6 +779,7 @@ local TooltipInfo =
 			Name = "GetQuestLogItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -753,6 +798,7 @@ local TooltipInfo =
 			Name = "GetQuestLogSpecialItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -768,6 +814,7 @@ local TooltipInfo =
 			Name = "GetQuestPartyProgress",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -785,6 +832,7 @@ local TooltipInfo =
 			Name = "GetRecipeRankInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -801,6 +849,7 @@ local TooltipInfo =
 			Name = "GetRecipeReagentItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -817,6 +866,7 @@ local TooltipInfo =
 			Name = "GetRecipeResultItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -836,6 +886,7 @@ local TooltipInfo =
 			Name = "GetRecipeResultItemForOrder",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -855,6 +906,7 @@ local TooltipInfo =
 			Name = "GetRuneforgeResultItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -873,6 +925,7 @@ local TooltipInfo =
 			Name = "GetSendMailItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -888,6 +941,7 @@ local TooltipInfo =
 			Name = "GetShapeshift",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -913,6 +967,7 @@ local TooltipInfo =
 			Name = "GetSocketGem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -938,6 +993,7 @@ local TooltipInfo =
 			Name = "GetSocketedRelic",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -953,6 +1009,7 @@ local TooltipInfo =
 			Name = "GetSpellBookItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -969,6 +1026,7 @@ local TooltipInfo =
 			Name = "GetSpellByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenTainted",
 
 			Arguments =
 			{
@@ -989,6 +1047,7 @@ local TooltipInfo =
 			Name = "GetTalent",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1006,6 +1065,7 @@ local TooltipInfo =
 			Name = "GetTotem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1021,6 +1081,7 @@ local TooltipInfo =
 			Name = "GetToyByItemID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1036,6 +1097,7 @@ local TooltipInfo =
 			Name = "GetTradePlayerItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1051,6 +1113,7 @@ local TooltipInfo =
 			Name = "GetTradeTargetItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1066,6 +1129,7 @@ local TooltipInfo =
 			Name = "GetTrainerService",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1081,6 +1145,7 @@ local TooltipInfo =
 			Name = "GetTraitEntry",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1097,6 +1162,7 @@ local TooltipInfo =
 			Name = "GetTransmogrifyItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1112,6 +1178,7 @@ local TooltipInfo =
 			Name = "GetUnit",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1128,12 +1195,14 @@ local TooltipInfo =
 			Name = "GetUnitAura",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretWhenInCombat = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
 				{ Name = "unitToken", Type = "UnitToken", Nilable = false },
 				{ Name = "index", Type = "luaIndex", Nilable = false },
-				{ Name = "filter", Type = "cstring", Nilable = true },
+				{ Name = "filter", Type = "AuraFilters", Nilable = true },
 			},
 
 			Returns =
@@ -1145,12 +1214,14 @@ local TooltipInfo =
 			Name = "GetUnitBuff",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretWhenInCombat = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
 				{ Name = "unitToken", Type = "UnitToken", Nilable = false },
 				{ Name = "index", Type = "luaIndex", Nilable = false },
-				{ Name = "filter", Type = "cstring", Nilable = true },
+				{ Name = "filter", Type = "AuraFilters", Nilable = true },
 			},
 
 			Returns =
@@ -1162,12 +1233,14 @@ local TooltipInfo =
 			Name = "GetUnitBuffByAuraInstanceID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretWhenInCombat = true,
+			SecretArguments = "AllowedWhenTainted",
 
 			Arguments =
 			{
-				{ Name = "unitTokenString", Type = "cstring", Nilable = false },
+				{ Name = "unitToken", Type = "UnitToken", Nilable = false },
 				{ Name = "auraInstanceID", Type = "number", Nilable = false },
-				{ Name = "filter", Type = "cstring", Nilable = true },
+				{ Name = "filter", Type = "AuraFilters", Nilable = true },
 			},
 
 			Returns =
@@ -1179,12 +1252,14 @@ local TooltipInfo =
 			Name = "GetUnitDebuff",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretWhenInCombat = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
 				{ Name = "unitToken", Type = "UnitToken", Nilable = false },
 				{ Name = "index", Type = "luaIndex", Nilable = false },
-				{ Name = "filter", Type = "cstring", Nilable = true },
+				{ Name = "filter", Type = "AuraFilters", Nilable = true },
 			},
 
 			Returns =
@@ -1196,12 +1271,14 @@ local TooltipInfo =
 			Name = "GetUnitDebuffByAuraInstanceID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretWhenInCombat = true,
+			SecretArguments = "AllowedWhenTainted",
 
 			Arguments =
 			{
-				{ Name = "unitTokenString", Type = "cstring", Nilable = false },
+				{ Name = "unitToken", Type = "UnitToken", Nilable = false },
 				{ Name = "auraInstanceID", Type = "number", Nilable = false },
-				{ Name = "filter", Type = "cstring", Nilable = true },
+				{ Name = "filter", Type = "AuraFilters", Nilable = true },
 			},
 
 			Returns =
@@ -1223,6 +1300,7 @@ local TooltipInfo =
 			Name = "GetWeeklyReward",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1248,6 +1326,7 @@ local TooltipInfo =
 			Name = "GetWorldLootObject",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

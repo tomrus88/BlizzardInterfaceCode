@@ -9,6 +9,7 @@ local PartyPoseUI =
 		{
 			Name = "ExtraAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -19,6 +20,7 @@ local PartyPoseUI =
 			Name = "GetPartyPoseInfoByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -34,6 +36,7 @@ local PartyPoseUI =
 			Name = "GetPartyPoseInfoByMapID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -48,6 +51,7 @@ local PartyPoseUI =
 		{
 			Name = "HasExtraAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

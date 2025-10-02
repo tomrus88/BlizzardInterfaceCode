@@ -86,7 +86,9 @@ end
 
 local function prepSimple(val, context)
 	local valType = type(val);
-	if (valType == "nil")  then
+	if (not canaccessvalue(val)) then
+		return "(secret value)";
+	elseif (valType == "nil")  then
 		return "nil";
 	elseif (valType == "number") then
 		return val;
@@ -282,7 +284,10 @@ end
 function DevTools_DumpValue(val, prefix, firstPrefix, suffix, context)
 	local valType = type(val);
 
-	if (valType == "userdata") then
+	if (not canaccessvalue(val)) then
+		context:Write("(secret value)");
+		return;
+	elseif (valType == "userdata") then
 		local uName = context:GetUserdataName(val, 'value');
 		if (uName) then
 			context:Write(string_format(FORMATS.opaqueTypeValName,
@@ -306,6 +311,9 @@ function DevTools_DumpValue(val, prefix, firstPrefix, suffix, context)
 		context:Write(string_format(FORMATS.simpleValue,
 									firstPrefix,prepSimple(val, context),
 									suffix));
+		return;
+	elseif (not canaccesstable(val)) then
+		context:Write("(secret table)");
 		return;
 	end
 

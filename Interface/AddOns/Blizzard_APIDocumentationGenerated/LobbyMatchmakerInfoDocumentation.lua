@@ -13,6 +13,7 @@ local LobbyMatchmakerInfo =
 		{
 			Name = "EnterQueue",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -67,6 +68,7 @@ local LobbyMatchmakerInfo =
 		{
 			Name = "RespondToQueuePop",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

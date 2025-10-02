@@ -10,14 +10,9 @@ Wrath\SparkleFrame.lua
 Wrath\SparkleFrame.xml
 CustomBindingManager.lua
 CustomBindingHandler.lua
-Classic\SecureTemplatesBase.xml
-Mists\SecureTemplates.lua
-Classic\SecureTemplates_Shared.lua
-SecureStateDriver.lua
-SecureHoverDriver.lua
-Classic\SecureTemplates.xml
-SecureHandlerTemplates.xml
-SecureGroupHeaders.xml
+SecureTemplatesBase.xml
+SecureTemplates.lua
+SecureTemplates.xml
 WardrobeOutfits.xml
 Classic\NavigationBar.lua
 Classic\NavigationBar.xml

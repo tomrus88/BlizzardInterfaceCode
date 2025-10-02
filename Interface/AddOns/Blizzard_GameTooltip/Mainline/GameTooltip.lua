@@ -397,6 +397,8 @@ function GameTooltip_OnHide(self)
 
 	GameTooltip_ClearStatusBars(self);
 	GameTooltip_ClearStatusBarWatch(self);
+
+	self.suppressAutomaticCompareItem = false;
 end
 
 function GameTooltip_CycleSecondaryComparedItem(self)
@@ -608,8 +610,8 @@ local function AddFloorLocationLine(tooltip, floorLocation, aboveString, belowSt
 	end
 end
 
-function GameTooltip_AddQuest(self, questIDArg)
-	local questID = self.questID or questIDArg;
+function GameTooltip_AddQuest(self)
+	local questID = self.questID;
 	if ( not HaveQuestData(questID) ) then
 		GameTooltip_SetTitle(GameTooltip, RETRIEVING_DATA, RED_FONT_COLOR);
 		GameTooltip_SetTooltipWaitingForData(GameTooltip, true);
@@ -618,7 +620,7 @@ function GameTooltip_AddQuest(self, questIDArg)
 	end
 
 	local widgetSetAdded = false;
-	local widgetSetID = C_TaskQuest.GetQuestTooltipUIWidgetSet(questID);
+	local widgetSetID = C_TaskQuest.GetQuestUIWidgetSetByType(questID, Enum.MapIconUIWidgetSetType.Tooltip);
 	local isThreat = C_QuestLog.IsThreatQuest(questID);
 
 	local title, factionID, capped = C_TaskQuest.GetQuestInfoByQuestID(questID);
@@ -644,7 +646,7 @@ function GameTooltip_AddQuest(self, questIDArg)
 		local factionData = factionID and C_Reputation.GetFactionDataByID(factionID);
 		if factionData then
 			local questAwardsReputationWithFaction = C_QuestLog.DoesQuestAwardReputationWithFaction(questID, factionID);
-			local reputationYieldsRewards = (not capped) or C_Reputation.IsFactionParagon(factionID);
+			local reputationYieldsRewards = (not capped) or C_Reputation.IsFactionParagonForCurrentPlayer(factionID);
 			if questAwardsReputationWithFaction and reputationYieldsRewards then
 				GameTooltip:AddLine(factionData.name);
 			else
@@ -726,6 +728,10 @@ function GameTooltip_AddQuest(self, questIDArg)
 	end
 
 	GameTooltip:Show();
+end
+
+function GameTooltip_SuppressAutomaticCompareItem(tooltip)
+	tooltip.suppressAutomaticCompareItem = true;
 end
 
 function EmbeddedItemTooltip_UpdateSize(self)
@@ -941,20 +947,24 @@ function GameTooltipDataMixin:OnEvent(event, ...)
 	end
 end
 
-function GameTooltipDataMixin:SetWorldCursor(anchorType)
+function GameTooltipDataMixin:SetWorldCursor(anchorType, parent)
 	local tooltipData = C_TooltipInfo.GetWorldCursor();
+	if not parent then
+		parent = UIParent;
+	end
+
 	if anchorType == Enum.WorldCursorAnchorType.Default then
-		GameTooltip_SetDefaultAnchor(self, UIParent);
+		GameTooltip_SetDefaultAnchor(self, parent);
 	elseif anchorType == Enum.WorldCursorAnchorType.Cursor then
 		local tooltipAnchor = (tooltipData and tooltipData.worldLootObjectInventoryType) and "ANCHOR_CURSOR_RIGHT" or "ANCHOR_CURSOR";
 		self:SetOwner(UIParent, tooltipAnchor);
 	elseif anchorType == Enum.WorldCursorAnchorType.Nameplate then
-		self:SetOwner(UIParent, "ANCHOR_NONE");
+		self:SetOwner(parent, "ANCHOR_NONE");
 		self:SetObjectTooltipPosition();
 	end
 
 	local oldInfo = self:GetPrimaryTooltipInfo();
-	
+
 	if tooltipData then
 		local tooltipInfo = {
 			getterName = "GetWorldCursor",

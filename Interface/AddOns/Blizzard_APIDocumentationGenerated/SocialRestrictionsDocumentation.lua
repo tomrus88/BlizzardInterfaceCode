@@ -69,6 +69,7 @@ local SocialRestrictions =
 		{
 			Name = "SetChatDisabled",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

@@ -145,6 +145,16 @@ function tInvert(tbl)
 	return inverted;
 end
 
+function tInvertToArray(tbl)
+	local index = 1;
+	local copy = {};
+	for k in pairs(tbl) do
+		copy[k] = index;
+		index = index + 1;
+	end
+	return tInvert(copy);
+end
+
 function TableUtil.TrySet(tbl, key)
 	if not tbl[key] then
 		tbl[key] = true;
@@ -476,6 +486,17 @@ function GetOrCreateTableEntryByCallback(table, key, callback)
 	return currentValue, isNewValue;
 end
 
+function GetOrCreateTableEntryByMethod(table, key, method, owner)
+	local currentValue = table[key];
+	local isNewValue = (currentValue == nil);
+	if isNewValue then
+		currentValue = method(owner, key);
+		table[key] = currentValue;
+	end
+
+	return currentValue, isNewValue;
+end
+
 function GetRandomArrayEntry(array)
 	return array[math.random(1, #array)];
 end
@@ -624,9 +645,16 @@ function TableUtil.CreatePriorityTable(comparator, isAssociative)
 
 	local t = {};
 
+	local function GetKey(k)
+		if isAssociative then
+			return keyToPosMap[k];
+		end
+		return k;
+	end
+
 	function t:Get(k)
-		local key = isAssociative and keyToPosMap[k] or k;
-		return sortedArray[key];
+		local key = GetKey(k);
+		return key and sortedArray[key] or nil;
 	end
 
 	if not isAssociative then
@@ -636,12 +664,14 @@ function TableUtil.CreatePriorityTable(comparator, isAssociative)
 	end
 
 	function t:Remove(k)
-		local key = isAssociative and keyToPosMap[k] or k;
-		tRemove(sortedArray, key);
-		if isAssociative then
-			keyToPosMap[k] = nil;
-			local shiftUp = false;
-			ShiftPositionMap(key, shiftUp);
+		local key = GetKey(k);
+		if key then
+			tRemove(sortedArray, key);
+			if isAssociative then
+				keyToPosMap[k] = nil;
+				local shiftUp = false;
+				ShiftPositionMap(key, shiftUp);
+			end
 		end
 	end
 

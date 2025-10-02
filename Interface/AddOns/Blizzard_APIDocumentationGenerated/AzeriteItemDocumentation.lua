@@ -20,6 +20,7 @@ local AzeriteItem =
 			Name = "GetAzeriteItemXPInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -35,6 +36,7 @@ local AzeriteItem =
 		{
 			Name = "GetPowerLevel",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -49,6 +51,7 @@ local AzeriteItem =
 		{
 			Name = "GetUnlimitedPowerLevel",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -72,6 +75,7 @@ local AzeriteItem =
 		{
 			Name = "IsAzeriteItem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -95,6 +99,7 @@ local AzeriteItem =
 		{
 			Name = "IsAzeriteItemByID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -109,6 +114,7 @@ local AzeriteItem =
 		{
 			Name = "IsAzeriteItemEnabled",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

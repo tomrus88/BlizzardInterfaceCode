@@ -311,7 +311,7 @@ end
 
 -- OverrideQuality has to be passed into GameTooltip:SetRecipeResultItem in order for applyConcentration to be respected.
 -- Otherwise, the tooltip code automatically determines the current output item quality without applying concentration.
-function ProfessionsRecipeSchematicFormMixin:GetOutputOverrideQuality()
+function ProfessionsRecipeSchematicFormMixin:GetOutputOverrideQualityID()
 	local operationInfo = self:GetRecipeOperationInfo();
 	if not operationInfo or not self.currentRecipeInfo.qualityIDs then
 		return nil;
@@ -680,8 +680,8 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo, isRecraftOverride)
 		GameTooltip:SetOwner(self.OutputIcon, "ANCHOR_RIGHT");
 		local reagents = self.transaction:CreateCraftingReagentInfoTbl();
 
-		self.OutputIcon:SetScript("OnUpdate", function() 
-			GameTooltip:SetRecipeResultItem(self.recipeSchematic.recipeID, reagents, self.transaction:GetAllocationItemGUID(), self:GetCurrentRecipeLevel(), self:GetOutputOverrideQuality());
+		self.OutputIcon:SetScript("OnUpdate", function()
+			GameTooltip:SetRecipeResultItem(self.recipeSchematic.recipeID, reagents, self.transaction:GetAllocationItemGUID(), self:GetCurrentRecipeLevel(), self:GetOutputOverrideQualityID());
 		end);
 	end);
 
@@ -691,7 +691,7 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo, isRecraftOverride)
 	end);
 
 	self.OutputIcon:SetScript("OnClick", function()
-		local outputItemInfo = C_TradeSkillUI.GetRecipeOutputItemData(recipeID, self.transaction:CreateCraftingReagentInfoTbl(), self.transaction:GetAllocationItemGUID(), self:GetOutputOverrideQuality());
+		local outputItemInfo = C_TradeSkillUI.GetRecipeOutputItemData(recipeID, self.transaction:CreateCraftingReagentInfoTbl(), self.transaction:GetAllocationItemGUID(), self:GetOutputOverrideQualityID());
 		HandleModifiedItemClick(outputItemInfo.hyperlink);
 	end);
 
@@ -846,7 +846,7 @@ function ProfessionsRecipeSchematicFormMixin:Init(recipeInfo, isRecraftOverride)
 				GameTooltip:SetOwner(self.recraftSlot.OutputSlot, "ANCHOR_RIGHT");
 
 				local reagents = self.transaction:CreateCraftingReagentInfoTbl();
-				GameTooltip:SetRecipeResultItem(self.recipeSchematic.recipeID, reagents, self.transaction:GetRecraftAllocation(), self:GetCurrentRecipeLevel(), self:GetOutputOverrideQuality());
+				GameTooltip:SetRecipeResultItem(self.recipeSchematic.recipeID, reagents, self.transaction:GetRecraftAllocation(), self:GetCurrentRecipeLevel(), self:GetOutputOverrideQualityID());
 			end
 		end);
 
@@ -1526,7 +1526,8 @@ function ProfessionsRecipeSchematicFormMixin:UpdateRecraftSlot(operationInfo)
 		end
 
 		if operationInfo then
-			SetItemCraftingQualityOverlayOverride(self.recraftSlot.OutputSlot, operationInfo.craftingQuality);
+			local qualityInfo = C_TradeSkillUI.GetRecipeItemQualityInfo(operationInfo.recipeID, operationInfo.craftingQuality);
+			SetItemCraftingQualityOverlayOverride(self.recraftSlot.OutputSlot, qualityInfo);
 		end
 	end
 end

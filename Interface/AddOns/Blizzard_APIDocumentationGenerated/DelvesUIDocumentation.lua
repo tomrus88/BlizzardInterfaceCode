@@ -18,6 +18,7 @@ local DelvesUI =
 		{
 			Name = "GetCreatureDisplayInfoForCompanion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -32,6 +33,7 @@ local DelvesUI =
 		{
 			Name = "GetCurioLink",
 			Type = "Function",
+			SecretArguments = "AllowedWhenTainted",
 			Documentation = { "Given the spell ID for an owned curio and its rarity, return a spell link style hyperlink for the curio spell, since they aren't items when learned" },
 
 			Arguments =
@@ -48,6 +50,7 @@ local DelvesUI =
 		{
 			Name = "GetCurioNodeForCompanion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -63,6 +66,7 @@ local DelvesUI =
 		{
 			Name = "GetCurioRarityByTraitCondAccountElementID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -114,6 +118,7 @@ local DelvesUI =
 		{
 			Name = "GetFactionForCompanion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -128,6 +133,7 @@ local DelvesUI =
 		{
 			Name = "GetModelSceneForCompanion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -142,6 +148,7 @@ local DelvesUI =
 		{
 			Name = "GetRoleNodeForCompanion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -156,6 +163,7 @@ local DelvesUI =
 		{
 			Name = "GetRoleSubtreeForCompanion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -171,6 +179,7 @@ local DelvesUI =
 		{
 			Name = "GetTraitTreeForCompanion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -185,6 +194,7 @@ local DelvesUI =
 		{
 			Name = "GetUnseenCuriosBySlotType",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -200,6 +210,7 @@ local DelvesUI =
 		{
 			Name = "HasActiveDelve",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -214,6 +225,7 @@ local DelvesUI =
 		{
 			Name = "IsEligibleForActiveDelveRewards",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -228,6 +240,7 @@ local DelvesUI =
 		{
 			Name = "RequestPartyEligibilityForDelveTiers",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Queries private party members to see what level they have unlocked for the Delve. Ineligible members are added to the tooltip of dropdown entries." },
 
 			Arguments =
@@ -238,6 +251,7 @@ local DelvesUI =
 		{
 			Name = "SaveSeenCuriosBySlotType",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

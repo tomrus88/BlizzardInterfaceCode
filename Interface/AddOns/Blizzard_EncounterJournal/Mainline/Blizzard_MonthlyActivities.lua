@@ -305,9 +305,9 @@ function MonthlyActivitiesButtonMixin:OnClick_Internal()
 		return false;
 	end
 
-	if ( IsModifiedClick("CHATLINK") and ChatEdit_GetActiveWindow() ) then
+	if ( IsModifiedClick("CHATLINK") and ChatFrameUtil.GetActiveWindow() ) then
 		local perksActivityLink = C_PerksActivities.GetPerksActivityChatLink(data.ID);
-		ChatEdit_InsertLink(perksActivityLink);
+		ChatFrameUtil.InsertLink(perksActivityLink);
 		return true;
 	end
 
@@ -861,7 +861,7 @@ function MonthlyActivitiesFrameMixin:OnEvent(event, ...)
 	elseif ( event == "PERKS_ACTIVITY_COMPLETED" ) then
 		self.ScrollBox:ScrollToBegin();
 		self:UpdateActivities(ScrollBoxConstants.RetainScrollPosition);
-		Chat_AddSystemMessage(MONTHLY_ACTIVITIES_UPDATED);
+		ChatFrameUtil.AddSystemMessage(MONTHLY_ACTIVITIES_UPDATED);
 	end
 end
 

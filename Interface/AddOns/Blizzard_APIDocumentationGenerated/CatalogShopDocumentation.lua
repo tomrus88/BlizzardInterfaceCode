@@ -31,6 +31,7 @@ local CatalogShop =
 		{
 			Name = "GetCatalogShopProductDisplayInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -45,6 +46,7 @@ local CatalogShop =
 		{
 			Name = "GetCategoryInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -59,6 +61,7 @@ local CatalogShop =
 		{
 			Name = "GetCategorySectionInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -84,6 +87,7 @@ local CatalogShop =
 		{
 			Name = "GetProductAvailabilityTimeRemainingSecs",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -98,6 +102,7 @@ local CatalogShop =
 		{
 			Name = "GetProductIDsForBundle",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -112,6 +117,7 @@ local CatalogShop =
 		{
 			Name = "GetProductIDsForCategorySection",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -127,6 +133,7 @@ local CatalogShop =
 		{
 			Name = "GetProductInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -141,6 +148,7 @@ local CatalogShop =
 		{
 			Name = "GetProductSortOrder",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -157,6 +165,7 @@ local CatalogShop =
 		{
 			Name = "GetSectionIDsForCategory",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -171,6 +180,7 @@ local CatalogShop =
 		{
 			Name = "GetSpellVisualInfoForMount",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -194,6 +204,7 @@ local CatalogShop =
 		{
 			Name = "OnLegalDisclaimerClicked",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -203,10 +214,17 @@ local CatalogShop =
 		{
 			Name = "OpenCatalogShopInteraction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "shouldAllowMovement", Type = "bool", Nilable = false, Default = false },
+			},
 		},
 		{
 			Name = "ProductDisplayedTelemetry",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -218,6 +236,7 @@ local CatalogShop =
 		{
 			Name = "ProductSelectedTelemetry",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -230,6 +249,7 @@ local CatalogShop =
 		{
 			Name = "PurchaseProduct",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -441,7 +461,6 @@ local CatalogShop =
 				{ Name = "licenseTermDuration", Type = "number", Nilable = false },
 				{ Name = "virtualCurrencies", Type = "table", InnerType = "CatalogShopVirtualCurrency", Nilable = false },
 				{ Name = "isHidden", Type = "bool", Nilable = false },
-				{ Name = "hasPendingOrders", Type = "bool", Nilable = false },
 			},
 		},
 		{

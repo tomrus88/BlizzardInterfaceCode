@@ -9,6 +9,7 @@ local AddOnProfiler =
 		{
 			Name = "AddMeasuredCallEvent",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Adds a measured event to any ongoing measured calls. If no such calls are currently taking place, this function does nothing." },
 
 			Arguments =
@@ -20,6 +21,7 @@ local AddOnProfiler =
 			Name = "AddPerformanceMessageShown",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Internal API for telemetry." },
 
 			Arguments =
@@ -41,6 +43,7 @@ local AddOnProfiler =
 		{
 			Name = "GetAddOnMetric",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Gets an AddOn profiler value - all times returned are in milliseconds." },
 
 			Arguments =
@@ -57,6 +60,7 @@ local AddOnProfiler =
 		{
 			Name = "GetApplicationMetric",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Overall profiling data for the entire application (not just the UI)" },
 
 			Arguments =
@@ -72,6 +76,7 @@ local AddOnProfiler =
 		{
 			Name = "GetOverallMetric",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Overall profiling data for all addons" },
 
 			Arguments =
@@ -97,6 +102,7 @@ local AddOnProfiler =
 		{
 			Name = "GetTopKAddOnsForMetric",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Gets top K AddOns for a given metric." },
 
 			Arguments =
@@ -123,6 +129,7 @@ local AddOnProfiler =
 		{
 			Name = "MeasureCall",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Performs a profiled measurement of a single function call with any supplied arguments." },
 
 			Arguments =

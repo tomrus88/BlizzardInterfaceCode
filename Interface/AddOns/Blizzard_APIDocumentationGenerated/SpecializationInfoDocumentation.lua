@@ -39,6 +39,7 @@ local SpecializationInfo =
 		{
 			Name = "GetActiveSpecGroup",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -63,6 +64,7 @@ local SpecializationInfo =
 		{
 			Name = "GetClassIDFromSpecID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -77,6 +79,7 @@ local SpecializationInfo =
 		{
 			Name = "GetInspectSelectedPvpTalent",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -92,6 +95,7 @@ local SpecializationInfo =
 		{
 			Name = "GetNumSpecializationsForClassID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -116,6 +120,7 @@ local SpecializationInfo =
 		{
 			Name = "GetPvpTalentInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -130,6 +135,7 @@ local SpecializationInfo =
 		{
 			Name = "GetPvpTalentSlotInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -144,6 +150,7 @@ local SpecializationInfo =
 		{
 			Name = "GetPvpTalentSlotUnlockLevel",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -158,6 +165,7 @@ local SpecializationInfo =
 		{
 			Name = "GetPvpTalentUnlockLevel",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -172,6 +180,7 @@ local SpecializationInfo =
 		{
 			Name = "GetSpecIDs",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -186,6 +195,7 @@ local SpecializationInfo =
 		{
 			Name = "GetSpecialization",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -202,6 +212,7 @@ local SpecializationInfo =
 		{
 			Name = "GetSpecializationInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -211,6 +222,7 @@ local SpecializationInfo =
 				{ Name = "inspectTarget", Type = "string", Nilable = true },
 				{ Name = "sex", Type = "number", Nilable = true },
 				{ Name = "groupIndex", Type = "luaIndex", Nilable = true },
+				{ Name = "classID", Type = "number", Nilable = true },
 			},
 
 			Returns =
@@ -230,6 +242,7 @@ local SpecializationInfo =
 		{
 			Name = "GetSpecializationMasterySpells",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -246,6 +259,7 @@ local SpecializationInfo =
 		{
 			Name = "GetSpellsDisplay",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -260,6 +274,7 @@ local SpecializationInfo =
 		{
 			Name = "GetTalentInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -283,6 +298,7 @@ local SpecializationInfo =
 		{
 			Name = "IsPvpTalentLocked",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -297,6 +313,7 @@ local SpecializationInfo =
 		{
 			Name = "MatchesCurrentSpecSet",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -311,6 +328,7 @@ local SpecializationInfo =
 		{
 			Name = "SetPetSpecialization",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -321,6 +339,7 @@ local SpecializationInfo =
 		{
 			Name = "SetPvpTalentLocked",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -331,6 +350,7 @@ local SpecializationInfo =
 		{
 			Name = "SetSpecialization",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -479,6 +499,7 @@ local SpecializationInfo =
 				{ Name = "inspectTarget", Type = "string", Nilable = true },
 				{ Name = "sex", Type = "number", Nilable = true },
 				{ Name = "groupIndex", Type = "luaIndex", Nilable = true },
+				{ Name = "classID", Type = "number", Nilable = true },
 			},
 		},
 		{

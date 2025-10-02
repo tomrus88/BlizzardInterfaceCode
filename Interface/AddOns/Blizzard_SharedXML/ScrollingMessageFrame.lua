@@ -622,6 +622,9 @@ function ScrollingMessageFrameMixin:RefreshDisplay()
 		local messageInfo = self.historyBuffer:GetEntryAtIndex(messageIndex);
 		if messageInfo then
 			visibleLine.messageInfo = messageInfo;
+			-- Re-initialize the fontstring to clear secret aspects, as fontstrings don't
+			-- get released into the pool on display-only updates.
+			self:InitializeFontString(visibleLine);
 			visibleLine:SetText(messageInfo.message);
 			visibleLine:SetTextColor(messageInfo.r or fontR, messageInfo.g or fontG, messageInfo.b or fontB);
 			if canFade then
@@ -692,13 +695,18 @@ end
 
 function ScrollingMessageFrameMixin:AcquireFontString()
 	if not self.fontStringPool then
-		self.fontStringPool = CreateFontStringPool(self.FontStringContainer, "BACKGROUND", 0);
+		self.fontStringPool = CreateFontStringPool(self.FontStringContainer, "BACKGROUND", 0, nil, Pool_HideAndSetToDefaults);
 	end
 
 	local fontString = self.fontStringPool:Acquire();
+	self:InitializeFontString(fontString);
+	return fontString;
+end
+
+function ScrollingMessageFrameMixin:InitializeFontString(fontString)
+	fontString:SetToDefaults();
 	fontString:SetFontObject(self:GetFontObject());
 	fontString:SetNonSpaceWrap(true);
-	return fontString;
 end
 
 function ScrollingMessageFrameMixin:AcquireHighlightTexture()

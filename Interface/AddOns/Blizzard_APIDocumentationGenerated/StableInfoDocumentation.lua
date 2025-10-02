@@ -49,6 +49,7 @@ local StableInfo =
 		{
 			Name = "GetStablePetFoodTypes",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -63,6 +64,7 @@ local StableInfo =
 		{
 			Name = "GetStablePetInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -95,6 +97,7 @@ local StableInfo =
 		{
 			Name = "IsPetFavorite",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -109,6 +112,7 @@ local StableInfo =
 		{
 			Name = "PickupStablePet",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -118,6 +122,7 @@ local StableInfo =
 		{
 			Name = "SetPetFavorite",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -128,6 +133,7 @@ local StableInfo =
 		{
 			Name = "SetPetSlot",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

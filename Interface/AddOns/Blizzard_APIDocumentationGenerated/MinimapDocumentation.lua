@@ -26,6 +26,7 @@ local Minimap =
 		{
 			Name = "GetDefaultTrackingValue",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -67,6 +68,7 @@ local Minimap =
 		{
 			Name = "GetObjectIconTextureCoords",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -84,6 +86,7 @@ local Minimap =
 		{
 			Name = "GetPOITextureCoords",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -101,6 +104,7 @@ local Minimap =
 		{
 			Name = "GetTrackingFilter",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -115,6 +119,7 @@ local Minimap =
 		{
 			Name = "GetTrackingInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -147,6 +152,7 @@ local Minimap =
 		{
 			Name = "IsFilteredOut",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -161,6 +167,7 @@ local Minimap =
 		{
 			Name = "IsInsideQuestBlob",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -211,6 +218,7 @@ local Minimap =
 		{
 			Name = "SetDrawGroundTextures",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -220,6 +228,7 @@ local Minimap =
 		{
 			Name = "SetIgnoreRotateMinimap",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -229,6 +238,7 @@ local Minimap =
 		{
 			Name = "SetMinimapInsetInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -240,6 +250,7 @@ local Minimap =
 		{
 			Name = "SetTracking",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -266,7 +277,7 @@ local Minimap =
 			LiteralName = "MINIMAP_PING",
 			Payload =
 			{
-				{ Name = "unitTarget", Type = "UnitToken", Nilable = false },
+				{ Name = "unitTarget", Type = "UnitTokenVariant", Nilable = false },
 				{ Name = "y", Type = "number", Nilable = false },
 				{ Name = "x", Type = "number", Nilable = false },
 			},

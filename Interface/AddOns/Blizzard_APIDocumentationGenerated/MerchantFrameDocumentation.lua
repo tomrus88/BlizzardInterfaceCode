@@ -10,6 +10,7 @@ local MerchantFrame =
 			Name = "GetBuybackItemID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -25,6 +26,7 @@ local MerchantFrame =
 			Name = "GetItemInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -48,6 +50,7 @@ local MerchantFrame =
 		{
 			Name = "IsMerchantItemRefundable",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

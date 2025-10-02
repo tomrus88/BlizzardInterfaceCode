@@ -102,7 +102,12 @@ function AdventureMap_QuestOfferDataProviderMixin:OnQuestOfferPinClicked(pin)
 	end
 
 	AdventureMapQuestChoiceDialog:ShowWithQuest(self:GetMap(), pin, pin.questID, OnClosedCallback, 0);
-	AdventureMapQuestChoiceDialog:SetPortraitAtlas("FXAM-QuestBang", nil, nil, 0, 7);
+	local textureKit = C_AdventureMap.GetAdventureMapTextureKit();
+	if textureKit == "midnight" then
+		AdventureMapQuestChoiceDialog:SetPortraitAtlas("ui-prey-scoutingmap", nil, nil, 0, 23);
+	else
+		AdventureMapQuestChoiceDialog:SetPortraitAtlas("FXAM-QuestBang", nil, nil, 0, 7);
+	end
 
 	if not self.offerAreaTrigger then
 		self.offerAreaTrigger = self:GetMap():AcquireAreaTrigger("AdventureMap_QuestOffer");
@@ -131,7 +136,6 @@ end
 AdventureMap_QuestOfferPinMixin = CreateFromMixins(MapCanvasPinMixin);
 
 function AdventureMap_QuestOfferPinMixin:OnLoad()
-	self:SetAlphaStyle(AM_PIN_ALPHA_STYLE_VISIBLE_WHEN_ZOOMED_IN);
 	self:SetScalingLimits(1.25, 0.825, 1.275);
 end
 

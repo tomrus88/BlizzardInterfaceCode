@@ -28,6 +28,7 @@ local QuestOffer =
 		{
 			Name = "GetQuestRequiredCurrencyInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -42,6 +43,7 @@ local QuestOffer =
 		{
 			Name = "GetQuestRewardCurrencyInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

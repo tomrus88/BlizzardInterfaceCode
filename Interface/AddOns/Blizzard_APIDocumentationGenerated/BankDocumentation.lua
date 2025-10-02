@@ -18,6 +18,7 @@ local Bank =
 		{
 			Name = "AutoDepositItemsIntoBank",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -27,6 +28,7 @@ local Bank =
 		{
 			Name = "CanDepositMoney",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -41,6 +43,7 @@ local Bank =
 		{
 			Name = "CanPurchaseBankTab",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -55,6 +58,7 @@ local Bank =
 		{
 			Name = "CanUseBank",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -69,6 +73,7 @@ local Bank =
 		{
 			Name = "CanViewBank",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -83,6 +88,7 @@ local Bank =
 		{
 			Name = "CanWithdrawMoney",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -101,6 +107,7 @@ local Bank =
 		{
 			Name = "DepositMoney",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -111,6 +118,7 @@ local Bank =
 		{
 			Name = "DoesBankTypeSupportAutoDeposit",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -125,6 +133,7 @@ local Bank =
 		{
 			Name = "DoesBankTypeSupportMoneyTransfer",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -139,6 +148,7 @@ local Bank =
 		{
 			Name = "FetchBankLockedReason",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -153,6 +163,7 @@ local Bank =
 		{
 			Name = "FetchDepositedMoney",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -167,6 +178,7 @@ local Bank =
 		{
 			Name = "FetchNextPurchasableBankTabData",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -181,6 +193,7 @@ local Bank =
 		{
 			Name = "FetchNumPurchasedBankTabs",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -195,6 +208,7 @@ local Bank =
 		{
 			Name = "FetchPurchasedBankTabData",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -209,6 +223,7 @@ local Bank =
 		{
 			Name = "FetchPurchasedBankTabIDs",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -232,6 +247,7 @@ local Bank =
 		{
 			Name = "HasMaxBankTabs",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -246,6 +262,7 @@ local Bank =
 		{
 			Name = "IsItemAllowedInBankType",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -262,6 +279,7 @@ local Bank =
 			Name = "PurchaseBankTab",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -271,6 +289,7 @@ local Bank =
 		{
 			Name = "UpdateBankTabSettings",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -284,6 +303,7 @@ local Bank =
 		{
 			Name = "WithdrawMoney",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

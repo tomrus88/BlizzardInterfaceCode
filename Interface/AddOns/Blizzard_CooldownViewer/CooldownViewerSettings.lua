@@ -103,7 +103,7 @@ function CooldownViewerCategoryMixin:IsCollapsed()
 end
 
 function CooldownViewerCategoryMixin:WillDisableCooldownsAssignedToThisCategory()
-	return CooldownViewerUtil_IsDisabledCategory(self:GetCategory());
+	return CooldownViewerUtil.IsDisabledCategory(self:GetCategory());
 end
 
 function CooldownViewerCategoryMixin:GetCategoryAssignmentText()
@@ -167,6 +167,66 @@ function CooldownViewerSettingsItemMixin:RefreshData()
 	else
 		self.Icon:SetAtlas("cdm-empty");
 		self.Icon:SetDesaturated(false);
+		self:RefreshAlertTypeOverlay();
+	end
+end
+
+local function GetAlertTypeAtlas(alertType)
+	if alertType == Enum.CooldownViewerAlertType.Sound then
+		return "CreditsScreen-Assets-Buttons-Play";
+	end
+end
+
+local function AddAlertTypeIcon(index, alertType, overlay)
+	local asset = GetAlertTypeAtlas(alertType);
+	if asset then
+		local icon = overlay.icons[index];
+		if not icon then
+			icon = overlay:CreateTexture(nil, "ARTWORK");
+			local size = overlay:GetHeight() - 2;
+			icon:SetSize(size, size);
+			icon:SetPoint("CENTER", overlay, "CENTER", 0, 0);
+
+			overlay.icons[index] = icon;
+		end
+
+		icon:SetAtlas(asset);
+		icon:Show();
+	end
+end
+
+local function HideAlertTypeIcons(overlay)
+	for _, icon in ipairs(overlay.icons) do
+		icon:Hide();
+	end
+end
+
+function CooldownViewerSettingsItemMixin:RefreshAlertTypeOverlay()
+	local alertTypes = self:GetAllAlertTypes();
+	if alertTypes then
+		if not self.AlertTypesOverlay then
+			local overlay = CreateFrame("Frame", nil, self);
+			self.AlertTypesOverlay = overlay;
+			overlay:SetPoint("BOTTOMLEFT", self.Icon, "BOTTOMLEFT", 1, 2);
+			overlay:SetPoint("BOTTOMRIGHT", self.Icon, "BOTTOMRIGHT", -1, 2);
+			overlay:SetHeight(self:GetHeight() * 0.37);
+
+			overlay.BG = overlay:CreateTexture(nil, "BACKGROUND");
+			overlay.BG:SetAllPoints(overlay);
+			overlay.BG:SetColorTexture(0, 0, 0, 0.7);
+
+			overlay.icons = {};
+		end
+
+		HideAlertTypeIcons(self.AlertTypesOverlay);
+
+		for index, alertType in ipairs(alertTypes) do
+			AddAlertTypeIcon(index, alertType, self.AlertTypesOverlay);
+		end
+
+		self.AlertTypesOverlay:Show();
+	elseif self.AlertTypesOverlay then
+		self.AlertTypesOverlay:Hide();
 	end
 end
 
@@ -175,6 +235,7 @@ function CooldownViewerSettingsItemMixin:RefreshIconState()
 	assertsafe(info ~= nil, "Non empty cooldown with invalid info, id: " .. tostring(self:GetCooldownID()));
 
 	self.Icon:SetDesaturated(not info.isKnown or self:IsReorderLocked());
+	self:RefreshAlertTypeOverlay();
 end
 
 function CooldownViewerSettingsItemMixin:SetOrderIndex(orderIndex)
@@ -252,21 +313,190 @@ function CooldownViewerSettingsItemMixin:BeginOrderChange(eatNextGlobalMouseUp)
 	EventRegistry:TriggerEvent("CooldownViewerSettings.BeginOrderChange", self, eatNextGlobalMouseUp);
 end
 
-function CooldownViewerSettingsItemMixin:DisplayContextMenu()
-	MenuUtil.CreateContextMenu(self, function(owner, rootDescription)
-		rootDescription:SetTag("MENU_COOLDOWN_SETTINGS_ITEM");
+function CooldownViewerSettingsItemMixin:PlayAlertSample(alert)
+	print("Playing alert: " .. tostring(CooldownViewerAlert_GetPayloadText(alert)));
+end
 
-		local menuCategories = CooldownViewerSettings:GetValidAssignmentCategories(self);
-		for index, category in ipairs(menuCategories) do
-			rootDescription:CreateButton(category:GetCategoryAssignmentText(), function()
-				self:AssignToCategory(category);
+do
+	local function GetCooldownItemAlertButtonData(layoutManager, cooldownItem)
+		local numAlerts = layoutManager:GetNumAlerts(cooldownItem:GetCooldownID(), Enum.CDMLayoutMode.AccessOnly);
+		local maxAlerts = layoutManager:GetMaxNumAlertsPerItem();
+		local status = layoutManager:GetAddAlertStatus(cooldownItem:GetCooldownID());
+
+		return numAlerts, maxAlerts, status;
+	end
+
+	local function GetNewAlertButtonText(numAlerts, maxAlerts, enabled)
+		if enabled and numAlerts == 0 then
+			return COOLDOWN_VIEWER_SETTINGS_ADD_NEW_ALERT;
+		else
+			return COOLDOWN_VIEWER_SETTINGS_ADD_ALERT:format(numAlerts, maxAlerts);
+		end
+	end
+
+	local function AddNewAndClearAlertButtons(layoutManager, cooldownItem, rootDescription)
+		local numAlerts, maxAlerts, addAlertStatus = GetCooldownItemAlertButtonData(layoutManager, cooldownItem);
+		local addAlertEnabled = addAlertStatus == Enum.CooldownLayoutStatus.Success;
+		local text = GetNewAlertButtonText(numAlerts, maxAlerts, addAlertEnabled);
+		local newAlertButton = rootDescription:CreateButton(text, function()
+			CooldownViewerSettingsEditAlert:DisplayForCooldown(cooldownItem);
+		end);
+
+		newAlertButton:SetEnabled(addAlertEnabled);
+
+		if not addAlertEnabled then
+			newAlertButton:SetTooltip(function(tooltip, elementDescription)
+				GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+				GameTooltip_AddErrorLine(tooltip, CooldownViewerSettings:GetActionStatusText(Enum.CooldownLayoutAction.AddAlert, addAlertStatus));
 			end);
 		end
-	end);
+
+		newAlertButton:AddInitializer(function(button, description, menu)
+			local texture = button:AttachTexture();
+			texture:SetPoint("LEFT");
+			texture:SetAtlas(addAlertEnabled and "editmode-new-layout-plus" or "editmode-new-layout-plus-disabled", true);
+			button.fontString:ClearAllPoints();
+			button.fontString:SetPoint("LEFT", texture, "RIGHT", 3, 0);
+		end);
+
+		if numAlerts > 1 then
+			local removeAllAlerts = rootDescription:CreateButton(COOLDOWN_VIEWER_SETTINGS_CLEAR_ALL_ALERTS, function()
+				cooldownItem:RemoveAllAlerts();
+			end);
+
+			removeAllAlerts:AddInitializer(function(button, description, menu)
+				local texture = button:AttachTexture();
+				texture:SetSize(16, 16);
+				texture:SetPoint("LEFT");
+				texture:SetTexture([[Interface\Buttons\UI-GroupLoot-Pass-Up]]);
+				button.fontString:ClearAllPoints();
+				button.fontString:SetPoint("LEFT", texture, "RIGHT", 3, 0);
+			end);
+		end
+	end
+
+	local function AddExistingAlertButtons(layoutManager, cooldownItem, rootDescription)
+		local alerts = layoutManager:GetAlerts(cooldownItem:GetCooldownID(), Enum.CDMLayoutMode.AccessOnly);
+		if not alerts then
+			return 0;
+		end
+
+		for _, alert in ipairs(alerts) do
+			local payloadText = CooldownViewerAlert_GetPayloadText(alert);
+			local eventText = CooldownViewerAlert_GetEventText(alert);
+			local alertType = CooldownViewerAlert_GetType(alert);
+			local alertButton = rootDescription:CreateButton("temp", function()
+				cooldownItem:PlayAlertSample(alert);
+			end);
+
+			alertButton:AddInitializer(function(button, description, menu)
+				MenuUtil.HookTooltipScripts(button, function(tooltip)
+					GameTooltip_SetTitle(tooltip, COOLDOWN_VIEWER_SETTINGS_ALERT_MENU_BUTTON_TOOLTIP_PREVIEW);
+				end);
+
+				local typeTexture = button:AttachTexture();
+				typeTexture:SetSize(20, 20); -- use atlas size?
+				typeTexture:SetPoint("TOPLEFT");
+				typeTexture:SetAtlas(GetAlertTypeAtlas(alertType)); -- use atlas size?
+
+				local payloadFontString = button.fontString;
+				payloadFontString:SetFontObject("GameFontNormalLarge");
+				payloadFontString:SetSize(0, 0);
+				payloadFontString:ClearAllPoints();
+				payloadFontString:SetPoint("TOPLEFT", typeTexture, "TOPRIGHT", 3, 0);
+				payloadFontString:SetText(payloadText);
+
+				local eventFontString = button:AttachFontString();
+				eventFontString:SetFontObject("GameFontHighlightSmall");
+				eventFontString:SetSize(0, 0);
+				eventFontString:ClearAllPoints();
+				eventFontString:SetPoint("TOPLEFT", payloadFontString, "BOTTOMLEFT", 0, -5);
+				eventFontString:SetText(eventText);
+
+				local editButton = MenuTemplates.AttachAutoHideGearButton(button);
+				MenuTemplates.SetUtilityButtonTooltipText(editButton, COOLDOWN_VIEWER_SETTINGS_ALERT_MENU_BUTTON_TOOLTIP_EDIT);
+				MenuTemplates.SetUtilityButtonAnchor(editButton, MenuVariants.GearButtonAnchor, button);
+				MenuTemplates.SetUtilityButtonClickHandler(editButton, function()
+					CooldownViewerSettingsEditAlert:DisplayForAlert(cooldownItem, alert);
+					menu:Close();
+				end);
+
+				local deleteButton = MenuTemplates.AttachAutoHideCancelButton(button);
+				MenuTemplates.SetUtilityButtonTooltipText(deleteButton, COOLDOWN_VIEWER_SETTINGS_ALERT_MENU_BUTTON_TOOLTIP_DELETE);
+				MenuTemplates.SetUtilityButtonAnchor(deleteButton, MenuVariants.CancelButtonAnchor, editButton);
+				MenuTemplates.SetUtilityButtonClickHandler(deleteButton, function()
+					cooldownItem:RemoveAlert(alert);
+					menu:Close();
+				end);
+			end);
+		end
+
+		return #alerts;
+	end
+
+	function CooldownViewerSettingsItemMixin:DisplayContextMenu()
+		MenuUtil.CreateContextMenu(self, function(owner, rootDescription)
+			rootDescription:SetTag("MENU_COOLDOWN_SETTINGS_ITEM");
+
+			local layoutManager = CooldownViewerSettings:GetLayoutManager();
+
+			if AddExistingAlertButtons(layoutManager, self, rootDescription) > 0 then
+				rootDescription:CreateDivider();
+			end
+
+			AddNewAndClearAlertButtons(layoutManager, self, rootDescription);
+
+			rootDescription:CreateDivider();
+
+			-- Display category reassignment
+			local menuCategories = CooldownViewerSettings:GetValidAssignmentCategories(self);
+			for index, category in ipairs(menuCategories) do
+				local changeCategoryButton = rootDescription:CreateButton(category:GetCategoryAssignmentText(), function()
+					self:AssignToCategory(category);
+				end);
+
+				local changeCategoryStatus = layoutManager:GetCooldownCategoryChangeStatus(self:GetCooldownID(), category:GetCategory());
+				local enableChangeCategoryButton = changeCategoryStatus == Enum.CooldownLayoutStatus.Success;
+				changeCategoryButton:SetEnabled(enableChangeCategoryButton);
+
+				if not enableChangeCategoryButton  then
+					changeCategoryButton:SetTooltip(function(tooltip, elementDescription)
+						GameTooltip_SetTitle(tooltip, MenuUtil.GetElementText(elementDescription));
+						GameTooltip_AddErrorLine(tooltip, CooldownViewerSettings:GetActionStatusText(Enum.CooldownLayoutAction.ChangeCategory, changeCategoryStatus));
+					end);
+				end
+			end
+		end);
+	end
+end
+
+function CooldownViewerSettingsItemMixin:GetAllAlertTypes()
+	local alerts = CooldownViewerSettings:GetLayoutManager():GetAlerts(self:GetCooldownID(), Enum.CDMLayoutMode.AccessOnly);
+	if alerts and #alerts > 0 then
+		local alertTypes = {};
+		for _, alert in ipairs(alerts) do
+			alertTypes[CooldownViewerAlert_GetType(alert)] = true;
+		end
+
+		return tInvertToArray(alertTypes);
+	end
+
+	return nil;
+end
+
+function CooldownViewerSettingsItemMixin:RemoveAlert(alert)
+	CooldownViewerSettings:GetLayoutManager():RemoveAlert(self:GetCooldownID(), alert);
+	self:RefreshAlertTypeOverlay();
+end
+
+function CooldownViewerSettingsItemMixin:RemoveAllAlerts()
+	CooldownViewerSettings:GetLayoutManager():RemoveAllAlerts(self:GetCooldownID());
+	self:RefreshAlertTypeOverlay();
 end
 
 function CooldownViewerSettingsItemMixin:AssignToCategory(category)
-	CooldownViewerSettings:GetDataProvider():SetCooldownToCategory(self:GetCooldownID(), category:GetCategory());
+	local status = CooldownViewerSettings:GetDataProvider():SetCooldownToCategory(self:GetCooldownID(), category:GetCategory());
+	CooldownViewerSettings:CheckDisplayActionStatus(Enum.CooldownLayoutAction.ChangeCategory, status);
 	CooldownViewerSettings:RefreshLayout();
 end
 
@@ -519,8 +749,12 @@ CooldownViewerSettingsContentMixin = {};
 
 CooldownViewerSettingsMixin = {};
 
+function CooldownViewerSettingsMixin:GetExtraPanelWidth()
+	return 50;
+end
+
 function CooldownViewerSettingsMixin:OnLoad()
-	RegisterUIPanel(self, { area = "left", pushable = 1, extraWidth = 20, whileDead = 1});
+	RegisterUIPanel(self, { area = "left", pushable = 1, extraWidth = self:GetExtraPanelWidth(), whileDead = 1});
 
 	self:SetTitle(COOLDOWN_VIEWER_SETTINGS_TITLE);
 	self.categoryObjects = CreateCategoryObjectLookup();
@@ -528,11 +762,17 @@ function CooldownViewerSettingsMixin:OnLoad()
 	self.categoryPool:CreatePool("Frame", self.CooldownScroll.Content, "CooldownViewerSettingsCategoryTemplate");
 	self.categoryPool:CreatePool("Frame", self.CooldownScroll.Content, "CooldownViewerSettingsBarCategoryTemplate");
 
+	self.layoutManager = CreateFromMixins(CooldownViewerLayoutManagerMixin);
+	self.dataSerialization = CreateFromMixins(CooldownViewerDataStoreSerializationMixin);
+	self.dataProvider = CreateFromMixins(CooldownViewerSettingsDataProviderMixin);
+
 	self:SetupTabs();
 	self:SetupEventHandlers();
-	self:SetupDropdownMenu();
+	self:SetupSettingsMenu();
 	self:SetupPanelButtons();
 	self:SetupScrollFrame();
+	self:SetupEventEditFrame();
+	self:SetupLayoutManagerDialog();
 
 	self:SetLayoutManager(CreateFromMixins(CooldownViewerLayoutManagerMixin));
 	self:SetDataProvider(CreateFromMixins(CooldownViewerSettingsDataProviderMixin));
@@ -547,7 +787,9 @@ function CooldownViewerSettingsMixin:OnLoad()
 		serializer:Init(manager);
 		dataProvider:Init(manager);
 
-		EventRegistry:TriggerEvent("CooldownViewerSettings.OnSettingsLoaded", self);
+		-- Just loaded, there's nothing that could be pending.
+		-- Doing this here because it's always the last step in the load process
+		manager:SetHasPendingChanges(false);
 	end
 
 	EventUtil.ContinueAfterAllEvents(LoadCooldownSettings, "VARIABLES_LOADED", "PLAYER_ENTERING_WORLD", "COOLDOWN_VIEWER_DATA_LOADED");
@@ -596,7 +838,7 @@ function CooldownViewerSettingsMixin:SetupEventHandlers()
 	self:AddDynamicEventMethod(EventRegistry, "CooldownViewerSettings.OnPendingChanges", self.UpdateSaveButtonStates);
 end
 
-function CooldownViewerSettingsMixin:SetupDropdownMenu()
+function CooldownViewerSettingsMixin:SetupSettingsMenu()
 	self.SettingsDropdown:SetupMenu(function(owner, rootDescription)
 		rootDescription:SetTag("COOLDOWN_VIEWER_SETTINGS_MENU");
 
@@ -611,6 +853,247 @@ function CooldownViewerSettingsMixin:SetupDropdownMenu()
 		end);
 
 		EditModeManagerFrame:CreateEnterEditModeMenuButton(rootDescription, HUD_EDIT_MODE_MENU);
+	end);
+end
+
+function CooldownViewerSettingsMixin:CreateNewLayoutFromDialog(dialog)
+	self:SaveCurrentLayout(); -- Auto-save the current layout if the user makes a new layout
+
+	local layoutName = dialog:GetEditBoxText();
+	local newLayout, status = self:GetLayoutManager():AddLayout(layoutName, CooldownViewerUtil.GetCurrentClassAndSpecTag());
+	self:CheckDisplayActionStatus(Enum.CooldownLayoutAction.AddLayout, status, layoutName);
+
+	if newLayout then
+		self:SetActiveLayoutByID(CooldownManagerLayout_GetID(newLayout));
+	end
+end
+
+function CooldownViewerSettingsMixin:RenameLayoutFromDialog(dialog)
+	self:GetLayoutManager():RenameLayout(dialog:GetLayoutIndex(), dialog:GetEditBoxText());
+	self:SaveCurrentLayout();
+end
+
+function CooldownViewerSettingsMixin:DeleteLayoutFromDialog(dialog)
+	self:GetLayoutManager():RemoveLayout(dialog:GetLayoutIndex());
+	self:GetDataProvider():SwitchToBestLayoutForSpec();
+	self:SaveCurrentLayout();
+end
+
+function CooldownViewerSettingsMixin:ImportLayoutFromDialog(dialog)
+	-- self:ImportLayout(dialog:GetLayoutInfo(), dialog:GetDesiredLayoutType(), dialog:GetEditBoxText());
+	print("NYI: Actually import layout...");
+end
+
+function CooldownViewerSettingsMixin:IsCharacterSpecificLayout(layout)
+	return (layout.layoutType == Enum.EditModeLayoutType.Character);
+end
+
+function CooldownViewerSettingsMixin:GetLayoutName(layout)
+	return layout.layoutName;
+end
+
+function CooldownViewerSettingsMixin:ValidateLayoutNameFromDialog(dialog)
+	local editBoxText = dialog:GetEditBoxText();
+
+	local hasValidInput = UserInputNonEmpty(editBoxText);
+	if not hasValidInput then
+		return false, HUD_EDIT_MODE_ERROR_ENTER_NAME;
+	end
+
+	if not self:GetLayoutManager():IsValidLayoutName(editBoxText) then
+		return false, HUD_EDIT_MODE_ERROR_ENTER_NAME; -- TODO: Add custom string for this?
+	end
+
+	return true;
+end
+
+function CooldownViewerSettingsMixin:CanCreateNewLayoutFromDialog(dialog)
+	local manager = self:GetLayoutManager();
+	if manager:AreLayoutsFullyMaxed() then
+		local maxLayoutsErrorText = HUD_EDIT_MODE_ERROR_MAX_LAYOUTS:format(manager:GetMaxLayoutsForType(Enum.CooldownLayoutType.Character), manager:GetMaxLayoutsForType(Enum.CooldownLayoutType.Account));
+		return false, maxLayoutsErrorText;
+	end
+
+	local layoutType = dialog:GetDesiredLayoutType();
+	if manager:AreLayoutsOfTypeMaxed(layoutType) then
+		if layoutType == Enum.CooldownLayoutType.Character then
+			local maxCharLayoutsErrorText = HUD_EDIT_MODE_ERROR_MAX_CHAR_LAYOUTS:format(Constants.EditModeConsts.EditModeMaxLayoutsPerType);
+
+			return false, maxCharLayoutsErrorText;
+		else
+			local maxAccountLayoutsErrorText = HUD_EDIT_MODE_ERROR_MAX_ACCOUNT_LAYOUTS:format(Constants.EditModeConsts.EditModeMaxLayoutsPerType);
+			return false, maxAccountLayoutsErrorText;
+		end
+	end
+
+	return self:ValidateLayoutNameFromDialog(dialog);
+end
+
+function CooldownViewerSettingsMixin:CanRenameLayoutFromDialog(dialog)
+	return self:ValidateLayoutNameFromDialog(dialog);
+end
+
+function CooldownViewerSettingsMixin:CanImportFromDialog(dialog)
+	local isEnabled, disabledTooltip = self:CanCreateNewLayoutFromDialog(dialog);
+	if not isEnabled then
+		return isEnabled, disabledTooltip;
+	end
+
+	if not dialog:GetLayoutInfo() then
+		return false, HUD_EDIT_MODE_ERROR_ENTER_IMPORT_STRING_AND_NAME;
+	end
+
+	return true;
+end
+
+function CooldownViewerSettingsMixin:SetupLayoutManagerDropdown()
+	self.LayoutDropdown:SetWidth(220);
+
+	local layoutManager = self:GetLayoutManager();
+
+	local function IsSelected(index)
+		return layoutManager:GetActiveLayoutID() == index;
+	end
+
+	local function SetSelected(index)
+		self:CheckSaveCurrentLayout();
+		self:SetActiveLayoutByID(index);
+	end
+
+	local function IsStarterSelected()
+		return layoutManager:GetActiveLayoutID() == nil;
+	end
+
+	local function SetStarterSelected()
+		self:UseDefaultLayout();
+	end
+
+	self.LayoutDropdown:SetupMenu(function(dropdown, rootDescription)
+		rootDescription:SetTag("MENU_COOLDOWN_SETTINGS_LAYOUTS");
+
+		local lastLayoutType = nil;
+		local addedCharacterSpecificHeader = false;
+		for layoutID, layoutInfo in layoutManager:EnumerateLayouts() do
+			if layoutManager:CanActivateLayout(layoutInfo) then
+				local index = CooldownManagerLayout_GetID(layoutInfo);
+				local layoutType = CooldownManagerLayout_GetType(layoutInfo);
+				local layoutName = CooldownManagerLayout_GetName(layoutInfo);
+
+				if layoutType == Enum.CooldownLayoutType.Character and not addedCharacterSpecificHeader then
+					addedCharacterSpecificHeader = true;
+					local characterName = GetClassColoredTextForUnit("player", HUD_EDIT_MODE_CHARACTER_LAYOUTS_HEADER:format(UnitNameUnmodified("player")));
+					rootDescription:CreateTitle(characterName);
+				end
+
+				if lastLayoutType and lastLayoutType ~= layoutType then
+					rootDescription:CreateDivider();
+				end
+
+				lastLayoutType = layoutType;
+
+				local isUserLayout = layoutType == Enum.CooldownLayoutType.Account or layoutType == Enum.CooldownLayoutType.Character;
+				local layoutButton = rootDescription:CreateRadio(layoutName, IsSelected, SetSelected, index);
+
+				local canActivateLayout = layoutManager:CanActivateLayout(layoutInfo);
+				layoutButton:SetEnabled(canActivateLayout);
+				if not canActivateLayout then
+					layoutButton:SetTooltip(function(tooltip, elementDescription)
+						--- TODO: Localize and make utility to show spec name.
+						GameTooltip_SetTitle(tooltip, "[PH] Cannot switch to layout");
+						GameTooltip_AddErrorLine(tooltip, "[PH] " .. layoutName .. " is for spec: " .. CooldownManagerLayout_GetClassAndSpecTag(layoutInfo));
+					end);
+				end
+
+				if isUserLayout then
+					local copyButton = layoutButton:CreateButton(HUD_EDIT_MODE_COPY_LAYOUT, function()
+						print("NYI: Copy cooldown layout" .. layoutName);
+					end);
+					copyButton:SetEnabled(false);
+					copyButton:SetTooltip(function(tooltip, elementDescription)
+						GameTooltip_SetTitle(tooltip, HUD_EDIT_MODE_COPY_LAYOUT);
+						GameTooltip_AddErrorLine(tooltip, "NYI: Copy cooldown layout" .. layoutName);
+					end);
+
+					--[[ Copy button functionality coming soon...
+					local layoutsMaxed = layoutManager:AreLayoutsFullyMaxed();
+					if layoutsMaxed or layoutManager:HasPendingChanges() then
+						copyButton:SetEnabled(false);
+
+						local maxLayoutsPerType = layoutManager:GetMaxLayoutsForType(); -- todo: it's always the same for now.
+						local tooltipText = layoutsMaxed and HUD_EDIT_MODE_ERROR_COPY_MAX_LAYOUTS:format(maxLayoutsPerType, maxLayoutsPerType) or HUD_EDIT_MODE_ERROR_COPY;
+						copyButton:SetTooltip(function(tooltip, elementDescription)
+							GameTooltip_SetTitle(tooltip, HUD_EDIT_MODE_COPY_LAYOUT);
+							GameTooltip_AddErrorLine(tooltip, tooltipText);
+						end);
+					end
+					--]]
+
+					layoutButton:CreateButton(HUD_EDIT_MODE_RENAME_LAYOUT, function()
+						CooldownViewerLayoutDialog:ShowRenameLayoutDialog(layoutID, layoutInfo);
+					end);
+
+					layoutButton:DeactivateSubmenu();
+
+					layoutButton:AddInitializer(function(button, description, menu)
+						local gearButton = MenuTemplates.AttachAutoHideGearButton(button);
+						MenuTemplates.SetUtilityButtonTooltipText(gearButton, HUD_EDIT_MODE_RENAME_OR_COPY_LAYOUT);
+						MenuTemplates.SetUtilityButtonAnchor(gearButton, MenuVariants.GearButtonAnchor, button);
+						MenuTemplates.SetUtilityButtonClickHandler(gearButton, function()
+							description:ForceOpenSubmenu();
+						end);
+
+						local cancelButton = MenuTemplates.AttachAutoHideCancelButton(button);
+						MenuTemplates.SetUtilityButtonTooltipText(cancelButton, HUD_EDIT_MODE_DELETE_LAYOUT);
+						MenuTemplates.SetUtilityButtonAnchor(cancelButton, MenuVariants.CancelButtonAnchor, gearButton);
+						MenuTemplates.SetUtilityButtonClickHandler(cancelButton, function()
+							CooldownViewerLayoutDialog:ShowDeleteLayoutDialog(layoutID, layoutInfo);
+							menu:Close();
+						end);
+					end);
+				end
+			end
+		end
+
+		-- Only add the initial divider if layouts existed.
+		if lastLayoutType then
+			rootDescription:CreateDivider();
+		end
+
+		-- use starter layout
+		rootDescription:CreateRadio(BLUE_FONT_COLOR:WrapTextInColorCode(COOLDOWN_VIEWER_SETTINGS_USE_STARTER_LAYOUT), IsStarterSelected, SetStarterSelected, 0);
+
+		-- new layout
+		local newLayoutDisableOnMaxLayouts = true;
+		local newLayoutDisableOnActiveChanges = false;
+		local disabled = EditModeLayoutManagerUtil.GetDisableReason(newLayoutDisableOnMaxLayouts, newLayoutDisableOnActiveChanges, layoutManager) ~= nil;
+		local newLayoutButton = rootDescription:CreateButton(EditModeLayoutManagerUtil.GetNewLayoutText(disabled), function()
+			CooldownViewerLayoutDialog:ShowNewLayoutDialog(); -- TODO: Copy from active layout?? maybe not...ask design, "starter" will be default, but new could be copied from active
+		end);
+		EditModeLayoutManagerUtil.SetElementDescriptionEnabledState(newLayoutButton, newLayoutDisableOnMaxLayouts, newLayoutDisableOnActiveChanges, layoutManager);
+
+		-- import layout
+		local importLayoutDisableOnMaxLayouts = true;
+		local importLayoutDisableOnActiveChanges = true;
+		local importLayoutButton = rootDescription:CreateButton(HUD_EDIT_MODE_IMPORT_LAYOUT, function()
+			print("NYI: Showing import layout dialog");
+		end);
+		EditModeLayoutManagerUtil.SetElementDescriptionEnabledState(importLayoutButton, importLayoutDisableOnMaxLayouts, importLayoutDisableOnActiveChanges, layoutManager);
+		importLayoutButton:SetEnabled(false);
+		importLayoutButton:SetTooltip(function(tooltip, elementDescription)
+			GameTooltip_SetTitle(tooltip, HUD_EDIT_MODE_IMPORT_LAYOUT);
+			GameTooltip_AddErrorLine(tooltip, "NYI: Import cooldown layout");
+		end);
+
+		-- share
+		local shareButton = rootDescription:CreateButton(HUD_EDIT_MODE_COPY_TO_CLIPBOARD, function()
+			layoutManager:CopyActiveLayoutToClipboard();
+		end);
+		shareButton:SetEnabled(false);
+		shareButton:SetTooltip(function(tooltip, elementDescription)
+			GameTooltip_SetTitle(tooltip, HUD_EDIT_MODE_COPY_TO_CLIPBOARD);
+			GameTooltip_AddErrorLine(tooltip, "NYI: Copy layout to clipboard");
+		end);
+
 	end);
 end
 
@@ -633,6 +1116,59 @@ function CooldownViewerSettingsMixin:SetupScrollFrame()
 
 		self:CheckAddScrollFramePadding();
 	end);
+end
+
+function CooldownViewerSettingsMixin:SetupEventEditFrame()
+	CooldownViewerSettingsEditAlert:SetOwner(self);
+end
+
+function CooldownViewerSettingsMixin:SetupLayoutManagerDialog()
+	CooldownViewerLayoutDialog:SetLayoutManager(self:GetLayoutManager());
+	CooldownViewerLayoutDialog:SetModeData({
+		newLayout = {
+			title = HUD_EDIT_MODE_NAME_LAYOUT_DIALOG_TITLE,
+			acceptText = SAVE,
+			cancelText = CANCEL,
+			disabledAcceptTooltip = HUD_EDIT_MODE_ERROR_ENTER_NAME,
+			needsEditbox = true,
+			needsCharacterSpecific = false, -- TODO: Will enable account layouts later
+			onCancelEvent = nil,
+			onAcceptCallback = function(_layoutManager, dialog)
+				return self:CreateNewLayoutFromDialog(dialog);
+			end,
+			updateAcceptCallback = function(_layoutManager, dialog)
+				return self:CanCreateNewLayoutFromDialog(dialog);
+			end,
+		},
+
+		renameLayout = {
+			title = HUD_EDIT_MODE_RENAME_LAYOUT_DIALOG_TITLE,
+			acceptText = SAVE,
+			cancelText = CANCEL,
+			disabledAcceptTooltip = nil,
+			needsEditbox = true,
+			needsCharacterSpecific = false, -- Account specific doesn't apply to this dialog
+			onAcceptCallback = function(_layoutManager, dialog)
+				return self:RenameLayoutFromDialog(dialog);
+			end,
+			updateAcceptCallback = function(_layoutManager, dialog)
+				return self:ValidateLayoutNameFromDialog(dialog);
+			end,
+		},
+
+		deleteLayout = {
+			title = HUD_EDIT_MODE_DELETE_LAYOUT_DIALOG_TITLE,
+			acceptText = YES,
+			cancelText = NO,
+			disabledAcceptTooltip = nil,
+			needsEditbox = false,
+			needsCharacterSpecific = false,
+			onAcceptCallback = function(_layoutManager, dialog)
+				return self:DeleteLayoutFromDialog(dialog);
+			end,
+			updateAcceptCallback = function() return true; end,
+		},
+	});
 end
 
 function CooldownViewerSettingsMixin:IsReordering()
@@ -662,9 +1198,11 @@ function CooldownViewerSettingsMixin:EndOrderChange()
 	local targetItem = self:GetReorderTargetItem();
 	if sourceItem ~= targetItem then
 		if targetItem:IsEmptyCategory() then
-			self:GetDataProvider():SetCooldownToCategory(sourceItem:GetCooldownID(), targetItem:GetEmptyCategory():GetCategory());
+			local status = self:GetDataProvider():SetCooldownToCategory(sourceItem:GetCooldownID(), targetItem:GetEmptyCategory():GetCategory());
+			self:CheckDisplayActionStatus(Enum.CooldownLayoutAction.ChangeCategory, status);
 		else
-			self:GetDataProvider():ChangeOrderIndex(sourceItem:GetOrderIndex(), targetItem:GetOrderIndex(), self.reorderOffset);
+			local status = self:GetDataProvider():ChangeOrderIndex(sourceItem:GetOrderIndex(), targetItem:GetOrderIndex(), self.reorderOffset);
+			self:CheckDisplayActionStatus(Enum.CooldownLayoutAction.ChangeOrder, status);
 		end
 	end
 
@@ -709,6 +1247,7 @@ function CooldownViewerSettingsMixin:GetReorderTargetItem()
 end
 
 function CooldownViewerSettingsMixin:SetReorderSourceItem(item)
+	assertsafe(item:GetCooldownInfo() ~= nil, "Source cooldown must have valid info, id: " .. tostring(item:GetCooldownID()));
 	self.reorderSourceItem = item;
 end
 
@@ -796,7 +1335,7 @@ function CooldownViewerSettingsMixin:OnShow()
 end
 
 function CooldownViewerSettingsMixin:OnHide()
-	self:SaveCurrentLayout();
+	self:CheckSaveCurrentLayout();
 
 	PlaySound(SOUNDKIT.UI_CLASS_TALENT_CLOSE_WINDOW);
 
@@ -829,6 +1368,7 @@ function CooldownViewerSettingsMixin:RefreshLayout()
 	end
 
 	self:SetPortraitToSpecIcon();
+	self:SetupLayoutManagerDropdown();
 end
 
 local displayModeToCategories =
@@ -997,44 +1537,87 @@ function CooldownViewerSettingsMixin:TogglePanel()
 	end
 end
 
-function CooldownViewerSettingsMixin:UpdateFromUserChange()
-	self:SaveCurrentLayout();
-	self:RefreshLayout();
+local function RunDataProviderCallbackThatRequiresSaveAndRefresh(settings, callback)
+	callback();
+	settings:SaveCurrentLayout();
+	settings:RefreshLayout();
 end
 
 function CooldownViewerSettingsMixin:ResetCurrentToDefaults()
-	self:GetDataProvider():ResetCurrentToDefaults();
-	self:UpdateFromUserChange();
+	RunDataProviderCallbackThatRequiresSaveAndRefresh(self, function() self:GetDataProvider():ResetCurrentToDefaults(); end);
 end
 
 function CooldownViewerSettingsMixin:UseDefaultLayout()
-	self:GetDataProvider():UseDefaultLayout();
-	self:UpdateFromUserChange();
+	RunDataProviderCallbackThatRequiresSaveAndRefresh(self, function() self:GetDataProvider():UseDefaultLayout(); end);
 end
 
-function CooldownViewerSettingsMixin:SetActiveLayoutName(layoutName)
-	self:GetDataProvider():SetActiveLayoutName(layoutName);
-	self:UpdateFromUserChange();
+function CooldownViewerSettingsMixin:SetActiveLayoutByID(layoutID)
+	RunDataProviderCallbackThatRequiresSaveAndRefresh(self, function() self:GetDataProvider():SetActiveLayoutByID(layoutID); end);
 end
 
 function CooldownViewerSettingsMixin:ResetToRestorePoint()
-	self:GetDataProvider():ResetToRestorePoint();
-	self:UpdateFromUserChange();
+	RunDataProviderCallbackThatRequiresSaveAndRefresh(self, function() self:GetDataProvider():ResetToRestorePoint(); end);
 end
 
 function CooldownViewerSettingsMixin:SaveCurrentLayout()
 	local layoutManager = self:GetLayoutManager();
-	local savedSomething = layoutManager:SaveLayouts();
+
+	local savedSomething, isVerboseChange = layoutManager:SaveLayouts();
 	layoutManager:CreateRestorePoint();
 
-	if savedSomething then
+	if savedSomething and isVerboseChange then
 		UIErrorsFrame:AddExternalWarningMessage(COOLDOWN_VIEWER_SETTINGS_LAYOUT_SAVED_MESSAGE);
+	end
+end
+
+function CooldownViewerSettingsMixin:CheckSaveCurrentLayout()
+	local layoutManager = self:GetLayoutManager();
+	if layoutManager:HasPendingChanges() then
+		local activeLayout = layoutManager:GetActiveLayout();
+		if activeLayout and CooldownManagerLayout_IsDefaultLayout(activeLayout) then
+			-- This will show the rename dialog, but allow the new layout to be selected
+			-- If the user doesn't complete the rename that's fine, the default layout will continue to have its default name.
+			CooldownViewerLayoutDialog:ShowRenameLayoutDialog(CooldownManagerLayout_GetID(activeLayout), activeLayout);
+		end
+
+		-- Always save layouts when selecting non-default layouts.
+		self:SaveCurrentLayout();
 	end
 end
 
 function CooldownViewerSettingsMixin:UpdateSaveButtonStates()
 	local hasPendingChanges = self:GetLayoutManager():HasPendingChanges();
 	self.UndoButton:SetEnabled(hasPendingChanges);
+end
+
+local statusCodeToText =
+{
+	[Enum.CooldownLayoutStatus.InvalidLayoutName] = COOLDOWN_VIEWER_SETTINGS_ERROR_INVALID_LAYOUT_NAME,
+	[Enum.CooldownLayoutStatus.TooManyLayouts] = COOLDOWN_VIEWER_SETTINGS_ADD_ALERT_TOOLTIP_DISABLED_MAXED_LAYOUTS,
+	[Enum.CooldownLayoutStatus.AttemptToModifyDefaultLayoutWouldCreateTooManyLayouts] = COOLDOWN_VIEWER_SETTINGS_ERROR_TOO_MANY_LAYOUTS_TO_AUTO_MAKE_NEW_LAYOUT,
+	[Enum.CooldownLayoutStatus.TooManyAlerts] = COOLDOWN_VIEWER_SETTINGS_ADD_ALERT_TOOLTIP_DISABLED_TOO_MANY,
+}
+
+local actionCodeToText =
+{
+	[Enum.CooldownLayoutAction.ChangeOrder] = COOLDOWN_VIEWER_SETTINGS_ACTION_CHANGE_ORDER_INDEX,
+	[Enum.CooldownLayoutAction.ChangeCategory] = COOLDOWN_VIEWER_SETTINGS_ACTION_CHANGE_CATEGORY,
+	[Enum.CooldownLayoutAction.AddLayout] = COOLDOWN_VIEWER_SETTINGS_ACTION_ADD_LAYOUT,
+	[Enum.CooldownLayoutAction.AddAlert] = COOLDOWN_VIEWER_SETTINGS_ACTION_ADD_ALERT,
+}
+
+function CooldownViewerSettingsMixin:GetActionStatusText(action, status, ...)
+	local actionEntry = actionCodeToText[action];
+	local statusEntry = statusCodeToText[status];
+	if actionEntry and statusEntry then
+		return actionEntry:format(statusEntry:format(...));
+	end
+end
+
+function CooldownViewerSettingsMixin:CheckDisplayActionStatus(action, status, ...)
+	if status ~= Enum.CooldownLayoutStatus.Success then
+		ChatFrameUtil.DisplaySystemMessageInPrimary(self:GetActionStatusText(action, status, ...));
+	end
 end
 
 function CooldownViewerSettingsMixin:ShowOptionsPanel(fromEditMode)

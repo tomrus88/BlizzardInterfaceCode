@@ -27,7 +27,7 @@ function UpdateUIElementsForClientScene(sceneType)
 		PlayerFrame:Hide();
 		TargetFrame:Hide();
 	else
-		PlayerFrame:SetShown(true);
+		PlayerFrame:SetShown(not C_GameRules.IsGameRuleActive(Enum.GameRule.PlayerFrameDisabled));
 		TargetFrame:Update();
 	end
 end
@@ -469,9 +469,6 @@ function EncounterJournal_LoadUI()
 end
 
 function CollectionsJournal_LoadUI()
-	if C_GameRules.IsGameRuleActive(Enum.GameRule.CollectionsPanelDisabled) then
-		return;
-	end
 	UIParentLoadAddOn("Blizzard_Collections");
 end
 
@@ -606,6 +603,14 @@ function RemixArtifactUI_LoadUI()
 	RemixArtifactTutorialControllerFrame:RegisterForRemixArtifactFrameEvents();
 end
 
+function OutfitterUI_LoadUI()
+	UIParentLoadAddOn("Blizzard_OutfitterUI");
+end
+
+function WoWHackSpellsUI_LoadUI()
+	UIParentLoadAddOn("Blizzard_WoWHackSpellsUI");
+end
+
 function SubscriptionInterstitial_LoadUI()
 	C_AddOns.LoadAddOn("Blizzard_SubscriptionInterstitialUI");
 end
@@ -630,6 +635,10 @@ function ShowMacroFrame()
 
 	local macrosDisabled = C_GameRules.IsGameRuleActive(Enum.GameRule.MacrosDisabled);
 	if macrosDisabled then
+		return;
+	end
+
+	if (Kiosk.IsEnabled()) then
 		return;
 	end
 
@@ -1036,6 +1045,14 @@ function ToggleProfessionsBook()
 	ToggleFrame(ProfessionsBookFrame);
 end
 
+function ToggleWoWHackCharacterUI()
+	if not WoWHackCharacterUI then
+		UIParentLoadAddOn("Blizzard_WoWHackCharacterUI");
+	end
+
+	ToggleFrame(WoWHackCharacterUI);
+end
+
 
 function OpenDeathRecapUI(id)
 	if (not DeathRecapFrame) then
@@ -1281,8 +1298,8 @@ function UIParent_OnEvent(self, event, ...)
 			local info = ChatTypeInfo["WHISPER"];
 			GMChatFrame:AddMessage(format(GM_CHAT_LAST_SESSION, "|TInterface\\ChatFrame\\UI-ChatIcon-Blizz:12:20:0:0:32:16:4:28:0:16|t "..
 				GetGMLink(lastTalkedToGM, "["..lastTalkedToGM.."]")), info.r, info.g, info.b, info.id);
-			GMChatFrameEditBox:SetAttribute("tellTarget", lastTalkedToGM);
-			GMChatFrameEditBox:SetAttribute("chatType", "WHISPER");
+			GMChatFrameEditBox:SetTellTarget(lastTalkedToGM);
+			GMChatFrameEditBox:SetChatType("WHISPER");
 		end
 
 		NPETutorial_AttemptToBegin(event);
@@ -1485,6 +1502,8 @@ function UIParent_OnEvent(self, event, ...)
 		-- SHOW_MULTI_ACTIONBAR_1, SHOW_MULTI_ACTIONBAR_2, SHOW_MULTI_ACTIONBAR_3, SHOW_MULTI_ACTIONBAR_4 = GetActionBarToggles();
 		MultiActionBar_Update();
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then
+		local isInitialLogin, isUIReload = arg1, arg2;
+
 		-- Close any windows that were previously open
 		CloseAllWindows(1);
 
@@ -1575,11 +1594,7 @@ function UIParent_OnEvent(self, event, ...)
 
 		if Kiosk.IsEnabled() then
 			C_AddOns.LoadAddOn("Blizzard_Kiosk");
-
-			local isInitialLogin, isUIReload = arg1, arg2;
-			if isInitialLogin and not isUIReload then
-				KioskSessionStartedDialog:Show();
-			end
+			KioskFrame:HandlePlayerEnteringWorld(isInitialLogin, isUIReload);
 		end
 
 		if IsTrialAccount() or IsVeteranTrialAccount() then
@@ -1590,6 +1605,10 @@ function UIParent_OnEvent(self, event, ...)
 
 		if PlayerIsTimerunning() then
 			RemixArtifactTutorialUI_LoadUI();
+		end
+		
+		if C_Housing.IsInsideHouseOrPlot() then
+			C_AddOns.LoadAddOn("Blizzard_HousingControls");
 		end
 	elseif ( event == "UPDATE_BATTLEFIELD_STATUS" or event == "PVP_BRAWL_INFO_UPDATED" ) then
 		PlayBattlefieldBanner(self);
@@ -1830,7 +1849,7 @@ function UIParent_OnEvent(self, event, ...)
 		StaticPopup_Show("AUCTION_HOUSE_DISABLED");
 	elseif ( event == "AUCTION_HOUSE_SHOW_NOTIFICATION" or event == "AUCTION_HOUSE_SHOW_FORMATTED_NOTIFICATION" ) then
 		local auctionHouseNotification, formatArg = ...;
-		Chat_AddSystemMessage(ChatFrameUtil.GetAuctionHouseNotificationText(auctionHouseNotification, formatArg));
+		ChatFrameUtil.AddSystemMessage(ChatFrameUtil.GetAuctionHouseNotificationText(auctionHouseNotification, formatArg));
 
 	-- Events for trade skill UI handling
 	elseif ( event == "TRADE_SKILL_SHOW" ) then
@@ -2202,15 +2221,7 @@ function UIParent_OnEvent(self, event, ...)
 		ShowUIPanel(RuneforgeFrame);
 	elseif (event == "TRAIT_SYSTEM_INTERACTION_STARTED") then
 		local traitTreeID = ...;
-		--! TODO Getting companionID either from season data or player data has not been implemented yet. When done, pass companionID to this function
-		if traitTreeID == C_DelvesUI.GetTraitTreeForCompanion() then
-			ShowUIPanel(DelvesCompanionConfigurationFrame);
-		else
-			GenericTraitUI_LoadUI();
-
-			GenericTraitFrame:SetTreeID(traitTreeID);
-			ShowUIPanel(GenericTraitFrame);
-		end
+		TraitUtil.OpenTraitFrame(traitTreeID);
 	elseif ( event == "REMIX_ARTIFACT_UPDATE") then
 		if not RemixArtifactFrame then
 			RemixArtifactUI_LoadUI();
@@ -2279,45 +2290,7 @@ function UIParent_OnEvent(self, event, ...)
 		ItemButtonUtil.TriggerEvent(ItemButtonUtil.Event.ItemContextChanged);
 	elseif event == "REMIX_END_OF_EVENT" then
 		StaticPopup_Show("REMIX_END_OF_EVENT_NOTICE");
-	end
-end
-
---Aubrie TODO.. Convert these into horizontal layout frames? It's fine for now tho..
-function UIParent_UpdateTopFramePositions()
-	local yOffset = 0;
-	local xOffset = -230;
-
-	local statusFrames = {};
-	if GMChatStatusFrame and GMChatStatusFrame:IsShown() then
-		table.insert(statusFrames, GMChatStatusFrame);
-	end
-	if TicketStatusFrame and TicketStatusFrame:IsShown() then
-		table.insert(statusFrames, TicketStatusFrame);
-	end
-	if BehavioralMessagingTray and BehavioralMessagingTray:IsShown() then
-		table.insert(statusFrames, BehavioralMessagingTray);
-	end
-	if WowSurveyStatusFrame and WowSurveyStatusFrame:IsShown() then
-		table.insert(statusFrames, WowSurveyStatusFrame);
-	end
-
-	local buffOffset = 0;
-	for i, frame in ipairs(statusFrames) do
-		frame:ClearAllPoints();
-		if i == 1 then
-			frame:SetPoint("TOPRIGHT", xOffset, yOffset);
-		else
-			frame:SetPoint("TOPRIGHT", statusFrames[i-1], "TOPLEFT");
-		end
-
-		buffOffset = math.max(buffOffset, frame:GetHeight());
-	end
-
-	if BuffFrame:IsInDefaultPosition() then
-		local anchor = EditModeManagerFrame:GetDefaultAnchor(BuffFrame);
-		BuffFrame:ClearAllPoints();
-		BuffFrame:SetPoint(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.offsetX, anchor.offsetY - buffOffset);
-	end
+    end
 end
 
 -- Function that handles the escape key functions
@@ -2334,6 +2307,8 @@ function ToggleGameMenu()
 		else
 			SetGamePadCursorControl(true);
 		end
+	elseif HouseEditorFrame and HouseEditorFrame:IsShown() then
+		HouseEditorFrame:HandleEscape();
 	elseif ( not UIParent:IsShown() ) then
 		UIParent:Show();
 		SetUIVisibility(true);
@@ -2383,6 +2358,8 @@ function ToggleGameMenu()
 	elseif ( SoulbindViewer and SoulbindViewer:HandleEscape()) then
 	elseif ( ProfessionsFrame and ProfessionsFrame:IsShown() ) then
 		ProfessionsFrame:CheckConfirmClose();
+	-- When a PlayerChoice is flagged as requiresSelection we don't want ESC to close the frame
+	elseif ( PlayerChoiceFrame and PlayerChoiceFrame:IsShown() and PlayerChoiceFrame.choiceInfo and PlayerChoiceFrame.choiceInfo.requiresSelection) then
 	elseif ( securecall("CloseAllWindows") ) then
 	elseif ( CovenantPreviewFrame and CovenantPreviewFrame:IsShown()) then
 		CovenantPreviewFrame:HandleEscape();
@@ -2597,119 +2574,6 @@ function CreatePendingInviteConfirmationText_GetWarnings(invite, name, guid, rol
 	return table.concat(warnings, "\n");
 end
 
-function RefreshBuffs(frame, unit, numBuffs, suffix, checkCVar)
-	local frameName = frame:GetName();
-
-	frame.hasDispellable = nil;
-
-	numBuffs = numBuffs or MAX_PARTY_BUFFS;
-	suffix = suffix or "Buff";
-
-	local unitStatus, statusColor;
-	local debuffTotal = 0;
-
-	local filter = ( checkCVar and CVarCallbackRegistry:GetCVarValueBool("showCastableBuffs") and UnitCanAssist("player", unit) ) and "HELPFUL|RAID" or "HELPFUL";
-	local numFrames = 0;
-	AuraUtil.ForEachAura(unit, filter, numBuffs, function(...)
-		local name, icon, count, debuffType, duration, expirationTime = ...;
-
-		-- if we have an icon to show then proceed with setting up the aura
-		if ( icon ) then
-			numFrames = numFrames + 1;
-			local buffName = frameName..suffix..numFrames;
-
-			-- set the icon
-			local buffIcon = _G[buffName.."Icon"];
-			buffIcon:SetTexture(icon);
-
-			-- setup the cooldown
-			local coolDown = _G[buffName.."Cooldown"];
-			if ( coolDown ) then
-				CooldownFrame_Set(coolDown, expirationTime - duration, duration, true);
-			end
-
-			-- show the aura
-			_G[buffName]:Show();
-		end
-		return numFrames >= numBuffs;
-	end);
-
-	for i=numFrames + 1,numBuffs do
-		local buffName = frameName..suffix..i;
-		local buffFrame = _G[buffName];
-		if buffFrame then
-			buffFrame:Hide();
-		else
-			break;
-		end
-	end
-end
-
-function RefreshDebuffs(frame, unit, numDebuffs, suffix, checkCVar)
-	local frameName = frame:GetName();
-	suffix = suffix or "Debuff";
-	local frameNameWithSuffix = frameName..suffix;
-
-	frame.hasDispellable = nil;
-
-	numDebuffs = numDebuffs or MAX_PARTY_DEBUFFS;
-
-	local unitStatus, statusColor;
-	local debuffTotal = 0;
-	local isEnemy = UnitCanAttack("player", unit);
-
-	local filter = ( checkCVar and CVarCallbackRegistry:GetCVarValueBool("showDispelDebuffs") and UnitCanAssist("player", unit) ) and "HARMFUL|RAID" or "HARMFUL";
-
-	if strsub(unit, 1, 5) == "party" then
-		unitStatus = _G[frameName.."Status"];
-	end
-	AuraUtil.ForEachAura(unit, filter, numDebuffs, function(...)
-		local name, icon, count, debuffType, duration, expirationTime, caster = ...;
-
-		if ( icon and ( SHOW_CASTABLE_DEBUFFS == "0" or not isEnemy or caster == "player" ) ) then
-			debuffTotal = debuffTotal + 1;
-			local debuffName = frameNameWithSuffix..debuffTotal;
-			-- if we have an icon to show then proceed with setting up the aura
-
-			-- set the icon
-			local debuffIcon = _G[debuffName.."Icon"];
-			debuffIcon:SetTexture(icon);
-
-			-- setup the border
-			local debuffBorder = _G[debuffName.."Border"];
-			local debuffColor = DebuffTypeColor[debuffType] or DebuffTypeColor["none"];
-			debuffBorder:SetVertexColor(debuffColor.r, debuffColor.g, debuffColor.b);
-
-			-- record interesting data for the aura button
-			statusColor = debuffColor;
-			frame.hasDispellable = 1;
-
-			-- setup the cooldown
-			local coolDown = _G[debuffName.."Cooldown"];
-			if ( coolDown ) then
-				CooldownFrame_Set(coolDown, expirationTime - duration, duration, true);
-			end
-
-			-- show the aura
-			_G[debuffName]:Show();
-		end
-		return debuffTotal >= numDebuffs;
-	end);
-
-	for i=debuffTotal+1,numDebuffs do
-		local debuffName = frameNameWithSuffix..i;
-		_G[debuffName]:Hide();
-	end
-
-	frame.debuffTotal = debuffTotal;
-	-- Reset unitStatus overlay graphic timer
-	if ( frame.numDebuffs and debuffTotal >= frame.numDebuffs ) then
-		frame.debuffCountdown = 30;
-	end
-	if ( unitStatus and statusColor ) then
-		unitStatus:SetVertexColor(statusColor.r, statusColor.g, statusColor.b);
-	end
-end
 
 -- New Color API
 -- This function is intended to be used with C++ wrapped functions that return the difficulty of content instead

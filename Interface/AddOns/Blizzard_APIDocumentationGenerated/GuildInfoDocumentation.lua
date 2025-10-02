@@ -45,6 +45,7 @@ local GuildInfo =
 		{
 			Name = "Demote",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -59,6 +60,7 @@ local GuildInfo =
 			Name = "GetGuildNewsInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -73,6 +75,7 @@ local GuildInfo =
 		{
 			Name = "GetGuildRankOrder",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -87,6 +90,7 @@ local GuildInfo =
 		{
 			Name = "GetGuildTabardInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -101,6 +105,7 @@ local GuildInfo =
 		{
 			Name = "GuildControlGetRankFlags",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -119,6 +124,7 @@ local GuildInfo =
 		{
 			Name = "Invite",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -146,6 +152,7 @@ local GuildInfo =
 		{
 			Name = "IsGuildRankAssignmentAllowed",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -174,6 +181,7 @@ local GuildInfo =
 		{
 			Name = "MemberExistsByName",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -188,6 +196,7 @@ local GuildInfo =
 		{
 			Name = "Promote",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -197,6 +206,7 @@ local GuildInfo =
 		{
 			Name = "QueryGuildMemberRecipes",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -208,6 +218,7 @@ local GuildInfo =
 			Name = "QueryGuildMembersForRecipe",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -225,6 +236,7 @@ local GuildInfo =
 			Name = "RemoveFromGuild",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -235,6 +247,7 @@ local GuildInfo =
 			Name = "RequestGuildRename",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -249,6 +262,7 @@ local GuildInfo =
 		{
 			Name = "RequestRenameNameCheck",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -268,6 +282,7 @@ local GuildInfo =
 			Name = "SetGuildRankOrder",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -278,6 +293,7 @@ local GuildInfo =
 		{
 			Name = "SetLeader",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -287,6 +303,7 @@ local GuildInfo =
 		{
 			Name = "SetMOTD",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -297,6 +314,7 @@ local GuildInfo =
 			Name = "SetNote",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -308,6 +326,7 @@ local GuildInfo =
 		{
 			Name = "Uninvite",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -496,7 +515,7 @@ local GuildInfo =
 			LiteralName = "PLAYER_GUILD_UPDATE",
 			Payload =
 			{
-				{ Name = "unitTarget", Type = "UnitToken", Nilable = false },
+				{ Name = "unitTarget", Type = "UnitTokenVariant", Nilable = false },
 			},
 		},
 		{

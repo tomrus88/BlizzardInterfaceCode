@@ -457,6 +457,11 @@ function Pool_HideAndClearAnchors(pool, region)
 	region:ClearAllPoints();
 end
 
+function Pool_HideAndSetToDefaults(pool, region)
+	region:SetToDefaults();
+	region:Hide();
+end
+
 local function CreateSecureObjectPoolInstance(createFunc, resetFunc, capacity)
 	local pool = CreateFromMixinsPrivate(SecureObjectPoolMixin);
 	local proxy = CreateProxy(pool, ObjectPoolProxyMixin);

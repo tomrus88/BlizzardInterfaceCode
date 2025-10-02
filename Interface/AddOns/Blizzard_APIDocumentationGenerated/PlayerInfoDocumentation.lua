@@ -46,6 +46,7 @@ local PlayerInfo =
 		{
 			Name = "CanUseItem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -70,6 +71,7 @@ local PlayerInfo =
 		{
 			Name = "GetContentDifficultyCreatureForPlayer",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -84,6 +86,7 @@ local PlayerInfo =
 		{
 			Name = "GetContentDifficultyQuestForPlayer",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -119,6 +122,7 @@ local PlayerInfo =
 			Name = "GetInstancesUnlockedAtLevel",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -143,6 +147,7 @@ local PlayerInfo =
 		{
 			Name = "GetPetStableCreatureDisplayInfoID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -168,6 +173,7 @@ local PlayerInfo =
 			Name = "GetPlayerMythicPlusRatingSummary",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Returns the players mythic+ rating summary which includes the runs they've completed as well as their current season m+ rating" },
 
 			Arguments =
@@ -192,6 +198,7 @@ local PlayerInfo =
 		{
 			Name = "HasVisibleInvSlot",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -228,20 +235,6 @@ local PlayerInfo =
 			Returns =
 			{
 				{ Name = "isDisplayRaceNative", Type = "bool", Nilable = false },
-			},
-		},
-		{
-			Name = "IsExpansionLandingPageUnlockedForPlayer",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "expansionID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "isUnlocked", Type = "bool", Nilable = false },
 			},
 		},
 		{

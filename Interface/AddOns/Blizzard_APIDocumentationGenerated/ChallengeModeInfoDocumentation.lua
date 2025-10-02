@@ -9,6 +9,7 @@ local ChallengeModeInfo =
 		{
 			Name = "CanUseKeystoneInCurrentMap",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -52,6 +53,7 @@ local ChallengeModeInfo =
 			Name = "GetAffixInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -88,6 +90,7 @@ local ChallengeModeInfo =
 		{
 			Name = "GetDungeonScoreRarityColor",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Returns a color value from the passed in overall season M+ rating." },
 
 			Arguments =
@@ -113,6 +116,7 @@ local ChallengeModeInfo =
 		{
 			Name = "GetKeystoneLevelRarityColor",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Returns a color value from the passed in keystone level." },
 
 			Arguments =
@@ -158,6 +162,7 @@ local ChallengeModeInfo =
 			Name = "GetMapUIInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -188,6 +193,7 @@ local ChallengeModeInfo =
 			Name = "GetPowerLevelDamageHealthMod",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -215,6 +221,7 @@ local ChallengeModeInfo =
 		{
 			Name = "GetSpecificDungeonOverallScoreRarityColor",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Returns a color value from the passed in mythic+ rating from the combined affix scores for a specific dungeon" },
 
 			Arguments =
@@ -230,6 +237,7 @@ local ChallengeModeInfo =
 		{
 			Name = "GetSpecificDungeonScoreRarityColor",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Returns a color value from the passed in mythic+ rating for a specific dungeon." },
 
 			Arguments =
@@ -290,6 +298,7 @@ local ChallengeModeInfo =
 		{
 			Name = "RequestLeaders",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

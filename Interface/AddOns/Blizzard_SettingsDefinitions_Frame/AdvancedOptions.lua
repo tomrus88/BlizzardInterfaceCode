@@ -1,9 +1,24 @@
 local function Register()
+	-- Advanced settings do not apply to non-standard game modes for now.
+	if not C_GameRules.IsStandard() then
+		return;
+	end
+
 	local category, layout = Settings.RegisterVerticalLayoutCategory(ADVANCED_OPTIONS_LABEL);
 	Settings.ADVANCED_OPTIONS_CATEGORY_ID = category:GetID();
 
 	-- Order set in GameplaySettingsGroup.lua
 	category:SetOrder(CUSTOM_GAMEPLAY_SETTINGS_ORDER[ADVANCED_OPTIONS_LABEL]);
+
+	-- Mirrored from Keybindings Panel
+	if Settings.ClickCastInitializer then
+		layout:AddMirroredInitializer(Settings.ClickCastInitializer);
+	end
+
+	-- Mirrored from Keybindings Panel
+	if Settings.QuickKeybindInitializer then
+		layout:AddMirroredInitializer(Settings.QuickKeybindInitializer);
+	end
 
 	-- Assisted Combat
 	InterfaceOverrides.RunSettingsCallback(function()
@@ -31,6 +46,7 @@ local function Register()
 		local addSearchTags = false;
 		local initializer = CreateSettingsButtonInitializer(ASSISTED_COMBAT_ROTATION, ASSISTED_COMBAT_ROTATION_VIEW_SPELLBOOK, OnButtonClick, tooltipFn, addSearchTags, "ASSISTED_COMBAT_ROTATION");
 		initializer:AddModifyPredicate(C_AssistedCombat.IsAvailable);
+		initializer:SetKioskProtected();
 		layout:AddInitializer(initializer);
 	end);
 
@@ -62,6 +78,26 @@ local function Register()
 			return false;
 		end
 		initializer:SetSettingIntercept(onClickFn);
+	end);
+
+	-- Combat Warnings
+	InterfaceOverrides.RunSettingsCallback(function()
+		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(COMBAT_WARNINGS_LABEL));
+	end);
+
+	-- Enable Encounter Timeline
+	InterfaceOverrides.RunSettingsCallback(function()
+		local function GenerateTooltipText()
+			local isAvailable, failureReason = C_EncounterTimeline.IsTimelineSupported();
+			if isAvailable then
+				return COMBAT_WARNINGS_ENABLE_ENCOUNTER_TIMELINE_TOOLTIP;
+			else
+				return string.format("%s|n|n%s", COMBAT_WARNINGS_ENABLE_ENCOUNTER_TIMELINE_TOOLTIP, failureReason);
+			end
+		end
+
+		local setting, initializer = Settings.SetupCVarCheckbox(category, "encounterTimelineEnabled", COMBAT_WARNINGS_ENABLE_ENCOUNTER_TIMELINE_LABEL, GenerateTooltipText);
+		initializer:AddModifyPredicate(C_EncounterTimeline.IsTimelineSupported);
 	end);
 
 	-- Cooldown Viewer

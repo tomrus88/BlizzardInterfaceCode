@@ -22,6 +22,7 @@ function AlertFrameSystems_Register()
 	NewWarbandSceneAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewWarbandSceneAlertFrameTemplate", NewWarbandSceneAlertFrame_SetUp);
 	NewRuneforgePowerAlertSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewRuneforgePowerAlertFrameTemplate", NewRuneforgePowerAlertSystem_SetUp);
 	NewCosmeticAlertFrameSystem = AlertFrame:AddQueuedAlertFrameSubSystem("NewCosmeticAlertFrameTemplate", NewCosmeticAlertFrameSystem_SetUp);
+	HousingItemEarnedAlertFrameSystem = AlertFrame:AddQueuedAlertFrameSubSystem("HousingItemEarnedAlertFrameTemplate", HousingItemEarnedAlertFrameSystem_SetUp);
 end
 
 -- [[ GuildChallengeAlertFrame ]] --
@@ -912,9 +913,9 @@ function GarrisonFollowerAlertFrame_OnClick(self, button, down)
 		Garrison_LoadUI();
 	end
 	local garrisonType = GarrisonFollowerOptions[self.followerInfo.followerTypeID].garrisonType;
-	if(garrisonType and C_Garrison.GetLandingPageGarrisonType() == garrisonType) then 
+	if(garrisonType and C_Garrison.GetLandingPageGarrisonType() == garrisonType) then
 		ShowGarrisonLandingPage(GarrisonFollowerOptions[self.followerInfo.followerTypeID].garrisonType);
-	end 
+	end
 end
 
 -- Trees that override behaviors associated with their tree type
@@ -938,9 +939,9 @@ function GarrisonAlertFrame_OnClick(self, button, down)
 			Garrison_LoadUI();
 		end
 
-		if(self.garrisonType and C_Garrison.GetLandingPageGarrisonType() == self.garrisonType) then 
+		if(self.garrisonType and C_Garrison.GetLandingPageGarrisonType() == self.garrisonType) then
 			ShowGarrisonLandingPage(self.garrisonType);
-		end 
+		end
 	end
 end
 
@@ -1350,7 +1351,7 @@ function NewCosmeticAlertFrameMixin:SetUp(itemModifiedAppearanceID)
 	self:SetUpDisplay(icon, quality, name, YOU_COLLECTED_LABEL, "CosmeticIconFrame");
 
 	local item = Item:CreateFromItemID(info.itemID);
-	item:ContinueOnItemLoad(function()	
+	item:ContinueOnItemLoad(function()
 		if self.itemModifiedAppearanceID == itemModifiedAppearanceID then
 			self:SetUpDisplay(icon, item:GetItemQuality(), item:GetItemName(), YOU_COLLECTED_LABEL, "CosmeticIconFrame");
 		end
@@ -1381,7 +1382,7 @@ function NewCosmeticAlertFrameMixin:OnClick(button, down)
 
 	TransmogUtil.OpenCollectionToItem(self.itemModifiedAppearanceID);
 end
- 
+
 function NewCosmeticAlertFrameMixin:OnRelease()
 	self.LeftModelScene:ClearEffects();
 	self.RightModelScene:ClearEffects();
@@ -1390,7 +1391,7 @@ function NewCosmeticAlertFrameMixin:OnRelease()
 	end
 	self.timers = { };
  end
- 
+
 -- [[ MonthlyActivityAlertFrame ]] --
 function MonthlyActivityAlertFrame_SetUp(frame, perksActivityID)
 	local info = C_PerksActivities.GetPerksActivityInfo(perksActivityID);
@@ -1439,4 +1440,14 @@ function GuildRenameAlertSystem:CheckAddAlert(guildName, status)
 	end
 end
 
+-- [[ HousingItemEarnedAlertFrameSystem ]] --
 
+--! TODO Need to know what _rewardData looks like so we can set DecorType, DecorName, Icon, and maybe IconBorder's color
+--! TODO Need to know when to fire this toast. If on event, add to AlertSystems.lua OnEvent
+function HousingItemEarnedAlertFrameSystem_SetUp(frame, _rewardData)
+	frame.LightRays:SetAlpha(0);
+	frame.LightRays2:SetAlpha(0);
+	frame.glowAnimIn:Play();
+	frame.sparklesAnimIn:Play();
+	frame.lightRaysAnimIn:Play();
+end

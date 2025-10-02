@@ -134,7 +134,7 @@
 							<Size x="60" y="19"/>
 							<Color color="WHITE_FONT_COLOR"/>
 							<Anchors>
-								<Anchor point="TOPRIGHT" x="-4" y="-33" />
+								<Anchor point="TOPRIGHT" x="2" y="-33" />
 							</Anchors>
 						</FontString>
 						<Texture parentKey="Strikethrough" texelSnappingBias="0.0" snapToPixelGrid="false" >

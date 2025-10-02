@@ -9,6 +9,7 @@ local ArtifactUI =
 		{
 			Name = "AddPower",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -23,6 +24,7 @@ local ArtifactUI =
 		{
 			Name = "ApplyCursorRelicToSlot",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -32,6 +34,7 @@ local ArtifactUI =
 		{
 			Name = "CanApplyArtifactRelic",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -47,6 +50,7 @@ local ArtifactUI =
 		{
 			Name = "CanApplyCursorRelicToSlot",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -61,6 +65,7 @@ local ArtifactUI =
 		{
 			Name = "CanApplyRelicItemIDToEquippedArtifactSlot",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -76,6 +81,7 @@ local ArtifactUI =
 		{
 			Name = "CanApplyRelicItemIDToSlot",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -122,6 +128,7 @@ local ArtifactUI =
 			Name = "GetAppearanceInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -150,6 +157,7 @@ local ArtifactUI =
 			Name = "GetAppearanceInfoByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -178,6 +186,7 @@ local ArtifactUI =
 			Name = "GetAppearanceSetInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -247,6 +256,7 @@ local ArtifactUI =
 			Name = "GetArtifactXPRewardTargetInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -262,6 +272,7 @@ local ArtifactUI =
 		{
 			Name = "GetCostForPointAtRank",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -319,6 +330,7 @@ local ArtifactUI =
 		{
 			Name = "GetEquippedArtifactNumRelicSlots",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -334,6 +346,7 @@ local ArtifactUI =
 			Name = "GetEquippedArtifactRelicInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -351,6 +364,7 @@ local ArtifactUI =
 		{
 			Name = "GetEquippedRelicLockedReason",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -377,6 +391,7 @@ local ArtifactUI =
 			Name = "GetItemLevelIncreaseProvidedByRelic",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -420,6 +435,7 @@ local ArtifactUI =
 		{
 			Name = "GetNumRelicSlots",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -443,6 +459,7 @@ local ArtifactUI =
 		{
 			Name = "GetPowerHyperlink",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -458,6 +475,7 @@ local ArtifactUI =
 			Name = "GetPowerInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -472,6 +490,7 @@ local ArtifactUI =
 		{
 			Name = "GetPowerLinks",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -496,6 +515,7 @@ local ArtifactUI =
 		{
 			Name = "GetPowersAffectedByRelic",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -510,6 +530,7 @@ local ArtifactUI =
 		{
 			Name = "GetPowersAffectedByRelicItemLink",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -534,6 +555,7 @@ local ArtifactUI =
 			Name = "GetRelicInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -552,6 +574,7 @@ local ArtifactUI =
 			Name = "GetRelicInfoByItemID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -569,6 +592,7 @@ local ArtifactUI =
 		{
 			Name = "GetRelicLockedReason",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -584,6 +608,7 @@ local ArtifactUI =
 			Name = "GetRelicSlotType",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -640,6 +665,7 @@ local ArtifactUI =
 			Name = "GetTotalPowerCost",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -674,6 +700,7 @@ local ArtifactUI =
 		{
 			Name = "IsArtifactItem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -724,6 +751,7 @@ local ArtifactUI =
 		{
 			Name = "IsPowerKnown",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -747,6 +775,7 @@ local ArtifactUI =
 		{
 			Name = "SetAppearance",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -760,6 +789,7 @@ local ArtifactUI =
 		{
 			Name = "SetForgeRotation",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -771,6 +801,7 @@ local ArtifactUI =
 		{
 			Name = "SetPreviewAppearance",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Call without an argument to clear the preview." },
 
 			Arguments =

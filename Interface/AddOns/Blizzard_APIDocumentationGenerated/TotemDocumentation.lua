@@ -8,6 +8,7 @@ local Totem =
 		{
 			Name = "DestroyTotem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -17,6 +18,7 @@ local Totem =
 		{
 			Name = "GetTotemCannotDismiss",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -32,6 +34,8 @@ local Totem =
 			Name = "GetTotemInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretReturns = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -52,6 +56,8 @@ local Totem =
 		{
 			Name = "GetTotemTimeLeft",
 			Type = "Function",
+			SecretReturns = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -66,6 +72,7 @@ local Totem =
 		{
 			Name = "TargetTotem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

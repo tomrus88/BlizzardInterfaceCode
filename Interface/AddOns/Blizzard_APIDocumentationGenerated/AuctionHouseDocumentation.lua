@@ -9,6 +9,7 @@ local AuctionHouse =
 		{
 			Name = "CalculateCommodityDeposit",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -25,6 +26,7 @@ local AuctionHouse =
 		{
 			Name = "CalculateItemDeposit",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -41,6 +43,7 @@ local AuctionHouse =
 		{
 			Name = "CanCancelAuction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -56,6 +59,7 @@ local AuctionHouse =
 			Name = "CancelAuction",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -77,6 +81,7 @@ local AuctionHouse =
 		{
 			Name = "ConfirmCommoditiesPurchase",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -88,6 +93,7 @@ local AuctionHouse =
 			Name = "ConfirmPostCommodity",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -101,6 +107,7 @@ local AuctionHouse =
 			Name = "ConfirmPostItem",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -123,6 +130,7 @@ local AuctionHouse =
 		{
 			Name = "GetAuctionInfoByID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -137,6 +145,7 @@ local AuctionHouse =
 		{
 			Name = "GetAuctionItemSubClasses",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -151,6 +160,7 @@ local AuctionHouse =
 		{
 			Name = "GetAvailablePostCount",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -165,6 +175,7 @@ local AuctionHouse =
 		{
 			Name = "GetBidInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -179,6 +190,7 @@ local AuctionHouse =
 		{
 			Name = "GetBidType",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -211,6 +223,7 @@ local AuctionHouse =
 		{
 			Name = "GetCancelCost",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -225,6 +238,7 @@ local AuctionHouse =
 		{
 			Name = "GetCommoditySearchResultInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -240,6 +254,7 @@ local AuctionHouse =
 		{
 			Name = "GetCommoditySearchResultsQuantity",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -255,6 +270,7 @@ local AuctionHouse =
 			Name = "GetExtraBrowseInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -278,6 +294,7 @@ local AuctionHouse =
 		{
 			Name = "GetItemCommodityStatus",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -292,6 +309,7 @@ local AuctionHouse =
 		{
 			Name = "GetItemKeyFromItem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -306,6 +324,7 @@ local AuctionHouse =
 		{
 			Name = "GetItemKeyInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -322,6 +341,7 @@ local AuctionHouse =
 			Name = "GetItemKeyRequiredLevel",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -336,6 +356,7 @@ local AuctionHouse =
 		{
 			Name = "GetItemSearchResultInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -351,6 +372,7 @@ local AuctionHouse =
 		{
 			Name = "GetItemSearchResultsQuantity",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -383,6 +405,7 @@ local AuctionHouse =
 		{
 			Name = "GetMaxCommoditySearchResultPrice",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -397,6 +420,7 @@ local AuctionHouse =
 		{
 			Name = "GetMaxItemSearchResultBid",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -411,6 +435,7 @@ local AuctionHouse =
 		{
 			Name = "GetMaxItemSearchResultBuyout",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -461,6 +486,7 @@ local AuctionHouse =
 		{
 			Name = "GetNumCommoditySearchResults",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -475,6 +501,7 @@ local AuctionHouse =
 		{
 			Name = "GetNumItemSearchResults",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -516,6 +543,7 @@ local AuctionHouse =
 		{
 			Name = "GetOwnedAuctionInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -530,6 +558,7 @@ local AuctionHouse =
 		{
 			Name = "GetOwnedAuctionType",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -563,6 +592,7 @@ local AuctionHouse =
 			Name = "GetReplicateItemBattlePetInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -578,6 +608,7 @@ local AuctionHouse =
 		{
 			Name = "GetReplicateItemInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -609,6 +640,7 @@ local AuctionHouse =
 		{
 			Name = "GetReplicateItemLink",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -623,6 +655,7 @@ local AuctionHouse =
 		{
 			Name = "GetReplicateItemTimeLeft",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -637,6 +670,7 @@ local AuctionHouse =
 		{
 			Name = "GetTimeLeftBandInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -679,6 +713,7 @@ local AuctionHouse =
 		{
 			Name = "HasFullCommoditySearchResults",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -693,6 +728,7 @@ local AuctionHouse =
 		{
 			Name = "HasFullItemSearchResults",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -725,6 +761,7 @@ local AuctionHouse =
 		{
 			Name = "HasSearchResults",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -739,6 +776,7 @@ local AuctionHouse =
 		{
 			Name = "IsFavoriteItem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -753,6 +791,7 @@ local AuctionHouse =
 		{
 			Name = "IsSellItemValid",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -777,6 +816,7 @@ local AuctionHouse =
 		{
 			Name = "MakeItemKey",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -795,6 +835,7 @@ local AuctionHouse =
 			Name = "PlaceBid",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -806,6 +847,7 @@ local AuctionHouse =
 			Name = "PostCommodity",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -824,6 +866,7 @@ local AuctionHouse =
 			Name = "PostItem",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -842,6 +885,7 @@ local AuctionHouse =
 		{
 			Name = "QueryBids",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -852,6 +896,7 @@ local AuctionHouse =
 		{
 			Name = "QueryOwnedAuctions",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -861,6 +906,7 @@ local AuctionHouse =
 		{
 			Name = "RefreshCommoditySearchResults",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -870,6 +916,7 @@ local AuctionHouse =
 		{
 			Name = "RefreshItemSearchResults",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -890,6 +937,7 @@ local AuctionHouse =
 		{
 			Name = "RequestMoreCommoditySearchResults",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -904,6 +952,7 @@ local AuctionHouse =
 		{
 			Name = "RequestMoreItemSearchResults",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -918,6 +967,7 @@ local AuctionHouse =
 		{
 			Name = "RequestOwnedAuctionBidderInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -932,6 +982,7 @@ local AuctionHouse =
 		{
 			Name = "SearchForFavorites",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -941,6 +992,7 @@ local AuctionHouse =
 		{
 			Name = "SearchForItemKeys",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -951,6 +1003,7 @@ local AuctionHouse =
 		{
 			Name = "SendBrowseQuery",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -960,6 +1013,7 @@ local AuctionHouse =
 		{
 			Name = "SendSearchQuery",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Search queries are restricted to 100 calls per minute. These should not be used to query the entire auction house. See ReplicateItems" },
 
 			Arguments =
@@ -974,6 +1028,7 @@ local AuctionHouse =
 		{
 			Name = "SendSellSearchQuery",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Search queries are restricted to 100 calls per minute. These should not be used to query the entire auction house. See ReplicateItems. ItemKey should have its iLVL and suffix cleared before calling." },
 
 			Arguments =
@@ -986,6 +1041,7 @@ local AuctionHouse =
 		{
 			Name = "SetFavoriteItem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -1006,6 +1062,7 @@ local AuctionHouse =
 			Name = "StartCommoditiesPurchase",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

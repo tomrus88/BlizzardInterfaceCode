@@ -9,6 +9,7 @@ local SharedTraits =
 		{
 			Name = "CanEditConfig",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Returns whether the player can make changes to the specified talent config." },
 
 			Arguments =
@@ -25,6 +26,7 @@ local SharedTraits =
 		{
 			Name = "CanPurchaseRank",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -41,6 +43,7 @@ local SharedTraits =
 		{
 			Name = "CanRefundRank",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -56,6 +59,7 @@ local SharedTraits =
 		{
 			Name = "CascadeRepurchaseRanks",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -72,6 +76,7 @@ local SharedTraits =
 		{
 			Name = "ClearCascadeRepurchaseHistory",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -85,6 +90,7 @@ local SharedTraits =
 		{
 			Name = "CommitConfig",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -99,6 +105,7 @@ local SharedTraits =
 		{
 			Name = "ConfigHasStagedChanges",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -113,6 +120,7 @@ local SharedTraits =
 		{
 			Name = "GenerateImportString",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -127,6 +135,7 @@ local SharedTraits =
 		{
 			Name = "GenerateInspectImportString",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -142,6 +151,7 @@ local SharedTraits =
 			Name = "GetConditionInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -158,6 +168,7 @@ local SharedTraits =
 			Name = "GetConfigIDBySystemID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -173,6 +184,7 @@ local SharedTraits =
 			Name = "GetConfigIDByTreeID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -188,6 +200,7 @@ local SharedTraits =
 			Name = "GetConfigInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -203,6 +216,7 @@ local SharedTraits =
 			Name = "GetConfigVariationID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -217,6 +231,7 @@ local SharedTraits =
 		{
 			Name = "GetConfigsByType",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -232,6 +247,7 @@ local SharedTraits =
 			Name = "GetDefinitionInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -247,6 +263,7 @@ local SharedTraits =
 			Name = "GetEntryInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -263,6 +280,7 @@ local SharedTraits =
 			Name = "GetIncreasedTraitData",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -287,6 +305,7 @@ local SharedTraits =
 		{
 			Name = "GetNodeCost",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -303,6 +322,7 @@ local SharedTraits =
 			Name = "GetNodeInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -319,6 +339,7 @@ local SharedTraits =
 			Name = "GetStagedChanges",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Returns IDs of Trait Nodes with pending changes, grouped by the type of change; Returns nothing if there are no pending changes" },
 
 			Arguments =
@@ -336,6 +357,7 @@ local SharedTraits =
 		{
 			Name = "GetStagedChangesCost",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -351,6 +373,7 @@ local SharedTraits =
 			Name = "GetSubTreeInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -367,6 +390,7 @@ local SharedTraits =
 			Name = "GetSystemIDByTreeID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -381,6 +405,7 @@ local SharedTraits =
 		{
 			Name = "GetTraitCurrencyInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -399,6 +424,7 @@ local SharedTraits =
 			Name = "GetTraitDescription",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -415,6 +441,7 @@ local SharedTraits =
 			Name = "GetTraitSystemFlags",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -430,6 +457,7 @@ local SharedTraits =
 			Name = "GetTraitSystemWidgetSetID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -444,6 +472,7 @@ local SharedTraits =
 		{
 			Name = "GetTreeCurrencyInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -460,6 +489,7 @@ local SharedTraits =
 		{
 			Name = "GetTreeHash",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -475,6 +505,7 @@ local SharedTraits =
 			Name = "GetTreeInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -491,6 +522,7 @@ local SharedTraits =
 			Name = "GetTreeNodes",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Returns a list of nodeIDs, sorted ascending, for a given treeID. Contains nodes for all class specializations." },
 
 			Arguments =
@@ -524,6 +556,7 @@ local SharedTraits =
 		{
 			Name = "PurchaseAllRanks",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -540,6 +573,7 @@ local SharedTraits =
 		{
 			Name = "PurchaseRank",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -555,6 +589,7 @@ local SharedTraits =
 		{
 			Name = "RefundAllRanks",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -570,6 +605,7 @@ local SharedTraits =
 		{
 			Name = "RefundRank",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -586,6 +622,7 @@ local SharedTraits =
 		{
 			Name = "ResetTree",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -601,6 +638,7 @@ local SharedTraits =
 		{
 			Name = "ResetTreeByCurrency",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -617,6 +655,7 @@ local SharedTraits =
 		{
 			Name = "RollbackConfig",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -631,6 +670,7 @@ local SharedTraits =
 		{
 			Name = "SetSelection",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -648,6 +688,7 @@ local SharedTraits =
 		{
 			Name = "StageConfig",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -666,6 +707,7 @@ local SharedTraits =
 		{
 			Name = "TryPurchaseAllRanks",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -681,6 +723,7 @@ local SharedTraits =
 		{
 			Name = "TryPurchaseToNode",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -696,6 +739,7 @@ local SharedTraits =
 		{
 			Name = "TryRefundToNode",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

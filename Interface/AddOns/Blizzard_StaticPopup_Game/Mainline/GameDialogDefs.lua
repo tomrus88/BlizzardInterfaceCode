@@ -200,7 +200,7 @@ StaticPopupDialogs["DEATH"] = {
 		if ( not dialog.UpdateRecapButton ) then
 			dialog.UpdateRecapButton = function( dialog )
 				local button4 = dialog:GetButton4();
-				if ( DeathRecap_HasEvents() ) then
+				if ( C_DeathRecap.HasRecapEvents() ) then
 					button4:Enable();
 					button4:SetScript("OnEnter", nil );
 					button4:SetScript("OnLeave", nil);
@@ -256,8 +256,8 @@ StaticPopupDialogs["DEATH"] = {
 		end
 
 		local b1_enabled = dialog:GetButton1():IsEnabled();
-		local encounterSupressRelease = IsEncounterSuppressingRelease();
-		if ( encounterSupressRelease ) then
+		local encounterSuppressRelease = C_InstanceEncounter.IsEncounterSuppressingRelease();
+		if ( encounterSuppressRelease ) then
 			dialog:GetButton1():SetEnabled(false);
 			dialog:GetButton1():SetText(DEATH_RELEASE);
 		else
@@ -276,7 +276,7 @@ StaticPopupDialogs["DEATH"] = {
 
 		if ( b1_enabled ~= dialog:GetButton1():IsEnabled() ) then
 			if ( b1_enabled ) then
-				if ( encounterSupressRelease ) then
+				if ( encounterSuppressRelease ) then
 					dialog:SetText(CAN_NOT_RELEASE_IN_COMBAT);
 				else
 					dialog:SetText(CAN_NOT_RELEASE_RIGHT_NOW);
@@ -559,7 +559,7 @@ StaticPopupDialogs["CONFIRM_AZERITE_EMPOWERED_RESPEC_EXPENSIVE"] = {
 		dialog:GetEditBox():SetFocus();
 	end,
 	OnHide = function(dialog, data)
-		ChatEdit_FocusActiveWindow();
+		ChatFrameUtil.FocusActiveWindow();
 		dialog:GetEditBox():SetText("");
 	end,
 	EditBoxOnEnterPressed = function(editBox, data)
@@ -616,7 +616,7 @@ StaticPopupDialogs["DELETE_GOOD_ITEM"] = {
 		dialog:GetEditBox():SetFocus();
 	end,
 	OnHide = function(dialog, data)
-		ChatEdit_FocusActiveWindow();
+		ChatFrameUtil.FocusActiveWindow();
 		dialog:GetEditBox():SetText("");
 		MerchantFrame_ResetRefundItem();
 		if GameTooltip:GetOwner() == dialog then
@@ -679,7 +679,7 @@ StaticPopupDialogs["DELETE_GOOD_QUEST_ITEM"] = {
 		dialog:GetEditBox():SetFocus();
 	end,
 	OnHide = function(dialog, data)
-		ChatEdit_FocusActiveWindow();
+		ChatFrameUtil.FocusActiveWindow();
 		dialog:GetEditBox():SetText("");
 		MerchantFrame_ResetRefundItem();
 	end,
@@ -815,7 +815,7 @@ StaticPopupDialogs["CONFIRM_DESTROY_COMMUNITY"] = {
 		dialog:GetEditBox():SetFocus();
 	end,
 	OnHide = function(dialog, data)
-		ChatEdit_FocusActiveWindow();
+		ChatFrameUtil.FocusActiveWindow();
 		dialog:GetEditBox():SetText("");
 		MerchantFrame_ResetRefundItem();
 	end,
@@ -882,7 +882,7 @@ StaticPopupDialogs["ADD_GUILDMEMBER"] = {
 		end
 	end,
 	OnHide = function(dialog, data)
-		ChatEdit_FocusActiveWindow();
+		ChatFrameUtil.FocusActiveWindow();
 		dialog:GetEditBox():SetText("");
 		dialog:GetButton1():SetScript("OnEnter", nil );
 		dialog:GetButton1():SetScript("OnLeave", nil);
@@ -895,7 +895,7 @@ StaticPopupDialogs["ADD_GUILDMEMBER"] = {
 		local dialog = editBox:GetParent();
 		local invitee = editBox:GetText();
 		if invitee == "" then
-			ChatFrame_OpenChat("");
+			ChatFrameUtil.OpenChat("");
 		else
 			C_GuildInfo.Invite(invitee);
 			dialog:Hide();
@@ -914,8 +914,8 @@ StaticPopupDialogs["ADD_GUILDMEMBER_WITH_FINDER_LINK"] = Mixin({
 		local clubInfo = ClubFinderGetCurrentClubListingInfo(data.clubId);
 		if (clubInfo) then
 			local link = GetClubFinderLink(clubInfo.clubFinderGUID, clubInfo.name);
-			if not ChatEdit_InsertLink(link) then
-				ChatFrame_OpenChat(link);
+			if not ChatFrameUtil.InsertLink(link) then
+				ChatFrameUtil.OpenChat(link);
 			end
 		end
 	end,
@@ -990,7 +990,7 @@ StaticPopupDialogs["RENAME_PET"] = {
 		dialog:GetEditBox():SetFocus();
 	end,
 	OnHide = function(dialog, data)
-		ChatEdit_FocusActiveWindow();
+		ChatFrameUtil.FocusActiveWindow();
 		dialog:GetEditBox():SetText("");
 	end,
 	OnUpdate = function(dialog, elapsed)
@@ -1064,27 +1064,6 @@ StaticPopupDialogs["XP_LOSS"] = {
 	OnUpdate = function(dialog, elapsed)
 		if ( not C_PlayerInteractionManager.IsValidNPCInteraction(Enum.PlayerInteractionType.SpiritHealer) ) then
 			C_PlayerInteractionManager.ClearInteraction(Enum.PlayerInteractionType.SpiritHealer);
-		end
-	end,
-	timeout = 0,
-	exclusive = 1,
-	whileDead = 1,
-	showAlert = 1,
-	hideOnEscape = 1
-};
-
-StaticPopupDialogs["XP_LOSS_NO_SICKNESS_NO_DURABILITY"] = {
-	text = CONFIRM_XP_LOSS_NO_SICKNESS_NO_DURABILITY,
-	button1 = ACCEPT,
-	button2 = CANCEL,
-	OnAccept = function(dialog, data)
-		C_PlayerInteractionManager.ConfirmationInteraction(Enum.PlayerInteractionType.SpiritHealer);
-		C_PlayerInteractionManager.ClearInteraction(Enum.PlayerInteractionType.SpiritHealer);
-	end,
-	OnUpdate = function(dialog, elapsed)
-		if ( not C_PlayerInteractionManager.IsValidNPCInteraction(Enum.PlayerInteractionType.SpiritHealer) ) then
-			C_PlayerInteractionManager.ClearInteraction(Enum.PlayerInteractionType.SpiritHealer);
-			dialog:Hide();
 		end
 	end,
 	timeout = 0,
@@ -1358,7 +1337,7 @@ StaticPopupDialogs["INVITE_COMMUNITY_MEMBER"] = {
 		end
 	end,
 	OnHide = function(dialog, data)
-		ChatEdit_FocusActiveWindow();
+		ChatFrameUtil.FocusActiveWindow();
 		dialog:GetEditBox():SetText("");
 		dialog:GetButton1():SetScript("OnEnter", nil );
 		dialog:GetButton1():SetScript("OnLeave", nil);
@@ -1403,7 +1382,7 @@ StaticPopupDialogs["CONFIRM_RAF_REMOVE_RECRUIT"] = {
 		dialog:GetEditBox():SetFocus();
 	end,
 	OnHide = function(dialog, data)
-		ChatEdit_FocusActiveWindow();
+		ChatFrameUtil.FocusActiveWindow();
 		dialog:GetEditBox():SetText("");
 	end,
 	EditBoxOnEnterPressed = function(editBox, data)

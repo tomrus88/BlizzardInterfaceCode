@@ -55,6 +55,7 @@ local AnimaDiversionUI =
 			Name = "SelectAnimaNode",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

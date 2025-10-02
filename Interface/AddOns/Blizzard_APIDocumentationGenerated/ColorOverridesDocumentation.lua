@@ -13,6 +13,7 @@ local ColorOverrides =
 		{
 			Name = "GetColorForQuality",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -27,6 +28,7 @@ local ColorOverrides =
 		{
 			Name = "GetColorOverrideInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -41,6 +43,7 @@ local ColorOverrides =
 		{
 			Name = "GetDefaultColorForQuality",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -55,6 +58,7 @@ local ColorOverrides =
 		{
 			Name = "RemoveColorOverride",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -64,6 +68,7 @@ local ColorOverrides =
 		{
 			Name = "SetColorOverride",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

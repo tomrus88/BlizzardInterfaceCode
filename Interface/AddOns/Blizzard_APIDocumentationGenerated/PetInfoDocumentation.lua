@@ -19,6 +19,7 @@ local PetInfo =
 		{
 			Name = "GetPetTamersForMap",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -33,6 +34,7 @@ local PetInfo =
 		{
 			Name = "GetSpellForPetAction",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -47,6 +49,7 @@ local PetInfo =
 		{
 			Name = "IsPetActionPassive",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -61,6 +64,7 @@ local PetInfo =
 		{
 			Name = "PetAbandon",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -74,6 +78,7 @@ local PetInfo =
 		{
 			Name = "PetRename",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

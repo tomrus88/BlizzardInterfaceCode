@@ -18,6 +18,7 @@ local PaperDollInfo =
 		{
 			Name = "CanCursorCanGoInSlot",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -32,6 +33,7 @@ local PaperDollInfo =
 		{
 			Name = "GetArmorEffectiveness",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -47,6 +49,7 @@ local PaperDollInfo =
 		{
 			Name = "GetArmorEffectivenessAgainstTarget",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -62,6 +65,7 @@ local PaperDollInfo =
 			Name = "GetInspectAzeriteItemEmpoweredChoices",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -77,6 +81,7 @@ local PaperDollInfo =
 		{
 			Name = "GetInspectGuildInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -94,6 +99,7 @@ local PaperDollInfo =
 		{
 			Name = "GetInspectItemLevel",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -144,6 +150,7 @@ local PaperDollInfo =
 		{
 			Name = "GetStaggerPercentage",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -159,6 +166,7 @@ local PaperDollInfo =
 		{
 			Name = "IsInventorySlotEnabled",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -168,6 +176,15 @@ local PaperDollInfo =
 			Returns =
 			{
 				{ Name = "isEnabled", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsRangedSlotShown",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "isShown", Type = "bool", Nilable = false },
 			},
 		},
 		{

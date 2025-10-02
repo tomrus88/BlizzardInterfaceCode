@@ -5,13 +5,14 @@ local UIWidgetManagerShared =
 		{
 			Name = "MapIconUIWidgetSetType",
 			Type = "Enumeration",
-			NumValues = 2,
+			NumValues = 3,
 			MinValue = 0,
-			MaxValue = 1,
+			MaxValue = 2,
 			Fields =
 			{
 				{ Name = "Tooltip", Type = "MapIconUIWidgetSetType", EnumValue = 0 },
 				{ Name = "BehindIcon", Type = "MapIconUIWidgetSetType", EnumValue = 1 },
+				{ Name = "AdventureMapDetails", Type = "MapIconUIWidgetSetType", EnumValue = 2 },
 			},
 		},
 		{

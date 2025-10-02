@@ -9,6 +9,7 @@ local QuestInfoSystem =
 		{
 			Name = "GetQuestClassification",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -25,6 +26,7 @@ local QuestInfoSystem =
 			Name = "GetQuestRewardCurrencies",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -39,6 +41,7 @@ local QuestInfoSystem =
 		{
 			Name = "GetQuestRewardSpellInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -55,6 +58,7 @@ local QuestInfoSystem =
 			Name = "GetQuestRewardSpells",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -69,6 +73,7 @@ local QuestInfoSystem =
 		{
 			Name = "GetQuestShouldToastCompletion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -83,6 +88,7 @@ local QuestInfoSystem =
 		{
 			Name = "HasQuestRewardCurrencies",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -97,6 +103,7 @@ local QuestInfoSystem =
 		{
 			Name = "HasQuestRewardSpells",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

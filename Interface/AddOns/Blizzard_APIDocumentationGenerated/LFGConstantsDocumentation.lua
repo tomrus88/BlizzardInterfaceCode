@@ -17,6 +17,22 @@ local LFGConstants =
 			},
 		},
 		{
+			Name = "LFGListDisplayType",
+			Type = "Enumeration",
+			NumValues = 6,
+			MinValue = 0,
+			MaxValue = 5,
+			Fields =
+			{
+				{ Name = "RoleCount", Type = "LFGListDisplayType", EnumValue = 0 },
+				{ Name = "RoleEnumerate", Type = "LFGListDisplayType", EnumValue = 1 },
+				{ Name = "ClassEnumerate", Type = "LFGListDisplayType", EnumValue = 2 },
+				{ Name = "HideAll", Type = "LFGListDisplayType", EnumValue = 3 },
+				{ Name = "PlayerCount", Type = "LFGListDisplayType", EnumValue = 4 },
+				{ Name = "Comment", Type = "LFGListDisplayType", EnumValue = 5 },
+			},
+		},
+		{
 			Name = "LFGListFilter",
 			Type = "Enumeration",
 			NumValues = 8,

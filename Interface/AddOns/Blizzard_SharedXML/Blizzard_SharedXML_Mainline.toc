@@ -33,7 +33,6 @@ BindingUtil.lua
 InputUtil.lua
 EventUtil.lua
 RegionUtil.lua
-AnchorUtil.lua
 SortUtil.lua
 GridLayoutUtil.lua
 ScriptAnimationUtil.lua
@@ -59,6 +58,7 @@ Shared\VASErrorLookup.lua
 SelectableButton.lua
 SelectableButton.xml
 ButtonGroup.lua
+Shared\Button\CheckButtonTemplates.xml
 Shared\Button\UIButtonTemplate.lua
 Shared\Button\UIButtonTemplate.xml
 Shared\Button\ThreeSliceButtonTemplate.lua
@@ -195,13 +195,26 @@ CustomBindingButtonMixin.lua
 CustomBindingButtonTemplate.xml
 Shared\Tabs\MinimalTab.lua
 Shared\Tabs\MinimalTab.xml
+
+Shared\Button\UIPanelButtonTemplates.lua
+Shared\Button\UIPanelButtonTemplates.xml
+
+Shared\Dialog\DialogTemplates.lua
+Shared\Dialog\DialogTemplates.xml
+DialogUtil.lua
+
+Shared\InputBox\InputBoxTemplates.lua
+Shared\InputBox\InputBoxTemplates.xml
+
 SharedBasicControls.lua
 SharedBasicControls.xml
 Mainline\UIDropDownMenu.lua
 Mainline\UIDropDownMenuTemplates.lua
 Mainline\UIDropDownMenuTemplates.xml
 Mainline\UIDropDownMenu.xml
-DialogUtil.lua
+
+Shared\Frame\MainMenuFrameTemplates.lua
+Mainline\Frame\MainMenuFrameTemplates.xml
 
 Mainline\Sound.lua
 

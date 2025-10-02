@@ -1,3 +1,5 @@
+-- NOTE: If you make changes here, you likely need to make changes to EvokerAlternatePower.lua
+
 EvokerEbonMightBarMixin = {}
 
 -- Ebon Might Spell that applies Aura on Self

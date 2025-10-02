@@ -798,6 +798,7 @@ function Class_LootCorpseWatcher:StartWatching()
 	end
 	Dispatcher:RegisterEvent("PLAYER_REGEN_DISABLED", self);
 	Dispatcher:RegisterEvent("PLAYER_REGEN_ENABLED", self);
+	Dispatcher:RegisterEvent("UNIT_LOOT", self);
 end
 
 function Class_LootCorpseWatcher:StopWatching()
@@ -805,12 +806,7 @@ function Class_LootCorpseWatcher:StopWatching()
 	Dispatcher:UnregisterEvent("PLAYER_REGEN_ENABLED", self);
 	Dispatcher:UnregisterEvent("CHAT_MSG_LOOT", self);
 	Dispatcher:UnregisterEvent("CHAT_MSG_MONEY", self);
-	Dispatcher:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED", self);
-
-	if (self.canLootTimer) then
-		self.canLootTimer:Cancel();
-		self.canLootTimer = nil;
-	end
+	Dispatcher:UnregisterEvent("UNIT_LOOT", self);
 end
 
 function Class_LootCorpseWatcher:WatchQuestMob(unitID)
@@ -848,31 +844,16 @@ end
 -- Entering Combat
 function Class_LootCorpseWatcher:PLAYER_REGEN_DISABLED(...)
 	self:SuppressChildren();
-	Dispatcher:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", self);
 end
 
 -- Leaving Combat
 function Class_LootCorpseWatcher:PLAYER_REGEN_ENABLED(...)
 	self:UnsuppressChildren();
-	Dispatcher:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED", self);
 end
 
--- Watch for units dying while in combat.  if that happened, check the unit to see if the
--- player can loot it and if so, prompt the player to loot
-function Class_LootCorpseWatcher:COMBAT_LOG_EVENT_UNFILTERED(timestamp, _logEvent)
-	local eventData = {CombatLogGetCurrentEventInfo()};
-	local logEvent = eventData[2];
-	local unitGUID = eventData[8];
-	if ((logEvent == "UNIT_DIED") or (logEvent == "UNIT_DESTROYED")) then
-		-- Wait for mirror data
-		if not self.canLootTimer then
-			self.canLootTimer = C_Timer.NewTimer(1, function()
-				if CanLootUnit(unitGUID) then
-					self:UnitLootable(unitGUID);
-				end
-				self.canLootTimer = nil;
-			end);
-		end
+function Class_LootCorpseWatcher:UNIT_LOOT(unitGUID, hasLoot)
+	if CanLootUnit(unitGUID) then
+		self:UnitLootable(unitGUID);
 	end
 end
 
@@ -883,7 +864,7 @@ function Class_LootCorpseWatcher:UnitLootable(unitGUID)
 		return;
 	end
 
-	local unitID = tonumber(string.match(unitGUID, "Creature%-.-%-.-%-.-%-.-%-(.-)%-"));
+	local unitID = C_GUIDUtil.GetCreatureID(unitGUID);
 	for id, hasKilled in pairs(self._QuestMobs) do
 		if (unitID == hasKilled) then			
 			tutorial:ForceBegin(unitID);

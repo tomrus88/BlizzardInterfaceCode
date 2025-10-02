@@ -1,6 +1,9 @@
 MAIN_ACTION_BAR_DEFAULT_OFFSET_Y = 45;
 RIGHT_ACTION_BAR_DEFAULT_OFFSET_X = -5;
+RIGHT_ACTION_BAR_DEFAULT_PADDING_X = 0;
 RIGHT_ACTION_BAR_DEFAULT_OFFSET_Y = -77;
+ACTION_BARS_SKIP_AUTOMATIC_POSITIONING = false;
+RIGHT_CONTAINER_OFFSET_Y = -260;
 
 EDIT_MODE_MODERN_SYSTEM_MAP =
 {
@@ -447,7 +450,7 @@ EDIT_MODE_MODERN_SYSTEM_MAP =
 			[Enum.EditModeChatFrameSetting.WidthHundreds] = 4,
 			[Enum.EditModeChatFrameSetting.WidthTensAndOnes] = 30,
 			[Enum.EditModeChatFrameSetting.HeightHundreds] = 1,
-			[Enum.EditModeChatFrameSetting.HeightTensAndOnes] = 20,
+			[Enum.EditModeChatFrameSetting.HeightTensAndOnes] = 70,
 		},
 		anchorInfo = {
 			point = "BOTTOMLEFT",
@@ -705,6 +708,108 @@ EDIT_MODE_MODERN_SYSTEM_MAP =
 				offsetX = 420,
 				offsetY = 430,
 			},
+		},
+	},
+
+	[Enum.EditModeSystem.PersonalResourceDisplay] = {
+		settings = {
+			[Enum.EditModePersonalResourceDisplaySetting.ShowFriendlyBuffs] = 0,
+			[Enum.EditModePersonalResourceDisplaySetting.ShowResourceOnTarget] = 0,
+			[Enum.EditModePersonalResourceDisplaySetting.HideHealthAndPower] = 0,
+			[Enum.EditModePersonalResourceDisplaySetting.OnlyShowInCombat] = 0,
+		},
+		anchorInfo = {
+			point = "BOTTOM",
+			relativeTo = "UIParent",
+			relativePoint = "BOTTOM",
+			offsetX = -410,
+			offsetY = 380,
+		},
+	},
+
+	[Enum.EditModeSystem.EncounterEvents] = {
+		[Enum.EditModeEncounterEventsSystemIndices.Timeline] = {
+			settings = {
+				[Enum.EditModeEncounterEventsSetting.Orientation] = Enum.EncounterEventsOrientation.Horizontal,
+				[Enum.EditModeEncounterEventsSetting.IconDirection] = Enum.EncounterEventsIconDirection.Right,
+				[Enum.EditModeEncounterEventsSetting.IconSize] = 5,
+				[Enum.EditModeEncounterEventsSetting.OverallSize] = 5,
+				[Enum.EditModeEncounterEventsSetting.Transparency] = 100,
+				[Enum.EditModeEncounterEventsSetting.Background] = 0,
+				[Enum.EditModeEncounterEventsSetting.Visibility] = Enum.EncounterEventsVisibility.Always,
+				[Enum.EditModeEncounterEventsSetting.ShowSpellName] = 0,
+				[Enum.EditModeEncounterEventsSetting.ShowTooltips] = 0,
+				[Enum.EditModeEncounterEventsSetting.ShowTimer] = 1,
+			},
+			anchorInfo = {
+				point = "TOP",
+				relativeTo = "UIParent",
+				relativePoint = "TOP",
+				offsetX = 0,
+				offsetY = -130,
+			},
+		},
+		[Enum.EditModeEncounterEventsSystemIndices.CriticalWarnings] = {
+			settings = {
+				[Enum.EditModeEncounterEventsSetting.IconSize] = 5,
+				[Enum.EditModeEncounterEventsSetting.OverallSize] = 5,
+				[Enum.EditModeEncounterEventsSetting.Transparency] = 100,
+				[Enum.EditModeEncounterEventsSetting.Visibility] = Enum.EncounterEventsVisibility.Always,
+				[Enum.EditModeEncounterEventsSetting.ShowTooltips] = 1,
+			},
+			anchorInfo = {
+				point = "TOP",
+				relativeTo = "UIParent",
+				relativePoint = "TOP",
+				offsetX = 0,
+				offsetY = -215,
+			},
+		},
+		[Enum.EditModeEncounterEventsSystemIndices.MediumWarnings] = {
+			settings = {
+				[Enum.EditModeEncounterEventsSetting.IconSize] = 5,
+				[Enum.EditModeEncounterEventsSetting.OverallSize] = 5,
+				[Enum.EditModeEncounterEventsSetting.Transparency] = 100,
+				[Enum.EditModeEncounterEventsSetting.Visibility] = Enum.EncounterEventsVisibility.Always,
+				[Enum.EditModeEncounterEventsSetting.ShowTooltips] = 1,
+			},
+			anchorInfo = {
+				point = "TOP",
+				relativeTo = "UIParent",
+				relativePoint = "TOP",
+				offsetX = 0,
+				offsetY = -270,
+			},
+
+		},
+		[Enum.EditModeEncounterEventsSystemIndices.NormalWarnings] = {
+			settings = {
+				[Enum.EditModeEncounterEventsSetting.IconSize] = 5,
+				[Enum.EditModeEncounterEventsSetting.OverallSize] = 5,
+				[Enum.EditModeEncounterEventsSetting.Transparency] = 100,
+				[Enum.EditModeEncounterEventsSetting.Visibility] = Enum.EncounterEventsVisibility.Always,
+				[Enum.EditModeEncounterEventsSetting.ShowTooltips] = 1,
+			},
+			anchorInfo = {
+				point = "TOP",
+				relativeTo = "UIParent",
+				relativePoint = "TOP",
+				offsetX = 0,
+				offsetY = -315,
+			},
+		},
+	},
+
+	[Enum.EditModeSystem.DamageMeter] = {
+		settings = {
+			[Enum.EditModeDamageMeterSetting.Visibility] = Enum.DamageMeterVisibility.InCombat,
+		},
+		anchorInfo = {
+			point = "TOPLEFT",
+			relativeTo = "UIParent",
+			relativePoint = "TOPLEFT",
+			offsetX = 0,
+			offsetY = 0,
 		},
 	},
 };
@@ -1324,4 +1429,10 @@ EDIT_MODE_CLASSIC_SYSTEM_MAP =
 	},
 
 	[Enum.EditModeSystem.CooldownViewer] = EDIT_MODE_MODERN_SYSTEM_MAP[Enum.EditModeSystem.CooldownViewer];
+
+	[Enum.EditModeSystem.PersonalResourceDisplay] = EDIT_MODE_MODERN_SYSTEM_MAP[Enum.EditModeSystem.PersonalResourceDisplay];
+
+	[Enum.EditModeSystem.EncounterEvents] = EDIT_MODE_MODERN_SYSTEM_MAP[Enum.EditModeSystem.EncounterEvents];
+
+	[Enum.EditModeSystem.DamageMeter] = EDIT_MODE_MODERN_SYSTEM_MAP[Enum.EditModeSystem.DamageMeter];
 };

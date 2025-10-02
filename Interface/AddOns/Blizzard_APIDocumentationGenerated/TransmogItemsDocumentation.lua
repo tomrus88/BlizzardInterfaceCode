@@ -9,6 +9,7 @@ local TransmogItems =
 		{
 			Name = "AccountCanCollectSource",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -42,6 +43,7 @@ local TransmogItems =
 		{
 			Name = "CanAppearanceHaveIllusion",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -56,6 +58,7 @@ local TransmogItems =
 		{
 			Name = "ClearNewAppearance",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -65,6 +68,7 @@ local TransmogItems =
 		{
 			Name = "ClearSearch",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -79,6 +83,7 @@ local TransmogItems =
 		{
 			Name = "DeleteOutfit",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -92,6 +97,7 @@ local TransmogItems =
 		{
 			Name = "GetAllAppearanceSources",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -124,6 +130,7 @@ local TransmogItems =
 		{
 			Name = "GetAppearanceCameraID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -139,6 +146,7 @@ local TransmogItems =
 		{
 			Name = "GetAppearanceCameraIDBySource",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -155,6 +163,7 @@ local TransmogItems =
 			Name = "GetAppearanceInfoBySource",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -170,6 +179,7 @@ local TransmogItems =
 			Name = "GetAppearanceSourceDrops",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -185,6 +195,7 @@ local TransmogItems =
 			Name = "GetAppearanceSourceInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -208,6 +219,7 @@ local TransmogItems =
 			Name = "GetAppearanceSources",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -225,6 +237,7 @@ local TransmogItems =
 			Name = "GetArtifactAppearanceStrings",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -241,6 +254,7 @@ local TransmogItems =
 			Name = "GetCategoryAppearances",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -256,6 +270,7 @@ local TransmogItems =
 		{
 			Name = "GetCategoryCollectedCount",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -271,6 +286,7 @@ local TransmogItems =
 			Name = "GetCategoryForItem",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -286,6 +302,7 @@ local TransmogItems =
 			Name = "GetCategoryInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -305,6 +322,7 @@ local TransmogItems =
 		{
 			Name = "GetCategoryTotal",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -346,6 +364,7 @@ local TransmogItems =
 		{
 			Name = "GetFilteredCategoryCollectedCount",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -360,6 +379,7 @@ local TransmogItems =
 		{
 			Name = "GetFilteredCategoryTotal",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -375,6 +395,7 @@ local TransmogItems =
 			Name = "GetIllusionInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -390,6 +411,7 @@ local TransmogItems =
 			Name = "GetIllusionStrings",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -425,6 +447,7 @@ local TransmogItems =
 		{
 			Name = "GetIsAppearanceFavorite",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -440,6 +463,7 @@ local TransmogItems =
 			Name = "GetItemInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -456,6 +480,7 @@ local TransmogItems =
 			Name = "GetItemTransmogInfoListFromOutfitHyperlink",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -500,6 +525,7 @@ local TransmogItems =
 			Name = "GetOutfitHyperlinkFromItemTransmogInfoList",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -515,6 +541,7 @@ local TransmogItems =
 			Name = "GetOutfitInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -531,6 +558,7 @@ local TransmogItems =
 			Name = "GetOutfitItemTransmogInfoList",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -555,6 +583,7 @@ local TransmogItems =
 			Name = "GetPairedArtifactAppearance",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -570,6 +599,7 @@ local TransmogItems =
 			Name = "GetSourceIcon",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -585,6 +615,7 @@ local TransmogItems =
 			Name = "GetSourceInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -600,6 +631,7 @@ local TransmogItems =
 			Name = "GetSourceItemID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -615,6 +647,7 @@ local TransmogItems =
 			Name = "GetSourceRequiredHoliday",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -639,6 +672,7 @@ local TransmogItems =
 			Name = "GetValidAppearanceSourcesForClass",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -665,6 +699,7 @@ local TransmogItems =
 		{
 			Name = "IsAppearanceHiddenVisual",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -679,6 +714,7 @@ local TransmogItems =
 		{
 			Name = "IsCategoryValidForItem",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -694,6 +730,7 @@ local TransmogItems =
 		{
 			Name = "IsNewAppearance",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -717,6 +754,7 @@ local TransmogItems =
 		{
 			Name = "IsSearchInProgress",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -731,6 +769,7 @@ local TransmogItems =
 		{
 			Name = "IsSourceTypeFilterChecked",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -754,6 +793,7 @@ local TransmogItems =
 		{
 			Name = "ModifyOutfit",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -764,6 +804,7 @@ local TransmogItems =
 		{
 			Name = "NewOutfit",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -780,6 +821,7 @@ local TransmogItems =
 		{
 			Name = "PlayerCanCollectSource",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -795,6 +837,7 @@ local TransmogItems =
 		{
 			Name = "PlayerHasTransmog",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -810,6 +853,7 @@ local TransmogItems =
 		{
 			Name = "PlayerHasTransmogByItemInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -824,6 +868,7 @@ local TransmogItems =
 		{
 			Name = "PlayerHasTransmogItemModifiedAppearance",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -838,6 +883,7 @@ local TransmogItems =
 		{
 			Name = "PlayerKnowsSource",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -852,6 +898,7 @@ local TransmogItems =
 		{
 			Name = "RenameOutfit",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -862,6 +909,7 @@ local TransmogItems =
 		{
 			Name = "SearchProgress",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -876,6 +924,7 @@ local TransmogItems =
 		{
 			Name = "SearchSize",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -890,6 +939,7 @@ local TransmogItems =
 		{
 			Name = "SetAllCollectionTypeFilters",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -899,6 +949,7 @@ local TransmogItems =
 		{
 			Name = "SetAllFactionsShown",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -908,6 +959,7 @@ local TransmogItems =
 		{
 			Name = "SetAllRacesShown",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -917,6 +969,7 @@ local TransmogItems =
 		{
 			Name = "SetAllSourceTypeFilters",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -926,6 +979,7 @@ local TransmogItems =
 		{
 			Name = "SetClassFilter",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -935,6 +989,7 @@ local TransmogItems =
 		{
 			Name = "SetCollectedShown",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -948,6 +1003,7 @@ local TransmogItems =
 		{
 			Name = "SetIsAppearanceFavorite",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -958,6 +1014,7 @@ local TransmogItems =
 		{
 			Name = "SetSearch",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -973,6 +1030,7 @@ local TransmogItems =
 		{
 			Name = "SetSearchAndFilterCategory",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -982,6 +1040,7 @@ local TransmogItems =
 		{
 			Name = "SetSourceTypeFilter",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -992,6 +1051,7 @@ local TransmogItems =
 		{
 			Name = "SetUncollectedShown",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

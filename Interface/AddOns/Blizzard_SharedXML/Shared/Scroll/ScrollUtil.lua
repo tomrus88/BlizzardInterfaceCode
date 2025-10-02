@@ -320,7 +320,7 @@ end
 
 SelectionBehaviorMixin = CreateFromMixins(CallbackRegistryMixin);
 
-SelectionBehaviorFlags = FlagsUtil.MakeFlags("Deselectable", "Intrusive");
+SelectionBehaviorFlags = FlagsUtil.MakeFlags("Deselectable", "Intrusive", "MultiSelect");
 
 SelectionBehaviorMixin:GenerateCallbackEvents(
 	{
@@ -440,7 +440,7 @@ end
 
 function SelectionBehaviorMixin:ToggleSelectElementData(elementData)
 	local oldSelected = self:IsElementDataSelected(elementData);
-	if oldSelected and not self:IsFlagSet(SelectionBehaviorFlags.Deselectable) then
+	if oldSelected and not (self:IsFlagSet(SelectionBehaviorFlags.Deselectable) or self:IsFlagSet(SelectionBehaviorFlags.MultiSelect)) then
 		return;
 	end
 
@@ -548,11 +548,11 @@ end
 function SelectionBehaviorMixin:SetElementDataSelected_Internal(elementData, newSelected)
 	local deselected = nil;
 	if newSelected then
-		-- Works under the current single selection policy. When multi-select is added,
-		-- change this.
-		deselected = self:DeselectByPredicate(function(data)
-			return data ~= elementData and self:IsElementDataSelected(data);
-		end);
+		if not self.selectionFlags:IsSet(SelectionBehaviorFlags.MultiSelect) then
+			deselected = self:DeselectByPredicate(function(data)
+				return data ~= elementData and self:IsElementDataSelected(data);
+			end);
+		end
 	end
 
 	local changed = self:IsElementDataSelected(elementData) ~= newSelected;
@@ -574,7 +574,7 @@ function SelectionBehaviorMixin:SetElementDataSelected_Internal(elementData, new
 end
 
 function SelectionBehaviorMixin:Select(frame)
-	self:SelectElementData(frame:GetElementData());
+	return self:SelectElementData(frame:GetElementData());
 end
 
 function SelectionBehaviorMixin:ToggleSelect(frame)

@@ -68,6 +68,7 @@ local GossipInfo =
 			Name = "GetFriendshipReputation",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -82,6 +83,7 @@ local GossipInfo =
 		{
 			Name = "GetFriendshipReputationRanks",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -123,6 +125,7 @@ local GossipInfo =
 		{
 			Name = "GetOptionUIWidgetSetsAndTypesByOptionID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -146,6 +149,7 @@ local GossipInfo =
 		{
 			Name = "GetPoiForUiMapID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -160,6 +164,7 @@ local GossipInfo =
 		{
 			Name = "GetPoiInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -188,6 +193,8 @@ local GossipInfo =
 		{
 			Name = "SelectActiveQuest",
 			Type = "Function",
+			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -197,6 +204,8 @@ local GossipInfo =
 		{
 			Name = "SelectAvailableQuest",
 			Type = "Function",
+			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -206,6 +215,8 @@ local GossipInfo =
 		{
 			Name = "SelectOption",
 			Type = "Function",
+			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -217,6 +228,8 @@ local GossipInfo =
 		{
 			Name = "SelectOptionByIndex",
 			Type = "Function",
+			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

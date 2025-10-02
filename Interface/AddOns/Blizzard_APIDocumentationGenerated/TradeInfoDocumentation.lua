@@ -16,6 +16,7 @@ local TradeInfo =
 			Name = "PickupTradeMoney",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -26,6 +27,7 @@ local TradeInfo =
 			Name = "SetTradeMoney",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 			Documentation = { "Sets the amount of money in the current trade offer." },
 
 			Arguments =

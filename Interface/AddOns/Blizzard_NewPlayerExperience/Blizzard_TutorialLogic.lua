@@ -62,7 +62,7 @@ function TutorialLogic:Begin()
 	self.playerClass = TutorialHelper:GetClass();
 	self.factionData = TutorialData:GetFactionData();-- get the data for the player's faction
 	self.vendorQuestID = self.factionData.UseVendorQuest;
-	self.specQuestID = TutorialHelper:FilterByClass(self.factionData.SpecQuests);
+	self.specQuestID = self.factionData.SpecQuestTrackID;
 	
 	TutorialQuestManager:RegisterForCallbacks(self);-- Certain tutorials kick off when quests are accepted
 	
@@ -111,7 +111,7 @@ function TutorialLogic:Begin()
 	TutorialManager:AddTutorial(Class_AddMountToActionBar:new());
 	TutorialManager:AddTutorial(Class_UseMount:new());
 
-	local specQuestID = TutorialHelper:FilterByClass(self.factionData.SpecQuests);
+	local specQuestID = self.factionData.SpecQuestTrackID;
 	TutorialManager:AddTutorial(Class_ChangeSpec_NPE:new(), nil, specQuestID);
 	local autoStart = true;
 	TutorialManager:AddWatcher(Class_StarterTalentWatcher_NPE:new(), autoStart);

@@ -9,6 +9,7 @@ local SpellActivationOverlay =
 		{
 			Name = "IsSpellOverlayed",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

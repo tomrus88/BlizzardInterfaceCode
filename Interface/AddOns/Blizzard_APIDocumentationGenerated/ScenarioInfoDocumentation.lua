@@ -10,6 +10,7 @@ local ScenarioInfo =
 			Name = "GetCriteriaInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -25,6 +26,7 @@ local ScenarioInfo =
 			Name = "GetCriteriaInfoByStep",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -40,6 +42,7 @@ local ScenarioInfo =
 		{
 			Name = "GetJailersTowerTypeString",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -65,6 +68,7 @@ local ScenarioInfo =
 			Name = "GetScenarioStepInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

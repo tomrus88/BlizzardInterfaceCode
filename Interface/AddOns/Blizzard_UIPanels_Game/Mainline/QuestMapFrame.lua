@@ -220,9 +220,9 @@ function QuestLogMixin:SetDisplayMode(displayMode)
 	end
 
 	if displayMode == QuestLogDisplayMode.Events then
-		if not GetCVarBitfield("closedInfoFramesAccountWide", LE_FRAME_TUTORIAL_ACCOUNT_EVENT_SCHEDULER_TAB_SEEN) then
+		if not GetCVarBitfield("closedInfoFramesAccountWide", Enum.FrameTutorialAccount.EventSchedulerTabSeen) then
 			HelpTip:Hide(self.EventsTab, EVENT_SCHEDULER_WORLD_MAP_HELP_TEXT);
-			SetCVarBitfield("closedInfoFramesAccountWide", LE_FRAME_TUTORIAL_ACCOUNT_EVENT_SCHEDULER_TAB_SEEN, true);
+			SetCVarBitfield("closedInfoFramesAccountWide", Enum.FrameTutorialAccount.EventSchedulerTabSeen, true);
 		end
 	end
 
@@ -250,13 +250,13 @@ function QuestLogMixin:ValidateTabs()
 end
 
 function QuestLogMixin:CheckEventsTabTutorial()
-	local shouldShowHelp = self.EventsTab:IsShown() and C_PlayerInfo.CanPlayerUseEventScheduler() and not GetCVarBitfield("closedInfoFramesAccountWide", LE_FRAME_TUTORIAL_ACCOUNT_EVENT_SCHEDULER_TAB_SEEN);
+	local shouldShowHelp = self.EventsTab:IsShown() and C_PlayerInfo.CanPlayerUseEventScheduler() and not GetCVarBitfield("closedInfoFramesAccountWide", Enum.FrameTutorialAccount.EventSchedulerTabSeen);
 	if shouldShowHelp then
 		local helpTipInfo = {
 			text = EVENT_SCHEDULER_WORLD_MAP_HELP_TEXT,
 			buttonStyle = HelpTip.ButtonStyle.Close,
 			cvarBitfield = "closedInfoFramesAccountWide",
-			bitfieldFlag = LE_FRAME_TUTORIAL_ACCOUNT_EVENT_SCHEDULER_TAB_SEEN,
+			bitfieldFlag = Enum.FrameTutorialAccount.EventSchedulerTabSeen,
 			targetPoint = HelpTip.Point.RightEdgeCenter,
 			offsetY = 4,
 		};
@@ -2070,6 +2070,10 @@ function QuestLogQuests_Update()
 end
 
 function ToggleQuestLog()
+	if ( C_GameRules.IsGameRuleActive(Enum.GameRule.WorldMapDisabled) ) then
+		return;
+	end
+
 	if ( QuestMapFrame:IsShown() and QuestMapFrame:IsVisible() ) then
 		HideUIPanel(QuestMapFrame:GetParent());
 	else
@@ -2299,7 +2303,7 @@ function QuestMapLogTitleButton_CreateContextMenu(self)
 end
 
 function QuestMapLogTitleButton_OnClick(self, button)
-	if ChatEdit_TryInsertQuestLinkForQuestID(self.questID) then
+	if ChatFrameUtil.TryInsertQuestLinkForQuestID(self.questID) then
 		return;
 	end
 

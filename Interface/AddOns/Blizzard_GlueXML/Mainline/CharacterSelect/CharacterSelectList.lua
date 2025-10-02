@@ -1,4 +1,7 @@
 
+local LIST_SCROLL_BOX_DEFAULT_X_OFFSET = -32;
+local LIST_SCROLL_BOX_DEFAULT_Y_OFFSET = 83;
+
 CharacterSelectListMixin = {};
 
 function CharacterSelectListMixin:OnLoad()
@@ -54,16 +57,34 @@ function CharacterSelectListMixin:OnLoad()
 	self:RegisterEvent("CHARACTER_LIST_GROUP_CREATED");
 	self:RegisterEvent("CHARACTER_LIST_GROUP_DELETED");
 	self:RegisterEvent("ACCOUNT_CVARS_LOADED");
+	self:RegisterEvent("CHARACTER_LIST_RESTRICTIONS_RECEIVED");
 
 	local function OnCollectionsHide()
 		self:EvaluateHelptips();
 	end
 	EventRegistry:RegisterCallback("GlueCollections.OnHide", OnCollectionsHide);
 
+	local function OnConfigRefreshed()
+		self:UpdateConfigElements();
+	end
+	EventRegistry:RegisterCallback("CharacterSelectUI.ConfigRefreshed", OnConfigRefreshed);
+
 	-- This event handler can only be added after the CharacterSelectUI's OnLoad has run.
 	RunNextFrame(function ()
 		self:AddDynamicEventMethod(CharacterSelectUI, CharacterSelectUIMixin.Event.ExpansionTrialStateUpdated, CharacterSelectListMixin.OnExpansionTrialStateUpdated);
 	end);
+end
+
+function CharacterSelectListMixin:OnShow()
+	CallbackRegistrantMixin.OnShow(self);
+
+	self:UpdateConfigElements();
+end
+
+function CharacterSelectListMixin:OnHide()
+	CallbackRegistrantMixin.OnHide(self);
+
+	self:UpdateConfigElements();
 end
 
 function CharacterSelectListMixin:OnEvent(event, ...)
@@ -114,6 +135,9 @@ function CharacterSelectListMixin:OnEvent(event, ...)
 		CharacterSelectListUtil.SaveCharacterOrder();
 	elseif event == "ACCOUNT_CVARS_LOADED" then
 		self:EvaluateHelptips();
+	elseif event == "CHARACTER_LIST_RESTRICTIONS_RECEIVED" then
+		local noCreate = true;
+		CharacterSelect_SelectCharacter(CharacterSelect.selectedIndex, noCreate);
 	end
 end
 
@@ -470,6 +494,13 @@ function CharacterSelectListMixin:InitDragBehavior()
 	self.ScrollBox:SetDataProvider(CreateDataProvider());
 end
 
+function CharacterSelectListMixin:UpdateConfigElements()
+	local isUndeleting = CharacterSelectUtil.IsUndeleting();
+	local config = CharacterSelectUtil.GetConfig();
+	self.SearchBox:SetShown(not isUndeleting and config[CharacterSelectUtil.ConfigParam.CharacterListSearch]);
+	self.AddGroupButton:SetShown(not isUndeleting and config[CharacterSelectUtil.ConfigParam.CharacterListAddGroup]);
+end
+
 function CharacterSelectListMixin:UpdateUndeleteState()
 	local isUndeleting = CharacterSelectUtil.IsUndeleting();
 
@@ -480,8 +511,7 @@ function CharacterSelectListMixin:UpdateUndeleteState()
 	self.UndeleteRealmLabel:SetShown(isUndeleting);
 	self.UndeleteRealmBackdrop:SetShown(isUndeleting);
 	self.BackToActiveButton:SetShown(isUndeleting);
-	self.SearchBox:SetShown(not isUndeleting);
-	self.AddGroupButton:SetShown(not isUndeleting);
+	self:UpdateConfigElements();
 	self.SearchBox:SetText("");
 
 	if isUndeleting then
@@ -571,15 +601,17 @@ function CharacterSelectListMixin:EvaluateHelptips()
 		HelpTip:Show(self, introHelpTipInfo);
 	end
 
-	local addGroupHelpTipInfo = {
-		text = CHARACTER_SELECT_ADD_GROUP_HELPTIP,
-		buttonStyle = HelpTip.ButtonStyle.Close,
-		targetPoint = HelpTip.Point.LeftEdgeCenter,
-		cvar = "seenCharacterSelectAddGroupHelpTip",
-		cvarValue = "1",
-		checkCVars = true,
-	};
-	HelpTip:Show(self.AddGroupButton, addGroupHelpTipInfo);
+	if self.AddGroupButton:IsShown() then
+		local addGroupHelpTipInfo = {
+			text = CHARACTER_SELECT_ADD_GROUP_HELPTIP,
+			buttonStyle = HelpTip.ButtonStyle.Close,
+			targetPoint = HelpTip.Point.LeftEdgeCenter,
+			cvar = "seenCharacterSelectAddGroupHelpTip",
+			cvarValue = "1",
+			checkCVars = true,
+		};
+		HelpTip:Show(self.AddGroupButton, addGroupHelpTipInfo);
+	end
 end
 
 function CharacterSelectListMixin:ClearSearch()

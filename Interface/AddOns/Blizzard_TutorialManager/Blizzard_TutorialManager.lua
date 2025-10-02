@@ -203,6 +203,13 @@ function TutorialManager:CheckHasCompletedFrameTutorial(tutorial, callback)
 	end);
 end
 
+function TutorialManager:CheckHasCompletedTutorial(tutorialBitfield, tutorial, callback)
+	EventUtil.ContinueOnVariablesLoaded(function()
+		local hasCompleted = GetCVarBitfield(tutorialBitfield, tutorial);
+		callback(hasCompleted);
+	end);
+end
+
 TutorialManager:Initialize();
 
 -- ============================================================================================================

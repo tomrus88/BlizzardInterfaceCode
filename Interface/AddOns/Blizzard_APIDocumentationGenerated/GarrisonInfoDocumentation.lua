@@ -9,6 +9,7 @@ local GarrisonInfo =
 		{
 			Name = "AddFollowerToMission",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -34,6 +35,7 @@ local GarrisonInfo =
 		{
 			Name = "GetAutoMissionBoardState",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -48,6 +50,7 @@ local GarrisonInfo =
 		{
 			Name = "GetAutoMissionEnvironmentEffect",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -62,6 +65,7 @@ local GarrisonInfo =
 		{
 			Name = "GetAutoMissionTargetingInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -78,6 +82,7 @@ local GarrisonInfo =
 		{
 			Name = "GetAutoMissionTargetingInfoForSpell",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -94,6 +99,7 @@ local GarrisonInfo =
 		{
 			Name = "GetAutoTroops",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -108,6 +114,7 @@ local GarrisonInfo =
 		{
 			Name = "GetCombatLogSpellInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -159,6 +166,7 @@ local GarrisonInfo =
 			Name = "GetFollowerAutoCombatSpells",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -175,6 +183,7 @@ local GarrisonInfo =
 		{
 			Name = "GetFollowerAutoCombatStats",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -189,6 +198,7 @@ local GarrisonInfo =
 		{
 			Name = "GetFollowerMissionCompleteInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -203,6 +213,7 @@ local GarrisonInfo =
 		{
 			Name = "GetGarrisonPlotsInstancesForMap",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -217,6 +228,7 @@ local GarrisonInfo =
 		{
 			Name = "GetGarrisonTalentTreeCurrencyTypes",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -231,6 +243,7 @@ local GarrisonInfo =
 		{
 			Name = "GetGarrisonTalentTreeType",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -254,6 +267,7 @@ local GarrisonInfo =
 		{
 			Name = "GetMissionCompleteEncounters",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -268,6 +282,7 @@ local GarrisonInfo =
 		{
 			Name = "GetMissionDeploymentInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -282,6 +297,7 @@ local GarrisonInfo =
 		{
 			Name = "GetMissionEncounterIconInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -296,6 +312,7 @@ local GarrisonInfo =
 		{
 			Name = "GetTalentInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -310,6 +327,7 @@ local GarrisonInfo =
 		{
 			Name = "GetTalentPointsSpentInTalentTree",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -325,6 +343,7 @@ local GarrisonInfo =
 			Name = "GetTalentTreeIDsByClassID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -340,6 +359,7 @@ local GarrisonInfo =
 		{
 			Name = "GetTalentTreeInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -354,6 +374,7 @@ local GarrisonInfo =
 		{
 			Name = "GetTalentTreeResetInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -369,6 +390,7 @@ local GarrisonInfo =
 		{
 			Name = "GetTalentTreeTalentPointResearchInfo",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -390,6 +412,7 @@ local GarrisonInfo =
 			Name = "GetTalentUnlockWorldQuest",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -422,6 +445,7 @@ local GarrisonInfo =
 		{
 			Name = "IsEnvironmentCountered",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -436,6 +460,7 @@ local GarrisonInfo =
 		{
 			Name = "IsFollowerOnCompletedMission",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -450,6 +475,7 @@ local GarrisonInfo =
 		{
 			Name = "IsLandingPageMinimapButtonVisible",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -464,6 +490,7 @@ local GarrisonInfo =
 		{
 			Name = "IsTalentConditionMet",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -479,6 +506,7 @@ local GarrisonInfo =
 		{
 			Name = "RegenerateCombatLog",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -493,6 +521,7 @@ local GarrisonInfo =
 		{
 			Name = "RemoveFollowerFromMission",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -504,6 +533,7 @@ local GarrisonInfo =
 		{
 			Name = "RushHealAllFollowers",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -513,6 +543,7 @@ local GarrisonInfo =
 		{
 			Name = "RushHealFollower",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -522,6 +553,7 @@ local GarrisonInfo =
 		{
 			Name = "SetAutoCombatSpellFastForward",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

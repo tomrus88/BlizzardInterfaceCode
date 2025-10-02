@@ -114,7 +114,7 @@ function ProfessionsCrafterOrderViewMixin:InitButtons()
 
 		if self.order.orderType == Enum.CraftingOrderType.Npc then
 			HelpTip:Hide(self.CreateButton, CRAFTING_ORDERS_FIRST_NPC_ORDER_HELPTIP);
-			SetCVarBitfield("closedInfoFramesAccountWide", LE_FRAME_TUTORIAL_ACCOUNT_NPC_CRAFTING_ORDER_CREATE_BUTTON, true);
+			SetCVarBitfield("closedInfoFramesAccountWide", Enum.FrameTutorialAccount.NpcCraftingOrderCreateButton, true);
 		end
      end);
 
@@ -159,7 +159,7 @@ function ProfessionsCrafterOrderViewMixin:InitButtons()
 		local canWhisper = whisperStatus == Enum.ChatWhisperTargetStatus.CanWhisper or whisperStatus == Enum.ChatWhisperTargetStatus.CanWhisperGuild;
 		if canWhisper then
 			rootDescription:CreateButton(WHISPER_MESSAGE, function()
-				ChatFrame_SendTell(self.order.customerName);
+				ChatFrameUtil.SendTell(self.order.customerName);
 			end);
 		else
 			local button = rootDescription:CreateButton(WHISPER_MESSAGE, nop);
@@ -274,8 +274,10 @@ function ProfessionsCrafterOrderViewMixin:InitRegions()
     self.OrderDetails.MinimumQualityIcon:SetScript("OnEnter", function(icon)
         GameTooltip:SetOwner(icon, "ANCHOR_RIGHT");
 
-		local smallIcon = true;
-        GameTooltip_AddHighlightLine(GameTooltip, PROFESSIONS_ORDER_HAS_MINIMUM_QUALITY_FMT:format(Professions.GetChatIconMarkupForQuality(self.order.minQuality, smallIcon)));
+        local qualityInfo = C_TradeSkillUI.GetRecipeItemQualityInfo(self.order.spellID, self.order.minQuality);
+        local smallIcon = true;
+        local markup = Professions.GetChatIconMarkupForQuality(qualityInfo, smallIcon);
+        GameTooltip_AddHighlightLine(GameTooltip, PROFESSIONS_ORDER_HAS_MINIMUM_QUALITY_FMT:format(markup));
         GameTooltip:Show();
     end);
     self.OrderDetails.MinimumQualityIcon:SetScript("OnLeave", function()
@@ -693,7 +695,7 @@ function ProfessionsCrafterOrderViewMixin:SchematicPostInit()
         self.OrderDetails.SchematicForm.recraftSlot.OutputSlot:SetScript("OnEnter", function(slot)
             GameTooltip:SetOwner(slot, "ANCHOR_RIGHT");
             local reagents = transaction:CreateCraftingReagentInfoTbl();
-            GameTooltip:SetRecipeResultItemForOrder(self.order.spellID, reagents, self.order.orderID, self.OrderDetails.SchematicForm:GetCurrentRecipeLevel(), self.OrderDetails.SchematicForm:GetOutputOverrideQuality());
+            GameTooltip:SetRecipeResultItemForOrder(self.order.spellID, reagents, self.order.orderID, self.OrderDetails.SchematicForm:GetCurrentRecipeLevel(), self.OrderDetails.SchematicForm:GetOutputOverrideQualityID());
         end);
         self.OrderDetails.SchematicForm.recraftSlot.InputSlot:SetScript("OnMouseDown", nil);
     end
@@ -707,8 +709,8 @@ function ProfessionsCrafterOrderViewMixin:UpdateMinimumQualityIcon()
 	local showMinimumQuality = self.order.minQuality > 1 and not self.OrderDetails.FulfillmentForm:IsShown();
     self.OrderDetails.MinimumQualityIcon:SetShown(showMinimumQuality);
     if showMinimumQuality then
-        local small = true;
-        self.OrderDetails.MinimumQualityIcon:SetAtlas(Professions.GetIconForQuality(self.order.minQuality, small), TextureKitConstants.UseAtlasSize);
+        local qualityInfo = C_TradeSkillUI.GetRecipeItemQualityInfo(self.order.spellID, self.order.minQuality);
+        self.OrderDetails.MinimumQualityIcon:SetAtlas(qualityInfo.iconSmall, TextureKitConstants.UseAtlasSize);
         self.OrderDetails.MinimumQualityIcon:ClearAllPoints();
         local outputText = self:IsRecrafting() and self.OrderDetails.SchematicForm.RecraftingOutputText or self.OrderDetails.SchematicForm.OutputText;
         self.OrderDetails.MinimumQualityIcon:SetPoint("LEFT", outputText, "RIGHT", 5, 0);
@@ -782,7 +784,7 @@ local npcOrderCreateButtonHelpTipInfo =
 	alignment = HelpTip.Alignment.Center,
 	offsetX = 0,
 	cvarBitfield = "closedInfoFramesAccountWide",
-	bitfieldFlag = LE_FRAME_TUTORIAL_ACCOUNT_NPC_CRAFTING_ORDER_CREATE_BUTTON,
+	bitfieldFlag = Enum.FrameTutorialAccount.NpcCraftingOrderCreateButton,
 	checkCVars = true,
 };
 
@@ -814,11 +816,15 @@ function ProfessionsCrafterOrderViewMixin:UpdateCreateButton()
     elseif not transaction:HasMetAllRequirements() then
         enabled = false;
         errorReason = PROFESSIONS_INSUFFICIENT_REAGENTS;
-    elseif self.order.minQuality and self.OrderDetails.SchematicForm.Details:GetProjectedQuality() and self.order.minQuality > self.OrderDetails.SchematicForm.Details:GetProjectedQuality() then
-        enabled = false;
+    elseif self.order.minQuality then
+		local qualityInfo = self.OrderDetails.SchematicForm.Details:GetProjectedQualityInfo();
+		if qualityInfo and self.order.minQuality > qualityInfo.quality then
+			enabled = false;
 
-		local smallIcon = true;
-        errorReason = PROFESSIONS_ORDER_HAS_MINIMUM_QUALITY_FMT:format(Professions.GetChatIconMarkupForQuality(self.order.minQuality, smallIcon));
+			local smallIcon = true;
+			local markup = Professions.GetChatIconMarkupForQuality(qualityInfo, smallIcon);
+			errorReason = PROFESSIONS_ORDER_HAS_MINIMUM_QUALITY_FMT:format(markup);
+		end
     end
 
     self.CreateButton:SetEnabled(enabled);

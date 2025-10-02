@@ -18,6 +18,7 @@ local Covenants =
 		{
 			Name = "GetCovenantData",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

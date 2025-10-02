@@ -416,6 +416,7 @@
 		<xs:attribute name="fixedSize" type="xs:boolean" default="false"/>
 		<xs:attribute name="filter" type="xs:boolean" default="false"/>
 		<xs:attribute name="canBeUserScaled" type="xs:boolean" default="false"/>
+		<xs:attribute name="slug" type="xs:boolean" default="false"/>
 	</xs:complexType>
 
 	<xs:element name="Font" substitutionGroup="UiField">
@@ -466,9 +467,10 @@
 		<xs:attribute name="passThroughButtons" type="xs:string"/>
 		<xs:attribute name="protected" type="xs:boolean" default="false"/>
 		<xs:attribute name="secureReferenceKey" type="xs:string"/>
-    <xs:attribute name="retainClickThroughOverride" type="xs:boolean" default="false"/>
-    <xs:attribute name="propagateMouseInput" type="PROPAGATE_MOUSE"/>
-    <xs:attribute name="propagateMouseInputMask" type="PROPAGATE_MOUSE"/>
+		<xs:attribute name="retainClickThroughOverride" type="xs:boolean" default="false"/>
+		<xs:attribute name="propagateMouseInput" type="PROPAGATE_MOUSE"/>
+		<xs:attribute name="propagateMouseInputMask" type="PROPAGATE_MOUSE"/>
+		<xs:attribute name="preventSecretValues" type="xs:boolean" default="false"/>
 	</xs:attributeGroup>
 
 	<xs:complexType name="LayoutFrameType">

@@ -8,6 +8,7 @@ local Console =
 		{
 			Name = "CalculateStringEditDistance",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -23,6 +24,7 @@ local Console =
 		{
 			Name = "ConsoleEcho",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -39,6 +41,7 @@ local Console =
 		{
 			Name = "ConsoleExec",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -63,6 +66,7 @@ local Console =
 		{
 			Name = "ConsoleGetColorFromType",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -95,6 +99,7 @@ local Console =
 		{
 			Name = "ConsolePrintAllMatchingCommands",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -104,6 +109,7 @@ local Console =
 		{
 			Name = "ConsoleSetFontHeight",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -113,6 +119,7 @@ local Console =
 		{
 			Name = "SetConsoleKey",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

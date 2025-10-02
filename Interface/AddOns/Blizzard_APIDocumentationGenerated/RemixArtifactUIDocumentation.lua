@@ -14,6 +14,7 @@ local RemixArtifactUI =
 			Name = "GetAppearanceInfoByID",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -82,6 +83,7 @@ local RemixArtifactUI =
 		{
 			Name = "ItemInSlotIsRemixArtifact",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

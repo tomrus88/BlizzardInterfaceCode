@@ -55,7 +55,7 @@ function CatalogShopMixin:OnLoad_CatalogShop()
 	EventRegistry:RegisterCallback("CatalogShop.OnNoProductsSelected", self.OnNoProductsSelected, self);
 	EventRegistry:RegisterCallback("CatalogShop.OnCategorySelected", self.OnCategorySelected, self);
 
-	self:SetPortraitToAsset("Interface\\Icons\\WoW_Store");
+	self:SetPortraitToAsset("Interface\\Icons\\UI_Shop");
 	self:SetTitle(BLIZZARD_STORE);
 
 	if ( C_Glue.IsOnGlueScreen() ) then
@@ -247,10 +247,12 @@ function CatalogShopMixin:HideUnavailableScreen()
 end
 
 function CatalogShopMixin:ShowAfterCheckout()
+	self.ModelSceneContainerFrame:Show();
 	self:SetAlpha(1);
 end
 
 function CatalogShopMixin:HideForCheckout()
+	self.ModelSceneContainerFrame:Hide();
 	self:SetAlpha(0);
 end
 
@@ -447,10 +449,10 @@ function CatalogShopMixin:OnAttributeChanged(name, value)
 			self:SetAttribute("escaperesult", handled);
 		end
 	elseif ( name == "selectsubscription" ) then
-		-- Subscriptions are now in the Game Upgrade Category
-		self:SetCatalogShopLinkTag(CatalogShopConstants.CategoryLinks.GameUpgrades);
+		self:SetCatalogShopLinkTag(CatalogShopConstants.CategoryLinks.Subscriptions);
 	elseif ( name == "selectgametime" ) then
-		self:SetCatalogShopLinkTag(CatalogShopConstants.CategoryLinks.GameTime);
+		-- legacy - game time is now subscriptions
+		self:SetCatalogShopLinkTag(CatalogShopConstants.CategoryLinks.Subscriptions);
 	elseif ( name == "settokencategory" ) then
 		-- the WoW Token is in the Services Category
 		self:SetCatalogShopLinkTag(CatalogShopConstants.CategoryLinks.Services);
@@ -778,6 +780,9 @@ function CatalogShopProductDetailsFrameMixin:OnLoad()
 end
 
 function CatalogShopProductDetailsFrameMixin:SetDetailsFrameProductInfo(productInfo)
+	if productInfo == self:GetDetailsFrameProductInfo() then
+		return;
+	end
 	self.currentProductInfo = productInfo;
 	self:UpdateState();
 end
@@ -822,18 +827,14 @@ function CatalogShopProductDetailsFrameMixin:UpdateState()
 
 	local isTokenOnGlues = (C_Glue.IsOnGlueScreen() and displayInfo.productType == CatalogShopConstants.ProductType.Token);
 	local isPurchasable = (not isTokenOnGlues and not selectedProductInfo.isFullyOwned);
-	local shouldShowPendingPurchasesText = isPurchasable and selectedProductInfo.hasPendingOrders;
 
 	self.ButtonContainer.PurchaseButton:SetText(selectedProductInfo.price);
 	self.ButtonContainer.PurchaseButton:SetEnabled(isPurchasable);
 
-	-- Adjust for text fields
+	-- Adjust for the text field explaining you need to be logged in to buy a token
 	self.ButtonContainer.NoPriceInGlues:SetShown(isTokenOnGlues);
-	self.ButtonContainer.PendingPurchasesText:SetShown(shouldShowPendingPurchasesText);
 	if isTokenOnGlues then
 		self.ButtonContainer:SetSize(320, 80);
-	elseif shouldShowPendingPurchasesText then
-		self.ButtonContainer:SetSize(320, 60);
 	else
 		self.ButtonContainer:SetSize(320, 50);
 	end

@@ -314,7 +314,7 @@ end
 
 function ZoneAbilityFrameSpellButtonMixin:GetOverrideSpellID()
 	local spellID = self:GetSpellID();
-	return FindSpellOverrideByID(spellID) or spellID;
+	return C_SpellBook.FindSpellOverrideByID(spellID) or spellID;
 end
 
 function ZoneAbilityFrameSpellButtonMixin:SetContent(zoneAbilityInfo)

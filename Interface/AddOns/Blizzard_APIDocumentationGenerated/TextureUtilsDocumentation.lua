@@ -9,6 +9,7 @@ local TextureUtils =
 		{
 			Name = "ClearTitleIconTexture",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -18,6 +19,7 @@ local TextureUtils =
 		{
 			Name = "GetAtlasElementID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -39,8 +41,24 @@ local TextureUtils =
 			},
 		},
 		{
+			Name = "GetAtlasExists",
+			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "atlas", Type = "textureAtlas", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "atlasExists", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "GetAtlasID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -56,6 +74,7 @@ local TextureUtils =
 			Name = "GetAtlasInfo",
 			Type = "Function",
 			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -70,6 +89,7 @@ local TextureUtils =
 		{
 			Name = "GetCraftingReagentQualityChatIcon",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -84,6 +104,7 @@ local TextureUtils =
 		{
 			Name = "GetFilenameFromFileDataID",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -98,6 +119,7 @@ local TextureUtils =
 		{
 			Name = "GetTitleIconTexture",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -109,6 +131,7 @@ local TextureUtils =
 		{
 			Name = "IsTitleIconTextureReady",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -124,6 +147,7 @@ local TextureUtils =
 		{
 			Name = "SetTitleIconTexture",
 			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
@@ -136,6 +160,7 @@ local TextureUtils =
 			Name = "SetURLTexture",
 			Type = "Function",
 			HasRestrictions = true,
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

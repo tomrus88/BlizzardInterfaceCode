@@ -142,7 +142,6 @@ CatalogShopConstants =
 		Mounts = "mounts",
 		Transmogs = "transmogs",
 		Subscriptions = "subscriptions",
-		GameTime = "gametimeoffers",
 		GameUpgrades = "game upgrades",
 		Services = "services",
 		Featured = "featured",
