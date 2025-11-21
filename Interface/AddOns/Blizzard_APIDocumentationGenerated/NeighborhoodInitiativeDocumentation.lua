@@ -102,6 +102,10 @@ local NeighborhoodInitiative =
 			},
 		},
 		{
+			Name = "RequestInitiativeActivityLog",
+			Type = "Function",
+		},
+		{
 			Name = "RequestNeighborhoodInitiativeInfo",
 			Type = "Function",
 		},
@@ -191,6 +195,7 @@ local NeighborhoodInitiative =
 			{
 				{ Name = "isLoaded", Type = "bool", Nilable = false },
 				{ Name = "neighborhoodGUID", Type = "WOWGUID", Nilable = false },
+				{ Name = "nextUpdateTime", Type = "time_t", Nilable = false },
 				{ Name = "taskActivity", Type = "table", InnerType = "InitiativeActivityLogEntry", Nilable = false },
 			},
 		},
@@ -215,6 +220,7 @@ local NeighborhoodInitiative =
 				{ Name = "decorQuantity", Type = "number", Nilable = false },
 				{ Name = "favor", Type = "number", Nilable = false },
 				{ Name = "money", Type = "WOWMONEY", Nilable = false },
+				{ Name = "rewardQuestID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -233,6 +239,7 @@ local NeighborhoodInitiative =
 				{ Name = "inProgress", Type = "bool", Nilable = false },
 				{ Name = "taskType", Type = "NeighborhoodInitiativeTaskType", Nilable = false },
 				{ Name = "sortOrder", Type = "number", Nilable = false },
+				{ Name = "rewardQuestID", Type = "number", Nilable = false },
 				{ Name = "requirementsList", Type = "table", InnerType = "CriteriaRequirement", Nilable = false },
 				{ Name = "criteriaList", Type = "table", InnerType = "CriteriaRequiredValue", Nilable = false },
 			},

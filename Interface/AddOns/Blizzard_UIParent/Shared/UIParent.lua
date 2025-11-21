@@ -751,6 +751,18 @@ function IsLFGModeActive(category)
 	return false;
 end
 
+function ShouldShowArenaParty()
+	return IsActiveBattlefieldArena() and not C_PvP.IsInBrawl();
+end
+
+function ShouldShowPartyFrames()
+	return ShouldShowArenaParty() or (IsInGroup() and not IsInRaid()) or EditModeManagerFrame:ArePartyFramesForcedShown();
+end
+
+function ShouldShowRaidFrames()
+	return not ShouldShowArenaParty() and IsInRaid() or EditModeManagerFrame:AreRaidFramesForcedShown();
+end
+
 --Like date(), but localizes AM/PM. In the future, could also localize other stuff.
 function BetterDate(formatString, timeVal)
 	local dateTable = date("*t", timeVal);
@@ -787,6 +799,12 @@ function TrialAccountCapReached_Inform(capType)
 		DEFAULT_CHAT_FRAME:AddMessage(CAPPED_MONEY_TRIAL, info.r, info.g, info.b);
 	end
 	displayedCapMessage = true;
+end
+
+function IsLevelAtEffectiveMaxLevel(level)
+	-- Timerunners levels can go above the purchased max level to the max current expansion level
+	local maxLevel = GameRulesUtil.GetEffectiveMaxLevelForPlayer();
+	return level >= maxLevel;
 end
 
 function ConfirmOrLeaveLFGParty()

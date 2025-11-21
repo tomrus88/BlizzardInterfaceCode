@@ -5,6 +5,7 @@
 ## Dependencies: Blizzard_APIDocumentation
 
 # Start documentation files here
+AbbreviateConfigAPIDocumentation.lua
 AccessibilityOptionsDocumentation.lua
 AccountInfoDocumentation.lua
 AccountStoreDocumentation.lua
@@ -55,6 +56,7 @@ ClientSceneDocumentation.lua
 ClubDocumentation.lua
 ClubFinderDocumentation.lua
 ColorOverridesDocumentation.lua
+ColorUtilDocumentation.lua
 CombatAudioAlertDocumentation.lua
 CombatLogDocumentation.lua
 CombatLogInternalDocumentation.lua
@@ -333,6 +335,7 @@ TradeInfoDocumentation.lua
 TradeSkillUIDocumentation.lua
 TrainerDocumentation.lua
 TraitConfigDocumentation.lua
+TransmogOutfitInfoDocumentation.lua
 TransmogDocumentation.lua
 TransmogItemsDocumentation.lua
 TransmogSetsDocumentation.lua
@@ -451,6 +454,7 @@ ItemSharedDocumentation.lua
 LFGConstantsDocumentation.lua
 LegendaryCraftingTypesDocumentation.lua
 LevelConstantsDocumentation.lua
+LocalizationSharedDocumentation.lua
 LogConstantsDocumentation.lua
 LogicConstantsDocumentation.lua
 LootConstantsDocumentation.lua
@@ -500,8 +504,8 @@ RolodexConstantsDocumentation.lua
 ScreenLocationConstantsDocumentation.lua
 ScriptRegionSharedDocumentation.lua
 SeasonsConstantsDocumentation.lua
-SecretDocumentation.lua
 SecretAspectConstantsDocumentation.lua
+SecretPredicatesDocumentation.lua
 SharedScriptObjectModelLightDocumentation.lua
 SharedScriptObjectUnitPositionFrameDocumentation.lua
 SharedTraitsEnumsDocumentation.lua
@@ -528,6 +532,7 @@ TradeSkillUITypesDocumentation.lua
 TraitConstantsDocumentation.lua
 TransformManipulatorConstantsDocumentation.lua
 TransmogConstantsDocumentation.lua
+TransmogOutfitConstantsDocumentation.lua
 TransmogSharedDocumentation.lua
 UIActionConstantsDocumentation.lua
 UIButtonSharedDocumentation.lua

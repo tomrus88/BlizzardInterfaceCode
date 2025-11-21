@@ -640,6 +640,22 @@ local TooltipInfo =
 			},
 		},
 		{
+			Name = "GetOutfit",
+			Type = "Function",
+			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "outfitID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "data", Type = "TooltipData", Nilable = false },
+			},
+		},
+		{
 			Name = "GetOwnedItemByID",
 			Type = "Function",
 			MayReturnNothing = true,
@@ -1159,22 +1175,6 @@ local TooltipInfo =
 			},
 		},
 		{
-			Name = "GetTransmogrifyItem",
-			Type = "Function",
-			MayReturnNothing = true,
-			SecretArguments = "AllowedWhenUntainted",
-
-			Arguments =
-			{
-				{ Name = "transmogLocation", Type = "TransmogLocation", Mixin = "TransmogLocationMixin", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "data", Type = "TooltipData", Nilable = false },
-			},
-		},
-		{
 			Name = "GetUnit",
 			Type = "Function",
 			MayReturnNothing = true,
@@ -1195,7 +1195,7 @@ local TooltipInfo =
 			Name = "GetUnitAura",
 			Type = "Function",
 			MayReturnNothing = true,
-			SecretWhenAurasRestricted = true,
+			SecretWhenAuraIndexRestricted = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -1234,7 +1234,7 @@ local TooltipInfo =
 			Name = "GetUnitBuff",
 			Type = "Function",
 			MayReturnNothing = true,
-			SecretWhenAurasRestricted = true,
+			SecretWhenAuraIndexRestricted = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -1253,7 +1253,7 @@ local TooltipInfo =
 			Name = "GetUnitBuffByAuraInstanceID",
 			Type = "Function",
 			MayReturnNothing = true,
-			SecretWhenAurasRestricted = true,
+			SecretWhenAuraInstanceRestricted = true,
 			SecretArguments = "AllowedWhenTainted",
 
 			Arguments =
@@ -1272,7 +1272,7 @@ local TooltipInfo =
 			Name = "GetUnitDebuff",
 			Type = "Function",
 			MayReturnNothing = true,
-			SecretWhenAurasRestricted = true,
+			SecretWhenAuraIndexRestricted = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -1291,7 +1291,7 @@ local TooltipInfo =
 			Name = "GetUnitDebuffByAuraInstanceID",
 			Type = "Function",
 			MayReturnNothing = true,
-			SecretWhenAurasRestricted = true,
+			SecretWhenAuraInstanceRestricted = true,
 			SecretArguments = "AllowedWhenTainted",
 
 			Arguments =

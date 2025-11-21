@@ -276,6 +276,10 @@ function CollectionsJournal_LoadUI()
 	UIParentLoadAddOn("Blizzard_Collections");
 end
 
+function Transmog_LoadUI()
+	UIParentLoadAddOn("Blizzard_Transmog");
+end
+
 function BlackMarket_LoadUI()
 	UIParentLoadAddOn("Blizzard_BlackMarketUI");
 end
@@ -771,7 +775,7 @@ function UIParent_OnEvent(self, event, ...)
 		end
 	elseif ( event == "GROUP_ROSTER_UPDATE" ) then
 		-- Hide/Show party member frames
-		RaidOptionsFrame_UpdatePartyFrames();
+		UpdateRaidAndPartyFrames();
 		if ( not IsInGroup(LE_PARTY_CATEGORY_INSTANCE) ) then
 			StaticPopup_Hide("CONFIRM_LEAVE_INSTANCE_PARTY");
 		end
@@ -1750,19 +1754,6 @@ function SetGuildTabardTextures(emblemSize, columns, offset, unit, emblemTexture
 	end
 end
 
-function GetDisplayedAllyFrames()
-	local useCompact = GetCVarBool("useCompactPartyFrames")
-	if ( IsActiveBattlefieldArena() and not useCompact ) then
-		return "party";
-	elseif ( IsInGroup() and (IsInRaid() or useCompact) ) then
-		return "raid";
-	elseif ( IsInGroup() ) then
-		return "party";
-	else
-		return nil;
-	end
-end
-
 function IsInLFDBattlefield()
 	return false;
 end
@@ -1863,16 +1854,6 @@ function ShakeFrame(frame, shake, maximumDuration, frequency)
 			frame.shakeTicker:Cancel();
 		end
 	end);
-end
-
- -- takes into account the current expansion
- -- NOTE: it's not safe to cache this value as it could change in the middle of the session
-function GetEffectivePlayerMaxLevel()
-	return GetMaxPlayerLevel();
-end
-
-function IsLevelAtEffectiveMaxLevel(level)
-	return level >= GetEffectivePlayerMaxLevel();
 end
 
 -- From SocialQueue.lua

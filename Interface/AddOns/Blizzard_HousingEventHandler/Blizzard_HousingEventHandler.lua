@@ -39,9 +39,25 @@ function HousingFramesUtil.ToggleHouseEditor()
 	end
 end
 
-function HousingFramesUtil.ActivateHouseEditorMode(mode)
+function HousingFramesUtil.IsHouseEditorModeAvailable(mode)
+	if C_HousingDecor.IsModeDisabledForPreviewState(mode) then
+		return false;
+	end
+
 	local modeAvailability = C_HouseEditor.GetHouseEditorModeAvailability(mode);
-	if modeAvailability ~= Enum.HousingResult.Success or (not HousingTutorialUtil.HousingQuestTutorialComplete() and not HousingTutorialUtil.IsModeValidForTutorial(mode)) then
+	if modeAvailability ~= Enum.HousingResult.Success then
+		return false;
+	end
+
+	if not HousingTutorialUtil.HousingQuestTutorialComplete() and not HousingTutorialUtil.IsModeValidForTutorial(mode) then
+		return false;
+	end
+
+	return true;
+end
+
+function HousingFramesUtil.ActivateHouseEditorMode(mode)
+	if not HousingFramesUtil.IsHouseEditorModeAvailable(mode) then
 		return;
 	end
 
@@ -111,9 +127,9 @@ function HousingFramesUtil.SetGridSnapEnabled(gridSnapEnabled)
 	C_HousingBasicMode.SetGridSnapEnabled(gridSnapEnabled);
 end
 
-function HousingFramesUtil.SetNudgeEnabled(nudgeEnabled)
+function HousingFramesUtil.SetFreePlaceEnabled(freeplaceEnabled)
 	PlaySound(SOUNDKIT.HOUSING_PRIMARY_SUB_MENU_BUTTON_TOGGLE_SHORTCUT);
-	C_HousingBasicMode.SetNudgeEnabled(nudgeEnabled);
+	C_HousingBasicMode.SetFreePlaceEnabled(freeplaceEnabled);
 end
 
 function HousingFramesUtil.ZoomLayoutCamera(zoom)
@@ -208,6 +224,15 @@ function HousingFramesUtil.HandleRotateBasicDecorSelectionRightKeybind(keystate)
 		if baseBinding ~= "NONE" then
 			RunBinding(baseBinding, keystate);
 		end
+	end
+end
+
+function HousingFramesUtil.OpenFrameToTaskID(taskID)
+	if not HousingDashboardFrame or not HousingDashboardFrame:IsShown() then
+		HousingFramesUtil.ToggleHousingDashboard();
+	end
+	if HousingDashboardFrame then
+		HousingDashboardFrame:OpenInitiativesFrameToTaskID(taskID);
 	end
 end
 

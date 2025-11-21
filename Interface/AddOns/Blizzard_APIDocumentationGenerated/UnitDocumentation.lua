@@ -172,7 +172,6 @@ local Unit =
 		{
 			Name = "GetUnitHealthModifier",
 			Type = "Function",
-			SecretReturns = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -188,7 +187,6 @@ local Unit =
 		{
 			Name = "GetUnitMaxHealthModifier",
 			Type = "Function",
-			SecretReturns = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -311,7 +309,6 @@ local Unit =
 		{
 			Name = "GetUnitPowerModifier",
 			Type = "Function",
-			SecretReturns = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -345,7 +342,6 @@ local Unit =
 		{
 			Name = "GetUnitTotalModifiedMaxHealthPercent",
 			Type = "Function",
-			SecretReturns = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -770,7 +766,7 @@ local Unit =
 		{
 			Name = "UnitCastingInfo",
 			Type = "Function",
-			SecretWhenUnitSpellCastsRestricted = true,
+			SecretWhenUnitCastingInfoRestricted = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -794,7 +790,7 @@ local Unit =
 		{
 			Name = "UnitChannelInfo",
 			Type = "Function",
-			SecretWhenUnitSpellCastsRestricted = true,
+			SecretWhenUnitChannelInfoRestricted = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -1026,7 +1022,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1140,7 +1136,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1155,7 +1151,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1200,7 +1196,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1215,7 +1211,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1363,7 +1359,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 				{ Name = "partyIndex", Type = "luaIndex", Nilable = true },
 			},
 
@@ -1379,7 +1375,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 				{ Name = "partyIndex", Type = "luaIndex", Nilable = true },
 			},
 
@@ -1411,7 +1407,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 				{ Name = "partyIndex", Type = "luaIndex", Nilable = true },
 			},
 
@@ -1427,7 +1423,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1457,7 +1453,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 				{ Name = "partyIndex", Type = "luaIndex", Nilable = true },
 			},
 
@@ -1490,7 +1486,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 				{ Name = "partyIndex", Type = "luaIndex", Nilable = true },
 			},
 
@@ -1521,7 +1517,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1536,7 +1532,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1611,7 +1607,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1656,7 +1652,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1763,7 +1759,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1839,7 +1835,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1900,7 +1896,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1915,7 +1911,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1976,7 +1972,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -1991,7 +1987,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 				{ Name = "partyIndex", Type = "luaIndex", Nilable = true },
 			},
 
@@ -2007,7 +2003,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -2037,7 +2033,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -2126,12 +2122,13 @@ local Unit =
 		{
 			Name = "UnitIsUnit",
 			Type = "Function",
+			SecretWhenUnitIdentityRestricted = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
-				{ Name = "unitName1", Type = "cstring", Nilable = false },
-				{ Name = "unitName2", Type = "cstring", Nilable = false },
+				{ Name = "unit1", Type = "UnitToken", Nilable = false },
+				{ Name = "unit2", Type = "UnitToken", Nilable = false },
 			},
 
 			Returns =
@@ -2146,7 +2143,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -2366,7 +2363,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -2381,7 +2378,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 				{ Name = "partyIndex", Type = "luaIndex", Nilable = true },
 			},
 
@@ -2397,7 +2394,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 				{ Name = "partyIndex", Type = "luaIndex", Nilable = true },
 			},
 
@@ -2900,7 +2897,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -3078,7 +3075,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =
@@ -3156,7 +3153,7 @@ local Unit =
 
 			Arguments =
 			{
-				{ Name = "unit", Type = "UnitToken", Nilable = false, Default = "WOWGUID_NULL" },
+				{ Name = "unit", Type = "UnitToken", Nilable = true },
 			},
 
 			Returns =

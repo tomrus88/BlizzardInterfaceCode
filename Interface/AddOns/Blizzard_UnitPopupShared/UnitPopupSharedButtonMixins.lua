@@ -434,8 +434,13 @@ function UnitPopupWhisperButtonMixin:OnClick(contextData)
 		local playerLocation = contextData.playerLocation;
 		if playerLocation then
 			isBNetAccount = playerLocation and playerLocation:IsBattleNetGUID();
+		end
 	end
-end
+
+	local unit = contextData.unit;
+	if unit and not UnitIsPlayer(unit) then
+		return;
+	end
 
 	if isBNetAccount then
 		ChatFrameUtil.SendBNetTell(contextData.name);
@@ -447,7 +452,7 @@ end
 
 function UnitPopupWhisperButtonMixin:IsEnabled(contextData)
 	local unit = contextData.unit;
-	return not unit or UnitIsConnected(unit);
+	return not unit or (UnitIsConnected(unit) and UnitIsPlayer(unit));
 end
 
 UnitPopupInviteButtonMixin = CreateFromMixins(UnitPopupButtonBaseMixin);
@@ -1283,6 +1288,17 @@ end
 function UnitPopupReportInWorldButtonMixin:GetReportType()
 	return Enum.ReportType.InWorld;
 end
+
+UnitPopupReportNeighborhoodRosterMixin = CreateFromMixins(UnitPopupReportButtonMixin);
+
+function UnitPopupReportNeighborhoodRosterMixin:GetText(contextData)
+	return REPORT_IN_WORLD_PLAYER;
+end
+
+function UnitPopupReportNeighborhoodRosterMixin:GetReportType()
+	return Enum.ReportType.NeighborhoodRoster;
+end
+
 
 UnitPopupPvpReportGroupMemberButtonMixin = CreateFromMixins(UnitPopupReportButtonMixin);
 

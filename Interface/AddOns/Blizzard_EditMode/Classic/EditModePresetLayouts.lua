@@ -274,6 +274,45 @@ EDIT_MODE_MODERN_SYSTEM_MAP =
 			},
 		},
 
+		[Enum.EditModeUnitFrameSystemIndices.Party] = {
+			settings = {
+				[Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames] = 0,
+				[Enum.EditModeUnitFrameSetting.ShowPartyFrameBackground] = 0,
+				[Enum.EditModeUnitFrameSetting.UseHorizontalGroups] = 0,
+				[Enum.EditModeUnitFrameSetting.DisplayBorder] = 0,
+				[Enum.EditModeUnitFrameSetting.FrameHeight] = 0,
+				[Enum.EditModeUnitFrameSetting.FrameWidth] = 0,
+				[Enum.EditModeUnitFrameSetting.FrameSize] = 0,
+				[Enum.EditModeUnitFrameSetting.SortPlayersBy] = Enum.SortPlayersBy.Group,
+			},
+			anchorInfo = {
+				point = "TOPLEFT",
+				relativeTo = "CompactRaidFrameManager",
+				relativePoint = "TOPRIGHT",
+				offsetX = 0,
+				offsetY = 12,
+			},
+		},
+
+		[Enum.EditModeUnitFrameSystemIndices.Raid] = {
+			settings = {
+				[Enum.EditModeUnitFrameSetting.ViewRaidSize] = Enum.ViewRaidSize.Ten,
+				[Enum.EditModeUnitFrameSetting.DisplayBorder] = 0,
+				[Enum.EditModeUnitFrameSetting.RaidGroupDisplayType] = Enum.RaidGroupDisplayType.SeparateGroupsVertical,
+				[Enum.EditModeUnitFrameSetting.SortPlayersBy] = Enum.SortPlayersBy.Role,
+				[Enum.EditModeUnitFrameSetting.FrameHeight] = 0,
+				[Enum.EditModeUnitFrameSetting.FrameWidth] = 0,
+				[Enum.EditModeUnitFrameSetting.RowSize] = 5,
+			},
+			anchorInfo = {
+				point = "TOPLEFT",
+				relativeTo = "CompactRaidFrameManager",
+				relativePoint = "TOPRIGHT",
+				offsetX = 0,
+				offsetY = -5,
+			},
+		},
+
 		[Enum.EditModeUnitFrameSystemIndices.Pet] = {
 			settings = {
 				[Enum.EditModeUnitFrameSetting.FrameSize] = 0,
@@ -337,6 +376,22 @@ EDIT_MODE_MODERN_SYSTEM_MAP =
 				offsetX = -202,
 				offsetY = -152,
 			},
+		},
+	},
+
+	[Enum.EditModeSystem.ChatFrame] = {
+		settings = {
+			[Enum.EditModeChatFrameSetting.WidthHundreds] = 4,
+			[Enum.EditModeChatFrameSetting.WidthTensAndOnes] = 30,
+			[Enum.EditModeChatFrameSetting.HeightHundreds] = 1,
+			[Enum.EditModeChatFrameSetting.HeightTensAndOnes] = 20,
+		},
+		anchorInfo = {
+			point = "BOTTOMLEFT",
+			relativeTo = "UIParent",
+			relativePoint = "BOTTOMLEFT",
+			offsetX = 35,
+			offsetY = 140, -- Avoids clipping unit frame.
 		},
 	},
 
@@ -677,6 +732,45 @@ EDIT_MODE_CLASSIC_SYSTEM_MAP =
 			},
 		},
 
+		[Enum.EditModeUnitFrameSystemIndices.Party] = {
+			settings = {
+				[Enum.EditModeUnitFrameSetting.UseRaidStylePartyFrames] = 0,
+				[Enum.EditModeUnitFrameSetting.ShowPartyFrameBackground] = 0,
+				[Enum.EditModeUnitFrameSetting.UseHorizontalGroups] = 0,
+				[Enum.EditModeUnitFrameSetting.DisplayBorder] = 0,
+				[Enum.EditModeUnitFrameSetting.FrameHeight] = 0,
+				[Enum.EditModeUnitFrameSetting.FrameWidth] = 0,
+				[Enum.EditModeUnitFrameSetting.FrameSize] = 0,
+				[Enum.EditModeUnitFrameSetting.SortPlayersBy] = Enum.SortPlayersBy.Group,
+			},
+			anchorInfo = {
+				point = "TOPLEFT",
+				relativeTo = "CompactRaidFrameManager",
+				relativePoint = "TOPRIGHT",
+				offsetX = 0,
+				offsetY = 12,
+			},
+		},
+
+		[Enum.EditModeUnitFrameSystemIndices.Raid] = {
+			settings = {
+				[Enum.EditModeUnitFrameSetting.ViewRaidSize] = Enum.ViewRaidSize.Ten,
+				[Enum.EditModeUnitFrameSetting.DisplayBorder] = 0,
+				[Enum.EditModeUnitFrameSetting.RaidGroupDisplayType] = Enum.RaidGroupDisplayType.SeparateGroupsVertical,
+				[Enum.EditModeUnitFrameSetting.SortPlayersBy] = Enum.SortPlayersBy.Role,
+				[Enum.EditModeUnitFrameSetting.FrameHeight] = 0,
+				[Enum.EditModeUnitFrameSetting.FrameWidth] = 0,
+				[Enum.EditModeUnitFrameSetting.RowSize] = 5,
+			},
+			anchorInfo = {
+				point = "TOPLEFT",
+				relativeTo = "CompactRaidFrameManager",
+				relativePoint = "TOPRIGHT",
+				offsetX = 0,
+				offsetY = -5,
+			},
+		},
+
 		[Enum.EditModeUnitFrameSystemIndices.Pet] = {
 			settings = {
 				[Enum.EditModeUnitFrameSetting.FrameSize] = 0,
@@ -740,6 +834,22 @@ EDIT_MODE_CLASSIC_SYSTEM_MAP =
 				offsetX = -202,
 				offsetY = -152,
 			},
+		},
+	},
+
+	[Enum.EditModeSystem.ChatFrame] = {
+		settings = {
+			[Enum.EditModeChatFrameSetting.WidthHundreds] = 4,
+			[Enum.EditModeChatFrameSetting.WidthTensAndOnes] = 30,
+			[Enum.EditModeChatFrameSetting.HeightHundreds] = 1,
+			[Enum.EditModeChatFrameSetting.HeightTensAndOnes] = 20,
+		},
+		anchorInfo = {
+			point = "BOTTOMLEFT",
+			relativeTo = "UIParent",
+			relativePoint = "BOTTOMLEFT",
+			offsetX = 35,
+			offsetY = 150,
 		},
 	},
 

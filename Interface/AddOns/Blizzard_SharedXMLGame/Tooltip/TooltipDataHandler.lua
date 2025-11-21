@@ -465,7 +465,6 @@ do
 		SetGuildBankItem = "GetGuildBankItem",
 		SetHeirloomByItemID = "GetHeirloomByItemID",
 		SetRuneforgeResultItem = "GetRuneforgeResultItem",
-		SetTransmogrifyItem = "GetTransmogrifyItem",
 		SetArtifactItem = "GetArtifactItem",
 		SetBagItem = "GetBagItem",
 		SetBagItemChild = "GetBagItemChild",
@@ -527,6 +526,7 @@ do
 		SetItemInteractionItem = "GetItemInteractionItem",
 		SetItemByGUID = "GetItemByGUID",
 		SetWorldLootObject = "GetWorldLootObject",
+		SetOutfit = "GetOutfit",
 	};
 
 	local handler = TooltipDataHandlerMixin;

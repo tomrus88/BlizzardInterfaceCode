@@ -278,10 +278,10 @@ local SimpleFrameAPI =
 
 			Returns =
 			{
-				{ Name = "left", Type = "uiUnit", Nilable = false },
-				{ Name = "bottom", Type = "uiUnit", Nilable = false },
-				{ Name = "width", Type = "uiUnit", Nilable = false },
-				{ Name = "height", Type = "uiUnit", Nilable = false },
+				{ Name = "left", Type = "uiUnit", Nilable = false, ConditionalSecret = true },
+				{ Name = "bottom", Type = "uiUnit", Nilable = false, ConditionalSecret = true },
+				{ Name = "width", Type = "uiUnit", Nilable = false, ConditionalSecret = true },
+				{ Name = "height", Type = "uiUnit", Nilable = false, ConditionalSecret = true },
 			},
 		},
 		{
@@ -738,6 +738,19 @@ local SimpleFrameAPI =
 			Returns =
 			{
 				{ Name = "locked", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsIgnoringChildrenForBounds",
+			Type = "Function",
+
+			Arguments =
+			{
+			},
+
+			Returns =
+			{
+				{ Name = "ignore", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -1234,6 +1247,16 @@ local SimpleFrameAPI =
 			Type = "Function",
 			IsProtectedFunction = true,
 			SecretArguments = "NotAllowed",
+
+			Arguments =
+			{
+				{ Name = "ignore", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "SetIgnoringChildrenForBounds",
+			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{

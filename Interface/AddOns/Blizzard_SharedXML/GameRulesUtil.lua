@@ -52,7 +52,7 @@ function GameRulesUtil.ShouldShowTargetCastBar()
 end
 
 function GameRulesUtil.ShouldShowNamePlateCastBar()
-	return not C_GameRules.IsGameRuleActive(Enum.GameRule.NameplateCastBarDisabled);
+	return GetCVarBool("nameplateShowCastBars") and not C_GameRules.IsGameRuleActive(Enum.GameRule.NameplateCastBarDisabled);
 end
 
 function GameRulesUtil.ShouldShowAddOns()
@@ -183,6 +183,11 @@ function GameRulesUtil.OnActiveGameModeUpdated()
 	for _, systemCallback in ipairs(registeredSystemCallbacks) do
 		systemCallback();
 	end
+end
+
+function GameRulesUtil.GetEffectiveMaxLevelForPlayer()
+	-- Timerunners levels can go above the purchased max level to the max current expansion level
+	return (PlayerIsTimerunning() and not IsTrialAccount()) and GetMaxLevelForLatestExpansion() or GetMaxLevelForPlayerExpansion();
 end
 
 EventRegistry:RegisterFrameEventAndCallback("ACTIVE_GAME_MODE_UPDATED", GameRulesUtil.OnActiveGameModeUpdated, GameRulesUtil);
