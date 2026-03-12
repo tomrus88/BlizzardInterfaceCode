@@ -2763,6 +2763,15 @@ local ChatInfo =
 			},
 		},
 	},
+	Predicates =
+	{
+		{
+			Name = "RestrictedForMacroChatMessages",
+			Type = "Precondition",
+			FailureMode = "ReturnNothing",
+			Documentation = { "Restricts sending chat messages on chat types that can be observed by external players. Only applies during instance encounters for messages initiated from macros." },
+		},
+	},
 };
 
 APIDocumentation:AddDocumentationTable(ChatInfo);

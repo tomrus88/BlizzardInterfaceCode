@@ -47,9 +47,9 @@ function CatalogShopMixin:OnLoad_CatalogShop()
 	self:RegisterEvent("TOKEN_STATUS_CHANGED");
 	self:RegisterEvent("CATALOG_SHOP_OPEN_SIMPLE_CHECKOUT");
 	self:RegisterEvent("SIMPLE_CHECKOUT_CLOSED");
-	self:RegisterEvent("CATALOG_SHOP_PMT_IMAGE_DOWNLOADED");
 	self:RegisterEvent("SET_SEEN_PRODUCTS");
 	self:RegisterEvent("BULK_PURCHASE_RESULT_RECEIVED");
+	self:RegisterEvent("BN_DISCONNECTED");
 	self:InitVariables();
 	EventRegistry:RegisterCallback("CatalogShop.OnProductSelected", self.OnProductSelected, self);
 	EventRegistry:RegisterCallback("CatalogShop.OnNoProductsSelected", self.OnNoProductsSelected, self);
@@ -355,9 +355,6 @@ function CatalogShopMixin:OnEvent_CatalogShop(event, ...)
 		--StoreFrame_CheckMarketPriceUpdates();
 	elseif (event == "UI_SCALE_CHANGED") then
 		FrameUtil.UpdateScaleForFitSpecific(self, self:GetWidth() + CatalogShopConstants.ScreenPadding.Horizontal, self:GetHeight() + CatalogShopConstants.ScreenPadding.Vertical);
-	elseif (event == "CATALOG_SHOP_PMT_IMAGE_DOWNLOADED") then
-		--	// Finish implementation when completing [WOW11-144188]
-		--...handle it
 	elseif (event == "CATALOG_SHOP_VIRTUAL_CURRENCY_BALANCE_UPDATE") then
 		local currencyCode, balance = ...;
 		balance = tonumber(balance);
@@ -389,6 +386,8 @@ function CatalogShopMixin:OnEvent_CatalogShop(event, ...)
 		if (result == Enum.BulkRefundResult.ResultOk) then
 			C_CatalogShop.RefreshVirtualCurrencyBalance(Constants.CatalogShopVirtualCurrencyConstants.HEARTHSTEEL_VC_CURRENCY_CODE);
 		end
+	elseif event == "BN_DISCONNECTED" then
+		self:Hide();
 	end
 end
 
@@ -428,6 +427,9 @@ function CatalogShopMixin:OnShow()
 	end
 	FrameUtil.UpdateScaleForFitSpecific(self, self:GetWidth() + CatalogShopConstants.ScreenPadding.Horizontal, self:GetHeight() + CatalogShopConstants.ScreenPadding.Vertical);
 	self.shoppingSessionUUIDStr = C_CatalogShop.OpenCatalogShopInteractionFromShop();
+
+	local isShown = true;
+	CatalogShopOutbound.VisibilityUpdated(isShown);
 end
 
 function CatalogShopMixin:OnHide()
@@ -464,6 +466,9 @@ function CatalogShopMixin:OnHide()
 	self.shoppingSessionUUIDStr = nil;
 	self.failedLoad = false;
 	PlaySound(SOUNDKIT.CATALOG_SHOP_CLOSE_SHOP);
+
+	local isShown = false;
+	CatalogShopOutbound.VisibilityUpdated(isShown);
 end
 
 function CatalogShopMixin:GetUseNativeForm()
@@ -709,16 +714,12 @@ function CatalogShopMixin:ToggleProductDetails(showDetails, productInfo)
 	self.CatalogShopDetailsFrame.ButtonContainer:SetShown(not showDetails);
 	if showDetails then
 		self.ProductDetailsContainerFrame:UpdateProductInfo(productInfo);
-	else
-		-- If we have a productInfo we need to ask the ProductContainerFrame to update so
-		-- that product is selected and the scroll view is rebuilt correctly. [Fixes CLASS-45742]
-		if productInfo then
-			local resetSelection = false;
-			self.ProductContainerFrame:UpdateProducts(resetSelection);
-		end
+	elseif productInfo then
+		self.ProductContainerFrame:TrySelectProduct(productInfo);
 	end
 	self.CatalogShopDetailsFrame:MarkDirty();
 	self.PersistentRefundContainerFrame:UpdateState();
+	self.PMTImageContainerFrame:SetDetailsShown(showDetails);
 end
 
 function CatalogShopMixin:FormatTimeLeft(secondsRemaining, formatter)
@@ -941,9 +942,13 @@ function CatalogShopProductDetailsFrameMixin:UpdateState()
 		self.ProductType:SetShown(false);
 	end
 
-	if (not not selectedProductInfo.consumableQuantity) then
+	if (selectedProductInfo.decorQuantity ~= nil) then
+		local placedQuantity = selectedProductInfo.decorQuantity.placedQuantity;
+		local storedQuantity = selectedProductInfo.decorQuantity.storedQuantity;
+		local totalQuantity = placedQuantity + storedQuantity;
+
 		if (selectedProductInfo.isBundle) then
-			self.QuantityOwned:SetShown(selectedProductInfo.consumableQuantity > 0 and (not selectedProductInfo.isFullyOwned));
+			self.QuantityOwned:SetShown(totalQuantity > 0 and (not selectedProductInfo.isFullyOwned));
 			self.QuantityOwned:SetText(HouseChestAtlasMarkup.." "..CATALOG_SHOP_DECOR_BUNDLE_OWNED);
 			self.QuantityOwned.tooltip = {
 				name = CATALOG_SHOP_DECOR_BUNDLE_OWNED,
@@ -951,8 +956,11 @@ function CatalogShopProductDetailsFrameMixin:UpdateState()
 			};
 		else
 			self.QuantityOwned:Show();
-			self.QuantityOwned:SetText(HouseChestAtlasMarkup.." "..string.format(CATALOG_SHOP_DECOR_INDIVIDUAL_OWNED, selectedProductInfo.consumableQuantity));
-			self.QuantityOwned.tooltip = nil;
+			self.QuantityOwned:SetText(HouseChestAtlasMarkup.." "..string.format(CATALOG_SHOP_DECOR_INDIVIDUAL_OWNED, totalQuantity));
+			self.QuantityOwned.tooltip = {
+				name = string.format(CATALOG_SHOP_DECOR_INDIVIDUAL_OWNED, totalQuantity),
+				description = string.format(CATALOG_SHOP_DECOR_INDIVIDUAL_OWNED_TOOLTIP, placedQuantity, storedQuantity),
+			};
 		end
 	else
 		self.QuantityOwned:Hide();

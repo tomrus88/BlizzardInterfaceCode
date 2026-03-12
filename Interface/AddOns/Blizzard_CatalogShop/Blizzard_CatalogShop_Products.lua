@@ -180,8 +180,12 @@ function CatalogShopProductContainerFrameMixin:TrySelectProductByID(productID)
 		return elementData.catalogShopProductID == productID;
 	end);
 	if foundElementData then
-		scrollContainer.selectionBehavior:SelectElementData(foundElementData);
-		scrollContainer.ScrollBox:ScrollToElementData(foundElementData, ScrollBoxConstants.AlignNearest);
+		local isSelected = scrollContainer.selectionBehavior:IsElementDataSelected(foundElementData);
+		if isSelected then
+			scrollBox:ScrollToElementData(foundElementData, ScrollBoxConstants.AlignNearest);
+		else
+			scrollContainer.selectionBehavior:SelectElementData(foundElementData);
+		end
 		return true;
 	end
 
@@ -212,7 +216,7 @@ end
 function CatalogShopProductContainerFrameMixin:OnModelSceneFailure(displayInfo)
 	CatalogShopFrame.ModelSceneContainerFrame:Hide();
 	CatalogShopFrame.PMTImageContainerFrame:Show();
-	CatalogShopFrame.PMTImageContainerFrame:SetPMTImageOnly(displayInfo);
+	CatalogShopFrame.PMTImageContainerFrame:SetForFailedModelScene(displayInfo);
 end
 
 function ModelSceneShouldAllowRotation(modelSceneID)
@@ -320,6 +324,9 @@ function CatalogShopProductContainerFrameMixin:OnProductSelected(productInfo)
 		if productInfo.previewIconTexture then
 			iconFrame.Icon:SetAtlas(productInfo.previewIconTexture);
 		end
+	elseif productType == CatalogShopConstants.ProductType.Room then
+		CatalogShopFrame.PMTImageContainerFrame:Show();
+		CatalogShopFrame.PMTImageContainerFrame:SetForHousingRoom(displayInfo);
 	else
 		CatalogShopFrame.ModelSceneContainerFrame:Show();
 	end
@@ -409,6 +416,17 @@ function ProductContainerFrameMixin:InitProductContainer()
 		-- (We have 2 products) Look for the collection sort order
 		local lhsOrder = C_CatalogShop.GetProductSortOrder(lhs.categoryID, lhs.sectionID, lhs.catalogShopProductID) or 999;
 		local rhsOrder = C_CatalogShop.GetProductSortOrder(rhs.categoryID, rhs.sectionID, rhs.catalogShopProductID) or 999;
+
+		-- Add 100 to any product's order value if it's 'owned'. We want to sort owned products to the bottom of their Sections
+		local lhsOwned = lhs.isFullyOwned or false;
+		if lhsOwned then
+			lhsOrder = lhsOrder + 100;
+		end
+		local rhsOwned = rhs.isFullyOwned or false;
+		if rhsOwned then
+			rhsOrder = rhsOrder + 100;
+		end
+
 		return lhsOrder < rhsOrder;
 	end
 
@@ -514,35 +532,9 @@ function ProductContainerFrameMixin:InitProductContainer()
 			end
 		elseif elementData.elementType == CatalogShopConstants.ScrollViewElementType.Product then
 			local scrollViewSize = sectionInfo.scrollGridSize or 3;-- How many children per row
-			if scrollViewSize == 1 then
-				if elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Token then
-					factory(CatalogShopConstants.CardTemplate.WideCardToken, InitializeButton);
-				elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Subscription then
-					factory(CatalogShopConstants.CardTemplate.WideCardSubscription, InitializeButton);
-				elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.GameTime then
-					factory(CatalogShopConstants.CardTemplate.WideCardGameTime, InitializeButton);
-				else
-					factory(CatalogShopConstants.CardTemplate.Wide, InitializeButton);
-				end
-			else
-				if elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Services then
-					factory(CatalogShopConstants.CardTemplate.SmallServices, InitializeButton);
-				elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Subscription then
-					factory(CatalogShopConstants.CardTemplate.SmallSubscriptions, InitializeButton);
-				elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.GameTime then
-					factory(CatalogShopConstants.CardTemplate.SmallGameTime, InitializeButton);
-				elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Tender then
-					factory(CatalogShopConstants.CardTemplate.SmallTender, InitializeButton);
-				elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Toy then
-					factory(CatalogShopConstants.CardTemplate.SmallToys, InitializeButton);
-				elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Decor then
-					factory(CatalogShopConstants.CardTemplate.SmallDecor, InitializeButton);
-				elseif elementData.cardDisplayData.productType == CatalogShopConstants.ProductType.Access then
-					factory(CatalogShopConstants.CardTemplate.SmallAccess, InitializeButton);
-				else
-					factory(CatalogShopConstants.CardTemplate.Small, InitializeButton);
-				end
-			end
+			local useWideCard = (scrollViewSize == 1);
+			local cardTemplate = CatalogShopUtil.GetCardTemplate(useWideCard, elementData.cardDisplayData.productType);
+			factory(cardTemplate, InitializeButton);
 		end
 	end
 	self:SetupScrollView(GetProductContainerElementFactory);

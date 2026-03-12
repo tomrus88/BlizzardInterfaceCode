@@ -112,6 +112,9 @@ local Totem =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(Totem);

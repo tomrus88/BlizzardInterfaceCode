@@ -256,6 +256,36 @@ function SmallCatalogShopDecorCardMixin:Layout()
 	DecorCardLayout(self);
 end
 
+--------------------------------------------------
+-- SMALL CATALOG SHOP ROOM CARD MIXIN
+SmallCatalogShopRoomCardMixin = {};
+function SmallCatalogShopRoomCardMixin:OnLoad()
+	SmallCatalogShopProductCardMixin.OnLoad(self);
+end
+
+local function RoomCardLayout(card)
+	local displayInfo = C_CatalogShop.GetCatalogShopProductDisplayInfo(card.productInfo.catalogShopProductID);
+
+	-- Skip room-specific display for unknown (cross-game) licenses
+	if displayInfo.hasUnknownLicense then
+		return;
+	end
+
+	local container = card.ForegroundContainer;
+	container.RectIcon:ClearAllPoints();
+	container.RectIcon:SetPoint("CENTER", 0, 40);
+	container.RectIcon:SetSize(150, 150);
+
+	container.RectIcon:Show();
+	container.RectIcon:SetAtlas(displayInfo.houseTextureAtlas);
+	container.SquareIconBorder:Hide();	-- Its expected the texture altas element is the bordered version
+end
+
+function SmallCatalogShopRoomCardMixin:Layout()
+	SmallCatalogShopProductCardMixin.Layout(self);
+	RoomCardLayout(self);
+end
+
 
 --------------------------------------------------
 -- SMALL CATALOG SHOP ACCESS CARD MIXIN
@@ -409,6 +439,18 @@ end
 function DetailsCatalogShopDecorCardMixin:Layout()
 	DetailsCatalogShopProductCardMixin.Layout(self);
 	DecorCardLayout(self);
+end
+
+--------------------------------------------------
+-- DETAILS CATALOG SHOP ROOM CARD MIXIN
+DetailsCatalogShopRoomCardMixin = {};
+function DetailsCatalogShopRoomCardMixin:OnLoad()
+	DetailsCatalogShopProductCardMixin.OnLoad(self);
+end
+
+function DetailsCatalogShopRoomCardMixin:Layout()
+	DetailsCatalogShopProductCardMixin.Layout(self);
+	RoomCardLayout(self);
 end
 
 --------------------------------------------------

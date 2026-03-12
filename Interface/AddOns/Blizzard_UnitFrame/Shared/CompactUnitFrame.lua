@@ -1070,7 +1070,7 @@ function CompactUnitFrame_GetRangeAlpha(frame)
 		CompactUnitFrame_UpdateInRange(frame);
 	end
 
-	return frame.outOfRange and 0.3 or 1;
+	return frame.outOfRange and 0.5 or 1;
 end
 
 function CompactUnitFrame_UpdateDistance(frame)
@@ -1694,6 +1694,10 @@ do
 	end
 
 	local function CompactUnitFrame_ProcessAura(frame, aura, displayOnlyDispellableDebuffs, ignoreBuffs, ignoreDebuffs, ignoreDispelDebuffs, dispelIndicatorOption)
+		if aura.hideOnPartyFrames and CompactUnitFrame_IsPartyFrame(frame) then
+			return;
+		end
+
 		-- Dispel indicator display types is controlled independently from debuffs now.
 		-- This means that if something is in the dispel list, it doesn't necessarily mean it's in the debuff list, but if AuraUtil.ProcessAura thinks it's a dispel
 		-- then it to preserve existing behavior it's still added to debuffs.
@@ -2049,6 +2053,10 @@ end
 
 function CompactUnitFrame_IsPvpFrame(frame)
 	return frame.groupType == CompactRaidGroupTypeEnum.Arena;
+end
+
+function CompactUnitFrame_IsPartyFrame(frame)
+	return frame.groupType == CompactRaidGroupTypeEnum.Raid or frame.groupType == CompactRaidGroupTypeEnum.Party;
 end
 
 function CompactUnitFrame_GetOptionDisplayPowerBar(frame, options)

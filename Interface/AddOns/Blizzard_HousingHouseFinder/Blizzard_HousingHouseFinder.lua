@@ -355,7 +355,7 @@ HouseFinderBNetFriendSearchBoxMixin = {};
 
 function HouseFinderBNetFriendSearchBoxMixin:OnLoad()
 	local template = AUTOCOMPLETE_LIST.HOUSE_FINDER;
-	AutoCompleteEditBox_SetAutoCompleteSource(self, GetAutoCompleteResults, template.include, template.exclude);
+	AutoCompleteEditBox_SetAutoCompleteSource(self, C_AutoComplete.GetAutoCompleteResults, template.include, template.exclude);
 
 	local function HouseFinderAutoComplete(_editBox, fullText, nameInfo, _ambiguatedName)
 		self.autoCompleteBnetID = nameInfo.bnetID;
@@ -476,7 +476,11 @@ function HouseFinderPlotInfoFrameMixin:OnEvent(event, ...)
 		if result == Enum.HousingResult.Success then
 			self.VisitHouseButton:Enable();
 			HideUIPanel(HouseFinderFrame);
+		elseif result == Enum.HousingResult.BoundToStartingArea then
+			self.ReservationError:SetText(SPELL_FAILED_NOT_HERE);
+			self.ReservationError:Show();
 		else
+			self.ReservationError:SetText(HOUSEFINDER_RESERVATION_ERROR);
 			self.ReservationError:Show();
 		end
 	end

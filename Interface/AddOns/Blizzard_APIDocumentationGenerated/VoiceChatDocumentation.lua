@@ -1467,6 +1467,9 @@ local VoiceChat =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(VoiceChat);

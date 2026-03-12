@@ -25,6 +25,9 @@ local FrameAPINamePlate =
 	Tables =
 	{
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(FrameAPINamePlate);

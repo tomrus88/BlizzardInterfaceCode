@@ -410,6 +410,9 @@ local SecretPredicateAPI =
 	Tables =
 	{
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(SecretPredicateAPI);

@@ -328,6 +328,9 @@ local NeighborhoodInitiative =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(NeighborhoodInitiative);

@@ -3881,6 +3881,9 @@ local Unit =
 				{ Name = "currencyTypesID", Type = "number", Nilable = false },
 				{ Name = "currencyCost", Type = "number", Nilable = false },
 				{ Name = "currentDifficulty", Type = "number", Nilable = false },
+				{ Name = "displayItemID", Type = "number", Nilable = false },
+				{ Name = "itemContext", Type = "number", Nilable = false },
+				{ Name = "treasureContextLevel", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -4850,6 +4853,9 @@ local Unit =
 				{ Name = "attachTooltipToBar", Type = "bool", Nilable = false },
 			},
 		},
+	},
+	Predicates =
+	{
 	},
 };
 

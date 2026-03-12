@@ -445,6 +445,8 @@ local TooltipInfo =
 			{
 				{ Name = "itemID", Type = "number", Nilable = false },
 				{ Name = "quality", Type = "number", Nilable = true },
+				{ Name = "itemContext", Type = "number", Nilable = true },
+				{ Name = "treasureContextLevel", Type = "number", Nilable = true },
 			},
 
 			Returns =
@@ -1393,6 +1395,9 @@ local TooltipInfo =
 	},
 
 	Tables =
+	{
+	},
+	Predicates =
 	{
 	},
 };

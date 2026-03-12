@@ -39,6 +39,9 @@ local SecretAspectConstants =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(SecretAspectConstants);

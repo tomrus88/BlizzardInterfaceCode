@@ -1048,7 +1048,7 @@ EditModeSettingDisplayInfoManager.systemSettingDisplayInfo = {
 			type = Enum.EditModeSettingDisplayType.Dropdown,
 			options =
 			{
-				{value = Enum.EncounterEventsTooltipAnchor.Hidden, text = NONE},
+				{value = Enum.EncounterEventsTooltipAnchor.Hidden, text = HUD_EDIT_MODE_SETTING_ENCOUNTER_EVENTS_TOOLTIPS_NONE},
 				{value = Enum.EncounterEventsTooltipAnchor.Default, text = HUD_EDIT_MODE_SETTING_ENCOUNTER_EVENTS_TOOLTIPS_HUD},
 				{value = Enum.EncounterEventsTooltipAnchor.Cursor, text = HUD_EDIT_MODE_SETTING_ENCOUNTER_EVENTS_TOOLTIPS_CURSOR},
 			},

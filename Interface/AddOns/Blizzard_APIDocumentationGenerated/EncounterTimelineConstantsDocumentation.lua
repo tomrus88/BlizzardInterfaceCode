@@ -130,6 +130,9 @@ local EncounterTimelineConstants =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(EncounterTimelineConstants);

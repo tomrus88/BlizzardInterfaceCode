@@ -690,7 +690,7 @@ local SimpleFrameAPI =
 			Returns =
 			{
 				{ Name = "isRegistered", Type = "bool", Nilable = false },
-				{ Name = "units", Type = "string", Nilable = true, StrideIndex = 1 },
+				{ Name = "units", Type = "UnitTokenType", Nilable = true, StrideIndex = 1 },
 			},
 		},
 		{
@@ -987,7 +987,7 @@ local SimpleFrameAPI =
 			Arguments =
 			{
 				{ Name = "eventName", Type = "cstring", Nilable = false },
-				{ Name = "units", Type = "string", Nilable = false, StrideIndex = 1 },
+				{ Name = "units", Type = "UnitTokenType", Nilable = false, StrideIndex = 1 },
 			},
 
 			Returns =
@@ -1004,7 +1004,7 @@ local SimpleFrameAPI =
 			{
 				{ Name = "eventName", Type = "cstring", Nilable = false },
 				{ Name = "cb", Type = "FrameEventCallbackType", Nilable = false },
-				{ Name = "units", Type = "string", Nilable = false, StrideIndex = 1 },
+				{ Name = "units", Type = "UnitTokenType", Nilable = false, StrideIndex = 1 },
 			},
 
 			Returns =
@@ -1488,6 +1488,9 @@ local SimpleFrameAPI =
 			Name = "FrameEventCallbackType",
 			Type = "CallbackType",
 		},
+	},
+	Predicates =
+	{
 	},
 };
 

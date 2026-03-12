@@ -298,6 +298,9 @@ function CatalogShopDefaultProductCardMixin:Layout()
 	self:ShowNotification();
 end
 
+function CatalogShopDefaultProductCardMixin:GetCurrentPrice()
+	return self.productInfo.price;
+end
 
 --------------------------------------------------
 -- SMALL CATALOG SHOP PRODUCT CARD MIXIN

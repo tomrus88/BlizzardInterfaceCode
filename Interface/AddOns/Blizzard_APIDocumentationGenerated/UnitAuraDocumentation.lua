@@ -493,6 +493,13 @@ local UnitAura =
 	Tables =
 	{
 	},
+	Predicates =
+	{
+		{
+			Name = "RequiresNonSecretAura",
+			Type = "Precondition",
+		},
+	},
 };
 
 APIDocumentation:AddDocumentationTable(UnitAura);

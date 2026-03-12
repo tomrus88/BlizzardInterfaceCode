@@ -874,6 +874,9 @@ local EditModeManagerConstants =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(EditModeManagerConstants);

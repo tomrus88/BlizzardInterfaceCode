@@ -263,6 +263,9 @@ local BattleNet =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(BattleNet);

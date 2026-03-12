@@ -265,6 +265,9 @@ local CombatAudioAlertShared =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(CombatAudioAlertShared);

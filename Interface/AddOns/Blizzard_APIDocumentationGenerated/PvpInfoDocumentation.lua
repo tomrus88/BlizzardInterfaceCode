@@ -1896,6 +1896,9 @@ local PvpInfo =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(PvpInfo);

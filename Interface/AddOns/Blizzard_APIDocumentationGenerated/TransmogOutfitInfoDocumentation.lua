@@ -33,6 +33,17 @@ local TransmogOutfitInfo =
 			},
 		},
 		{
+			Name = "ChangeToOutfit",
+			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "playerFacingOutfitIndex", Type = "number", Nilable = false },
+				{ Name = "allowRemoveOutfit", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "ChangeViewedOutfit",
 			Type = "Function",
 			SecretArguments = "AllowedWhenUntainted",
@@ -60,6 +71,10 @@ local TransmogOutfitInfo =
 				{ Name = "trigger", Type = "TransmogSituationTrigger", Nilable = false },
 				{ Name = "toggleLock", Type = "bool", Nilable = false },
 			},
+		},
+		{
+			Name = "ClearOutfit",
+			Type = "Function",
 		},
 		{
 			Name = "CommitAndApplyAllPending",
@@ -105,6 +120,22 @@ local TransmogOutfitInfo =
 			{
 				{ Name = "appearanceSlotInfo", Type = "table", InnerType = "TransmogOutfitSlotInfo", Nilable = false },
 				{ Name = "illusionSlotInfo", Type = "table", InnerType = "TransmogOutfitSlotInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "GetAllTransmogOutfitOptionSheatheCategoryInfo",
+			Type = "Function",
+			MayReturnNothing = true,
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "imaID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "categoryInfo", Type = "table", InnerType = "TransmogOutfitOptionSheatheCategoryInfo", Nilable = false },
 			},
 		},
 		{
@@ -303,6 +334,7 @@ local TransmogOutfitInfo =
 			Returns =
 			{
 				{ Name = "cost", Type = "BigUInteger", Nilable = false },
+				{ Name = "modifierFlags", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -653,6 +685,18 @@ local TransmogOutfitInfo =
 			},
 		},
 		{
+			Name = "SetPendingTransmogSheatheCategory",
+			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "slot", Type = "TransmogOutfitSlot", Nilable = false },
+				{ Name = "option", Type = "TransmogOutfitSlotOption", Nilable = false },
+				{ Name = "category", Type = "TransmogOutfitSlotOptionSheatheCategory", Nilable = false },
+			},
+		},
+		{
 			Name = "SetSecondarySlotState",
 			Type = "Function",
 			MayReturnNothing = true,
@@ -793,6 +837,7 @@ local TransmogOutfitInfo =
 				{ Name = "icon", Type = "fileID", Nilable = false },
 				{ Name = "isEventOutfit", Type = "bool", Nilable = false },
 				{ Name = "isDisabled", Type = "bool", Nilable = false },
+				{ Name = "playerFacingOutfitIndex", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -802,6 +847,15 @@ local TransmogOutfitInfo =
 			{
 				{ Name = "primarySlotInfo", Type = "TransmogOutfitSlotInfo", Nilable = false },
 				{ Name = "secondarySlotInfo", Type = "TransmogOutfitSlotInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "TransmogOutfitOptionSheatheCategoryInfo",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "sheatheCategory", Type = "TransmogOutfitSlotOptionSheatheCategory", Nilable = false },
+				{ Name = "categoryName", Type = "cstring", Nilable = false },
 			},
 		},
 		{
@@ -905,8 +959,12 @@ local TransmogOutfitInfo =
 				{ Name = "error", Type = "TransmogOutfitSlotError", Nilable = false },
 				{ Name = "errorText", Type = "cstring", Nilable = false },
 				{ Name = "texture", Type = "fileID", Nilable = true },
+				{ Name = "sheatheCategory", Type = "TransmogOutfitSlotOptionSheatheCategory", Nilable = false },
 			},
 		},
+	},
+	Predicates =
+	{
 	},
 };
 

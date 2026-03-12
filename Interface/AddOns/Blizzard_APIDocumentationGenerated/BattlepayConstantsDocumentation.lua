@@ -234,6 +234,9 @@ local BattlepayConstants =
 			},
 		},
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(BattlepayConstants);

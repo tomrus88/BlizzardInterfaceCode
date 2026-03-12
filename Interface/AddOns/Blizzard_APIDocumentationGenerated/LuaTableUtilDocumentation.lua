@@ -69,6 +69,9 @@ local LuaTableUtil =
 	Tables =
 	{
 	},
+	Predicates =
+	{
+	},
 };
 
 APIDocumentation:AddDocumentationTable(LuaTableUtil);
