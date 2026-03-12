@@ -321,10 +321,6 @@ function HouseEditorStorageFrameMixin:OnStorageTabSelected(_isUserAction)
 	self.Filters:SetCollectionFiltersAvailable(false);
 	C_HousingDecor.ExitPreviewState();
 	self:OnTabChanged();
-
-	local clearCartEvent = string.format("%s.%s", HOUSING_MARKET_EVENT_NAMESPACE, ShoppingCartDataServices.ClearCart);
-	local requiresConfirmation = false;
-	EventRegistry:TriggerEvent(clearCartEvent, requiresConfirmation);
 end
 
 function HouseEditorStorageFrameMixin:OnMarketTabSelected(isUserAction)
@@ -338,8 +334,12 @@ function HouseEditorStorageFrameMixin:OnMarketTabSelected(isUserAction)
 	categorySearchParams.withOwnedEntriesOnly = false;
 	categorySearchParams.includeFeaturedCategory = self:ShouldShowMarketShop();
 	self.Categories:SetCategorySearchParams(categorySearchParams);
-	self.Categories:SetFocus(Constants.HousingCatalogConsts.HOUSING_CATALOG_FEATURED_CATEGORY_ID);
 	self.Categories:SetCategoriesBackground("house-chest-nav-bg_market");
+
+	if isUserAction then
+		self.Categories:SetFocus(Constants.HousingCatalogConsts.HOUSING_CATALOG_FEATURED_CATEGORY_ID);
+	end
+
 	self.Filters:SetCollectionFiltersAvailable(true);
 	self:CheckStartMarketInteraction();
 	C_HousingDecor.EnterPreviewState();
